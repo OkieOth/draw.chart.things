@@ -1,0 +1,170 @@
+{
+    "id": "http://schlothauer.de/schemas/shared/geo_area.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Boxes",
+    "description": "Model to describe the input of block diagrams",
+    "type": "object",
+    "properties": {
+        "title": {
+            "type": "string",
+            "description": "Title of the document"
+        },
+        "layout": {
+            "$ref": "#/definitions/Layout"
+        },
+        "defaultFormat": {
+            "$ref": "#/definitions/Format"
+        },
+        "formats": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/Format"
+            }
+        }
+    },
+    "definitions": {
+        "Layout": {
+            "type": "object",
+            "properties": {
+                "vertical": {
+                    "$ref": "#/definitions/LayoutArray"
+                },
+                "horizontal": {
+                    "$ref": "#/definitions/LayoutArray"
+                },
+                "box": {
+                    "$ref": "#/definitions/Box"
+                }
+            },
+            "required": ["type"]
+        },
+        "LayoutArray": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Layout"
+            }
+        },
+        "Box": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "unique identifier of that entry",
+                    "type": "string"
+                },
+                "caption": {
+                    "description": "Some kind of the main text",
+                    "type": "string"
+                },
+                "text1": {
+                    "description": "First additional text",
+                    "type": "string"
+                },
+                "text2": {
+                    "description": "Second additional text",
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "Tags to annotate the box, tags are used to format and filter",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "connections": {
+                    "description": "List of connections to other boxes",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Connection"
+                    }
+                }
+            },
+            "required": ["id", "caption"]
+        },
+        "Connection": {
+            "type": "object",
+            "properties": {
+                "destId": {
+                    "description": "box id of the destination",
+                    "type": "string"
+                },
+                "sourceArrow": {
+                    "description": "Arrow at the source box",
+                    "type": "boolean"
+                },
+                "destArrow": {
+                    "description": "Arrow at the destination box",
+                    "type": "boolean"
+                },
+                "tags": {
+                    "description": "Tags to annotate the connection, tags are used to format",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "Format": {
+            "type": "object",
+            "properties": {
+                "fontCaption": {
+                    "$ref": "#/definitions/FontDef"
+                },
+                "fontText1": {
+                    "$ref": "#/definitions/FontDef"
+                },
+                "fontText2": {
+                    "$ref": "#/definitions/FontDef"
+                },
+                "border": {
+                    "$ref": "#/definitions/LineDef"
+                },
+                "fill": {
+                    "$ref": "#/definitions/FillDef"
+                }
+            }
+        },
+        "Font": {
+            "type": "object",
+            "properties": {
+                "size": {
+                    "type": "integer"
+                },
+                "font": {
+                    "type": "string"
+                },
+                "type": {
+                    "enum": ["normal", "italic", "oblique"]
+                }
+            }
+        },
+        "LineDef": {
+            "type": "object",
+            "properties": {
+                "width": {
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "opacity": {
+                    "type": "number"
+                }
+            }
+        },
+        "FillDef": {
+            "type": "object",
+            "properties": {
+                "width": {
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "opacity": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}
