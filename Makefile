@@ -5,6 +5,9 @@ VERSION = $(shell grep "const Version =" cmd/sub/version.go | grep "const Versio
 build:
 	go build -o build/draw -ldflags "-s -w" cmd/main.go
 
+build-docker:
+	docker build -f Dockerfile.release -t ghcr.io/okieoth/draw.chart.things:$(VERSION) .
+
 generate-all:
 	bash -c scripts/generateAll.sh
 
