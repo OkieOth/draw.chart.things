@@ -1,0 +1,164 @@
+
+@startuml
+hide empty methods
+hide empty fields
+
+
+class "**Boxes**" as Boxes {
+        StringType title
+        Layout boxes
+        Format defaultFormat
+        Map<Format> formats
+        IntegerType minBoxMargin
+        IntegerType minConnectorMargin
+}
+note top: Model to describe the input\nof block diagrams
+
+ 
+
+class "**Layout**" as Layout {
+        StringType id
+        StringType caption
+        StringType text1
+        StringType text2
+        Layout[] vertical
+        Layout[] horizontal
+        StringType[] tags
+        Connection[] connections
+}
+
+ 
+
+class "**Format**" as Format {
+        FontDef fontCaption
+        FontDef fontText1
+        FontDef fontText2
+        LineDef border
+        FillDef fill
+}
+
+ 
+
+
+class "**LayoutArray**" as LayoutArray extends List {
+}
+
+class "**Connection**" as Connection {
+        StringType destId
+        BooleanType sourceArrow
+        BooleanType destArrow
+        StringType[] tags
+}
+
+ 
+
+class "**FontDef**" as FontDef {
+        IntegerType size
+        StringType font
+        FontDefTypeEnum type
+        FontDefWeightEnum weight
+        StringType color
+        FontDefAllignedEnum alligned
+        IntegerType spaceTop
+        IntegerType spaceBottom
+}
+note top: Defines the font a text
+
+ 
+
+class "**LineDef**" as LineDef {
+        IntegerType width
+        StringType color
+        NumberType opacity
+}
+note top: Defines how the border of\nthe box looks like
+
+ 
+
+class "**FillDef**" as FillDef {
+        StringType color
+        NumberType opacity
+}
+note top: Defines the fill of the\nbox
+
+ 
+
+enum "FontDefTypeEnum" as FontDefTypeEnum {
+    NORMAL
+    ITALIC
+    OBLIQUE
+}
+
+enum "FontDefWeightEnum" as FontDefWeightEnum {
+    NORMAL
+    BOLD
+    BOLDER
+}
+
+enum "FontDefAllignedEnum" as FontDefAllignedEnum {
+    LEFT
+    CENTER
+    RIGHT
+}
+
+
+    
+
+Boxes  *--  Layout
+
+Boxes  *--  Format
+
+
+
+
+    
+
+
+
+
+Layout "0" *-- "n" Layout
+
+
+
+Layout "0" *-- "n" Connection
+
+    
+Format  *--  FontDef
+
+Format  *--  FontDef
+
+Format  *--  FontDef
+
+Format  *--  LineDef
+
+Format  *--  FillDef
+
+    
+    
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+
+    
+
+
+
+    
+
+
+    
+    
+    
+
+footer \ngenerated with yacg (https://github.com/OkieOth/yacg),\n(template: plantUml.mako v1.1.0)\npowered by plantuml (https://plantuml.com/)
+@enduml

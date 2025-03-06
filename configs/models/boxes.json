@@ -1,5 +1,4 @@
 {
-    "id": "http://schlothauer.de/schemas/shared/geo_area.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Boxes",
     "description": "Model to describe the input of block diagrams",
@@ -9,7 +8,7 @@
             "type": "string",
             "description": "Title of the document"
         },
-        "layout": {
+        "boxes": {
             "$ref": "#/definitions/Layout"
         },
         "defaultFormat": {
@@ -20,31 +19,21 @@
             "additionalProperties": {
                 "$ref": "#/definitions/Format"
             }
+        },
+        "minBoxMargin": {
+            "type": "integer",
+            "description": "Minimum margin between boxes",
+            "default": 10
+        },
+        "minConnectorMargin": {
+            "type": "integer",
+            "description": "Minimum margin between connectors",
+            "default": 10
         }
     },
+    "required": ["boxes"],
     "definitions": {
         "Layout": {
-            "type": "object",
-            "properties": {
-                "vertical": {
-                    "$ref": "#/definitions/LayoutArray"
-                },
-                "horizontal": {
-                    "$ref": "#/definitions/LayoutArray"
-                },
-                "box": {
-                    "$ref": "#/definitions/Box"
-                }
-            },
-            "required": ["type"]
-        },
-        "LayoutArray": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/Layout"
-            }
-        },
-        "Box": {
             "type": "object",
             "properties": {
                 "id": {
@@ -63,6 +52,12 @@
                     "description": "Second additional text",
                     "type": "string"
                 },
+                "vertical": {
+                    "$ref": "#/definitions/LayoutArray"
+                },
+                "horizontal": {
+                    "$ref": "#/definitions/LayoutArray"
+                },
                 "tags": {
                     "description": "Tags to annotate the box, tags are used to format and filter",
                     "type": "array",
@@ -78,7 +73,13 @@
                     }
                 }
             },
-            "required": ["id", "caption"]
+            "required": ["type"]
+        },
+        "LayoutArray": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Layout"
+            }
         },
         "Connection": {
             "type": "object",
@@ -124,8 +125,9 @@
                 }
             }
         },
-        "Font": {
+        "FontDef": {
             "type": "object",
+            "description": "Defines the font a text",
             "properties": {
                 "size": {
                     "type": "integer"
@@ -135,11 +137,27 @@
                 },
                 "type": {
                     "enum": ["normal", "italic", "oblique"]
+                },
+                "weight": {
+                    "enum": ["normal", "bold", "bolder"]
+                },
+                "color": {
+                    "type": "string"
+                },
+                "alligned": {
+                    "enum": ["left", "center", "right"]
+                },
+                "spaceTop": {
+                    "type": "integer"
+                },
+                "spaceBottom": {
+                    "type": "integer"
                 }
             }
         },
         "LineDef": {
             "type": "object",
+            "description": "Defines how the border of the box looks like",
             "properties": {
                 "width": {
                     "type": "integer"
@@ -154,10 +172,8 @@
         },
         "FillDef": {
             "type": "object",
+            "description": "Defines the fill of the box",
             "properties": {
-                "width": {
-                    "type": "integer"
-                },
                 "color": {
                     "type": "string"
                 },

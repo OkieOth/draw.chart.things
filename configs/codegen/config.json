@@ -1,0 +1,33 @@
+[
+  {
+    "name": "types",
+    "description": "code gen configuration for example types",
+    "models": [
+      {
+        "schema": "/project/configs/models/boxes.json"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "types",
+        "singleFileTask": {
+          "template": "/project/configs/codegen/templates/golang_types.mako",
+          "destFile": "/project/pkg/types/boxes.go",
+          "templateParams": [
+            {
+              "name": "modelPackage",
+              "value": "types"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Plantuml",
+        "singleFileTask": {
+          "template": "plantUml",
+          "destFile": "/project/docs/models/puml/boxes.puml"
+        }
+      }
+    ]
+  }
+]
