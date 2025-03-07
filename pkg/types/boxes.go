@@ -16,24 +16,24 @@ import (
 type Boxes struct {
 
     // Title of the document
-    Title *string  `json:"title,omitempty"`
+    Title *string  `yaml:"title,omitempty"`
 
-    Boxes Layout  `json:"boxes"`
+    Layout *Layout  `yaml:"layout,omitempty"`
 
-    DefaultFormat *Format  `json:"defaultFormat,omitempty"`
+    DefaultFormat *Format  `yaml:"defaultFormat,omitempty"`
 
-    Formats map[string]Format  `json:"formats,omitempty"`
+    Formats map[string]Format  `yaml:"formats,omitempty"`
 
     // Minimum margin between boxes
-    MinBoxMargin *int32  `json:"minBoxMargin,omitempty"`
+    MinBoxMargin *int32  `yaml:"minBoxMargin,omitempty"`
 
     // Minimum margin between connectors
-    MinConnectorMargin *int32  `json:"minConnectorMargin,omitempty"`
+    MinConnectorMargin *int32  `yaml:"minConnectorMargin,omitempty"`
 }
 
 func NewBoxes() *Boxes {
         return &Boxes{
-            Boxes: *NewLayout(),
+            Layout: NewLayout(),
             Formats: make(map[string]Format, 0),
         }
 }
@@ -45,26 +45,26 @@ func NewBoxes() *Boxes {
 type Layout struct {
 
     // unique identifier of that entry
-    Id *string  `json:"id,omitempty"`
+    Id *string  `yaml:"id,omitempty"`
 
     // Some kind of the main text
-    Caption *string  `json:"caption,omitempty"`
+    Caption *string  `yaml:"caption,omitempty"`
 
     // First additional text
-    Text1 *string  `json:"text1,omitempty"`
+    Text1 *string  `yaml:"text1,omitempty"`
 
     // Second additional text
-    Text2 *string  `json:"text2,omitempty"`
+    Text2 *string  `yaml:"text2,omitempty"`
 
-    Vertical []Layout  `json:"vertical,omitempty"`
+    Vertical []Layout  `yaml:"vertical,omitempty"`
 
-    Horizontal []Layout  `json:"horizontal,omitempty"`
+    Horizontal []Layout  `yaml:"horizontal,omitempty"`
 
     // Tags to annotate the box, tags are used to format and filter
-    Tags []string  `json:"tags,omitempty"`
+    Tags []string  `yaml:"tags,omitempty"`
 
     // List of connections to other boxes
-    Connections []Connection  `json:"connections,omitempty"`
+    Connections []Connection  `yaml:"connections,omitempty"`
 }
 
 func NewLayout() *Layout {
@@ -82,15 +82,15 @@ func NewLayout() *Layout {
 
 type Format struct {
 
-    FontCaption *FontDef  `json:"fontCaption,omitempty"`
+    FontCaption *FontDef  `yaml:"fontCaption,omitempty"`
 
-    FontText1 *FontDef  `json:"fontText1,omitempty"`
+    FontText1 *FontDef  `yaml:"fontText1,omitempty"`
 
-    FontText2 *FontDef  `json:"fontText2,omitempty"`
+    FontText2 *FontDef  `yaml:"fontText2,omitempty"`
 
-    Border *LineDef  `json:"border,omitempty"`
+    Border *LineDef  `yaml:"border,omitempty"`
 
-    Fill *FillDef  `json:"fill,omitempty"`
+    Fill *FillDef  `yaml:"fill,omitempty"`
 }
 
 
@@ -107,16 +107,16 @@ type Format struct {
 type Connection struct {
 
     // box id of the destination
-    DestId *string  `json:"destId,omitempty"`
+    DestId *string  `yaml:"destId,omitempty"`
 
     // Arrow at the source box
-    SourceArrow *bool  `json:"sourceArrow,omitempty"`
+    SourceArrow *bool  `yaml:"sourceArrow,omitempty"`
 
     // Arrow at the destination box
-    DestArrow *bool  `json:"destArrow,omitempty"`
+    DestArrow *bool  `yaml:"destArrow,omitempty"`
 
     // Tags to annotate the connection, tags are used to format
-    Tags []string  `json:"tags,omitempty"`
+    Tags []string  `yaml:"tags,omitempty"`
 }
 
 func NewConnection() *Connection {
@@ -133,21 +133,21 @@ func NewConnection() *Connection {
 */
 type FontDef struct {
 
-    Size *int32  `json:"size,omitempty"`
+    Size *int32  `yaml:"size,omitempty"`
 
-    Font *string  `json:"font,omitempty"`
+    Font *string  `yaml:"font,omitempty"`
 
-    Type *FontDefTypeEnum  `json:"type,omitempty"`
+    Type *FontDefTypeEnum  `yaml:"type,omitempty"`
 
-    Weight *FontDefWeightEnum  `json:"weight,omitempty"`
+    Weight *FontDefWeightEnum  `yaml:"weight,omitempty"`
 
-    Color *string  `json:"color,omitempty"`
+    Color *string  `yaml:"color,omitempty"`
 
-    Alligned *FontDefAllignedEnum  `json:"alligned,omitempty"`
+    Alligned *FontDefAllignedEnum  `yaml:"alligned,omitempty"`
 
-    SpaceTop *int32  `json:"spaceTop,omitempty"`
+    SpaceTop *int32  `yaml:"spaceTop,omitempty"`
 
-    SpaceBottom *int32  `json:"spaceBottom,omitempty"`
+    SpaceBottom *int32  `yaml:"spaceBottom,omitempty"`
 }
 
 
@@ -159,11 +159,11 @@ type FontDef struct {
 */
 type LineDef struct {
 
-    Width *int32  `json:"width,omitempty"`
+    Width *int32  `yaml:"width,omitempty"`
 
-    Color *string  `json:"color,omitempty"`
+    Color *string  `yaml:"color,omitempty"`
 
-    Opacity *float64  `json:"opacity,omitempty"`
+    Opacity *float64  `yaml:"opacity,omitempty"`
 }
 
 
@@ -175,9 +175,9 @@ type LineDef struct {
 */
 type FillDef struct {
 
-    Color *string  `json:"color,omitempty"`
+    Color *string  `yaml:"color,omitempty"`
 
-    Opacity *float64  `json:"opacity,omitempty"`
+    Opacity *float64  `yaml:"opacity,omitempty"`
 }
 
 

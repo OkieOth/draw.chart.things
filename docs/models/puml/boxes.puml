@@ -6,7 +6,7 @@ hide empty fields
 
 class "**Boxes**" as Boxes {
         StringType title
-        Layout boxes
+        Layout layout
         Format defaultFormat
         Map<Format> formats
         IntegerType minBoxMargin

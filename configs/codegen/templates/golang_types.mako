@@ -211,7 +211,7 @@ type ${type.name} struct {
             % if property.description != None:
     // ${property.description}
             % endif
-    ${stringUtils.toUpperCamelCase(property.name)} ${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}  `json:"${property.name}${printOmitemptyIfNeeded(property)}"`
+    ${stringUtils.toUpperCamelCase(property.name)} ${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}  `yaml:"${property.name}${printOmitemptyIfNeeded(property)}"`
         % endfor
 }
 
