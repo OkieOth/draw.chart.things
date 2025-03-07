@@ -5,6 +5,9 @@ package types
 // created by yacg (template: golang_types.mako v1.1.0)
 
 import (
+    "encoding/json"
+    "errors"
+    "fmt"
 )
 
 
@@ -13,24 +16,24 @@ import (
 type Boxes struct {
 
     // Title of the document
-    Title *string  `yaml:"title,omitempty"`
+    Title *string  `json:"title,omitempty"`
 
-    Boxes Layout  `yaml:"boxes"`
+    Boxes Layout  `json:"boxes"`
 
-    DefaultFormat *Format  `yaml:"defaultFormat,omitempty"`
+    DefaultFormat *Format  `json:"defaultFormat,omitempty"`
 
-    Formats map[string]Format  `yaml:"formats,omitempty"`
+    Formats map[string]Format  `json:"formats,omitempty"`
 
     // Minimum margin between boxes
-    MinBoxMargin *int32  `yaml:"minBoxMargin,omitempty"`
+    MinBoxMargin *int32  `json:"minBoxMargin,omitempty"`
 
     // Minimum margin between connectors
-    MinConnectorMargin *int32  `yaml:"minConnectorMargin,omitempty"`
+    MinConnectorMargin *int32  `json:"minConnectorMargin,omitempty"`
 }
 
-func NewBoxes() Boxes {
-        return Boxes{
-            Boxes: NewLayout(),
+func NewBoxes() *Boxes {
+        return &Boxes{
+            Boxes: *NewLayout(),
             Formats: make(map[string]Format, 0),
         }
 }
@@ -42,30 +45,30 @@ func NewBoxes() Boxes {
 type Layout struct {
 
     // unique identifier of that entry
-    Id *string  `yaml:"id,omitempty"`
+    Id *string  `json:"id,omitempty"`
 
     // Some kind of the main text
-    Caption *string  `yaml:"caption,omitempty"`
+    Caption *string  `json:"caption,omitempty"`
 
     // First additional text
-    Text1 *string  `yaml:"text1,omitempty"`
+    Text1 *string  `json:"text1,omitempty"`
 
     // Second additional text
-    Text2 *string  `yaml:"text2,omitempty"`
+    Text2 *string  `json:"text2,omitempty"`
 
-    Vertical []Layout  `yaml:"vertical,omitempty"`
+    Vertical []Layout  `json:"vertical,omitempty"`
 
-    Horizontal []Layout  `yaml:"horizontal,omitempty"`
+    Horizontal []Layout  `json:"horizontal,omitempty"`
 
     // Tags to annotate the box, tags are used to format and filter
-    Tags []string  `yaml:"tags,omitempty"`
+    Tags []string  `json:"tags,omitempty"`
 
     // List of connections to other boxes
-    Connections []Connection  `yaml:"connections,omitempty"`
+    Connections []Connection  `json:"connections,omitempty"`
 }
 
-func NewLayout() Layout {
-        return Layout{
+func NewLayout() *Layout {
+        return &Layout{
             Vertical: make([]Layout, 0),
             Horizontal: make([]Layout, 0),
             Tags: make([]string, 0),
@@ -79,15 +82,15 @@ func NewLayout() Layout {
 
 type Format struct {
 
-    FontCaption *FontDef  `yaml:"fontCaption,omitempty"`
+    FontCaption *FontDef  `json:"fontCaption,omitempty"`
 
-    FontText1 *FontDef  `yaml:"fontText1,omitempty"`
+    FontText1 *FontDef  `json:"fontText1,omitempty"`
 
-    FontText2 *FontDef  `yaml:"fontText2,omitempty"`
+    FontText2 *FontDef  `json:"fontText2,omitempty"`
 
-    Border *LineDef  `yaml:"border,omitempty"`
+    Border *LineDef  `json:"border,omitempty"`
 
-    Fill *FillDef  `yaml:"fill,omitempty"`
+    Fill *FillDef  `json:"fill,omitempty"`
 }
 
 
@@ -104,20 +107,20 @@ type Format struct {
 type Connection struct {
 
     // box id of the destination
-    DestId *string  `yaml:"destId,omitempty"`
+    DestId *string  `json:"destId,omitempty"`
 
     // Arrow at the source box
-    SourceArrow *bool  `yaml:"sourceArrow,omitempty"`
+    SourceArrow *bool  `json:"sourceArrow,omitempty"`
 
     // Arrow at the destination box
-    DestArrow *bool  `yaml:"destArrow,omitempty"`
+    DestArrow *bool  `json:"destArrow,omitempty"`
 
     // Tags to annotate the connection, tags are used to format
-    Tags []string  `yaml:"tags,omitempty"`
+    Tags []string  `json:"tags,omitempty"`
 }
 
-func NewConnection() Connection {
-        return Connection{
+func NewConnection() *Connection {
+        return &Connection{
             Tags: make([]string, 0),
         }
 }
@@ -130,21 +133,21 @@ func NewConnection() Connection {
 */
 type FontDef struct {
 
-    Size *int32  `yaml:"size,omitempty"`
+    Size *int32  `json:"size,omitempty"`
 
-    Font *string  `yaml:"font,omitempty"`
+    Font *string  `json:"font,omitempty"`
 
-    Type *FontDefTypeEnum  `yaml:"type,omitempty"`
+    Type *FontDefTypeEnum  `json:"type,omitempty"`
 
-    Weight *FontDefWeightEnum  `yaml:"weight,omitempty"`
+    Weight *FontDefWeightEnum  `json:"weight,omitempty"`
 
-    Color *string  `yaml:"color,omitempty"`
+    Color *string  `json:"color,omitempty"`
 
-    Alligned *FontDefAllignedEnum  `yaml:"alligned,omitempty"`
+    Alligned *FontDefAllignedEnum  `json:"alligned,omitempty"`
 
-    SpaceTop *int32  `yaml:"spaceTop,omitempty"`
+    SpaceTop *int32  `json:"spaceTop,omitempty"`
 
-    SpaceBottom *int32  `yaml:"spaceBottom,omitempty"`
+    SpaceBottom *int32  `json:"spaceBottom,omitempty"`
 }
 
 
@@ -156,11 +159,11 @@ type FontDef struct {
 */
 type LineDef struct {
 
-    Width *int32  `yaml:"width,omitempty"`
+    Width *int32  `json:"width,omitempty"`
 
-    Color *string  `yaml:"color,omitempty"`
+    Color *string  `json:"color,omitempty"`
 
-    Opacity *float64  `yaml:"opacity,omitempty"`
+    Opacity *float64  `json:"opacity,omitempty"`
 }
 
 
@@ -172,9 +175,9 @@ type LineDef struct {
 */
 type FillDef struct {
 
-    Color *string  `yaml:"color,omitempty"`
+    Color *string  `json:"color,omitempty"`
 
-    Opacity *float64  `yaml:"opacity,omitempty"`
+    Opacity *float64  `json:"opacity,omitempty"`
 }
 
 
@@ -202,6 +205,31 @@ func (s FontDefTypeEnum) String() string {
 	}
 }
 
+func (s FontDefTypeEnum) MarshalJSON() ([]byte, error) {
+    return json.Marshal(s.String())
+}
+
+func (s *FontDefTypeEnum) UnmarshalJSON(data []byte) error {
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
+
+    switch value {
+    case "normal":
+        *s = FontDefTypeEnum_normal 
+    case "italic":
+        *s = FontDefTypeEnum_italic 
+    case "oblique":
+        *s = FontDefTypeEnum_oblique 
+    default:
+		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
+		return errors.New(msg)
+    }
+    return nil
+}
+
+
 
 
 type FontDefWeightEnum int64
@@ -225,6 +253,31 @@ func (s FontDefWeightEnum) String() string {
 	}
 }
 
+func (s FontDefWeightEnum) MarshalJSON() ([]byte, error) {
+    return json.Marshal(s.String())
+}
+
+func (s *FontDefWeightEnum) UnmarshalJSON(data []byte) error {
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
+
+    switch value {
+    case "normal":
+        *s = FontDefWeightEnum_normal 
+    case "bold":
+        *s = FontDefWeightEnum_bold 
+    case "bolder":
+        *s = FontDefWeightEnum_bolder 
+    default:
+		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
+		return errors.New(msg)
+    }
+    return nil
+}
+
+
 
 
 type FontDefAllignedEnum int64
@@ -247,6 +300,31 @@ func (s FontDefAllignedEnum) String() string {
         return "???"
 	}
 }
+
+func (s FontDefAllignedEnum) MarshalJSON() ([]byte, error) {
+    return json.Marshal(s.String())
+}
+
+func (s *FontDefAllignedEnum) UnmarshalJSON(data []byte) error {
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
+
+    switch value {
+    case "left":
+        *s = FontDefAllignedEnum_left 
+    case "center":
+        *s = FontDefAllignedEnum_center 
+    case "right":
+        *s = FontDefAllignedEnum_right 
+    default:
+		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
+		return errors.New(msg)
+    }
+    return nil
+}
+
 
 
 

@@ -84,6 +84,13 @@
         else:
             return ""
 
+    def printStarIfRequired(property):
+        if property.required and (not property.isArray) and (not isinstance(property.type, model.DictionaryType)):
+            return "*"
+        else:
+            return ""
+
+
     def getEnumDefaultValue(type):
         if type.default is not None:
             return secureEnumValues(type.default, type.name)
@@ -134,6 +141,11 @@ import (
 % if modelFuncs.isAtLeastOneDateRelatedTypeContained(modelTypes):
     "time"
 % endif
+% if modelFuncs.hasEnumTypes(modelTypes):
+    "encoding/json"
+    "errors"
+    "fmt"
+% endif
 )
 
 % for type in modelTypes:
@@ -163,6 +175,29 @@ func (s ${type.name}) String() string {
         return "???"
 	}
 }
+
+func (s ${type.name}) MarshalJSON() ([]byte, error) {
+    return json.Marshal(s.String())
+}
+
+func (s *${type.name}) UnmarshalJSON(data []byte) error {
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
+
+    switch value {
+        % for value in type.values:
+    case "${value}":
+        *s = ${secureEnumValues(value, type.name)} 
+        % endfor
+    default:
+		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
+		return errors.New(msg)
+    }
+    return nil
+}
+
     % endif
 
     % if hasattr(type, "properties"):
@@ -176,18 +211,18 @@ type ${type.name} struct {
             % if property.description != None:
     // ${property.description}
             % endif
-    ${stringUtils.toUpperCamelCase(property.name)} ${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}  `yaml:"${property.name}${printOmitemptyIfNeeded(property)}"`
+    ${stringUtils.toUpperCamelCase(property.name)} ${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}  `json:"${property.name}${printOmitemptyIfNeeded(property)}"`
         % endfor
 }
 
         % if needsBuilder(type):
-func New${type.name}() ${type.name} {
-        return ${type.name}{
+func New${type.name}() *${type.name} {
+        return &${type.name}{
             % for property in type.properties:
                 % if property.isArray or isinstance(property.type, model.DictionaryType):
             ${stringUtils.toUpperCamelCase(property.name)}: make(${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}, 0),
                 % elif isinstance(property.type, model.ComplexType) and needsBuilder(property.type):
-            ${stringUtils.toUpperCamelCase(property.name)}: New${property.type.name}(),
+            ${stringUtils.toUpperCamelCase(property.name)}: ${printStarIfRequired(property)}New${property.type.name}(),
                 % endif
             % endfor
         }
