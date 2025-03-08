@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "BoxesDocument",
+    "description": "Internal model to describe the layout if the boxes chart",
+    "definitions": {
+        "BoxesDocument": {
+            "type": "object",
+            "properties": {
+                "boxesDef": {
+                    "$ref": "./boxes.json"
+                },
+                "height": {
+                    "type": "integer",
+                    "description": "Height of the document"
+                },
+                "width": {
+                    "type": "integer",
+                    "description": "Width of the document"
+                }
+            }
+        }
+    }
+}

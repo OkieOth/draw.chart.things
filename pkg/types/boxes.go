@@ -18,7 +18,7 @@ type Boxes struct {
     // Title of the document
     Title *string  `yaml:"title,omitempty"`
 
-    Layout *Layout  `yaml:"layout,omitempty"`
+    Boxes Layout  `yaml:"boxes"`
 
     DefaultFormat *Format  `yaml:"defaultFormat,omitempty"`
 
@@ -33,7 +33,7 @@ type Boxes struct {
 
 func NewBoxes() *Boxes {
         return &Boxes{
-            Layout: NewLayout(),
+            Boxes: *NewLayout(),
             Formats: make(map[string]Format, 0),
         }
 }

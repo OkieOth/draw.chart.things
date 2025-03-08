@@ -4,7 +4,7 @@ defaultFormat:
     color: black
   fill:
     color: lightgreen
-layout:
+boxes:
   id: main
   caption: I am a simple box
   text1: The first example layout

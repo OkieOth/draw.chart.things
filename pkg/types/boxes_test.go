@@ -18,14 +18,13 @@ func TestLoadBoxes(t *testing.T) {
 		fileName: "../../resources/examples/simple_box.yaml",
 		verify: func(t *testing.T, b *types.Boxes) {
 			assert.NotNil(t, b)
-			assert.NotNil(t, b.Layout)
-			assert.Equal(t, "main", *b.Layout.Id)
-			assert.Equal(t, "I am a simple box", *b.Layout.Caption)
-			assert.Equal(t, "The first example layout", *b.Layout.Text1)
-			assert.Equal(t, "This is a simple box layout. It is used to demonstrate the basic layout features.", *b.Layout.Text2)
-			assert.Equal(t, 2, len(b.Layout.Tags))
-			assert.Equal(t, "simple", b.Layout.Tags[0])
-			assert.Equal(t, "test", b.Layout.Tags[1])
+			assert.Equal(t, "main", *b.Boxes.Id)
+			assert.Equal(t, "I am a simple box", *b.Boxes.Caption)
+			assert.Equal(t, "The first example layout", *b.Boxes.Text1)
+			assert.Equal(t, "This is a simple box layout. It is used to demonstrate the basic layout features.", *b.Boxes.Text2)
+			assert.Equal(t, 2, len(b.Boxes.Tags))
+			assert.Equal(t, "simple", b.Boxes.Tags[0])
+			assert.Equal(t, "test", b.Boxes.Tags[1])
 
 			assert.NotNil(t, b.DefaultFormat)
 			assert.NotNil(t, b.DefaultFormat.Border)
