@@ -68,6 +68,7 @@ note top: Defines the font a text
 
 class "**LineDef**" as LineDef {
         IntegerType width
+        LineDefStyleEnum style
         StringType color
         NumberType opacity
 }
@@ -99,6 +100,12 @@ enum "FontDefAllignedEnum" as FontDefAllignedEnum {
     LEFT
     CENTER
     RIGHT
+}
+
+enum "LineDefStyleEnum" as LineDefStyleEnum {
+    SOLID
+    DOTTED
+    DASHED
 }
 
 
@@ -153,9 +160,11 @@ Format  *--  FillDef
 
 
 
+
     
 
 
+    
     
     
     

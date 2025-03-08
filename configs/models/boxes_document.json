@@ -2,20 +2,133 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "BoxesDocument",
     "description": "Internal model to describe the layout if the boxes chart",
+    "type": "object",
+    "x-domain": "implementation",
+    "properties": {
+        "title": {
+            "type": "string",
+            "description": "Title of the document"
+        },
+        "boxes": {
+            "$ref": "#/definitions/LayoutElement"
+        },
+        "height": {
+            "type": "integer",
+            "description": "Height of the document"
+        },
+        "width": {
+            "type": "integer",
+            "description": "Width of the document"
+        },
+        "connections": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ConnectionElem"
+            }
+        }
+    },
+    "required": ["boxes", "height", "width"],
     "definitions": {
-        "BoxesDocument": {
+        "LayoutElement": {
             "type": "object",
             "properties": {
-                "boxesDef": {
-                    "$ref": "./boxes.json"
+                "id": {
+                    "description": "unique identifier of that entry",
+                    "type": "string"
                 },
-                "height": {
+                "caption": {
+                    "description": "Some kind of the main text",
+                    "type": "string"
+                },
+                "text1": {
+                    "description": "First additional text",
+                    "type": "string"
+                },
+                "text2": {
+                    "description": "Second additional text",
+                    "type": "string"
+                },
+                "vertical": {
+                    "$ref": "#/definitions/LayoutElemArray"
+                },
+                "horizontal": {
+                    "$ref": "#/definitions/LayoutElemArray"
+                },
+                "x": {
                     "type": "integer",
-                    "description": "Height of the document"
+                    "description": "X position of the element"
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Y position of the element"
                 },
                 "width": {
                     "type": "integer",
-                    "description": "Width of the document"
+                    "description": "Width of the element"
+                },
+                "height": {
+                    "type": "integer",
+                    "description": "Height of the element"
+                },
+                "format": {
+                    "$ref": "./boxes.json#/definitions/Format"
+                },
+                "tags": {
+                    "description": "Tags to annotate the box, tags are used to format and filter",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["id", "x", "y", "width", "height", "format"]
+        },
+        "LayoutElemArray": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/LayoutElement"
+            }
+        },
+        "ConnectionElem": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "$ref": "#/definitions/LayoutElement",
+                    "description": "Reference to the box where the connector starts"
+                },
+                "to": {
+                    "$ref": "#/definitions/LayoutElement",
+                    "description": "Reference to the box where the connector ends"
+                },
+                "sourceArrow": {
+                    "description": "Arrow at the source box",
+                    "type": "boolean"
+                },
+                "destArrow": {
+                    "description": "Arrow at the destination box",
+                    "type": "boolean"
+                },
+                "format": {
+                    "$ref": "./boxes.json#/definitions/LineDef"
+                },
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConnectionPoint"
+                    }
+                }
+            }
+        },
+        "ConnectionPoint": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "X position of the point"
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Y position of the point"
                 }
             }
         }

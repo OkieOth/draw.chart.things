@@ -2,6 +2,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Boxes",
     "description": "Model to describe the input of block diagrams",
+    "x-domain": "input",
     "type": "object",
     "properties": {
         "title": {
@@ -161,6 +162,9 @@
             "properties": {
                 "width": {
                     "type": "integer"
+                },
+                "style": {
+                    "enum": ["solid", "dotted", "dashed"]
                 },
                 "color": {
                     "type": "string"

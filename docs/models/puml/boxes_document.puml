@@ -1,0 +1,97 @@
+
+@startuml
+hide empty methods
+hide empty fields
+
+
+class "**BoxesDocument**" as BoxesDocument {
+        StringType title
+        LayoutElement boxes
+        IntegerType height
+        IntegerType width
+        ConnectionElem[] connections
+}
+note top: Internal model to describe the\nlayout if the boxes chart
+
+ 
+
+class "**LayoutElement**" as LayoutElement {
+        StringType id
+        StringType caption
+        StringType text1
+        StringType text2
+        LayoutElement[] vertical
+        LayoutElement[] horizontal
+        IntegerType x
+        IntegerType y
+        IntegerType width
+        IntegerType height
+        Format format
+        StringType[] tags
+}
+
+ 
+
+class "**ConnectionElem**" as ConnectionElem {
+        LayoutElement from
+        LayoutElement to
+        BooleanType sourceArrow
+        BooleanType destArrow
+        LineDef format
+        ConnectionPoint[] points
+}
+
+ 
+
+class "**LayoutElemArray**" as LayoutElemArray extends List {
+}
+
+class "**ConnectionPoint**" as ConnectionPoint {
+        IntegerType x
+        IntegerType y
+}
+
+ 
+
+
+    
+
+BoxesDocument  *--  LayoutElement
+
+
+
+BoxesDocument "0" *-- "n" ConnectionElem
+
+    
+
+
+
+
+LayoutElement "0" *-- "n" LayoutElement
+
+
+
+
+
+
+LayoutElement  *--  Format
+
+
+    
+ConnectionElem  *--  LayoutElement
+
+ConnectionElem  *--  LayoutElement
+
+
+
+ConnectionElem  *--  LineDef
+
+ConnectionElem "0" *-- "n" ConnectionPoint
+
+    
+    
+
+
+
+footer \ngenerated with yacg (https://github.com/OkieOth/yacg),\n(template: plantUml.mako v1.1.0)\npowered by plantuml (https://plantuml.com/)
+@enduml

@@ -161,6 +161,8 @@ type LineDef struct {
 
     Width *int32  `yaml:"width,omitempty"`
 
+    Style *LineDefStyleEnum  `yaml:"style,omitempty"`
+
     Color *string  `yaml:"color,omitempty"`
 
     Opacity *float64  `yaml:"opacity,omitempty"`
@@ -318,6 +320,54 @@ func (s *FontDefAllignedEnum) UnmarshalJSON(data []byte) error {
         *s = FontDefAllignedEnum_center 
     case "right":
         *s = FontDefAllignedEnum_right 
+    default:
+		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
+		return errors.New(msg)
+    }
+    return nil
+}
+
+
+
+
+type LineDefStyleEnum int64
+
+const (
+    LineDefStyleEnum_solid LineDefStyleEnum = iota
+        LineDefStyleEnum_dotted
+        LineDefStyleEnum_dashed
+)
+
+func (s LineDefStyleEnum) String() string {
+	switch s {
+	case LineDefStyleEnum_solid:
+		return "solid"
+	case LineDefStyleEnum_dotted:
+		return "dotted"
+	case LineDefStyleEnum_dashed:
+		return "dashed"
+    default:
+        return "???"
+	}
+}
+
+func (s LineDefStyleEnum) MarshalJSON() ([]byte, error) {
+    return json.Marshal(s.String())
+}
+
+func (s *LineDefStyleEnum) UnmarshalJSON(data []byte) error {
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
+
+    switch value {
+    case "solid":
+        *s = LineDefStyleEnum_solid 
+    case "dotted":
+        *s = LineDefStyleEnum_dotted 
+    case "dashed":
+        *s = LineDefStyleEnum_dashed 
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
