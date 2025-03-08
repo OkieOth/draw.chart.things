@@ -1,4 +1,4 @@
-package boxes
+package boxesimpl
 
 import (
 	"fmt"
