@@ -13,7 +13,7 @@ type testFunc func(t *testing.T, b *types.Boxes)
 func checkLayout(t *testing.T, l *types.Layout, id string, horizontalLen, verticalLen int) {
 	assert.Len(t, l.Horizontal, horizontalLen)
 	assert.Len(t, l.Vertical, verticalLen)
-	assert.Equal(t, id, *l.Id)
+	assert.Equal(t, id, l.Id)
 }
 
 func TestLoadBoxes(t *testing.T) {
@@ -26,9 +26,9 @@ func TestLoadBoxes(t *testing.T) {
 			assert.NotNil(t, b)
 			checkLayout(t, &b.Boxes, "main", 0, 0)
 
-			assert.Equal(t, "I am a simple box", *b.Boxes.Caption)
-			assert.Equal(t, "The first example layout", *b.Boxes.Text1)
-			assert.Equal(t, "This is a simple box layout. It is used to demonstrate the basic layout features.", *b.Boxes.Text2)
+			assert.Equal(t, "I am a simple box", b.Boxes.Caption)
+			assert.Equal(t, "The first example layout", b.Boxes.Text1)
+			assert.Equal(t, "This is a simple box layout. It is used to demonstrate the basic layout features.", b.Boxes.Text2)
 			assert.Len(t, b.Boxes.Tags, 2)
 			assert.Equal(t, "simple", b.Boxes.Tags[0])
 			assert.Equal(t, "test", b.Boxes.Tags[1])

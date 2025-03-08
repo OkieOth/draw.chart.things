@@ -81,7 +81,7 @@
                     }
                 }
             },
-            "required": ["id", "x", "y", "width", "height", "format"]
+            "required": ["id", "x", "y", "width", "height", "format", "caption", "text1", "text2"]
         },
         "LayoutElemArray": {
             "type": "array",

@@ -16,3 +16,8 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	// TODO: Implement this
 	return nil
 }
+
+func InitialLayoutBoxes(b *types.Boxes) (*types.BoxesDocument, error) {
+	doc := types.DocumentFromBoxes(b)
+	return doc, nil // TODO
+}

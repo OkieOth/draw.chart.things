@@ -43,13 +43,13 @@ type LayoutElement struct {
     Id string  `yaml:"id"`
 
     // Some kind of the main text
-    Caption *string  `yaml:"caption,omitempty"`
+    Caption string  `yaml:"caption"`
 
     // First additional text
-    Text1 *string  `yaml:"text1,omitempty"`
+    Text1 string  `yaml:"text1"`
 
     // Second additional text
-    Text2 *string  `yaml:"text2,omitempty"`
+    Text2 string  `yaml:"text2"`
 
     Vertical []LayoutElement  `yaml:"vertical,omitempty"`
 

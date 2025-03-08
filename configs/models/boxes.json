@@ -74,7 +74,7 @@
                     }
                 }
             },
-            "required": ["type"]
+            "required": ["type", "id", "caption", "text1", "text2"]
         },
         "LayoutArray": {
             "type": "array",

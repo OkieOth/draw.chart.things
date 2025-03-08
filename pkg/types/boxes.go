@@ -45,16 +45,16 @@ func NewBoxes() *Boxes {
 type Layout struct {
 
     // unique identifier of that entry
-    Id *string  `yaml:"id,omitempty"`
+    Id string  `yaml:"id"`
 
     // Some kind of the main text
-    Caption *string  `yaml:"caption,omitempty"`
+    Caption string  `yaml:"caption"`
 
     // First additional text
-    Text1 *string  `yaml:"text1,omitempty"`
+    Text1 string  `yaml:"text1"`
 
     // Second additional text
-    Text2 *string  `yaml:"text2,omitempty"`
+    Text2 string  `yaml:"text2"`
 
     Vertical []Layout  `yaml:"vertical,omitempty"`
 
