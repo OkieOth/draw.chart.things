@@ -161,9 +161,13 @@
                 },
                 "fill": {
                     "$ref": "./formats.json#/definitions/FillDef"
+                },
+                "minBoxMargin": {
+                    "type": "integer",
+                    "description": "Minimum margin between boxes"
                 }
             },
-            "required": ["padding", "lineHeight", "fontCaption", "fontText1", "fontText2"]
+            "required": ["padding", "lineHeight", "fontCaption", "fontText1", "fontText2", "minBoxMargin"]
         }
     }
 }

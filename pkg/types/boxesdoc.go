@@ -137,6 +137,9 @@ type BoxFormat struct {
     Border *LineDef  `yaml:"border,omitempty"`
 
     Fill *FillDef  `yaml:"fill,omitempty"`
+
+    // Minimum margin between boxes
+    MinBoxMargin int32  `yaml:"minBoxMargin"`
 }
 
 

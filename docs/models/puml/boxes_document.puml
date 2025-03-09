@@ -52,6 +52,7 @@ class "**BoxFormat**" as BoxFormat {
         FontDef fontText2
         LineDef border
         FillDef fill
+        IntegerType minBoxMargin
 }
 
  
@@ -170,6 +171,7 @@ BoxFormat  *--  FontDef
 BoxFormat  *--  LineDef
 
 BoxFormat  *--  FillDef
+
 
     
     

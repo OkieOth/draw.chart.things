@@ -2,6 +2,9 @@ package types_test
 
 import (
 	"testing"
+
+	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/stretchr/testify/assert"
 )
 
 type DummyDimensionCalculator struct {
@@ -36,6 +39,45 @@ func NewDummyDimensionCalculator(captionWidth, captionHeight, text1Width, text1H
 	}
 }
 
+// func tested types.InitDimensions
 func TestInitDimensions(t *testing.T) {
-	// TODO
+	tests := []struct {
+		layout         types.Layout
+		expectedHeight int32
+		expectedWidth  int32
+	}{
+		{
+			layout: types.Layout{
+				Caption: "test1",
+			},
+			expectedHeight: 60,
+			expectedWidth:  110,
+		},
+		{
+			layout: types.Layout{
+				Caption: "test2",
+				Text1:   "test2-text1",
+			},
+			expectedHeight: 75,
+			expectedWidth:  130,
+		},
+		{
+			layout: types.Layout{
+				Caption: "test3",
+				Text1:   "test3-text1",
+				Text2:   "test3-text2",
+			},
+			expectedHeight: 90,
+			expectedWidth:  130,
+		},
+	}
+
+	dc := NewDummyDimensionCalculator(100, 50, 120, 10, 80, 10)
+	emptyFormats := map[string]types.BoxFormat{}
+	for _, test := range tests {
+		le := types.ExpInitLayoutElement(&test.layout, emptyFormats)
+		le.InitDimensions(dc)
+		assert.Equal(t, test.expectedHeight, le.Height)
+		assert.Equal(t, test.expectedWidth, le.Width)
+	}
 }
