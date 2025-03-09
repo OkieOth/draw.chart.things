@@ -1,6 +1,6 @@
 package types
 
-func initLayoutElemArray(l []Layout, inputFormats map[string]Format) []LayoutElement {
+func initLayoutElemArray(l []Layout, inputFormats map[string]BoxFormat) []LayoutElement {
 	var res = make([]LayoutElement, 0)
 	for _, elem := range l {
 		res = append(res, initLayoutElement(&elem, inputFormats))
@@ -58,7 +58,7 @@ func initFontDef(l *FontDef) FontDef {
 	return f
 }
 
-func initBoxFormat(l *Layout, f *Format) BoxFormat {
+func initBoxFormat(f *Format) BoxFormat {
 	var border *LineDef
 	var fill *FillDef
 
@@ -83,13 +83,43 @@ func initBoxFormat(l *Layout, f *Format) BoxFormat {
 	}
 }
 
-func initLayoutElement(l *Layout, inputFormats map[string]Format) LayoutElement {
-	var f *Format
+func getDefaultFormat() BoxFormat {
+	return BoxFormat{
+		Padding:     5,
+		FontCaption: initFontDef(nil),
+		FontText1:   initFontDef(nil),
+		FontText2:   initFontDef(nil),
+	}
+}
+
+func initFormats(inputFormat map[string]Format) map[string]BoxFormat {
+	var res = make(map[string]BoxFormat)
+	for key, elem := range inputFormat {
+		res[key] = initBoxFormat(&elem)
+	}
+	if _, hasDefault := res["default"]; !hasDefault {
+		res["default"] = getDefaultFormat()
+	}
+	return res
+}
+
+func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutElement {
+	var f *BoxFormat
 	for _, tag := range l.Tags {
 		if val, ok := inputFormats[tag]; ok {
 			f = &val
 			break
 		}
+	}
+	for key, format := range inputFormats {
+		if key == "default" {
+			f = &format
+			break
+		}
+	}
+	if f == nil {
+		d := getDefaultFormat()
+		f = &d
 	}
 	return LayoutElement{
 		Id:         l.Id,
@@ -98,13 +128,14 @@ func initLayoutElement(l *Layout, inputFormats map[string]Format) LayoutElement 
 		Text2:      l.Text2,
 		Vertical:   initLayoutElemArray(l.Vertical, inputFormats),
 		Horizontal: initLayoutElemArray(l.Horizontal, inputFormats),
-		Format:     initBoxFormat(l, f),
+		Format:     *f,
 	}
 }
 
 func DocumentFromBoxes(b *Boxes) *BoxesDocument {
 	doc := NewBoxesDocument()
 	doc.Title = b.Title
-	doc.Boxes = initLayoutElement(&b.Boxes, b.Formats)
+	doc.Formats = initFormats(b.Formats)
+	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats)
 	return doc
 }

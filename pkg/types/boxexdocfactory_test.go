@@ -10,7 +10,7 @@ func TestInitLayoutElement(t *testing.T) {
 	tests := []struct {
 		name         string
 		layout       types.Layout
-		inputFormats map[string]types.Format
+		inputFormats map[string]types.BoxFormat
 		expected     types.LayoutElement
 	}{
 		{
@@ -18,7 +18,7 @@ func TestInitLayoutElement(t *testing.T) {
 			layout: types.Layout{
 				Id: "test1",
 			},
-			inputFormats: map[string]types.Format{},
+			inputFormats: map[string]types.BoxFormat{},
 			expected: types.LayoutElement{
 				Id: "test1",
 				Format: types.BoxFormat{
@@ -59,9 +59,9 @@ func TestInitLayoutElement(t *testing.T) {
 				Text2:   "Test Text2",
 				Tags:    []string{"tag1"},
 			},
-			inputFormats: map[string]types.Format{
+			inputFormats: map[string]types.BoxFormat{
 				"tag1": {
-					FontCaption: &types.FontDef{
+					FontCaption: types.FontDef{
 						Size:       12,
 						Type:       &types.ExpFontDefTypeEnum_normal,
 						Weight:     &types.ExpFontDefWeightEnum_bold,
@@ -77,7 +77,7 @@ func TestInitLayoutElement(t *testing.T) {
 				Text1:   "Test Text1",
 				Text2:   "Test Text2",
 				Format: types.BoxFormat{
-					Padding: 5,
+					Padding: 0,
 					FontCaption: types.FontDef{
 						Size:       12,
 						Type:       &types.ExpFontDefTypeEnum_normal,
