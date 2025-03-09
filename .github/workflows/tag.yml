@@ -14,7 +14,7 @@ jobs:
       - name: Extract version from cmd/sub/version.go
         id: get_version
         run: |
-          TAG_NAME=$(grep "const Version =" cmd/sub/version.go | grep "const Version =" | sed -e 's-.*= "--' -e 's-".*--')
+          TAG_NAME=v$(grep "const Version =" cmd/sub/version.go | grep "const Version =" | sed -e 's-.*= "--' -e 's-".*--')
           echo "tag_name=$TAG_NAME" >> $GITHUB_ENV
 
 

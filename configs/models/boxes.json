@@ -2,19 +2,19 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Boxes",
     "description": "Model to describe the input of block diagrams",
+    "x-domain": "input",
     "type": "object",
     "properties": {
         "title": {
             "type": "string",
             "description": "Title of the document"
         },
-        "layout": {
+        "boxes": {
             "$ref": "#/definitions/Layout"
         },
-        "defaultFormat": {
-            "$ref": "#/definitions/Format"
-        },
         "formats": {
+            "$comment": "if the map contains an key 'default' it will be used as default format",
+            "description": "Map of formats available to be used in the boxes",
             "type": "object",
             "additionalProperties": {
                 "$ref": "#/definitions/Format"
@@ -73,7 +73,7 @@
                     }
                 }
             },
-            "required": ["type"]
+            "required": ["type", "id", "caption", "text1", "text2"]
         },
         "LayoutArray": {
             "type": "array",
@@ -109,76 +109,19 @@
             "type": "object",
             "properties": {
                 "fontCaption": {
-                    "$ref": "#/definitions/FontDef"
+                    "$ref": "./formats.json#/definitions/FontDef"
                 },
                 "fontText1": {
-                    "$ref": "#/definitions/FontDef"
+                    "$ref": "./formats.json#/definitions/FontDef"
                 },
                 "fontText2": {
-                    "$ref": "#/definitions/FontDef"
+                    "$ref": "./formats.json#/definitions/FontDef"
                 },
                 "border": {
-                    "$ref": "#/definitions/LineDef"
+                    "$ref": "./formats.json#/definitions/LineDef"
                 },
                 "fill": {
-                    "$ref": "#/definitions/FillDef"
-                }
-            }
-        },
-        "FontDef": {
-            "type": "object",
-            "description": "Defines the font a text",
-            "properties": {
-                "size": {
-                    "type": "integer"
-                },
-                "font": {
-                    "type": "string"
-                },
-                "type": {
-                    "enum": ["normal", "italic", "oblique"]
-                },
-                "weight": {
-                    "enum": ["normal", "bold", "bolder"]
-                },
-                "color": {
-                    "type": "string"
-                },
-                "alligned": {
-                    "enum": ["left", "center", "right"]
-                },
-                "spaceTop": {
-                    "type": "integer"
-                },
-                "spaceBottom": {
-                    "type": "integer"
-                }
-            }
-        },
-        "LineDef": {
-            "type": "object",
-            "description": "Defines how the border of the box looks like",
-            "properties": {
-                "width": {
-                    "type": "integer"
-                },
-                "color": {
-                    "type": "string"
-                },
-                "opacity": {
-                    "type": "number"
-                }
-            }
-        },
-        "FillDef": {
-            "type": "object",
-            "description": "Defines the fill of the box",
-            "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "opacity": {
-                    "type": "number"
+                    "$ref": "./formats.json#/definitions/FillDef"
                 }
             }
         }

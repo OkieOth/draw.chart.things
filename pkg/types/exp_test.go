@@ -1,0 +1,10 @@
+package types
+
+var ExpInitLayoutElemArray = initLayoutElemArray
+var ExpInitLayoutElement = initLayoutElement
+
+var ExpFontDefTypeEnum_normal FontDefTypeEnum = FontDefTypeEnum_normal
+var ExpFontDefWeightEnum_normal FontDefWeightEnum = FontDefWeightEnum_normal
+var ExpFontDefWeightEnum_bold FontDefWeightEnum = FontDefWeightEnum_bold
+var ExpFontDefAlignedEnum_center FontDefAlignedEnum = FontDefAlignedEnum_center
+var ExpFontDefAlignedEnum_left FontDefAlignedEnum = FontDefAlignedEnum_left
