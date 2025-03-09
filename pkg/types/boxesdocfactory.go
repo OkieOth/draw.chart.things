@@ -8,6 +8,33 @@ func initLayoutElemArray(l []Layout) []LayoutElement {
 	return res
 }
 
+// func initFontDef(l *FontDef) FontDef {
+// 	return FontDef{
+// 		Family: l.Family,
+// 		Size:   l.Size,
+// 		Style:  l.Style,
+// 		Color:  l.Color,
+// 	}
+// }
+
+// func initBoxFormat(l *Layout) BoxFormat {
+// 	var border *LineDef
+// 	var fill *FillDef
+
+// 	return BoxFormat{
+// 		Padding:       5,
+// 		LineHeight:    1.5,
+// 		FontCaption:   initFontDef(&l.FontCaption),
+// 		CaptionBefore: 0,
+// 		FontText1:     *fontText1,
+// 		Text1Before:   30,
+// 		FontText2:     *fontText2,
+// 		Text2Before:   30,
+// 		Border:        *border,
+// 		Fill:          *fill,
+// 	}
+// }
+
 func initLayoutElement(l *Layout) LayoutElement {
 	return LayoutElement{
 		Id:         l.Id,
@@ -16,6 +43,7 @@ func initLayoutElement(l *Layout) LayoutElement {
 		Text2:      l.Text2,
 		Vertical:   initLayoutElemArray(l.Vertical),
 		Horizontal: initLayoutElemArray(l.Horizontal),
+		//BoxFormat:  initBoxFormat(l),
 	}
 }
 

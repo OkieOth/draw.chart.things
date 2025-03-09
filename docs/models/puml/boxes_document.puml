@@ -48,7 +48,7 @@ class "**LayoutElemArray**" as LayoutElemArray extends List {
 
 class "**BoxFormat**" as BoxFormat {
         IntegerType padding
-        IntegerType lineHeight
+        NumberType lineHeight
         FontDef fontCaption
         IntegerType captionBefore
         FontDef fontText1

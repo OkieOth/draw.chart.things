@@ -140,7 +140,7 @@
                     "description": "Padding of the box"
                 },
                 "lineHeight": {
-                    "type": "integer",
+                    "type": "number",
                     "description": "Line height of the box"
                 },
                 "fontCaption": {

@@ -125,7 +125,7 @@ type BoxFormat struct {
     Padding int32  `yaml:"padding"`
 
     // Line height of the box
-    LineHeight int32  `yaml:"lineHeight"`
+    LineHeight float64  `yaml:"lineHeight"`
 
     FontCaption FontDef  `yaml:"fontCaption"`
 
