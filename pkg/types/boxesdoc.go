@@ -24,12 +24,16 @@ type BoxesDocument struct {
     Width int32  `yaml:"width"`
 
     Connections []ConnectionElem  `yaml:"connections,omitempty"`
+
+    // Map of formats available to be used in the boxes
+    Formats map[string]BoxFormat  `yaml:"formats,omitempty"`
 }
 
 func NewBoxesDocument() *BoxesDocument {
         return &BoxesDocument{
             Boxes: *NewLayoutElement(),
             Connections: make([]ConnectionElem, 0),
+            Formats: make(map[string]BoxFormat, 0),
         }
 }
 
@@ -124,28 +128,19 @@ type BoxFormat struct {
     // Padding of the box
     Padding int32  `yaml:"padding"`
 
-    // Line height of the box
-    LineHeight float64  `yaml:"lineHeight"`
-
     FontCaption FontDef  `yaml:"fontCaption"`
-
-    // Space before the caption
-    CaptionBefore int32  `yaml:"captionBefore"`
 
     FontText1 FontDef  `yaml:"fontText1"`
 
-    // Space before the text1
-    Text1Before int32  `yaml:"text1Before"`
-
     FontText2 FontDef  `yaml:"fontText2"`
 
-    // Space before the text2
-    Text2Before int32  `yaml:"text2Before"`
+    Border *LineDef  `yaml:"border,omitempty"`
 
-    Border LineDef  `yaml:"border"`
-
-    Fill FillDef  `yaml:"fill"`
+    Fill *FillDef  `yaml:"fill,omitempty"`
 }
+
+
+
 
 
 

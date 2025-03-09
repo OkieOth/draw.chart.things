@@ -7,7 +7,6 @@ hide empty fields
 class "**Boxes**" as Boxes {
         StringType title
         Layout boxes
-        Format defaultFormat
         Map<Format> formats
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
@@ -29,6 +28,7 @@ class "**Layout**" as Layout {
 
  
 
+
 class "**Format**" as Format {
         FontDef fontCaption
         FontDef fontText1
@@ -38,7 +38,6 @@ class "**Format**" as Format {
 }
 
  
-
 
 class "**LayoutArray**" as LayoutArray extends List {
 }
@@ -57,8 +56,9 @@ class "**FontDef**" as FontDef {
         StringType font
         FontDefTypeEnum type
         FontDefWeightEnum weight
+        NumberType lineHeight
         StringType color
-        FontDefAllignedEnum alligned
+        FontDefAlignedEnum aligned
         IntegerType spaceTop
         IntegerType spaceBottom
 }
@@ -69,16 +69,14 @@ note top: Defines the font a text
 enum "FontDefTypeEnum" as FontDefTypeEnum {
     NORMAL
     ITALIC
-    OBLIQUE
 }
 
 enum "FontDefWeightEnum" as FontDefWeightEnum {
     NORMAL
     BOLD
-    BOLDER
 }
 
-enum "FontDefAllignedEnum" as FontDefAllignedEnum {
+enum "FontDefAlignedEnum" as FontDefAlignedEnum {
     LEFT
     CENTER
     RIGHT
@@ -117,7 +115,6 @@ Boxes  *--  Format
 
 
 
-
     
 
 
@@ -129,6 +126,7 @@ Layout "0" *-- "n" Layout
 
 Layout "0" *-- "n" Connection
 
+    
     
 Format  *--  FontDef
 
@@ -142,12 +140,12 @@ Format  *--  FillDef
 
     
     
-    
 
 
 
 
     
+
 
 
 

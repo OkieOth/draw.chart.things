@@ -15,21 +15,24 @@ import (
 */
 type FontDef struct {
 
-    Size *int32  `yaml:"size,omitempty"`
+    Size int32  `yaml:"size"`
 
-    Font *string  `yaml:"font,omitempty"`
+    Font string  `yaml:"font"`
 
     Type *FontDefTypeEnum  `yaml:"type,omitempty"`
 
     Weight *FontDefWeightEnum  `yaml:"weight,omitempty"`
 
-    Color *string  `yaml:"color,omitempty"`
+    // Line height of the box
+    LineHeight float32  `yaml:"lineHeight"`
 
-    Alligned *FontDefAllignedEnum  `yaml:"alligned,omitempty"`
+    Color string  `yaml:"color"`
 
-    SpaceTop *int32  `yaml:"spaceTop,omitempty"`
+    Aligned *FontDefAlignedEnum  `yaml:"aligned,omitempty"`
 
-    SpaceBottom *int32  `yaml:"spaceBottom,omitempty"`
+    SpaceTop int32  `yaml:"spaceTop"`
+
+    SpaceBottom int32  `yaml:"spaceBottom"`
 }
 
 
@@ -41,7 +44,6 @@ type FontDefTypeEnum int64
 const (
     FontDefTypeEnum_normal FontDefTypeEnum = iota
         FontDefTypeEnum_italic
-        FontDefTypeEnum_oblique
 )
 
 func (s FontDefTypeEnum) String() string {
@@ -50,8 +52,6 @@ func (s FontDefTypeEnum) String() string {
 		return "normal"
 	case FontDefTypeEnum_italic:
 		return "italic"
-	case FontDefTypeEnum_oblique:
-		return "oblique"
     default:
         return "???"
 	}
@@ -72,8 +72,6 @@ func (s *FontDefTypeEnum) UnmarshalJSON(data []byte) error {
         *s = FontDefTypeEnum_normal 
     case "italic":
         *s = FontDefTypeEnum_italic 
-    case "oblique":
-        *s = FontDefTypeEnum_oblique 
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
@@ -89,7 +87,6 @@ type FontDefWeightEnum int64
 const (
     FontDefWeightEnum_normal FontDefWeightEnum = iota
         FontDefWeightEnum_bold
-        FontDefWeightEnum_bolder
 )
 
 func (s FontDefWeightEnum) String() string {
@@ -98,8 +95,6 @@ func (s FontDefWeightEnum) String() string {
 		return "normal"
 	case FontDefWeightEnum_bold:
 		return "bold"
-	case FontDefWeightEnum_bolder:
-		return "bolder"
     default:
         return "???"
 	}
@@ -120,8 +115,6 @@ func (s *FontDefWeightEnum) UnmarshalJSON(data []byte) error {
         *s = FontDefWeightEnum_normal 
     case "bold":
         *s = FontDefWeightEnum_bold 
-    case "bolder":
-        *s = FontDefWeightEnum_bolder 
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
@@ -132,32 +125,32 @@ func (s *FontDefWeightEnum) UnmarshalJSON(data []byte) error {
 
 
 
-type FontDefAllignedEnum int64
+type FontDefAlignedEnum int64
 
 const (
-    FontDefAllignedEnum_left FontDefAllignedEnum = iota
-        FontDefAllignedEnum_center
-        FontDefAllignedEnum_right
+    FontDefAlignedEnum_left FontDefAlignedEnum = iota
+        FontDefAlignedEnum_center
+        FontDefAlignedEnum_right
 )
 
-func (s FontDefAllignedEnum) String() string {
+func (s FontDefAlignedEnum) String() string {
 	switch s {
-	case FontDefAllignedEnum_left:
+	case FontDefAlignedEnum_left:
 		return "left"
-	case FontDefAllignedEnum_center:
+	case FontDefAlignedEnum_center:
 		return "center"
-	case FontDefAllignedEnum_right:
+	case FontDefAlignedEnum_right:
 		return "right"
     default:
         return "???"
 	}
 }
 
-func (s FontDefAllignedEnum) MarshalJSON() ([]byte, error) {
+func (s FontDefAlignedEnum) MarshalJSON() ([]byte, error) {
     return json.Marshal(s.String())
 }
 
-func (s *FontDefAllignedEnum) UnmarshalJSON(data []byte) error {
+func (s *FontDefAlignedEnum) UnmarshalJSON(data []byte) error {
     var value string
     if err := json.Unmarshal(data, &value); err != nil {
         return err
@@ -165,11 +158,11 @@ func (s *FontDefAllignedEnum) UnmarshalJSON(data []byte) error {
 
     switch value {
     case "left":
-        *s = FontDefAllignedEnum_left 
+        *s = FontDefAlignedEnum_left 
     case "center":
-        *s = FontDefAllignedEnum_center 
+        *s = FontDefAlignedEnum_center 
     case "right":
-        *s = FontDefAllignedEnum_right 
+        *s = FontDefAlignedEnum_right 
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)

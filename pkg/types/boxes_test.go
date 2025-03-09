@@ -33,17 +33,19 @@ func TestLoadBoxes(t *testing.T) {
 			assert.Equal(t, "simple", b.Boxes.Tags[0])
 			assert.Equal(t, "test", b.Boxes.Tags[1])
 
-			assert.NotNil(t, b.DefaultFormat)
-			assert.NotNil(t, b.DefaultFormat.Border)
-			assert.Equal(t, "black", *b.DefaultFormat.Border.Color)
-			assert.Equal(t, int32(1), *b.DefaultFormat.Border.Width)
-			assert.NotNil(t, b.DefaultFormat.Fill)
-			assert.Equal(t, "lightgreen", *b.DefaultFormat.Fill.Color)
-			assert.Nil(t, b.DefaultFormat.FontCaption)
-			assert.Nil(t, b.DefaultFormat.FontText1)
-			assert.Nil(t, b.DefaultFormat.FontText2)
+			defaultFormat, defFormatExist := b.Formats["default"]
 
-			assert.Len(t, b.Formats, 0)
+			assert.True(t, defFormatExist)
+			assert.NotNil(t, defaultFormat.Border)
+			assert.Equal(t, "black", *defaultFormat.Border.Color)
+			assert.Equal(t, int32(1), *defaultFormat.Border.Width)
+			assert.NotNil(t, defaultFormat.Fill)
+			assert.Equal(t, "lightgreen", *defaultFormat.Fill.Color)
+			assert.Nil(t, defaultFormat.FontCaption)
+			assert.Nil(t, defaultFormat.FontText1)
+			assert.Nil(t, defaultFormat.FontText2)
+
+			assert.Len(t, b.Formats, 1)
 		},
 	},
 		{

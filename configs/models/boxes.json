@@ -12,10 +12,9 @@
         "boxes": {
             "$ref": "#/definitions/Layout"
         },
-        "defaultFormat": {
-            "$ref": "#/definitions/Format"
-        },
         "formats": {
+            "$comment": "if the map contains an key 'default' it will be used as default format",
+            "description": "Map of formats available to be used in the boxes",
             "type": "object",
             "additionalProperties": {
                 "$ref": "#/definitions/Format"

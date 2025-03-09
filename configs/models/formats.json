@@ -16,15 +16,20 @@
                     "type": "string"
                 },
                 "type": {
-                    "enum": ["normal", "italic", "oblique"]
+                    "enum": ["normal", "italic"]
                 },
                 "weight": {
-                    "enum": ["normal", "bold", "bolder"]
+                    "enum": ["normal", "bold"]
+                },
+                "lineHeight": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Line height of the box"
                 },
                 "color": {
                     "type": "string"
                 },
-                "alligned": {
+                "aligned": {
                     "enum": ["left", "center", "right"]
                 },
                 "spaceTop": {
@@ -33,7 +38,8 @@
                 "spaceBottom": {
                     "type": "integer"
                 }
-            }
+            },
+            "required": ["size", "font", "lineHeight", "color", "spaceTop", "spaceBottom"]
         },
         "LineDef": {
             "type": "object",

@@ -17,8 +17,7 @@ type Boxes struct {
 
     Boxes Layout  `yaml:"boxes"`
 
-    DefaultFormat *Format  `yaml:"defaultFormat,omitempty"`
-
+    // Map of formats available to be used in the boxes
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
     // Minimum margin between boxes
@@ -77,6 +76,9 @@ func NewLayout() *Layout {
 
 
 
+
+
+
 type Format struct {
 
     FontCaption *FontDef  `yaml:"fontCaption,omitempty"`
@@ -89,9 +91,6 @@ type Format struct {
 
     Fill *FillDef  `yaml:"fill,omitempty"`
 }
-
-
-
 
 
 

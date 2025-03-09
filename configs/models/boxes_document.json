@@ -25,6 +25,14 @@
             "items": {
                 "$ref": "#/definitions/ConnectionElem"
             }
+        },
+        "formats": {
+            "$comment": "if the map contains an key 'default' it will be used as default format",
+            "description": "Map of formats available to be used in the boxes",
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/BoxFormat"
+            }
         }
     },
     "required": ["boxes", "height", "width"],
@@ -139,30 +147,14 @@
                     "type": "integer",
                     "description": "Padding of the box"
                 },
-                "lineHeight": {
-                    "type": "number",
-                    "description": "Line height of the box"
-                },
                 "fontCaption": {
                     "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "captionBefore": {
-                    "type": "integer",
-                    "description": "Space before the caption"
                 },
                 "fontText1": {
                     "$ref": "./formats.json#/definitions/FontDef"
                 },
-                "text1Before": {
-                    "type": "integer",
-                    "description": "Space before the text1"
-                },
                 "fontText2": {
                     "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "text2Before": {
-                    "type": "integer",
-                    "description": "Space before the text2"
                 },
                 "border": {
                     "$ref": "./formats.json#/definitions/LineDef"
@@ -171,7 +163,7 @@
                     "$ref": "./formats.json#/definitions/FillDef"
                 }
             },
-            "required": ["padding", "lineHeight", "fontCaption", "captionBefore", "fontText1", "text1Before", "fontText2", "text2Before", "border", "fill"]
+            "required": ["padding", "lineHeight", "fontCaption", "fontText1", "fontText2"]
         }
     }
 }
