@@ -74,21 +74,23 @@ func initBoxFormat(f *Format) BoxFormat {
 	}
 
 	return BoxFormat{
-		Padding:     5,
-		FontCaption: initFontDef(fontCaption),
-		FontText1:   initFontDef(fontText1),
-		FontText2:   initFontDef(fontText2),
-		Border:      border,
-		Fill:        fill,
+		Padding:      GlobalPadding,
+		MinBoxMargin: GlobalMinBoxMargin,
+		FontCaption:  initFontDef(fontCaption),
+		FontText1:    initFontDef(fontText1),
+		FontText2:    initFontDef(fontText2),
+		Border:       border,
+		Fill:         fill,
 	}
 }
 
 func getDefaultFormat() BoxFormat {
 	return BoxFormat{
-		Padding:     5,
-		FontCaption: initFontDef(nil),
-		FontText1:   initFontDef(nil),
-		FontText2:   initFontDef(nil),
+		Padding:      GlobalPadding,
+		MinBoxMargin: GlobalMinBoxMargin,
+		FontCaption:  initFontDef(nil),
+		FontText1:    initFontDef(nil),
+		FontText2:    initFontDef(nil),
 	}
 }
 

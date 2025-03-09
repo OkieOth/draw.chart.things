@@ -6,46 +6,47 @@ type TextDimensionCalculator interface {
 	Text2Dimensions(txt string) (width, height int32)
 }
 
-func (l *LayoutElement) InitDimensions(c TextDimensionCalculator) {
-	initVertical := func() {
-		if len(l.Vertical) > 0 {
-			var h, w int32
-			for _, sub := range l.Vertical {
-				if h > 0 {
-					h += l.Format.MinBoxMargin
-				}
-				sub.InitDimensions(c)
-				h += sub.Height
-				if sub.Width > w {
-					w = sub.Width
-				}
+func (l *LayoutElement) initVertical(c TextDimensionCalculator) {
+	if len(l.Vertical) > 0 {
+		var h, w int32
+		for _, sub := range l.Vertical {
+			if h > 0 {
+				h += l.Format.MinBoxMargin
 			}
-			l.Height += h
-			if w > l.Width {
-				l.Width = w
+			sub.InitDimensions(c)
+			h += sub.Height
+			if sub.Width > w {
+				w = sub.Width
 			}
 		}
-	}
-	initHorizontal := func() {
-		if len(l.Horizontal) > 0 {
-			var h, w int32
-			for _, sub := range l.Horizontal {
-				if w > 0 {
-					w += l.Format.MinBoxMargin
-				}
-				sub.InitDimensions(c)
-				w += sub.Width
-				if sub.Height > h {
-					h = sub.Height
-				}
-			}
-			l.Height += h
-			if l.Width < w {
-				l.Width = w
-			}
+		l.Height += h + l.Format.Padding
+		if w > l.Width {
+			l.Width = w
 		}
 	}
+}
 
+func (l *LayoutElement) initHorizontal(c TextDimensionCalculator) {
+	if len(l.Horizontal) > 0 {
+		var h, w int32
+		for _, sub := range l.Horizontal {
+			if w > 0 {
+				w += l.Format.MinBoxMargin
+			}
+			sub.InitDimensions(c)
+			w += sub.Width
+			if sub.Height > h {
+				h = sub.Height
+			}
+		}
+		l.Height += h + l.Format.Padding
+		if l.Width < w {
+			l.Width = w
+		}
+	}
+}
+
+func (l *LayoutElement) InitDimensions(c TextDimensionCalculator) {
 	var cW, cH, t1W, t1H, t2W, t2H int32
 	l.Height = (2 * l.Format.Padding)
 	if l.Caption != "" {
@@ -61,7 +62,6 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator) {
 		l.Height += t2H + l.Format.Padding + l.Format.FontText2.SpaceTop + l.Format.FontText2.SpaceBottom
 	}
 	l.Width = max(cW, max(t1W, t2W)) + (2 * l.Format.Padding)
-
-	initVertical()
-	initHorizontal()
+	l.initVertical(c)
+	l.initHorizontal(c)
 }

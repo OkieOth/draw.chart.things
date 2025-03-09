@@ -70,6 +70,46 @@ func TestInitDimensions(t *testing.T) {
 			expectedHeight: 90,
 			expectedWidth:  130,
 		},
+		{
+			layout: types.Layout{
+				Caption: "test4",
+				Text1:   "test4-text1",
+				Text2:   "test4-text2",
+				Vertical: []types.Layout{
+					{
+						Caption: "test4-V1",
+					},
+					{
+						Caption: "test4-V2",
+					},
+					{
+						Caption: "test3-V3",
+					},
+				},
+			},
+			expectedHeight: 295,
+			expectedWidth:  130,
+		},
+		{
+			layout: types.Layout{
+				Caption: "test5",
+				Text1:   "test5-text1",
+				Text2:   "test5-text2",
+				Horizontal: []types.Layout{
+					{
+						Caption: "test5-V1",
+					},
+					{
+						Caption: "test5-V2",
+					},
+					{
+						Caption: "test5-V3",
+					},
+				},
+			},
+			expectedHeight: 155,
+			expectedWidth:  350,
+		},
 	}
 
 	dc := NewDummyDimensionCalculator(100, 50, 120, 10, 80, 10)
