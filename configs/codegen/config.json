@@ -4,12 +4,42 @@
     "description": "code gen configuration for boxes input types",
     "models": [
       {
+        "schema": "/project/configs/models/formats.json"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "base",
+        "singleFileTask": {
+          "template": "/project/configs/codegen/templates/golang_types.mako",
+          "destFile": "/project/pkg/types/formats.go",
+          "templateParams": [
+            {
+              "name": "modelPackage",
+              "value": "types"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "boxes",
+    "description": "code gen configuration for boxes input types",
+    "models": [
+      {
         "schema": "/project/configs/models/boxes.json"
       }
     ],
     "tasks": [
       {
-        "name": "types",
+        "name": "input",
+        "whiteListed": [
+          {
+            "name": "input",
+            "type": "domain"
+          }
+        ],
         "singleFileTask": {
           "template": "/project/configs/codegen/templates/golang_types.mako",
           "destFile": "/project/pkg/types/boxes.go",
@@ -23,6 +53,16 @@
       },
       {
         "name": "Plantuml",
+        "whiteListed": [
+          {
+            "name": "input",
+            "type": "domain"
+          },
+          {
+            "name": "base",
+            "type": "domain"
+          }
+        ],
         "singleFileTask": {
           "template": "plantUml",
           "destFile": "/project/docs/models/puml/boxes.puml"
@@ -63,6 +103,10 @@
         "whiteListed": [
           {
             "name": "implementation",
+            "type": "domain"
+          },
+          {
+            "name": "base",
             "type": "domain"
           }
         ],

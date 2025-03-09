@@ -1,0 +1,69 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Formats",
+    "description": "Some types to define base formats",
+    "type": "object",
+    "x-domain": "base",
+    "definitions": {
+        "FontDef": {
+            "type": "object",
+            "description": "Defines the font a text",
+            "properties": {
+                "size": {
+                    "type": "integer"
+                },
+                "font": {
+                    "type": "string"
+                },
+                "type": {
+                    "enum": ["normal", "italic", "oblique"]
+                },
+                "weight": {
+                    "enum": ["normal", "bold", "bolder"]
+                },
+                "color": {
+                    "type": "string"
+                },
+                "alligned": {
+                    "enum": ["left", "center", "right"]
+                },
+                "spaceTop": {
+                    "type": "integer"
+                },
+                "spaceBottom": {
+                    "type": "integer"
+                }
+            }
+        },
+        "LineDef": {
+            "type": "object",
+            "description": "Defines how the border of the box looks like",
+            "properties": {
+                "width": {
+                    "type": "integer"
+                },
+                "style": {
+                    "enum": ["solid", "dotted", "dashed"]
+                },
+                "color": {
+                    "type": "string"
+                },
+                "opacity": {
+                    "type": "number"
+                }
+            }
+        },
+        "FillDef": {
+            "type": "object",
+            "description": "Defines the fill of the box",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "opacity": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

@@ -26,7 +26,7 @@ class "**LayoutElement**" as LayoutElement {
         IntegerType y
         IntegerType width
         IntegerType height
-        Format format
+        BoxFormat format
         StringType[] tags
 }
 
@@ -46,10 +46,81 @@ class "**ConnectionElem**" as ConnectionElem {
 class "**LayoutElemArray**" as LayoutElemArray extends List {
 }
 
+class "**BoxFormat**" as BoxFormat {
+        IntegerType padding
+        IntegerType lineHeight
+        FontDef fontCaption
+        IntegerType captionBefore
+        FontDef fontText1
+        IntegerType text1Before
+        FontDef fontText2
+        IntegerType text2Before
+        LineDef border
+        FillDef fill
+}
+
+ 
+
 class "**ConnectionPoint**" as ConnectionPoint {
         IntegerType x
         IntegerType y
 }
+
+ 
+
+class "**FontDef**" as FontDef {
+        IntegerType size
+        StringType font
+        FontDefTypeEnum type
+        FontDefWeightEnum weight
+        StringType color
+        FontDefAllignedEnum alligned
+        IntegerType spaceTop
+        IntegerType spaceBottom
+}
+note top: Defines the font a text
+
+ 
+
+enum "FontDefTypeEnum" as FontDefTypeEnum {
+    NORMAL
+    ITALIC
+    OBLIQUE
+}
+
+enum "FontDefWeightEnum" as FontDefWeightEnum {
+    NORMAL
+    BOLD
+    BOLDER
+}
+
+enum "FontDefAllignedEnum" as FontDefAllignedEnum {
+    LEFT
+    CENTER
+    RIGHT
+}
+
+class "**LineDef**" as LineDef {
+        IntegerType width
+        LineDefStyleEnum style
+        StringType color
+        NumberType opacity
+}
+note top: Defines how the border of\nthe box looks like
+
+ 
+
+enum "LineDefStyleEnum" as LineDefStyleEnum {
+    SOLID
+    DOTTED
+    DASHED
+}
+
+class "**FillDef**" as FillDef {
+        StringType color
+        NumberType opacity
+}
+note top: Defines the fill of the\nbox
 
  
 
@@ -74,7 +145,7 @@ LayoutElement "0" *-- "n" LayoutElement
 
 
 
-LayoutElement  *--  Format
+LayoutElement  *--  BoxFormat
 
 
     
@@ -87,6 +158,43 @@ ConnectionElem  *--  LayoutElement
 ConnectionElem  *--  LineDef
 
 ConnectionElem "0" *-- "n" ConnectionPoint
+
+    
+    
+
+
+BoxFormat  *--  FontDef
+
+
+BoxFormat  *--  FontDef
+
+
+BoxFormat  *--  FontDef
+
+
+BoxFormat  *--  LineDef
+
+BoxFormat  *--  FillDef
+
+    
+
+
+    
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+
+
+
 
     
     

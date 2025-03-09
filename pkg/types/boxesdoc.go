@@ -67,7 +67,7 @@ type LayoutElement struct {
     // Height of the element
     Height int32  `yaml:"height"`
 
-    Format Format  `yaml:"format"`
+    Format BoxFormat  `yaml:"format"`
 
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
@@ -113,6 +113,39 @@ func NewConnectionElem() *ConnectionElem {
 }
 
 
+
+
+
+
+
+
+type BoxFormat struct {
+
+    // Padding of the box
+    Padding int32  `yaml:"padding"`
+
+    // Line height of the box
+    LineHeight int32  `yaml:"lineHeight"`
+
+    FontCaption FontDef  `yaml:"fontCaption"`
+
+    // Space before the caption
+    CaptionBefore int32  `yaml:"captionBefore"`
+
+    FontText1 FontDef  `yaml:"fontText1"`
+
+    // Space before the text1
+    Text1Before int32  `yaml:"text1Before"`
+
+    FontText2 FontDef  `yaml:"fontText2"`
+
+    // Space before the text2
+    Text2Before int32  `yaml:"text2Before"`
+
+    Border LineDef  `yaml:"border"`
+
+    Fill FillDef  `yaml:"fill"`
+}
 
 
 

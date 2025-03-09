@@ -71,7 +71,7 @@
                     "description": "Height of the element"
                 },
                 "format": {
-                    "$ref": "./boxes.json#/definitions/Format"
+                    "$ref": "#/definitions/BoxFormat"
                 },
                 "tags": {
                     "description": "Tags to annotate the box, tags are used to format and filter",
@@ -109,7 +109,7 @@
                     "type": "boolean"
                 },
                 "format": {
-                    "$ref": "./boxes.json#/definitions/LineDef"
+                    "$ref": "./formats.json#/definitions/LineDef"
                 },
                 "points": {
                     "type": "array",
@@ -131,6 +131,47 @@
                     "description": "Y position of the point"
                 }
             }
+        },
+        "BoxFormat": {
+            "type": "object",
+            "properties": {
+                "padding": {
+                    "type": "integer",
+                    "description": "Padding of the box"
+                },
+                "lineHeight": {
+                    "type": "integer",
+                    "description": "Line height of the box"
+                },
+                "fontCaption": {
+                    "$ref": "./formats.json#/definitions/FontDef"
+                },
+                "captionBefore": {
+                    "type": "integer",
+                    "description": "Space before the caption"
+                },
+                "fontText1": {
+                    "$ref": "./formats.json#/definitions/FontDef"
+                },
+                "text1Before": {
+                    "type": "integer",
+                    "description": "Space before the text1"
+                },
+                "fontText2": {
+                    "$ref": "./formats.json#/definitions/FontDef"
+                },
+                "text2Before": {
+                    "type": "integer",
+                    "description": "Space before the text2"
+                },
+                "border": {
+                    "$ref": "./formats.json#/definitions/LineDef"
+                },
+                "fill": {
+                    "$ref": "./formats.json#/definitions/FillDef"
+                }
+            },
+            "required": ["padding", "lineHeight", "fontCaption", "captionBefore", "fontText1", "text1Before", "fontText2", "text2Before", "border", "fill"]
         }
     }
 }
