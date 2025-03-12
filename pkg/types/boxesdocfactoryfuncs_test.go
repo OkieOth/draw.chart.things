@@ -54,6 +54,7 @@ func TestInitDimensions(t *testing.T) {
 			expectedWidth:  110,
 		},
 		{
+			// extends "test1" with an additional text1
 			layout: types.Layout{
 				Caption: "test2",
 				Text1:   "test2-text1",
@@ -62,6 +63,7 @@ func TestInitDimensions(t *testing.T) {
 			expectedWidth:  130,
 		},
 		{
+			// extends "test2" with an additional text2
 			layout: types.Layout{
 				Caption: "test3",
 				Text1:   "test3-text1",
@@ -71,6 +73,7 @@ func TestInitDimensions(t *testing.T) {
 			expectedWidth:  130,
 		},
 		{
+			// basic vertical layout test
 			layout: types.Layout{
 				Caption: "test4",
 				Text1:   "test4-text1",
@@ -91,6 +94,7 @@ func TestInitDimensions(t *testing.T) {
 			expectedWidth:  130,
 		},
 		{
+			// basic horizontal layout test
 			layout: types.Layout{
 				Caption: "test5",
 				Text1:   "test5-text1",
