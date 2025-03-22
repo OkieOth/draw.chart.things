@@ -1,10 +1,29 @@
-package svg
+package svgdrawing
 
 import (
 	"github.com/ajstarks/svgo"
 	"github.com/okieoth/draw.chart.things/pkg/types"
 	"io"
 )
+
+type SvgTextDimensionCalculator struct {
+}
+
+func NewSvgTextDimensionCalculator() *SvgTextDimensionCalculator {
+	return &SvgTextDimensionCalculator{}
+}
+
+func (s *SvgTextDimensionCalculator) CaptionDimensions(txt string) (width, height int) {
+	return 100, 50 // TODO - implement this
+}
+
+func (s *SvgTextDimensionCalculator) Text1Dimensions(txt string) (width, height int) {
+	return 100, 50 // TODO - implement this
+}
+
+func (s *SvgTextDimensionCalculator) Text2Dimensions(txt string) (width, height int) {
+	return 100, 50 // TODO - implement this
+}
 
 type Drawing struct {
 	canvas *svg.SVG

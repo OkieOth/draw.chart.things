@@ -8,27 +8,27 @@ import (
 )
 
 type DummyDimensionCalculator struct {
-	captionWidth  int32
-	captionHeight int32
-	text1Width    int32
-	text1Height   int32
-	text2Width    int32
-	text2Height   int32
+	captionWidth  int
+	captionHeight int
+	text1Width    int
+	text1Height   int
+	text2Width    int
+	text2Height   int
 }
 
-func (d *DummyDimensionCalculator) CaptionDimensions(txt string) (width, height int32) {
+func (d *DummyDimensionCalculator) CaptionDimensions(txt string) (width, height int) {
 	return d.captionWidth, d.captionHeight
 }
 
-func (d *DummyDimensionCalculator) Text1Dimensions(txt string) (width, height int32) {
+func (d *DummyDimensionCalculator) Text1Dimensions(txt string) (width, height int) {
 	return d.text1Width, d.text1Height
 }
 
-func (d *DummyDimensionCalculator) Text2Dimensions(txt string) (width, height int32) {
+func (d *DummyDimensionCalculator) Text2Dimensions(txt string) (width, height int) {
 	return d.text2Width, d.text2Height
 }
 
-func NewDummyDimensionCalculator(captionWidth, captionHeight, text1Width, text1Height, text2Width, text2Height int32) *DummyDimensionCalculator {
+func NewDummyDimensionCalculator(captionWidth, captionHeight, text1Width, text1Height, text2Width, text2Height int) *DummyDimensionCalculator {
 	return &DummyDimensionCalculator{
 		captionWidth:  captionWidth,
 		captionHeight: captionHeight,
@@ -43,8 +43,8 @@ func NewDummyDimensionCalculator(captionWidth, captionHeight, text1Width, text1H
 func TestInitDimensions(t *testing.T) {
 	tests := []struct {
 		layout         types.Layout
-		expectedHeight int32
-		expectedWidth  int32
+		expectedHeight int
+		expectedWidth  int
 	}{
 		{
 			layout: types.Layout{

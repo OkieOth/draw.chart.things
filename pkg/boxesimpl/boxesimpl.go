@@ -3,6 +3,7 @@ package boxesimpl
 import (
 	"fmt"
 
+	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
@@ -13,7 +14,9 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 		return err
 	}
 	fmt.Println(layout) // Dummy
-	doc, err := InitialLayoutBoxes(layout)
+	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
+
+	doc, err := InitialLayoutBoxes(layout, textDimensionCalulator)
 	if err != nil {
 		return err
 	}
@@ -24,7 +27,8 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	return nil
 }
 
-func InitialLayoutBoxes(b *types.Boxes) (*types.BoxesDocument, error) {
+func InitialLayoutBoxes(b *types.Boxes, c types.TextDimensionCalculator) (*types.BoxesDocument, error) {
 	doc := types.DocumentFromBoxes(b)
+	doc.Boxes.InitDimensions(c)
 	return doc, nil // TODO
 }
