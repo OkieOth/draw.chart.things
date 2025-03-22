@@ -15,7 +15,7 @@ import (
 */
 type FontDef struct {
 
-    Size int32  `yaml:"size"`
+    Size int  `yaml:"size"`
 
     Font string  `yaml:"font"`
 
@@ -30,9 +30,9 @@ type FontDef struct {
 
     Aligned *FontDefAlignedEnum  `yaml:"aligned,omitempty"`
 
-    SpaceTop int32  `yaml:"spaceTop"`
+    SpaceTop int  `yaml:"spaceTop"`
 
-    SpaceBottom int32  `yaml:"spaceBottom"`
+    SpaceBottom int  `yaml:"spaceBottom"`
 }
 
 
@@ -178,7 +178,7 @@ func (s *FontDefAlignedEnum) UnmarshalJSON(data []byte) error {
 */
 type LineDef struct {
 
-    Width *int32  `yaml:"width,omitempty"`
+    Width *int  `yaml:"width,omitempty"`
 
     Style *LineDefStyleEnum  `yaml:"style,omitempty"`
 

@@ -1,16 +1,16 @@
 package types
 
 type TextDimensionCalculator interface {
-	CaptionDimensions(txt string) (width, height int32)
-	Text1Dimensions(txt string) (width, height int32)
-	Text2Dimensions(txt string) (width, height int32)
+	CaptionDimensions(txt string) (width, height int)
+	Text1Dimensions(txt string) (width, height int)
+	Text2Dimensions(txt string) (width, height int)
 }
 
-func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset int32) {
+func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset int) {
 	if len(l.Vertical) > 0 {
 		curX := l.X + l.Format.Padding
 		curY := l.Y + yInnerOffset
-		var h, w int32
+		var h, w int
 		for _, sub := range l.Vertical {
 			if h > 0 {
 				h += l.Format.MinBoxMargin
@@ -31,11 +31,11 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset int
 	}
 }
 
-func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset int32) {
+func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset int) {
 	if len(l.Horizontal) > 0 {
 		curX := l.X + l.Format.Padding
 		curY := l.Y + yInnerOffset
-		var h, w int32
+		var h, w int
 		for _, sub := range l.Horizontal {
 			if w > 0 {
 				w += l.Format.MinBoxMargin
@@ -57,8 +57,8 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset i
 }
 
 func (l *LayoutElement) InitDimensions(c TextDimensionCalculator) {
-	var cW, cH, t1W, t1H, t2W, t2H int32
-	var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int32
+	var cW, cH, t1W, t1H, t2W, t2H int
+	var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	l.Height = (2 * l.Format.Padding)
 	if l.Caption != "" {
 		yCaptionOffset = l.Format.FontCaption.SpaceTop + l.Format.Padding

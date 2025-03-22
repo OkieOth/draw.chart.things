@@ -1,4 +1,4 @@
 package types
 
-var GlobalMinBoxMargin int32 = 10
-var GlobalPadding int32 = 5
+var GlobalMinBoxMargin int = 10
+var GlobalPadding int = 5

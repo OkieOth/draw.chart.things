@@ -33,9 +33,9 @@
         if typeObj is None:
             return '???'
         elif isinstance(typeObj, model.IntegerType):
-            if typeObj.format is None or typeObj.format == model.IntegerTypeFormatEnum.INT32:
+            if typeObj.format == model.IntegerTypeFormatEnum.INT32:
                 ret = 'int32'
-            elif typeObj.format is None or typeObj.format == model.IntegerTypeFormatEnum.UINT32:
+            elif typeObj.format == model.IntegerTypeFormatEnum.UINT32:
                 ret = 'uint32'
             else:
                 ret = 'int'

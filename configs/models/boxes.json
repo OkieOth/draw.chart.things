@@ -31,7 +31,7 @@
             "default": 10
         }
     },
-    "required": ["boxes"],
+    "required": ["title", "boxes"],
     "definitions": {
         "Layout": {
             "type": "object",

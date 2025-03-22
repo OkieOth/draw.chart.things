@@ -1,5 +1,13 @@
 package types
 
+import "fmt"
+
+type BoxesDrawing interface {
+	Start(title string, height, width int) error
+	Draw(caption, text1, text2 string, x, y, width, height int, format BoxFormat) error
+	Done() error
+}
+
 func initLayoutElemArray(l []Layout, inputFormats map[string]BoxFormat) []LayoutElement {
 	var res = make([]LayoutElement, 0)
 	for _, elem := range l {
@@ -140,4 +148,28 @@ func DocumentFromBoxes(b *Boxes) *BoxesDocument {
 	doc.Formats = initFormats(b.Formats)
 	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats)
 	return doc
+}
+
+func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
+	if err := drawingImpl.Start(d.Title, d.Height, d.Width); err != nil {
+		return fmt.Errorf("Error starting drawing: %w", err)
+	}
+	return d.Boxes.Draw(drawingImpl)
+}
+
+func (b *LayoutElement) Draw(drawing BoxesDrawing) error {
+	if err := drawing.Draw(b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, b.Format); err != nil {
+		return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+	}
+	for _, elem := range b.Vertical {
+		if err := elem.Draw(drawing); err != nil {
+			return err
+		}
+	}
+	for _, elem := range b.Horizontal {
+		if err := elem.Draw(drawing); err != nil {
+			return err
+		}
+	}
+	return nil
 }

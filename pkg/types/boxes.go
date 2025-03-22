@@ -13,7 +13,7 @@ import (
 type Boxes struct {
 
     // Title of the document
-    Title *string  `yaml:"title,omitempty"`
+    Title string  `yaml:"title"`
 
     Boxes Layout  `yaml:"boxes"`
 
@@ -21,10 +21,10 @@ type Boxes struct {
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
     // Minimum margin between boxes
-    MinBoxMargin *int32  `yaml:"minBoxMargin,omitempty"`
+    MinBoxMargin *int  `yaml:"minBoxMargin,omitempty"`
 
     // Minimum margin between connectors
-    MinConnectorMargin *int32  `yaml:"minConnectorMargin,omitempty"`
+    MinConnectorMargin *int  `yaml:"minConnectorMargin,omitempty"`
 }
 
 func NewBoxes() *Boxes {

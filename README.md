@@ -4,4 +4,3 @@
 
 Utility and library to draw and autolayout some diagram types
 out of a YAML specification.
-

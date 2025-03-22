@@ -13,15 +13,15 @@ import (
 type BoxesDocument struct {
 
     // Title of the document
-    Title *string  `yaml:"title,omitempty"`
+    Title string  `yaml:"title"`
 
     Boxes LayoutElement  `yaml:"boxes"`
 
     // Height of the document
-    Height int32  `yaml:"height"`
+    Height int  `yaml:"height"`
 
     // Width of the document
-    Width int32  `yaml:"width"`
+    Width int  `yaml:"width"`
 
     Connections []ConnectionElem  `yaml:"connections,omitempty"`
 
@@ -60,16 +60,16 @@ type LayoutElement struct {
     Horizontal []LayoutElement  `yaml:"horizontal,omitempty"`
 
     // X position of the element
-    X int32  `yaml:"x"`
+    X int  `yaml:"x"`
 
     // Y position of the element
-    Y int32  `yaml:"y"`
+    Y int  `yaml:"y"`
 
     // Width of the element
-    Width int32  `yaml:"width"`
+    Width int  `yaml:"width"`
 
     // Height of the element
-    Height int32  `yaml:"height"`
+    Height int  `yaml:"height"`
 
     Format BoxFormat  `yaml:"format"`
 
@@ -126,7 +126,7 @@ func NewConnectionElem() *ConnectionElem {
 type BoxFormat struct {
 
     // Padding of the box
-    Padding int32  `yaml:"padding"`
+    Padding int  `yaml:"padding"`
 
     FontCaption FontDef  `yaml:"fontCaption"`
 
@@ -139,7 +139,7 @@ type BoxFormat struct {
     Fill *FillDef  `yaml:"fill,omitempty"`
 
     // Minimum margin between boxes
-    MinBoxMargin int32  `yaml:"minBoxMargin"`
+    MinBoxMargin int  `yaml:"minBoxMargin"`
 }
 
 
@@ -153,10 +153,10 @@ type BoxFormat struct {
 type ConnectionPoint struct {
 
     // X position of the point
-    X *int32  `yaml:"x,omitempty"`
+    X *int  `yaml:"x,omitempty"`
 
     // Y position of the point
-    Y *int32  `yaml:"y,omitempty"`
+    Y *int  `yaml:"y,omitempty"`
 }
 
 

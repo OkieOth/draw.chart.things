@@ -13,7 +13,14 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 		return err
 	}
 	fmt.Println(layout) // Dummy
+	doc, err := InitialLayoutBoxes(layout)
+	if err != nil {
+		return err
+	}
+	fmt.Println(doc) // Dummy
 	// TODO: Implement this
+
+	// TODO: Draw the boxes
 	return nil
 }
 

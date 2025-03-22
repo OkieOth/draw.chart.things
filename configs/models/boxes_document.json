@@ -35,7 +35,7 @@
             }
         }
     },
-    "required": ["boxes", "height", "width"],
+    "required": ["title", "boxes", "height", "width"],
     "definitions": {
         "LayoutElement": {
             "type": "object",
