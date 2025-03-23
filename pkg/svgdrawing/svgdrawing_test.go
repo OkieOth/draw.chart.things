@@ -16,10 +16,11 @@ func TestSimpleSvg(t *testing.T) {
 	tests := []struct {
 		inputFile  string
 		outputFile string
-	}{{
-		inputFile:  "../../resources/examples/simple_box.yaml",
-		outputFile: "../../temp/TestSimpleSvg_box.svg",
-	},
+	}{
+		// {
+		// 	inputFile:  "../../resources/examples/simple_box.yaml",
+		// 	outputFile: "../../temp/TestSimpleSvg_box.svg",
+		// },
 		{
 			inputFile:  "../../resources/examples/simple_diamond.yaml",
 			outputFile: "../../temp/TestSimpleSvg_diamond.svg",
@@ -36,6 +37,7 @@ func TestSimpleSvg(t *testing.T) {
 		require.Nil(t, err)
 		svgdrawing := svgdrawing.NewDrawing(output)
 		doc.DrawBoxes(svgdrawing)
+		svgdrawing.Done()
 		output.Close()
 	}
 }

@@ -1,10 +1,11 @@
 title: Simple Diamond
-defaultFormat:
-  border:
-    width: 1
-    color: black
-  fill:
-    color: lightgreen
+formats:
+  default:
+    border:
+      width: 5
+      color: purple
+    fill:
+      color: yellow
 boxes:
   vertical:
     - id: r1_1

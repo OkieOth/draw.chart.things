@@ -29,6 +29,17 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 
 func InitialLayoutBoxes(b *types.Boxes, c types.TextDimensionCalculator) (*types.BoxesDocument, error) {
 	doc := types.DocumentFromBoxes(b)
+	doc.Boxes.X = types.GlobalPadding
+	doc.Boxes.Y = types.GlobalPadding
 	doc.Boxes.InitDimensions(c)
-	return doc, nil // TODO
+	doc.Width = doc.Boxes.Width + types.GlobalPadding*2
+	doc.Height = doc.Boxes.Height + types.GlobalPadding*2
+	if doc.Title != "" {
+		w, h := c.Text1Dimensions(doc.Title)
+		doc.Height += h + (2 * types.GlobalPadding)
+		if w > doc.Width {
+			doc.Width = w + (2 * types.GlobalPadding)
+		}
+	}
+	return doc, nil
 }

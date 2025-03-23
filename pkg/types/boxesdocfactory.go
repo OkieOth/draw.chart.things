@@ -4,7 +4,7 @@ import "fmt"
 
 type BoxesDrawing interface {
 	Start(title string, height, width int) error
-	Draw(caption, text1, text2 string, x, y, width, height int, format BoxFormat) error
+	Draw(id, caption, text1, text2 string, x, y, width, height int, format BoxFormat) error
 	Done() error
 }
 
@@ -158,7 +158,7 @@ func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
 }
 
 func (b *LayoutElement) Draw(drawing BoxesDrawing) error {
-	if err := drawing.Draw(b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, b.Format); err != nil {
+	if err := drawing.Draw(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, b.Format); err != nil {
 		return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
 	}
 	for _, elem := range b.Vertical {
