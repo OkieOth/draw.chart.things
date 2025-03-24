@@ -121,15 +121,17 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 			break
 		}
 	}
-	for key, format := range inputFormats {
-		if key == "default" {
-			f = &format
-			break
+	if (f == nil) && (l.Caption != "" || l.Text1 != "" || l.Text2 != "") {
+		for key, format := range inputFormats {
+			if key == "default" {
+				f = &format
+				break
+			}
 		}
-	}
-	if f == nil {
-		d := getDefaultFormat()
-		f = &d
+		if f == nil {
+			d := getDefaultFormat()
+			f = &d
+		}
 	}
 	return LayoutElement{
 		Id:         l.Id,
@@ -138,7 +140,7 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		Text2:      l.Text2,
 		Vertical:   initLayoutElemArray(l.Vertical, inputFormats),
 		Horizontal: initLayoutElemArray(l.Horizontal, inputFormats),
-		Format:     *f,
+		Format:     f,
 	}
 }
 
@@ -158,8 +160,10 @@ func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
 }
 
 func (b *LayoutElement) Draw(drawing BoxesDrawing) error {
-	if err := drawing.Draw(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, b.Format); err != nil {
-		return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+	if b.Format != nil {
+		if err := drawing.Draw(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, *b.Format); err != nil {
+			return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+		}
 	}
 	for _, elem := range b.Vertical {
 		if err := elem.Draw(drawing); err != nil {

@@ -7,6 +7,60 @@ import (
 )
 
 func TestInitLayoutElement(t *testing.T) {
+	bf := types.BoxFormat{
+		Padding: 5,
+		FontCaption: types.FontDef{
+			Size:       10,
+			Type:       &types.ExpFontDefTypeEnum_normal,
+			Weight:     &types.ExpFontDefWeightEnum_normal,
+			LineHeight: 1.5,
+			Color:      "black",
+			Aligned:    &types.ExpFontDefAlignedEnum_left,
+		},
+		FontText1: types.FontDef{
+			Size:       10,
+			Type:       &types.ExpFontDefTypeEnum_normal,
+			Weight:     &types.ExpFontDefWeightEnum_normal,
+			LineHeight: 1.5,
+			Color:      "black",
+			Aligned:    &types.ExpFontDefAlignedEnum_left,
+		},
+		FontText2: types.FontDef{
+			Size:       10,
+			Type:       &types.ExpFontDefTypeEnum_normal,
+			Weight:     &types.ExpFontDefWeightEnum_normal,
+			LineHeight: 1.5,
+			Color:      "black",
+			Aligned:    &types.ExpFontDefAlignedEnum_left,
+		},
+	}
+	bf2 := types.BoxFormat{
+		Padding: 0,
+		FontCaption: types.FontDef{
+			Size:       12,
+			Type:       &types.ExpFontDefTypeEnum_normal,
+			Weight:     &types.ExpFontDefWeightEnum_bold,
+			LineHeight: 2.0,
+			Color:      "red",
+			Aligned:    &types.ExpFontDefAlignedEnum_center,
+		},
+		FontText1: types.FontDef{
+			Size:       10,
+			Type:       &types.ExpFontDefTypeEnum_normal,
+			Weight:     &types.ExpFontDefWeightEnum_normal,
+			LineHeight: 1.5,
+			Color:      "black",
+			Aligned:    &types.ExpFontDefAlignedEnum_left,
+		},
+		FontText2: types.FontDef{
+			Size:       10,
+			Type:       &types.ExpFontDefTypeEnum_normal,
+			Weight:     &types.ExpFontDefWeightEnum_normal,
+			LineHeight: 1.5,
+			Color:      "black",
+			Aligned:    &types.ExpFontDefAlignedEnum_left,
+		},
+	}
 	tests := []struct {
 		name         string
 		layout       types.Layout
@@ -20,34 +74,8 @@ func TestInitLayoutElement(t *testing.T) {
 			},
 			inputFormats: map[string]types.BoxFormat{},
 			expected: types.LayoutElement{
-				Id: "test1",
-				Format: types.BoxFormat{
-					Padding: 5,
-					FontCaption: types.FontDef{
-						Size:       10,
-						Type:       &types.ExpFontDefTypeEnum_normal,
-						Weight:     &types.ExpFontDefWeightEnum_normal,
-						LineHeight: 1.5,
-						Color:      "black",
-						Aligned:    &types.ExpFontDefAlignedEnum_left,
-					},
-					FontText1: types.FontDef{
-						Size:       10,
-						Type:       &types.ExpFontDefTypeEnum_normal,
-						Weight:     &types.ExpFontDefWeightEnum_normal,
-						LineHeight: 1.5,
-						Color:      "black",
-						Aligned:    &types.ExpFontDefAlignedEnum_left,
-					},
-					FontText2: types.FontDef{
-						Size:       10,
-						Type:       &types.ExpFontDefTypeEnum_normal,
-						Weight:     &types.ExpFontDefWeightEnum_normal,
-						LineHeight: 1.5,
-						Color:      "black",
-						Aligned:    &types.ExpFontDefAlignedEnum_left,
-					},
-				},
+				Id:     "test1",
+				Format: &bf,
 			},
 		},
 		{
@@ -76,33 +104,7 @@ func TestInitLayoutElement(t *testing.T) {
 				Caption: "Test Caption",
 				Text1:   "Test Text1",
 				Text2:   "Test Text2",
-				Format: types.BoxFormat{
-					Padding: 0,
-					FontCaption: types.FontDef{
-						Size:       12,
-						Type:       &types.ExpFontDefTypeEnum_normal,
-						Weight:     &types.ExpFontDefWeightEnum_bold,
-						LineHeight: 2.0,
-						Color:      "red",
-						Aligned:    &types.ExpFontDefAlignedEnum_center,
-					},
-					FontText1: types.FontDef{
-						Size:       10,
-						Type:       &types.ExpFontDefTypeEnum_normal,
-						Weight:     &types.ExpFontDefWeightEnum_normal,
-						LineHeight: 1.5,
-						Color:      "black",
-						Aligned:    &types.ExpFontDefAlignedEnum_left,
-					},
-					FontText2: types.FontDef{
-						Size:       10,
-						Type:       &types.ExpFontDefTypeEnum_normal,
-						Weight:     &types.ExpFontDefWeightEnum_normal,
-						LineHeight: 1.5,
-						Color:      "black",
-						Aligned:    &types.ExpFontDefAlignedEnum_left,
-					},
-				},
+				Format:  &bf2,
 			},
 		},
 	}

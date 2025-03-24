@@ -71,7 +71,7 @@ type LayoutElement struct {
     // Height of the element
     Height int  `yaml:"height"`
 
-    Format BoxFormat  `yaml:"format"`
+    Format *BoxFormat  `yaml:"format,omitempty"`
 
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
