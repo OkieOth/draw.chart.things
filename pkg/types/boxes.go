@@ -20,6 +20,9 @@ type Boxes struct {
     // Map of formats available to be used in the boxes
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
+    // Padding used as default over the whole diagram
+    GlobalPadding *int  `yaml:"globalPadding,omitempty"`
+
     // Minimum margin between boxes
     MinBoxMargin *int  `yaml:"minBoxMargin,omitempty"`
 
@@ -90,6 +93,12 @@ type Format struct {
     Border *LineDef  `yaml:"border,omitempty"`
 
     Fill *FillDef  `yaml:"fill,omitempty"`
+
+    // Padding used for this format
+    Padding *int  `yaml:"padding,omitempty"`
+
+    // Minimum margin between boxes
+    BoxMargin *int  `yaml:"boxMargin,omitempty"`
 }
 
 

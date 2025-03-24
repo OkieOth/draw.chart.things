@@ -1,6 +1,8 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type BoxesDrawing interface {
 	Start(title string, height, width int) error
@@ -73,17 +75,25 @@ func initBoxFormat(f *Format) BoxFormat {
 	var fontCaption *FontDef
 	var fontText1 *FontDef
 	var fontText2 *FontDef
+	padding := GlobalPadding
+	boxMargin := GlobalMinBoxMargin
 	if f != nil {
 		fontCaption = f.FontCaption
 		fontText1 = f.FontText1
 		fontText2 = f.FontText2
 		border = f.Border
 		fill = f.Fill
+		if f.Padding != nil {
+			padding = *f.Padding
+		}
+		if f.BoxMargin != nil {
+			boxMargin = *f.BoxMargin
+		}
 	}
 
 	return BoxFormat{
-		Padding:      GlobalPadding,
-		MinBoxMargin: GlobalMinBoxMargin,
+		Padding:      padding,
+		MinBoxMargin: boxMargin,
 		FontCaption:  initFontDef(fontCaption),
 		FontText1:    initFontDef(fontText1),
 		FontText2:    initFontDef(fontText2),
@@ -149,6 +159,15 @@ func DocumentFromBoxes(b *Boxes) *BoxesDocument {
 	doc.Title = b.Title
 	doc.Formats = initFormats(b.Formats)
 	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats)
+	if doc.MinBoxMargin == 0 {
+		doc.MinBoxMargin = GlobalMinBoxMargin
+	}
+	if doc.MinConnectorMargin == 0 {
+		doc.MinConnectorMargin = GlobalMinBoxMargin
+	}
+	if doc.GlobalPadding == 0 {
+		doc.GlobalPadding = GlobalPadding
+	}
 	return doc
 }
 

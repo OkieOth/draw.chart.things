@@ -25,6 +25,15 @@ type BoxesDocument struct {
 
     Connections []ConnectionElem  `yaml:"connections,omitempty"`
 
+    // Padding used as default over the whole diagram
+    GlobalPadding int  `yaml:"globalPadding"`
+
+    // Minimum margin between boxes
+    MinBoxMargin int  `yaml:"minBoxMargin"`
+
+    // Minimum margin between connectors
+    MinConnectorMargin int  `yaml:"minConnectorMargin"`
+
     // Map of formats available to be used in the boxes
     Formats map[string]BoxFormat  `yaml:"formats,omitempty"`
 }

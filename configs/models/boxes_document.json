@@ -26,6 +26,21 @@
                 "$ref": "#/definitions/ConnectionElem"
             }
         },
+        "globalPadding": {
+            "type": "integer",
+            "description": "Padding used as default over the whole diagram",
+            "default": 5
+        },
+        "minBoxMargin": {
+            "type": "integer",
+            "description": "Minimum margin between boxes",
+            "default": 10
+        },
+        "minConnectorMargin": {
+            "type": "integer",
+            "description": "Minimum margin between connectors",
+            "default": 10
+        },
         "formats": {
             "$comment": "if the map contains an key 'default' it will be used as default format",
             "description": "Map of formats available to be used in the boxes",
@@ -35,7 +50,7 @@
             }
         }
     },
-    "required": ["title", "boxes", "height", "width"],
+    "required": ["title", "boxes", "height", "width", "minBoxMargin", "minConnectorMargin", "globalPadding"],
     "definitions": {
         "LayoutElement": {
             "type": "object",

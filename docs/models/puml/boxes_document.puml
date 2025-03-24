@@ -10,6 +10,9 @@ class "**BoxesDocument**" as BoxesDocument {
         IntegerType height
         IntegerType width
         ConnectionElem[] connections
+        IntegerType globalPadding
+        IntegerType minBoxMargin
+        IntegerType minConnectorMargin
         Map<BoxFormat> formats
 }
 note top: Internal model to describe the\nlayout if the boxes chart
@@ -130,6 +133,9 @@ BoxesDocument  *--  LayoutElement
 
 
 BoxesDocument "0" *-- "n" ConnectionElem
+
+
+
 
 BoxesDocument  *--  BoxFormat
 

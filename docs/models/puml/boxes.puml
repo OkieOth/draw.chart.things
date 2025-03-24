@@ -8,6 +8,7 @@ class "**Boxes**" as Boxes {
         StringType title
         Layout boxes
         Map<Format> formats
+        IntegerType globalPadding
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
 }
@@ -35,6 +36,8 @@ class "**Format**" as Format {
         FontDef fontText2
         LineDef border
         FillDef fill
+        IntegerType padding
+        IntegerType boxMargin
 }
 
  
@@ -115,6 +118,7 @@ Boxes  *--  Format
 
 
 
+
     
 
 
@@ -137,6 +141,8 @@ Format  *--  FontDef
 Format  *--  LineDef
 
 Format  *--  FillDef
+
+
 
     
     

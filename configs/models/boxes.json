@@ -20,6 +20,11 @@
                 "$ref": "#/definitions/Format"
             }
         },
+        "globalPadding": {
+            "type": "integer",
+            "description": "Padding used as default over the whole diagram",
+            "default": 5
+        },
         "minBoxMargin": {
             "type": "integer",
             "description": "Minimum margin between boxes",
@@ -122,6 +127,16 @@
                 },
                 "fill": {
                     "$ref": "./formats.json#/definitions/FillDef"
+                },
+                "padding": {
+                    "type": "integer",
+                    "description": "Padding used for this format",
+                    "default": 5
+                },
+                "boxMargin": {
+                    "type": "integer",
+                    "description": "Minimum margin between boxes",
+                    "default": 10
                 }
             }
         }

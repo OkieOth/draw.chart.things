@@ -7,33 +7,6 @@ import (
 )
 
 func TestInitLayoutElement(t *testing.T) {
-	bf := types.BoxFormat{
-		Padding: 5,
-		FontCaption: types.FontDef{
-			Size:       10,
-			Type:       &types.ExpFontDefTypeEnum_normal,
-			Weight:     &types.ExpFontDefWeightEnum_normal,
-			LineHeight: 1.5,
-			Color:      "black",
-			Aligned:    &types.ExpFontDefAlignedEnum_left,
-		},
-		FontText1: types.FontDef{
-			Size:       10,
-			Type:       &types.ExpFontDefTypeEnum_normal,
-			Weight:     &types.ExpFontDefWeightEnum_normal,
-			LineHeight: 1.5,
-			Color:      "black",
-			Aligned:    &types.ExpFontDefAlignedEnum_left,
-		},
-		FontText2: types.FontDef{
-			Size:       10,
-			Type:       &types.ExpFontDefTypeEnum_normal,
-			Weight:     &types.ExpFontDefWeightEnum_normal,
-			LineHeight: 1.5,
-			Color:      "black",
-			Aligned:    &types.ExpFontDefAlignedEnum_left,
-		},
-	}
 	bf2 := types.BoxFormat{
 		Padding: 0,
 		FontCaption: types.FontDef{
@@ -75,7 +48,7 @@ func TestInitLayoutElement(t *testing.T) {
 			inputFormats: map[string]types.BoxFormat{},
 			expected: types.LayoutElement{
 				Id:     "test1",
-				Format: &bf,
+				Format: nil,
 			},
 		},
 		{
@@ -123,6 +96,12 @@ func TestInitLayoutElement(t *testing.T) {
 			}
 			if result.Text2 != tt.expected.Text2 {
 				t.Errorf("expected Text2 %v, got %v", tt.expected.Text2, result.Text2)
+			}
+			if (result.Format == nil && tt.expected.Format != nil) || (result.Format != nil && tt.expected.Format == nil) {
+				t.Errorf("expected Format %v, got %v", tt.expected.Format, result.Format)
+			}
+			if result.Format == nil {
+				return
 			}
 			if result.Format.Padding != tt.expected.Format.Padding {
 				t.Errorf("expected Padding %v, got %v", tt.expected.Format.Padding, result.Format.Padding)
