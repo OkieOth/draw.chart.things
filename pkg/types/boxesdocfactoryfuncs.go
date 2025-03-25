@@ -34,7 +34,7 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 
 func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if len(l.Horizontal) > 0 {
-		curX := l.X + defaultPadding
+		curX := l.X
 		curY := l.Y + yInnerOffset
 		var h, w int
 		for i := 0; i < len(l.Horizontal); i++ {
@@ -51,7 +51,7 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 				h = sub.Height
 			}
 		}
-		l.Height += h + defaultPadding
+		l.Height += h
 		if l.Width < w {
 			l.Width = w
 		}

@@ -17,10 +17,10 @@ func TestSimpleSvg(t *testing.T) {
 		inputFile  string
 		outputFile string
 	}{
-		// {
-		// 	inputFile:  "../../resources/examples/simple_box.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_box.svg",
-		// },
+		{
+			inputFile:  "../../resources/examples/simple_box.yaml",
+			outputFile: "../../temp/TestSimpleSvg_box.svg",
+		},
 		{
 			inputFile:  "../../resources/examples/simple_diamond.yaml",
 			outputFile: "../../temp/TestSimpleSvg_diamond.svg",
