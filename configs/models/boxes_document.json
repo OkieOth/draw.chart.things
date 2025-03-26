@@ -109,6 +109,14 @@
         "LayoutElemContainer": {
             "type": "object",
             "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "X position of the element"
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Y position of the element"
+                },
                 "width": {
                     "type": "integer",
                     "description": "Width of the container"
@@ -124,7 +132,7 @@
                     }
                 }
             },
-            "required": ["width", "height", "elems"]
+            "required": ["x", "y", "width", "height", "elems"]
         },
         "ConnectionElem": {
             "type": "object",

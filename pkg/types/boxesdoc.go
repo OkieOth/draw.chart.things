@@ -158,6 +158,12 @@ type BoxFormat struct {
 
 type LayoutElemContainer struct {
 
+    // X position of the element
+    X int  `yaml:"x"`
+
+    // Y position of the element
+    Y int  `yaml:"y"`
+
     // Width of the container
     Width int  `yaml:"width"`
 

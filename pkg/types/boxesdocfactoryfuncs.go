@@ -11,6 +11,7 @@ func (l *LayoutElement) centerHorizontal() {
 		for i := 0; i < len(l.Horizontal.Elems); i++ {
 			sub := &l.Horizontal.Elems[i]
 			sub.Y = l.Y + ((l.Horizontal.Height - sub.Height) / 2)
+			sub.centerHorizontal()
 		}
 	}
 }
@@ -20,6 +21,7 @@ func (l *LayoutElement) centerVertical() {
 		for i := 0; i < len(l.Vertical.Elems); i++ {
 			sub := &l.Vertical.Elems[i]
 			sub.X = l.X + ((l.Vertical.Width - sub.Width) / 2)
+			sub.centerVertical()
 		}
 	}
 }
@@ -46,7 +48,8 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 				l.Vertical.Width = sub.Width
 			}
 		}
-		l.Height += h + defaultPadding
+		l.Vertical.Height = h + defaultPadding
+		l.Height += l.Vertical.Height
 		if w > l.Width {
 			l.Width = w
 		}
@@ -77,6 +80,8 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 			}
 		}
 		l.Height += h
+		l.Horizontal.Width = w
+
 		if l.Width < w {
 			l.Width = w
 		}
