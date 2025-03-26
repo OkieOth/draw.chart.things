@@ -111,7 +111,7 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 155,
+			expectedHeight: 150,
 			expectedWidth:  350,
 		},
 	}

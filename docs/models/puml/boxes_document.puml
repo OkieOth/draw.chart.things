@@ -24,8 +24,8 @@ class "**LayoutElement**" as LayoutElement {
         StringType caption
         StringType text1
         StringType text2
-        LayoutElement[] vertical
-        LayoutElement[] horizontal
+        LayoutElemContainer vertical
+        LayoutElemContainer horizontal
         IntegerType x
         IntegerType y
         IntegerType width
@@ -60,8 +60,13 @@ class "**BoxFormat**" as BoxFormat {
 
  
 
-class "**LayoutElemArray**" as LayoutElemArray extends List {
+class "**LayoutElemContainer**" as LayoutElemContainer {
+        IntegerType width
+        IntegerType height
+        LayoutElement[] elems
 }
+
+ 
 
 class "**ConnectionPoint**" as ConnectionPoint {
         IntegerType x
@@ -144,8 +149,9 @@ BoxesDocument  *--  BoxFormat
 
 
 
-LayoutElement "0" *-- "n" LayoutElement
+LayoutElement  *--  LayoutElemContainer
 
+LayoutElement  *--  LayoutElemContainer
 
 
 
@@ -180,6 +186,10 @@ BoxFormat  *--  FillDef
 
 
     
+
+
+LayoutElemContainer "0" *-- "n" LayoutElement
+
     
 
 

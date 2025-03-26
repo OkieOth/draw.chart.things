@@ -10,12 +10,13 @@ type BoxesDrawing interface {
 	Done() error
 }
 
-func initLayoutElemArray(l []Layout, inputFormats map[string]BoxFormat) []LayoutElement {
-	var res = make([]LayoutElement, 0)
+func initLayoutElemContainer(l []Layout, inputFormats map[string]BoxFormat) *LayoutElemContainer {
+	var ret LayoutElemContainer
+	ret.Elems = make([]LayoutElement, 0)
 	for _, elem := range l {
-		res = append(res, initLayoutElement(&elem, inputFormats))
+		ret.Elems = append(ret.Elems, initLayoutElement(&elem, inputFormats))
 	}
-	return res
+	return &ret
 }
 
 func initFontDef(l *FontDef) FontDef {
@@ -148,8 +149,8 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		Caption:    l.Caption,
 		Text1:      l.Text1,
 		Text2:      l.Text2,
-		Vertical:   initLayoutElemArray(l.Vertical, inputFormats),
-		Horizontal: initLayoutElemArray(l.Horizontal, inputFormats),
+		Vertical:   initLayoutElemContainer(l.Vertical, inputFormats),
+		Horizontal: initLayoutElemContainer(l.Horizontal, inputFormats),
 		Format:     f,
 	}
 }
@@ -184,14 +185,18 @@ func (b *LayoutElement) Draw(drawing BoxesDrawing) error {
 			return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
 		}
 	}
-	for _, elem := range b.Vertical {
-		if err := elem.Draw(drawing); err != nil {
-			return err
+	if b.Vertical != nil {
+		for _, elem := range b.Vertical.Elems {
+			if err := elem.Draw(drawing); err != nil {
+				return err
+			}
 		}
 	}
-	for _, elem := range b.Horizontal {
-		if err := elem.Draw(drawing); err != nil {
-			return err
+	if b.Horizontal != nil {
+		for _, elem := range b.Horizontal.Elems {
+			if err := elem.Draw(drawing); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

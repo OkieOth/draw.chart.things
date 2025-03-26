@@ -7,26 +7,30 @@ type TextDimensionCalculator interface {
 }
 
 func (l *LayoutElement) centerHorizontal() {
-	for i := 0; i < len(l.Horizontal); i++ {
-		sub := &l.Horizontal[i]
-		sub.Y = l.Y + ((l.Height - sub.Height) / 2)
+	if l.Horizontal != nil {
+		for i := 0; i < len(l.Horizontal.Elems); i++ {
+			sub := &l.Horizontal.Elems[i]
+			sub.Y = l.Y + ((l.Horizontal.Height - sub.Height) / 2)
+		}
 	}
 }
 
 func (l *LayoutElement) centerVertical() {
-	for i := 0; i < len(l.Vertical); i++ {
-		sub := &l.Vertical[i]
-		sub.X = l.X + ((l.Width - sub.Width) / 2)
+	if l.Vertical != nil {
+		for i := 0; i < len(l.Vertical.Elems); i++ {
+			sub := &l.Vertical.Elems[i]
+			sub.X = l.X + ((l.Vertical.Width - sub.Width) / 2)
+		}
 	}
 }
 
 func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
-	if len(l.Vertical) > 0 {
+	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
 		curX := l.X
 		curY := l.Y + yInnerOffset
 		var h, w int
-		for i := 0; i < len(l.Vertical); i++ {
-			sub := &l.Vertical[i]
+		for i := 0; i < len(l.Vertical.Elems); i++ {
+			sub := &l.Vertical.Elems[i]
 			if h > 0 {
 				h += defaultBoxMargin
 			}
@@ -38,6 +42,9 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 			if sub.Width > w {
 				w = sub.Width
 			}
+			if sub.Width > l.Vertical.Width {
+				l.Vertical.Width = sub.Width
+			}
 		}
 		l.Height += h + defaultPadding
 		if w > l.Width {
@@ -48,12 +55,12 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 }
 
 func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
-	if len(l.Horizontal) > 0 {
+	if l.Horizontal != nil && len(l.Horizontal.Elems) > 0 {
 		curX := l.X
 		curY := l.Y + yInnerOffset
 		var h, w int
-		for i := 0; i < len(l.Horizontal); i++ {
-			sub := &l.Horizontal[i]
+		for i := 0; i < len(l.Horizontal.Elems); i++ {
+			sub := &l.Horizontal.Elems[i]
 			if w > 0 {
 				w += defaultBoxMargin
 			}
@@ -64,6 +71,9 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 			w += sub.Width
 			if sub.Height > h {
 				h = sub.Height
+			}
+			if sub.Height > l.Horizontal.Height {
+				l.Horizontal.Height = sub.Height
 			}
 		}
 		l.Height += h
