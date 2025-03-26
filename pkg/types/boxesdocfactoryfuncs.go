@@ -6,6 +6,20 @@ type TextDimensionCalculator interface {
 	Text2Dimensions(txt string) (width, height int)
 }
 
+func (l *LayoutElement) centerHorizontal() {
+	for i := 0; i < len(l.Horizontal); i++ {
+		sub := &l.Horizontal[i]
+		sub.Y = l.Y + ((l.Height - sub.Height) / 2)
+	}
+}
+
+func (l *LayoutElement) centerVertical() {
+	for i := 0; i < len(l.Vertical); i++ {
+		sub := &l.Vertical[i]
+		sub.X = l.X + ((l.Width - sub.Width) / 2)
+	}
+}
+
 func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if len(l.Vertical) > 0 {
 		curX := l.X
@@ -29,6 +43,7 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		if w > l.Width {
 			l.Width = w
 		}
+		l.centerVertical()
 	}
 }
 
@@ -55,6 +70,7 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 		if l.Width < w {
 			l.Width = w
 		}
+		l.centerHorizontal()
 	}
 }
 
