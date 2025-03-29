@@ -95,7 +95,6 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		if w > l.Width {
 			l.Width = w
 		}
-		l.centerVertical()
 	}
 }
 
@@ -129,7 +128,6 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 		if l.Width < w {
 			l.Width = w
 		}
-		l.centerHorizontal()
 	}
 }
 
