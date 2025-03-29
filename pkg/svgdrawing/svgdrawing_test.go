@@ -33,6 +33,14 @@ func TestSimpleSvg(t *testing.T) {
 			inputFile:  "../../resources/examples/complex_vertical.yaml",
 			outputFile: "../../temp/TestSimpleSvg_vcomplex.svg",
 		},
+		{
+			inputFile:  "../../resources/examples/complex_horizontal.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/complex_complex.yaml",
+			outputFile: "../../temp/TestSimpleSvg_ccomplex.svg",
+		},
 	}
 
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()

@@ -1,6 +1,6 @@
 package types
 
-var ExpInitLayoutElemArray = initLayoutElemArray
+var ExpInitLayoutElemContainer = initLayoutElemContainer
 var ExpInitLayoutElement = initLayoutElement
 
 var ExpFontDefTypeEnum_normal FontDefTypeEnum = FontDefTypeEnum_normal

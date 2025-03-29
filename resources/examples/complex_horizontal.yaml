@@ -7,8 +7,8 @@ formats:
     fill:
       color: yellow
 boxes:
-  vertical:
-    - horizontal:
+  horizontal:
+    - vertical:
       - id: r5_1
         caption: Most Left Element
         text1: I am in the second line
@@ -18,7 +18,7 @@ boxes:
       - id: r5_3
         caption: Right Element
         text1: I am in the second line
-    - horizontal:
+    - vertical:
       - id: r6_1
         caption: Most Left Element
         text1: I am in the second line

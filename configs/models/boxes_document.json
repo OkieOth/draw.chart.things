@@ -72,10 +72,10 @@
                     "type": "string"
                 },
                 "vertical": {
-                    "$ref": "#/definitions/LayoutElemArray"
+                    "$ref": "#/definitions/LayoutElemContainer"
                 },
                 "horizontal": {
-                    "$ref": "#/definitions/LayoutElemArray"
+                    "$ref": "#/definitions/LayoutElemContainer"
                 },
                 "x": {
                     "type": "integer",
@@ -106,11 +106,33 @@
             },
             "required": ["id", "x", "y", "width", "height", "caption", "text1", "text2"]
         },
-        "LayoutElemArray": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/LayoutElement"
-            }
+        "LayoutElemContainer": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "X position of the element"
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Y position of the element"
+                },
+                "width": {
+                    "type": "integer",
+                    "description": "Width of the container"
+                },
+                "height": {
+                    "type": "integer",
+                    "description": "Height of the container"
+                },
+                "elems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LayoutElement"
+                    }
+                }
+            },
+            "required": ["x", "y", "width", "height", "elems"]
         },
         "ConnectionElem": {
             "type": "object",

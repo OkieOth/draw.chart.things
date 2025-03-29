@@ -64,9 +64,9 @@ type LayoutElement struct {
     // Second additional text
     Text2 string  `yaml:"text2"`
 
-    Vertical []LayoutElement  `yaml:"vertical,omitempty"`
+    Vertical *LayoutElemContainer  `yaml:"vertical,omitempty"`
 
-    Horizontal []LayoutElement  `yaml:"horizontal,omitempty"`
+    Horizontal *LayoutElemContainer  `yaml:"horizontal,omitempty"`
 
     // X position of the element
     X int  `yaml:"x"`
@@ -88,8 +88,8 @@ type LayoutElement struct {
 
 func NewLayoutElement() *LayoutElement {
         return &LayoutElement{
-            Vertical: make([]LayoutElement, 0),
-            Horizontal: make([]LayoutElement, 0),
+            Vertical: NewLayoutElemContainer(),
+            Horizontal: NewLayoutElemContainer(),
             Tags: make([]string, 0),
         }
 }
@@ -154,6 +154,30 @@ type BoxFormat struct {
 
 
 
+
+
+type LayoutElemContainer struct {
+
+    // X position of the element
+    X int  `yaml:"x"`
+
+    // Y position of the element
+    Y int  `yaml:"y"`
+
+    // Width of the container
+    Width int  `yaml:"width"`
+
+    // Height of the container
+    Height int  `yaml:"height"`
+
+    Elems []LayoutElement  `yaml:"elems,omitempty"`
+}
+
+func NewLayoutElemContainer() *LayoutElemContainer {
+        return &LayoutElemContainer{
+            Elems: make([]LayoutElement, 0),
+        }
+}
 
 
 
