@@ -3,8 +3,10 @@ package types_test
 import (
 	"testing"
 
+	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
 	"github.com/okieoth/draw.chart.things/pkg/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type DummyDimensionCalculator struct {
@@ -124,4 +126,56 @@ func TestInitDimensions(t *testing.T) {
 		assert.Equal(t, test.expectedHeight, le.Height)
 		assert.Equal(t, test.expectedWidth, le.Width)
 	}
+}
+
+func checkLayoutElement(t *testing.T, le *types.LayoutElement, initX, initY int) {
+	require.GreaterOrEqual(t, le.X, initX)
+	require.GreaterOrEqual(t, le.Y, initY)
+	if le.Vertical != nil {
+		require.GreaterOrEqual(t, le.Vertical.X, le.X)
+		require.GreaterOrEqual(t, le.Vertical.Y, le.Y)
+		for _, v := range le.Vertical.Elems {
+			checkLayoutElement(t, &v, le.X, le.Y)
+		}
+	}
+	if le.Horizontal != nil {
+		require.GreaterOrEqual(t, le.Horizontal.X, le.X)
+		require.GreaterOrEqual(t, le.Horizontal.Y, le.Y)
+		for _, h := range le.Horizontal.Elems {
+			checkLayoutElement(t, &h, le.X, le.Y)
+		}
+	}
+}
+
+func TestCenteredCoordinates(t *testing.T) {
+	tests := []struct {
+		inputFile  string
+		outputFile string
+	}{
+		{
+			inputFile:  "../../resources/examples/simple_diamond.yaml",
+			outputFile: "../../temp/TestSimpleSvg_diamond.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/horizontal_diamond.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hdiamond.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/complex_vertical.yaml",
+			outputFile: "../../temp/TestSimpleSvg_vcomplex.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/complex_horizontal.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex.svg",
+		},
+	}
+	dc := NewDummyDimensionCalculator(100, 50, 120, 10, 80, 10)
+	for _, test := range tests {
+		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+		require.Nil(t, err)
+		doc, err := boxesimpl.InitialLayoutBoxes(b, dc)
+		require.Nil(t, err)
+		checkLayoutElement(t, &doc.Boxes, 0, 0)
+	}
+
 }

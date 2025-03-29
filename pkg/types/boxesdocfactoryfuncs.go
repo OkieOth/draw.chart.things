@@ -6,11 +6,49 @@ type TextDimensionCalculator interface {
 	Text2Dimensions(txt string) (width, height int)
 }
 
-func (l *LayoutElement) centerHorizontal() {
+func (l *LayoutElement) incrementX(xOffset int) {
+	l.X += xOffset
+	if l.Vertical != nil {
+		l.Vertical.X += xOffset
+		for i := 0; i < len(l.Vertical.Elems); i++ {
+			sub := &l.Vertical.Elems[i]
+			sub.incrementX(xOffset)
+		}
+	}
 	if l.Horizontal != nil {
+		l.Horizontal.X += xOffset
 		for i := 0; i < len(l.Horizontal.Elems); i++ {
 			sub := &l.Horizontal.Elems[i]
-			sub.Y = l.Y + ((l.Horizontal.Height - sub.Height) / 2)
+			sub.incrementX(xOffset)
+		}
+	}
+}
+
+func (l *LayoutElement) incrementY(yOffset int) {
+	l.Y += yOffset
+	if l.Vertical != nil {
+		l.Vertical.Y += yOffset
+		for i := 0; i < len(l.Vertical.Elems); i++ {
+			sub := &l.Vertical.Elems[i]
+			sub.incrementY(yOffset)
+		}
+	}
+	if l.Horizontal != nil {
+		l.Horizontal.Y += yOffset
+		for i := 0; i < len(l.Horizontal.Elems); i++ {
+			sub := &l.Horizontal.Elems[i]
+			sub.incrementY(yOffset)
+		}
+	}
+}
+
+func (l *LayoutElement) centerHorizontal() {
+	if l.Horizontal != nil {
+		l.Horizontal.Y = l.Y + ((l.Height - l.Horizontal.Height) / 2)
+		for i := 0; i < len(l.Horizontal.Elems); i++ {
+			sub := &l.Horizontal.Elems[i]
+			offset := ((l.Horizontal.Height - sub.Height) / 2)
+			sub.incrementY(offset)
 			sub.centerHorizontal()
 		}
 	}
@@ -18,9 +56,11 @@ func (l *LayoutElement) centerHorizontal() {
 
 func (l *LayoutElement) centerVertical() {
 	if l.Vertical != nil {
+		l.Vertical.X = l.X + ((l.Width - l.Vertical.Width) / 2)
 		for i := 0; i < len(l.Vertical.Elems); i++ {
 			sub := &l.Vertical.Elems[i]
-			sub.X = l.X + ((l.Vertical.Width - sub.Width) / 2)
+			offset := ((l.Vertical.Width - sub.Width) / 2)
+			sub.incrementX(offset)
 			sub.centerVertical()
 		}
 	}
@@ -29,7 +69,9 @@ func (l *LayoutElement) centerVertical() {
 func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
 		curX := l.X
+		l.Vertical.X = curX
 		curY := l.Y + yInnerOffset
+		l.Vertical.Y = curY
 		var h, w int
 		for i := 0; i < len(l.Vertical.Elems); i++ {
 			sub := &l.Vertical.Elems[i]
@@ -53,14 +95,15 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		if w > l.Width {
 			l.Width = w
 		}
-		l.centerVertical()
 	}
 }
 
 func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Horizontal != nil && len(l.Horizontal.Elems) > 0 {
 		curX := l.X
+		l.Horizontal.X = curX
 		curY := l.Y + yInnerOffset
+		l.Horizontal.Y = curY
 		var h, w int
 		for i := 0; i < len(l.Horizontal.Elems); i++ {
 			sub := &l.Horizontal.Elems[i]
@@ -85,7 +128,6 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 		if l.Width < w {
 			l.Width = w
 		}
-		l.centerHorizontal()
 	}
 }
 
@@ -114,4 +156,9 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 	}
 	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 	l.initHorizontal(c, yInnerOffset, defaultPadding, defaultBoxMargin)
+}
+
+func (l *LayoutElement) Center() {
+	l.centerVertical()
+	l.centerHorizontal()
 }

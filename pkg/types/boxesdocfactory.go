@@ -11,6 +11,9 @@ type BoxesDrawing interface {
 }
 
 func initLayoutElemContainer(l []Layout, inputFormats map[string]BoxFormat) *LayoutElemContainer {
+	if len(l) == 0 {
+		return nil
+	}
 	var ret LayoutElemContainer
 	ret.Elems = make([]LayoutElement, 0)
 	for _, elem := range l {

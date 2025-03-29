@@ -41,5 +41,6 @@ func InitialLayoutBoxes(b *types.Boxes, c types.TextDimensionCalculator) (*types
 			doc.Width = w + (2 * doc.GlobalPadding)
 		}
 	}
+	doc.Boxes.Center()
 	return doc, nil
 }
