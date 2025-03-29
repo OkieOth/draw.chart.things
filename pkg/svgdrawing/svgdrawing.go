@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/okieoth/draw.chart.things/pkg/svg"
 	"github.com/okieoth/draw.chart.things/pkg/types"
-	svg "github.com/okieoth/svgo"
 )
 
 type SvgTextDimensionCalculator struct {
