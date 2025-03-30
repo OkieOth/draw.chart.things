@@ -18,15 +18,15 @@ type DummyDimensionCalculator struct {
 	text2Height   int
 }
 
-func (d *DummyDimensionCalculator) CaptionDimensions(txt string) (width, height int) {
+func (d *DummyDimensionCalculator) CaptionDimensions(txt string, format *types.FontDef) (width, height int) {
 	return d.captionWidth, d.captionHeight
 }
 
-func (d *DummyDimensionCalculator) Text1Dimensions(txt string) (width, height int) {
+func (d *DummyDimensionCalculator) Text1Dimensions(txt string, format *types.FontDef) (width, height int) {
 	return d.text1Width, d.text1Height
 }
 
-func (d *DummyDimensionCalculator) Text2Dimensions(txt string) (width, height int) {
+func (d *DummyDimensionCalculator) Text2Dimensions(txt string, format *types.FontDef) (width, height int) {
 	return d.text2Width, d.text2Height
 }
 

@@ -1,9 +1,9 @@
 package types
 
 type TextDimensionCalculator interface {
-	CaptionDimensions(txt string) (width, height int)
-	Text1Dimensions(txt string) (width, height int)
-	Text2Dimensions(txt string) (width, height int)
+	CaptionDimensions(txt string, format *FontDef) (width, height int)
+	Text1Dimensions(txt string, format *FontDef) (width, height int)
+	Text2Dimensions(txt string, format *FontDef) (width, height int)
 }
 
 func (l *LayoutElement) incrementX(xOffset int) {
@@ -138,17 +138,17 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 		l.Height = (2 * l.Format.Padding)
 		if l.Caption != "" {
 			yCaptionOffset = l.Format.FontCaption.SpaceTop + l.Format.Padding
-			cW, cH = c.CaptionDimensions(l.Caption)
+			cW, cH = c.CaptionDimensions(l.Caption, &l.Format.FontCaption)
 			l.Height += cH + l.Format.FontCaption.SpaceTop + l.Format.FontCaption.SpaceBottom
 		}
 		if l.Text1 != "" {
 			yText1Offset = yCaptionOffset + l.Format.Padding + l.Format.FontText1.SpaceTop
-			t1W, t1H = c.Text1Dimensions(l.Text1)
+			t1W, t1H = c.Text1Dimensions(l.Text1, &l.Format.FontText1)
 			l.Height += t1H + l.Format.Padding + l.Format.FontText1.SpaceTop + l.Format.FontText1.SpaceBottom
 		}
 		if l.Text2 != "" {
 			yText2Offset = yText1Offset + l.Format.Padding + l.Format.FontText2.SpaceTop
-			t2W, t2H = c.Text2Dimensions(l.Text2)
+			t2W, t2H = c.Text2Dimensions(l.Text2, &l.Format.FontText2)
 			l.Height += t2H + l.Format.Padding + l.Format.FontText2.SpaceTop + l.Format.FontText2.SpaceBottom
 		}
 		yInnerOffset = l.Format.Padding + max(yCaptionOffset, max(yText1Offset, yText2Offset))

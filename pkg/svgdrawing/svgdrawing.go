@@ -15,15 +15,15 @@ func NewSvgTextDimensionCalculator() *SvgTextDimensionCalculator {
 	return &SvgTextDimensionCalculator{}
 }
 
-func (s *SvgTextDimensionCalculator) CaptionDimensions(txt string) (width, height int) {
+func (s *SvgTextDimensionCalculator) CaptionDimensions(txt string, format *types.FontDef) (width, height int) {
 	return 100, 50 // TODO - implement this
 }
 
-func (s *SvgTextDimensionCalculator) Text1Dimensions(txt string) (width, height int) {
+func (s *SvgTextDimensionCalculator) Text1Dimensions(txt string, format *types.FontDef) (width, height int) {
 	return 100, 50 // TODO - implement this
 }
 
-func (s *SvgTextDimensionCalculator) Text2Dimensions(txt string) (width, height int) {
+func (s *SvgTextDimensionCalculator) Text2Dimensions(txt string, format *types.FontDef) (width, height int) {
 	return 100, 50 // TODO - implement this
 }
 

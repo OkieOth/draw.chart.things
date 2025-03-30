@@ -35,7 +35,8 @@ func InitialLayoutBoxes(b *types.Boxes, c types.TextDimensionCalculator) (*types
 	doc.Width = doc.Boxes.Width + doc.GlobalPadding*2
 	doc.Height = doc.Boxes.Height + doc.GlobalPadding*2
 	if doc.Title != "" {
-		w, h := c.Text1Dimensions(doc.Title)
+		defaultFormat := doc.Formats["default"] // risky doesn't check if default exists
+		w, h := c.Text1Dimensions(doc.Title, &defaultFormat.FontCaption)
 		doc.Height += h + (2 * doc.GlobalPadding)
 		if w > doc.Width {
 			doc.Width = w + (2 * doc.GlobalPadding)
