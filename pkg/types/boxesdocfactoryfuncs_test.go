@@ -10,34 +10,18 @@ import (
 )
 
 type DummyDimensionCalculator struct {
-	captionWidth  int
-	captionHeight int
-	text1Width    int
-	text1Height   int
-	text2Width    int
-	text2Height   int
+	width  int
+	height int
 }
 
-func (d *DummyDimensionCalculator) CaptionDimensions(txt string, format *types.FontDef) (width, height int) {
-	return d.captionWidth, d.captionHeight
+func (d *DummyDimensionCalculator) Dimensions(txt string, format *types.FontDef) (width, height int) {
+	return d.width, d.height
 }
 
-func (d *DummyDimensionCalculator) Text1Dimensions(txt string, format *types.FontDef) (width, height int) {
-	return d.text1Width, d.text1Height
-}
-
-func (d *DummyDimensionCalculator) Text2Dimensions(txt string, format *types.FontDef) (width, height int) {
-	return d.text2Width, d.text2Height
-}
-
-func NewDummyDimensionCalculator(captionWidth, captionHeight, text1Width, text1Height, text2Width, text2Height int) *DummyDimensionCalculator {
+func NewDummyDimensionCalculator(width, height int) *DummyDimensionCalculator {
 	return &DummyDimensionCalculator{
-		captionWidth:  captionWidth,
-		captionHeight: captionHeight,
-		text1Width:    text1Width,
-		text1Height:   text1Height,
-		text2Width:    text2Width,
-		text2Height:   text2Height,
+		width:  width,
+		height: height,
 	}
 }
 
@@ -61,8 +45,8 @@ func TestInitDimensions(t *testing.T) {
 				Caption: "test2",
 				Text1:   "test2-text1",
 			},
-			expectedHeight: 75,
-			expectedWidth:  130,
+			expectedHeight: 115,
+			expectedWidth:  110,
 		},
 		{
 			// extends "test2" with an additional text2
@@ -71,8 +55,8 @@ func TestInitDimensions(t *testing.T) {
 				Text1:   "test3-text1",
 				Text2:   "test3-text2",
 			},
-			expectedHeight: 90,
-			expectedWidth:  130,
+			expectedHeight: 170,
+			expectedWidth:  110,
 		},
 		{
 			// basic vertical layout test
@@ -92,8 +76,8 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 295,
-			expectedWidth:  130,
+			expectedHeight: 375,
+			expectedWidth:  110,
 		},
 		{
 			// basic horizontal layout test
@@ -113,12 +97,12 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 150,
+			expectedHeight: 230,
 			expectedWidth:  350,
 		},
 	}
 
-	dc := NewDummyDimensionCalculator(100, 50, 120, 10, 80, 10)
+	dc := NewDummyDimensionCalculator(100, 50)
 	emptyFormats := map[string]types.BoxFormat{}
 	for _, test := range tests {
 		le := types.ExpInitLayoutElement(&test.layout, emptyFormats)
@@ -169,7 +153,7 @@ func TestCenteredCoordinates(t *testing.T) {
 			outputFile: "../../temp/TestSimpleSvg_hcomplex.svg",
 		},
 	}
-	dc := NewDummyDimensionCalculator(100, 50, 120, 10, 80, 10)
+	dc := NewDummyDimensionCalculator(100, 50)
 	for _, test := range tests {
 		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
 		require.Nil(t, err)

@@ -3,10 +3,17 @@ package svgdrawing
 import (
 	"fmt"
 	"io"
+	"unicode/utf8"
 
 	"github.com/okieoth/draw.chart.things/pkg/svg"
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
+
+const SANSSERIF_NORMAL_WIDTH_FACTOR = 2.6 / 6
+const SANSSERIF_BOLD_WIDTH_FACTOR = 2.8 / 6
+
+const MONOSPACE_NORMAL_WIDTH_FACTOR = 3 / 5
+const MONOSPACE_BOLD_WIDTH_FACTOR = 3 / 5
 
 type SvgTextDimensionCalculator struct {
 }
@@ -15,16 +22,71 @@ func NewSvgTextDimensionCalculator() *SvgTextDimensionCalculator {
 	return &SvgTextDimensionCalculator{}
 }
 
-func (s *SvgTextDimensionCalculator) CaptionDimensions(txt string, format *types.FontDef) (width, height int) {
-	return 100, 50 // TODO - implement this
+func getFormat(format *types.FontDef) *types.FontDef {
+	if format != nil {
+		return format
+	}
+	f := types.InitFontDef(nil)
+	return &f
 }
 
-func (s *SvgTextDimensionCalculator) Text1Dimensions(txt string, format *types.FontDef) (width, height int) {
-	return 100, 50 // TODO - implement this
+func serifDimensions(runeCount int, fontSize int, bold bool) (width, height int) {
+	var factor float32
+	if bold {
+		factor = float32(fontSize*10) * 2.15 / 5
+	} else {
+		factor = float32(fontSize*10) * 2.05 / 5
+	}
+	w := int(factor) * runeCount / 10
+	return w, fontSize
 }
 
-func (s *SvgTextDimensionCalculator) Text2Dimensions(txt string, format *types.FontDef) (width, height int) {
-	return 100, 50 // TODO - implement this
+func sansserifDimensions(runeCount int, fontSize int, bold bool) (width, height int) {
+	var factor float32
+	if bold {
+		factor = float32(fontSize*10) * 2.8 / 6
+	} else {
+		factor = float32(fontSize*10) * 2.6 / 6
+	}
+	w := int(factor) * runeCount / 10
+	return w, fontSize
+}
+func monospaceDimensions(runeCount int, fontSize int, bold bool) (width, height int) {
+	var factor float32
+	if bold {
+		factor = float32(fontSize*10) * 3 / 5
+	} else {
+		factor = float32(fontSize*10) * 3 / 5
+	}
+	w := int(factor) * runeCount / 10
+	return w, fontSize
+}
+
+func (s *SvgTextDimensionCalculator) Dimensions(txt string, format *types.FontDef) (width, height int) {
+	if format == nil {
+		f := types.InitFontDef(nil)
+		format = &f
+	}
+	fontSize := format.Size
+	if fontSize == 0 {
+		fontSize = 10
+	}
+	bold := false
+	if format.Weight != nil && *format.Weight == types.FontDefWeightEnum_bold {
+		bold = true
+	}
+	runeCount := utf8.RuneCountInString(txt)
+
+	switch format.Font {
+	case "serif":
+		return serifDimensions(runeCount, fontSize, bold)
+	case "sans-serif":
+		return sansserifDimensions(runeCount, fontSize, bold)
+	case "monospace":
+		return monospaceDimensions(runeCount, fontSize, bold)
+	default:
+		return sansserifDimensions(runeCount, fontSize, bold)
+	}
 }
 
 type Drawing struct {

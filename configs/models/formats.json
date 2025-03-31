@@ -13,7 +13,8 @@
                     "type": "integer"
                 },
                 "font": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "sans, sans-serif, monospace"
                 },
                 "type": {
                     "enum": ["normal", "italic"]

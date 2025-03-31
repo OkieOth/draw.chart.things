@@ -22,7 +22,7 @@ func initLayoutElemContainer(l []Layout, inputFormats map[string]BoxFormat) *Lay
 	return &ret
 }
 
-func initFontDef(l *FontDef) FontDef {
+func InitFontDef(l *FontDef) FontDef {
 	var f FontDef
 	typeNormal := FontDefTypeEnum_normal
 	weightNormal := FontDefWeightEnum_normal
@@ -98,9 +98,9 @@ func initBoxFormat(f *Format) BoxFormat {
 	return BoxFormat{
 		Padding:      padding,
 		MinBoxMargin: boxMargin,
-		FontCaption:  initFontDef(fontCaption),
-		FontText1:    initFontDef(fontText1),
-		FontText2:    initFontDef(fontText2),
+		FontCaption:  InitFontDef(fontCaption),
+		FontText1:    InitFontDef(fontText1),
+		FontText2:    InitFontDef(fontText2),
 		Border:       border,
 		Fill:         fill,
 	}
@@ -110,9 +110,9 @@ func getDefaultFormat() BoxFormat {
 	return BoxFormat{
 		Padding:      GlobalPadding,
 		MinBoxMargin: GlobalMinBoxMargin,
-		FontCaption:  initFontDef(nil),
-		FontText1:    initFontDef(nil),
-		FontText2:    initFontDef(nil),
+		FontCaption:  InitFontDef(nil),
+		FontText1:    InitFontDef(nil),
+		FontText2:    InitFontDef(nil),
 	}
 }
 
