@@ -59,6 +59,13 @@ func InitFontDef(l *FontDef) FontDef {
 		} else {
 			f.Aligned = &alignedLeft
 		}
+		f.SpaceTop = l.SpaceTop
+		f.SpaceBottom = l.SpaceBottom
+		if f.MaxLenBeforeBreak != 0 {
+			f.MaxLenBeforeBreak = l.MaxLenBeforeBreak
+		} else {
+			f.MaxLenBeforeBreak = 90
+		}
 	} else {
 		f.Size = 10
 		f.Type = &typeNormal
@@ -68,6 +75,7 @@ func InitFontDef(l *FontDef) FontDef {
 		f.Aligned = &alignedLeft
 		f.SpaceTop = 0
 		f.SpaceBottom = 0
+		f.MaxLenBeforeBreak = 90
 	}
 	return f
 }

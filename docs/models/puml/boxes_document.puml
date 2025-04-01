@@ -87,6 +87,7 @@ class "**FontDef**" as FontDef {
         FontDefAlignedEnum aligned
         IntegerType spaceTop
         IntegerType spaceBottom
+        IntegerType maxLenBeforeBreak
 }
 note top: Defines the font a text
 
@@ -198,6 +199,7 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
 
     
+
 
 
 

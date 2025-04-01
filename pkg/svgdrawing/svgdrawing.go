@@ -3,6 +3,7 @@ package svgdrawing
 import (
 	"fmt"
 	"io"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/okieoth/draw.chart.things/pkg/svg"
@@ -29,6 +30,8 @@ func getFormat(format *types.FontDef) *types.FontDef {
 	f := types.InitFontDef(nil)
 	return &f
 }
+
+type calcDimensions func(runeCount int, fontSize int, bold bool) (width, height int)
 
 func serifDimensions(runeCount int, fontSize int, bold bool) (width, height int) {
 	var factor float32
@@ -75,18 +78,82 @@ func (s *SvgTextDimensionCalculator) Dimensions(txt string, format *types.FontDe
 	if format.Weight != nil && *format.Weight == types.FontDefWeightEnum_bold {
 		bold = true
 	}
+	lineHeight := float32(1.2)
+	if format.LineHeight != 0 {
+		lineHeight = format.LineHeight
+	}
 	runeCount := utf8.RuneCountInString(txt)
 
+	var w, h int
 	switch format.Font {
 	case "serif":
-		return serifDimensions(runeCount, fontSize, bold)
+		if w, h = serifDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			w, h = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, serifDimensions)
+		}
 	case "sans-serif":
-		return sansserifDimensions(runeCount, fontSize, bold)
+		if w, h = sansserifDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			w, h = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, sansserifDimensions)
+		}
 	case "monospace":
-		return monospaceDimensions(runeCount, fontSize, bold)
+		if w, h = monospaceDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			w, h = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, monospaceDimensions)
+		}
 	default:
-		return sansserifDimensions(runeCount, fontSize, bold)
+		if w, h = sansserifDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			w, h = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, sansserifDimensions)
+		}
 	}
+	return w, h
+}
+
+func splitTxtDimensions(originalWidth, runeCount, fontSize int, bold bool, lineHeight float32, txt string, maxLenBeforeBreak int, f calcDimensions) (width, height int) {
+	words := strings.Fields(txt)
+	type WW struct {
+		word  string
+		width int
+	}
+	wordsWithWidth := make([]WW, 0)
+	for _, w := range words {
+		rc := utf8.RuneCount([]byte(w))
+		width, _ := f(rc, fontSize, bold)
+		if width > maxLenBeforeBreak {
+			// the included word is truncated :D
+			for j := rc - 1; j >= 0; j-- {
+				w2, _ := f(j, fontSize, bold)
+				if w2 <= maxLenBeforeBreak {
+					w = string([]rune(w)[:j])
+					width = w2
+					w = w[:rc+1]
+					break
+				}
+			}
+		}
+		wordsWithWidth = append(wordsWithWidth, WW{word: w, width: width})
+	}
+	// build the output lines ...
+	curWidth := 0
+	var line string
+	var maxWidth int
+	lines := make([]string, 0)
+	for _, ww := range wordsWithWidth {
+		if curWidth+ww.width < maxLenBeforeBreak {
+			if line != "" {
+				line += " "
+			}
+			line += ww.word
+			curWidth += ww.width
+		} else {
+			lines = append(lines, line)
+			lw, _ := f(utf8.RuneCount([]byte(line)), fontSize, bold)
+			if lw > maxWidth {
+				maxWidth = lw
+			}
+			line = ww.word
+			curWidth = ww.width
+		}
+	}
+	linesCount := len(lines)
+	return maxWidth, (fontSize * linesCount) + int(float32(linesCount-1)*float32(fontSize)*lineHeight)
 }
 
 type Drawing struct {
