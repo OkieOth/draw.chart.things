@@ -20,21 +20,13 @@ type SvgTextDimensionCalculator struct {
 }
 
 type textAndDimensions struct {
-	text   string
-	width  int
-	height int
+	Text   string
+	Width  int
+	Height int
 }
 
 func NewSvgTextDimensionCalculator() *SvgTextDimensionCalculator {
 	return &SvgTextDimensionCalculator{}
-}
-
-func getFormat(format *types.FontDef) *types.FontDef {
-	if format != nil {
-		return format
-	}
-	f := types.InitFontDef(nil)
-	return &f
 }
 
 type calcDimensions func(runeCount int, fontSize int, bold bool) (width, height int)
@@ -71,11 +63,7 @@ func monospaceDimensions(runeCount int, fontSize int, bold bool) (width, height 
 	return w, fontSize
 }
 
-func (s *SvgTextDimensionCalculator) splitTxt(txt string, format *types.FontDef) (width, height int, lines []textAndDimensions) {
-	if format == nil {
-		f := types.InitFontDef(nil)
-		format = &f
-	}
+func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef) (width, height int, lines []textAndDimensions) {
 	fontSize := format.Size
 	if fontSize == 0 {
 		fontSize = 10
@@ -94,18 +82,26 @@ func (s *SvgTextDimensionCalculator) splitTxt(txt string, format *types.FontDef)
 	switch format.Font {
 	case "serif":
 		if w, h = serifDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			lines = []textAndDimensions{{Text: txt, Width: w, Height: h}}
+		} else {
 			w, h, lines = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, serifDimensions)
 		}
 	case "sans-serif":
 		if w, h = sansserifDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			lines = []textAndDimensions{{Text: txt, Width: w, Height: h}}
+		} else {
 			w, h, lines = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, sansserifDimensions)
 		}
 	case "monospace":
 		if w, h = monospaceDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			lines = []textAndDimensions{{Text: txt, Width: w, Height: h}}
+		} else {
 			w, h, lines = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, monospaceDimensions)
 		}
 	default:
 		if w, h = sansserifDimensions(runeCount, fontSize, bold); w <= format.MaxLenBeforeBreak {
+			lines = []textAndDimensions{{Text: txt, Width: w, Height: h}}
+		} else {
 			w, h, lines = splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, sansserifDimensions)
 		}
 	}
@@ -113,7 +109,7 @@ func (s *SvgTextDimensionCalculator) splitTxt(txt string, format *types.FontDef)
 }
 
 func (s *SvgTextDimensionCalculator) Dimensions(txt string, format *types.FontDef) (width, height int) {
-	w, h, _ := s.splitTxt(txt, format)
+	w, h, _ := s.SplitTxt(txt, format)
 	return w, h
 }
 
@@ -135,12 +131,11 @@ func splitTxtDimensions(
 				if w2 <= maxLenBeforeBreak {
 					w = string([]rune(w)[:j])
 					width = w2
-					w = w[:rc+1]
 					break
 				}
 			}
 		}
-		wordsWithWidth = append(wordsWithWidth, textAndDimensions{text: w, width: width})
+		wordsWithWidth = append(wordsWithWidth, textAndDimensions{Text: w, Width: width})
 	}
 	// build the output lines ...
 	curWidth := 0
@@ -149,36 +144,34 @@ func splitTxtDimensions(
 	lines = make([]textAndDimensions, 0)
 	lh := int(float32(fontSize) * lineHeight)
 	heightSum := 0
-	appendLineToOutput := func(txt string, width, height int) []textAndDimensions {
-		lines = append(lines, textAndDimensions{text: txt, width: width, height: height})
-		heightSum += lh
+	appendLineToOutput := func(txt string, height int) []textAndDimensions {
 		lw, _ := f(utf8.RuneCount([]byte(txt)), fontSize, bold)
 		if lw > maxWidth {
 			maxWidth = lw
 		}
+		lines = append(lines, textAndDimensions{Text: txt, Width: lw, Height: height})
+		heightSum += lh
 		return lines
 	}
 	for _, ww := range wordsWithWidth {
-		if curWidth+ww.width < maxLenBeforeBreak {
+		if curWidth+ww.Width < maxLenBeforeBreak {
 			if line != "" {
 				line += " "
 			}
-			line += ww.text
-			curWidth += ww.width
+			line += ww.Text
+			curWidth += ww.Width
 		} else {
-			lines = appendLineToOutput(line, curWidth, lh)
-			lines = append(lines, textAndDimensions{text: line, width: curWidth, height: lh})
-			heightSum += lh
+			lines = appendLineToOutput(line, lh)
 			lw, _ := f(utf8.RuneCount([]byte(line)), fontSize, bold)
 			if lw > maxWidth {
 				maxWidth = lw
 			}
-			line = ww.text
-			curWidth = ww.width
+			line = ww.Text
+			curWidth = ww.Width
 		}
 	}
 	if line != "" {
-		lines = appendLineToOutput(line, curWidth, lh)
+		lines = appendLineToOutput(line, lh)
 	}
 	return maxWidth, heightSum, lines
 }
@@ -201,6 +194,52 @@ func (d *Drawing) Start(title string, height, width int) error {
 	return nil
 }
 
+func (d *Drawing) textFormat(fontDev *types.FontDef) string {
+	var font string
+	switch fontDev.Font {
+	case "serif":
+		font = "Times New Roman, Times, Georgia, serif"
+	case "sans-serif":
+		font = "Arial, Helvetica, sans-serif"
+	case "monospace":
+		font = "Courier New, Courier, Lucida Console, monospace"
+	default:
+		if fontDev.Font != "" {
+			font = fontDev.Font
+		} else {
+			font = "Arial, Helvetica, sans-serif;"
+		}
+	}
+	txtFormat := fmt.Sprintf("text-anchor:start;font-family:%s;font-size:%dpx;fill:%s", font, fontDev.Size, fontDev.Color)
+	if fontDev.Weight != nil && *fontDev.Weight == types.FontDefWeightEnum_bold {
+		txtFormat += ";font-weight:bold"
+	}
+	if fontDev.Type != nil && *fontDev.Type == types.FontDefTypeEnum_italic {
+		txtFormat += ";font-style:italic"
+	}
+	return txtFormat
+}
+
+func (d *Drawing) drawText(text string, currentY, x, width int, fontDev *types.FontDef) int {
+	if text != "" {
+		if fontDev.SpaceTop != 0 {
+			currentY += fontDev.SpaceTop
+		}
+		_, _, lines := d.txtDimensionCalculator.SplitTxt(text, fontDev)
+		for _, l := range lines {
+			yTxt := currentY + fontDev.Size
+			xTxt := x + (width-l.Width)/2
+			txtFormat := d.textFormat(fontDev)
+			d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
+			currentY += l.Height
+		}
+		if fontDev.SpaceBottom != 0 {
+			currentY += fontDev.SpaceBottom
+		}
+	}
+	return currentY
+}
+
 func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int, format types.BoxFormat) error {
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
@@ -219,20 +258,14 @@ func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int
 			if (*format.Border).Color != nil {
 				c = *(*format.Border).Color
 			}
-			attr += fmt.Sprintf("stroke: %s;stroke-width: %d", c, w)
+			attr += fmt.Sprintf("stroke: %s;stroke-Width: %d", c, w)
 		}
 		d.canvas.RectWithId(id, x, y, width, height, attr)
 	}
-	if caption != "" {
-		_, _, lines := d.txtDimensionCalculator.splitTxt(caption, &format.FontCaption)
-		yTxt := y + format.Padding
-		for _, l := range lines {
-			xTxt := x + (width-l.width)/2
-			txtFormat := "" // TODO
-			d.canvas.Text(xTxt, yTxt, l.text, txtFormat)
-			y += l.height
-		}
-	}
+	currentY := y + format.Padding
+	currentY = d.drawText(caption, currentY, x, width, &format.FontCaption)
+	currentY = d.drawText(text1, currentY, x, width, &format.FontText1)
+	d.drawText(text2, currentY, x, width, &format.FontText2)
 	return nil
 }
 

@@ -45,7 +45,7 @@ func TestInitDimensions(t *testing.T) {
 				Caption: "test2",
 				Text1:   "test2-text1",
 			},
-			expectedHeight: 115,
+			expectedHeight: 125,
 			expectedWidth:  110,
 		},
 		{
@@ -55,7 +55,7 @@ func TestInitDimensions(t *testing.T) {
 				Text1:   "test3-text1",
 				Text2:   "test3-text2",
 			},
-			expectedHeight: 170,
+			expectedHeight: 190,
 			expectedWidth:  110,
 		},
 		{
@@ -76,7 +76,7 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 375,
+			expectedHeight: 395,
 			expectedWidth:  110,
 		},
 		{
@@ -97,7 +97,7 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 230,
+			expectedHeight: 250,
 			expectedWidth:  350,
 		},
 	}
