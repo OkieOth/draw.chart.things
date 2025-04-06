@@ -225,11 +225,11 @@ func (d *Drawing) drawText(text string, currentY, x, width int, fontDev *types.F
 		if fontDev.SpaceTop != 0 {
 			currentY += fontDev.SpaceTop
 		}
+		txtFormat := d.textFormat(fontDev)
 		_, _, lines := d.txtDimensionCalculator.SplitTxt(text, fontDev)
 		for _, l := range lines {
 			yTxt := currentY + fontDev.Size
 			xTxt := x + (width-l.Width)/2
-			txtFormat := d.textFormat(fontDev)
 			d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
 			currentY += l.Height
 		}
