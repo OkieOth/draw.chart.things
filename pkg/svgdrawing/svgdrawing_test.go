@@ -69,20 +69,20 @@ func TestSplitTxt(t *testing.T) {
 		expectedHeight int
 		expectedLines  []svgdrawing.TextAndDimensions
 	}{
-		// {
-		// 	name:      "Single line sans-serif",
-		// 	inputText: "Hello World",
-		// 	fontDef: &types.FontDef{
-		// 		Font:              "sans-serif",
-		// 		Size:              12,
-		// 		MaxLenBeforeBreak: 100,
-		// 	},
-		// 	expectedWidth:  57,
-		// 	expectedHeight: 14,
-		// 	expectedLines: []svgdrawing.TextAndDimensions{
-		// 		{Text: "Hello World", Width: 57, Height: 14},
-		// 	},
-		// },
+		{
+			name:      "Single line sans-serif",
+			inputText: "Hello World",
+			fontDef: &types.FontDef{
+				Font:              "sans-serif",
+				Size:              12,
+				MaxLenBeforeBreak: 100,
+			},
+			expectedWidth:  62,
+			expectedHeight: 12,
+			expectedLines: []svgdrawing.TextAndDimensions{
+				{Text: "Hello World", Width: 62, Height: 12},
+			},
+		},
 		{
 			name:      "Multi line sans-serif",
 			inputText: "Hello World Hello World",
@@ -91,58 +91,62 @@ func TestSplitTxt(t *testing.T) {
 				Size:              12,
 				MaxLenBeforeBreak: 100,
 			},
-			expectedWidth:  88,
+			expectedWidth:  96,
 			expectedHeight: 28,
 			expectedLines: []svgdrawing.TextAndDimensions{
-				{Text: "Hello World Hello", Width: 88, Height: 14},
-				{Text: "World", Width: 26, Height: 14},
+				{Text: "Hello World Hello", Width: 96, Height: 14},
+				{Text: "World", Width: 28, Height: 14},
 			},
 		},
-		// {
-		// 	name:      "Multi-line sans-serif",
-		// 	inputText: "This is a long text that should wrap into multiple lines",
-		// 	fontDef: &types.FontDef{
-		// 		Font:              "sans-serif",
-		// 		Size:              12,
-		// 		MaxLenBeforeBreak: 50,
-		// 	},
-		// 	expectedWidth:  50,
-		// 	expectedHeight: 42,
-		// 	expectedLines: []svgdrawing.TextAndDimensions{
-		// 		{Text: "This is a long", Width: 50, Height: 14},
-		// 		{Text: "text that should", Width: 50, Height: 14},
-		// 		{Text: "wrap into multiple", Width: 50, Height: 14},
-		// 	},
-		// },
-		// {
-		// 	name:      "Single line monospace",
-		// 	inputText: "Monospace",
-		// 	fontDef: &types.FontDef{
-		// 		Font:              "monospace",
-		// 		Size:              10,
-		// 		MaxLenBeforeBreak: 80,
-		// 	},
-		// 	expectedWidth:  60,
-		// 	expectedHeight: 12,
-		// 	expectedLines: []svgdrawing.TextAndDimensions{
-		// 		{Text: "Monospace", Width: 60, Height: 12},
-		// 	},
-		// },
-		// {
-		// 	name:      "Multi-line serif",
-		// 	inputText: "Serif font with multiple lines",
-		// 	fontDef: &types.FontDef{
-		// 		Font:              "serif",
-		// 		Size:              14,
-		// 		MaxLenBeforeBreak: 70,
-		// 	},
-		// 	expectedWidth:  70,
-		// 	expectedHeight: 42,
-		// 	expectedLines: []svgdrawing.TextAndDimensions{
-		// 		{Text: "Serif font with", Width: 70, Height: 14},
-		// 		{Text: "multiple lines", Width: 70, Height: 14},
-		// 	},
-		// },
+		{
+			name:      "Multi-line sans-serif",
+			inputText: "This is a long text that should wrap into multiple lines",
+			fontDef: &types.FontDef{
+				Font:              "sans-serif",
+				Size:              12,
+				MaxLenBeforeBreak: 51,
+			},
+			expectedWidth:  51,
+			expectedHeight: 98,
+			expectedLines: []svgdrawing.TextAndDimensions{
+				{Text: "This is a", Width: 51, Height: 14},
+				{Text: "long text", Width: 51, Height: 14},
+				{Text: "that", Width: 22, Height: 14},
+				{Text: "should", Width: 34, Height: 14},
+				{Text: "wrap into", Width: 51, Height: 14},
+				{Text: "multiple", Width: 45, Height: 14},
+				{Text: "lines", Width: 28, Height: 14},
+			},
+		},
+		{
+			name:      "Single line monospace",
+			inputText: "Monospace",
+			fontDef: &types.FontDef{
+				Font:              "monospace",
+				Size:              10,
+				MaxLenBeforeBreak: 80,
+			},
+			expectedWidth:  59,
+			expectedHeight: 10,
+			expectedLines: []svgdrawing.TextAndDimensions{
+				{Text: "Monospace", Width: 59, Height: 10},
+			},
+		},
+		{
+			name:      "Multi-line serif",
+			inputText: "Serif font with multiple lines",
+			fontDef: &types.FontDef{
+				Font:              "serif",
+				Size:              14,
+				MaxLenBeforeBreak: 100,
+			},
+			expectedWidth:  94,
+			expectedHeight: 32,
+			expectedLines: []svgdrawing.TextAndDimensions{
+				{Text: "Serif font with", Width: 94, Height: 16},
+				{Text: "multiple lines", Width: 88, Height: 16},
+			},
+		},
 	}
 
 	for _, tt := range tests {

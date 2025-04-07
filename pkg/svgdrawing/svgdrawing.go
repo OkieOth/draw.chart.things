@@ -12,17 +12,18 @@ import (
 
 // Font width factor constants
 const (
+	MAGIC = 1.1
 	// Sans-serif font width factors
-	SANSSERIF_NORMAL_WIDTH_FACTOR = 2.6 / 6
-	SANSSERIF_BOLD_WIDTH_FACTOR   = 2.8 / 6
+	SANSSERIF_NORMAL_WIDTH_FACTOR = 2.6 / 6 * MAGIC
+	SANSSERIF_BOLD_WIDTH_FACTOR   = 2.8 / 6 * MAGIC
 
 	// Monospace font width factors
-	MONOSPACE_NORMAL_WIDTH_FACTOR = 3.0 / 5
-	MONOSPACE_BOLD_WIDTH_FACTOR   = 3.0 / 5
+	MONOSPACE_NORMAL_WIDTH_FACTOR = 3.0 / 5 * MAGIC
+	MONOSPACE_BOLD_WIDTH_FACTOR   = 3.0 / 5 * MAGIC
 
 	// Serif font width factors
-	SERIF_NORMAL_WIDTH_FACTOR = 2.05 / 5
-	SERIF_BOLD_WIDTH_FACTOR   = 2.15 / 5
+	SERIF_NORMAL_WIDTH_FACTOR = 2.05 / 5 * MAGIC
+	SERIF_BOLD_WIDTH_FACTOR   = 2.15 / 5 * MAGIC
 )
 
 // Function type for calculating text dimensions
@@ -237,7 +238,7 @@ func (d *Drawing) textFormat(fontDef *types.FontDef) string {
 		}
 	}
 
-	txtFormat := fmt.Sprintf("text-anchor:start;font-family:%s;font-size:%dpx;fill:%s",
+	txtFormat := fmt.Sprintf("text-anchor:middle;font-family:%s;font-size:%dpx;fill:%s",
 		font, fontDef.Size, fontDef.Color)
 
 	if fontDef.Weight != nil && *fontDef.Weight == types.FontDefWeightEnum_bold {
@@ -266,7 +267,7 @@ func (d *Drawing) drawText(text string, currentY, x, width int, fontDef *types.F
 
 	for _, l := range lines {
 		yTxt := currentY + fontDef.Size
-		xTxt := x + (width-l.Width)/2
+		xTxt := x + (width / 2)
 		d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
 		currentY += l.Height
 	}
