@@ -48,6 +48,7 @@ boxes:
       - id: r6_3
         caption: Right Element
         text1: I am in the second line
+        text2: Let me see what will happen here
       - id: r6_4
         caption: Right Element
         text1: I am in the second line

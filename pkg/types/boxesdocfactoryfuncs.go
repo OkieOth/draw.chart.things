@@ -71,8 +71,12 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		curY := l.Y + yInnerOffset
 		l.Vertical.Y = curY
 		var h, w int
+		var hasChilds bool
 		for i := 0; i < len(l.Vertical.Elems); i++ {
 			sub := &l.Vertical.Elems[i]
+			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
+				hasChilds = true
+			}
 			if h > 0 {
 				h += defaultBoxMargin
 			}
@@ -88,6 +92,13 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 				l.Vertical.Width = sub.Width
 			}
 		}
+		if !hasChilds {
+			for i := 0; i < len(l.Vertical.Elems); i++ {
+				sub := &l.Vertical.Elems[i]
+				sub.Width = w
+			}
+		}
+
 		l.Vertical.Height = h + defaultPadding
 		l.Height += l.Vertical.Height
 		if w > l.Width {
@@ -103,8 +114,12 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 		curY := l.Y + yInnerOffset
 		l.Horizontal.Y = curY
 		var h, w int
+		var hasChilds bool
 		for i := 0; i < len(l.Horizontal.Elems); i++ {
 			sub := &l.Horizontal.Elems[i]
+			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
+				hasChilds = true
+			}
 			if w > 0 {
 				w += defaultBoxMargin
 			}
@@ -120,6 +135,13 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 				l.Horizontal.Height = sub.Height
 			}
 		}
+		if !hasChilds {
+			for i := 0; i < len(l.Horizontal.Elems); i++ {
+				sub := &l.Horizontal.Elems[i]
+				sub.Height = h
+			}
+		}
+
 		l.Height += h
 		l.Horizontal.Width = w
 
