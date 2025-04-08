@@ -13,7 +13,8 @@
                     "type": "integer"
                 },
                 "font": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "sans, sans-serif, monospace"
                 },
                 "type": {
                     "enum": ["normal", "italic"]
@@ -37,9 +38,13 @@
                 },
                 "spaceBottom": {
                     "type": "integer"
+                },
+                "maxLenBeforeBreak": {
+                    "type": "integer",
+                    "description": "Maximum length of the text before it breaks"
                 }
             },
-            "required": ["size", "font", "lineHeight", "color", "spaceTop", "spaceBottom"]
+            "required": ["size", "font", "lineHeight", "color", "spaceTop", "spaceBottom", "maxLenBeforeBreak"]
         },
         "LineDef": {
             "type": "object",

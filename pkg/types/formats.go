@@ -33,6 +33,9 @@ type FontDef struct {
     SpaceTop int  `yaml:"spaceTop"`
 
     SpaceBottom int  `yaml:"spaceBottom"`
+
+    // Maximum length of the text before it breaks
+    MaxLenBeforeBreak int  `yaml:"maxLenBeforeBreak"`
 }
 
 

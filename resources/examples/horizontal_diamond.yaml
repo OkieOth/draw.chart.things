@@ -12,10 +12,10 @@ boxes:
   horizontal:
     - id: r1_1
       caption: Left Element
-      text1: I am in the first line
+      text1: I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line
     - vertical:
       - id: r2_1
-        caption: Most Top Element
+        caption: Most Top ElementLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
         text1: I am in the second line
       - id: r2_2
         caption: Center Element
