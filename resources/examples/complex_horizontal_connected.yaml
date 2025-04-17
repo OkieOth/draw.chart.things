@@ -13,6 +13,8 @@ boxes:
         caption: Ferdows
         text1: Stuff ...
         text2: More stuff
+        connections:
+          - destId: r5_3
     - vertical:
       - id: r5_1
         caption: Most Left Element, Das ist für Matthias mal sehen was passiert

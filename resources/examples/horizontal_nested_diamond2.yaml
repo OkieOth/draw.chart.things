@@ -1,0 +1,41 @@
+title: Simple Diamond
+formats:
+  default:
+    border:
+      width: 2
+      color: blue
+    fill:
+      color: orange
+globalPadding: 10
+minBoxMargin: 20
+boxes:
+  horizontal:
+    - id: r1_1
+      caption: Left Element
+      text1: I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line
+      vertical:
+        - id: r1_1_1
+          caption: I am a inner Element
+    - vertical:
+      - id: r2_1
+        caption: Most Top ElementLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+        text1: I am in the second line
+        vertical:
+          - id: r2_1_1
+            caption: I am another inner Element
+            text1:
+      - id: r2_2
+        caption: Center Element
+        text1: I am in the second line
+        vertical:
+          - id: r2_2_1
+            caption: I am inner Element three
+      - id: r2_3
+        caption: Bottom Element
+        text1: I am in the second line
+        vertical:
+          - id: r2_3_1
+            caption: I am inner Element four
+    - id: r3_1
+      caption: Right Element
+      text1: I am in the first line

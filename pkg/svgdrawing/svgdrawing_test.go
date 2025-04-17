@@ -22,6 +22,26 @@ func TestSimpleSvg(t *testing.T) {
 			outputFile: "../../temp/TestSimpleSvg_box.svg",
 		},
 		{
+			inputFile:  "../../resources/examples/simple_box_nested.yaml",
+			outputFile: "../../temp/TestSimpleSvg_box_nested.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/simple_box_nested2.yaml",
+			outputFile: "../../temp/TestSimpleSvg_box_nested2.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/simple_box_nested3.yaml",
+			outputFile: "../../temp/TestSimpleSvg_box_nested3.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/simple_box_nested4.yaml",
+			outputFile: "../../temp/TestSimpleSvg_box_nested4.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/simple_box_nested5.yaml",
+			outputFile: "../../temp/TestSimpleSvg_box_nested5.svg",
+		},
+		{
 			inputFile:  "../../resources/examples/simple_diamond.yaml",
 			outputFile: "../../temp/TestSimpleSvg_diamond.svg",
 		},
@@ -40,6 +60,14 @@ func TestSimpleSvg(t *testing.T) {
 		{
 			inputFile:  "../../resources/examples/complex_complex.yaml",
 			outputFile: "../../temp/TestSimpleSvg_ccomplex.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/horizontal_nested_diamond.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/horizontal_nested_diamond2.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx2.svg",
 		},
 	}
 
