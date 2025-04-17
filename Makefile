@@ -12,13 +12,22 @@ build-docker:
 generate-all:
 	bash -c scripts/generateAll.sh
 
-open-nested-in-browser:
+open-simple-in-browser:
 	firefox file://$(CURRENT_DIR)/temp/TestSimpleSvg_box.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested2.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested3.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested4.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested5.svg &
+
+open-complex-in-browser:
+	firefox file://$(CURRENT_DIR)/temp/TestSimpleSvg_diamond.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hdiamond.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hdiamond_nestedx.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hdiamond_nestedx2.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_ccomplex.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hcomplex.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_vcomplex.svg &
 
 
 test:
