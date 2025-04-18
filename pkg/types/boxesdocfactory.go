@@ -22,6 +22,19 @@ func initLayoutElemContainer(l []Layout, inputFormats map[string]BoxFormat) *Lay
 	return &ret
 }
 
+func initConnections(l []Connection) []LayoutElemConnection {
+	ret := make([]LayoutElemConnection, 0)
+	for _, elem := range l {
+		var conn LayoutElemConnection
+		conn.DestId = elem.DestId
+		conn.SourceArrow = elem.SourceArrow
+		conn.DestArrow = elem.DestArrow
+		conn.Tags = elem.Tags
+		ret = append(ret, conn)
+	}
+	return ret
+}
+
 func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, defaultItalic bool, spaceTop int) FontDef {
 	var f FontDef
 	typeNormal := FontDefTypeEnum_normal
@@ -183,13 +196,14 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		}
 	}
 	return LayoutElement{
-		Id:         l.Id,
-		Caption:    l.Caption,
-		Text1:      l.Text1,
-		Text2:      l.Text2,
-		Vertical:   initLayoutElemContainer(l.Vertical, inputFormats),
-		Horizontal: initLayoutElemContainer(l.Horizontal, inputFormats),
-		Format:     f,
+		Id:          l.Id,
+		Caption:     l.Caption,
+		Text1:       l.Text1,
+		Text2:       l.Text2,
+		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats),
+		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats),
+		Format:      f,
+		Connections: initConnections(l.Connections),
 	}
 }
 

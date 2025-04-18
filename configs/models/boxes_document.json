@@ -96,6 +96,12 @@
                 "format": {
                     "$ref": "#/definitions/BoxFormat"
                 },
+                "connections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LayoutElemConnection"
+                    }
+                },
                 "tags": {
                     "description": "Tags to annotate the box, tags are used to format and filter",
                     "type": "array",
@@ -134,6 +140,31 @@
             },
             "required": ["x", "y", "width", "height", "elems"]
         },
+        "LayoutElemConnection": {
+            "type": "object",
+            "properties": {
+                "destId": {
+                    "description": "box id of the destination",
+                    "type": "string"
+                },
+                "sourceArrow": {
+                    "description": "Arrow at the source box",
+                    "type": "boolean"
+                },
+                "destArrow": {
+                    "description": "Arrow at the destination box",
+                    "type": "boolean"
+                },
+                "tags": {
+                    "description": "Tags to annotate the connection, tags are used to format",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["destId", "sourceArrow", "destArrow", "tags"]
+        },
         "ConnectionElem": {
             "type": "object",
             "properties": {
@@ -156,13 +187,25 @@
                 "format": {
                     "$ref": "./formats.json#/definitions/LineDef"
                 },
-                "points": {
+                "parts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ConnectionPoint"
+                        "$ref": "#/definitions/ConnectionLine"
                     }
                 }
             }
+        },
+        "ConnectionLine": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "$ref": "#/definitions/ConnectionPoint"
+                },
+                "end": {
+                    "$ref": "#/definitions/ConnectionPoint"
+                }
+            },
+            "required": ["start", "end"]
         },
         "ConnectionPoint": {
             "type": "object",
@@ -175,7 +218,8 @@
                     "type": "integer",
                     "description": "Y position of the point"
                 }
-            }
+            },
+            "required": ["x", "y"]
         },
         "BoxFormat": {
             "type": "object",

@@ -112,13 +112,13 @@ type Format struct {
 type Connection struct {
 
     // box id of the destination
-    DestId *string  `yaml:"destId,omitempty"`
+    DestId string  `yaml:"destId"`
 
     // Arrow at the source box
-    SourceArrow *bool  `yaml:"sourceArrow,omitempty"`
+    SourceArrow bool  `yaml:"sourceArrow"`
 
     // Arrow at the destination box
-    DestArrow *bool  `yaml:"destArrow,omitempty"`
+    DestArrow bool  `yaml:"destArrow"`
 
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`

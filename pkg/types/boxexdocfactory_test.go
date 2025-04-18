@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestInitLayoutElement(t *testing.T) {
@@ -125,5 +126,43 @@ func TestInitLayoutElement(t *testing.T) {
 				t.Errorf("expected FontCaption Aligned %v, got %v", tt.expected.Format.FontCaption.Aligned, result.Format.FontCaption.Aligned)
 			}
 		})
+	}
+}
+
+func TestLoadFromFile(t *testing.T) {
+	tests := []struct {
+		inputFile string
+	}{
+		{
+			inputFile: "../../resources/examples/complex_horizontal_connected.yaml",
+		},
+	}
+
+	for _, test := range tests {
+		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+		require.Nil(t, err)
+		require.NotNil(t, b)
+		require.Equal(t, 0, len(b.Boxes.Connections))
+		require.Equal(t, "r4_1", b.Boxes.Horizontal[0].Vertical[0].Id)
+		require.Equal(t, "r5_3", b.Boxes.Horizontal[0].Vertical[0].Connections[0].DestId)
+		require.Equal(t, "r5_1", b.Boxes.Horizontal[1].Vertical[0].Id)
+		require.Equal(t, 0, len(b.Boxes.Horizontal[1].Vertical[0].Connections))
+		require.Equal(t, "r5_2", b.Boxes.Horizontal[1].Vertical[1].Id)
+		require.Equal(t, 0, len(b.Boxes.Horizontal[1].Vertical[1].Connections))
+		require.Equal(t, "r5_3", b.Boxes.Horizontal[1].Vertical[2].Id)
+		require.Equal(t, 0, len(b.Boxes.Horizontal[1].Vertical[2].Connections))
+
+		require.Equal(t, "r6_1", b.Boxes.Horizontal[2].Vertical[0].Id)
+		require.Equal(t, 0, len(b.Boxes.Horizontal[2].Vertical[0].Connections))
+		require.Equal(t, "r6_2", b.Boxes.Horizontal[2].Vertical[1].Id)
+		require.Equal(t, 0, len(b.Boxes.Horizontal[2].Vertical[1].Connections))
+		require.Equal(t, "r6_3", b.Boxes.Horizontal[2].Vertical[2].Id)
+		require.Equal(t, 0, len(b.Boxes.Horizontal[2].Vertical[2].Connections))
+		require.Equal(t, "r6_4", b.Boxes.Horizontal[2].Vertical[3].Id)
+		require.Equal(t, 1, len(b.Boxes.Horizontal[2].Vertical[3].Connections))
+		require.Equal(t, "r4_1", b.Boxes.Horizontal[2].Vertical[3].Connections[0].DestId)
+		require.Equal(t, "r6_5", b.Boxes.Horizontal[2].Vertical[4].Id)
+		require.Equal(t, 0, len(b.Boxes.Horizontal[2].Vertical[4].Connections))
+
 	}
 }

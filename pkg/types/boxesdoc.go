@@ -82,6 +82,8 @@ type LayoutElement struct {
 
     Format *BoxFormat  `yaml:"format,omitempty"`
 
+    Connections []LayoutElemConnection  `yaml:"connections,omitempty"`
+
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -90,6 +92,7 @@ func NewLayoutElement() *LayoutElement {
         return &LayoutElement{
             Vertical: NewLayoutElemContainer(),
             Horizontal: NewLayoutElemContainer(),
+            Connections: make([]LayoutElemConnection, 0),
             Tags: make([]string, 0),
         }
 }
@@ -114,14 +117,14 @@ type ConnectionElem struct {
 
     Format *LineDef  `yaml:"format,omitempty"`
 
-    Points []ConnectionPoint  `yaml:"points,omitempty"`
+    Parts []ConnectionLine  `yaml:"parts,omitempty"`
 }
 
 func NewConnectionElem() *ConnectionElem {
         return &ConnectionElem{
             From: NewLayoutElement(),
             To: NewLayoutElement(),
-            Points: make([]ConnectionPoint, 0),
+            Parts: make([]ConnectionLine, 0),
         }
 }
 
@@ -183,13 +186,50 @@ func NewLayoutElemContainer() *LayoutElemContainer {
 
 
 
+type LayoutElemConnection struct {
+
+    // box id of the destination
+    DestId string  `yaml:"destId"`
+
+    // Arrow at the source box
+    SourceArrow bool  `yaml:"sourceArrow"`
+
+    // Arrow at the destination box
+    DestArrow bool  `yaml:"destArrow"`
+
+    // Tags to annotate the connection, tags are used to format
+    Tags []string  `yaml:"tags,omitempty"`
+}
+
+func NewLayoutElemConnection() *LayoutElemConnection {
+        return &LayoutElemConnection{
+            Tags: make([]string, 0),
+        }
+}
+
+
+
+
+
+type ConnectionLine struct {
+
+    Start ConnectionPoint  `yaml:"start"`
+
+    End ConnectionPoint  `yaml:"end"`
+}
+
+
+
+
+
+
 type ConnectionPoint struct {
 
     // X position of the point
-    X *int  `yaml:"x,omitempty"`
+    X int  `yaml:"x"`
 
     // Y position of the point
-    Y *int  `yaml:"y,omitempty"`
+    Y int  `yaml:"y"`
 }
 
 
