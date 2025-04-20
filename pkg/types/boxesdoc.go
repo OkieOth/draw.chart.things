@@ -80,6 +80,12 @@ type LayoutElement struct {
     // Height of the element
     Height int  `yaml:"height"`
 
+    // X position of the center of the element
+    CenterX int  `yaml:"centerX"`
+
+    // X position of the center of the element
+    CenterY int  `yaml:"centerY"`
+
     Format *BoxFormat  `yaml:"format,omitempty"`
 
     Connections []LayoutElemConnection  `yaml:"connections,omitempty"`

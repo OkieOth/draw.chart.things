@@ -76,43 +76,10 @@ func (l *LayoutElement) centerVerticalElems() {
 	}
 }
 
-// func (l *LayoutElement) centerVerticalElems() {
-// 	if l.Vertical != nil {
-// 		cont := l.Vertical
-// 		contYOffset := (l.Height - cont.Height) / 2
-// 		contXOffset := (l.Width - cont.Width) / 2
-// 		cont.Y = l.Y + contYOffset
-// 		cont.X = l.X + contXOffset
-// 		for i := 0; i < len(cont.Elems); i++ {
-// 			sub := &cont.Elems[i]
-// 			offsetY := ((cont.Height - sub.Height) / 2)
-// 			sub.incrementY(offsetY)
-// 			offsetX := contXOffset + ((cont.Width - sub.Width) / 2)
-// 			sub.incrementX(offsetX)
-// 			sub.centerVerticalElems()
-// 			if sub.Horizontal != nil && len(sub.Horizontal.Elems) == 1 {
-// 				sub.centerHorizontalElems()
-// 			}
-// 		}
-// 	}
-// }
-
-// func (l *LayoutElement) centerLayoutElemContainer(cont *LayoutElemContainer) {
-// 	if cont != nil {
-// 		contYOffset := (l.Height - cont.Height) / 2
-// 		contXOffset := (l.Width - cont.Width) / 2
-// 		cont.Y = l.Y + contYOffset
-// 		cont.X = l.X + contXOffset
-// 		for i := 0; i < len(cont.Elems); i++ {
-// 			sub := &cont.Elems[i]
-// 			offsetY := ((cont.Height - sub.Height) / 2)
-// 			sub.incrementY(offsetY)
-// 			offsetX := contXOffset + ((cont.Width - sub.Width) / 2)
-// 			sub.incrementX(offsetX)
-// 			sub.Center()
-// 		}
-// 	}
-// }
+func (l *LayoutElement) AreOnTheSameVerticalLevel(otherElem *LayoutElement) bool {
+	return ((l.CenterY > otherElem.Y) && (l.CenterY < otherElem.Y+otherElem.Height)) ||
+		((otherElem.CenterY > l.Y) && (otherElem.CenterY < l.Y+l.Height))
+}
 
 func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
@@ -238,6 +205,8 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 }
 
 func (l *LayoutElement) Center() {
+	l.CenterX = l.X + (l.Width / 2)
+	l.CenterY = l.Y + (l.Height / 2)
 	l.centerHorizontalElems()
 	l.centerVerticalElems()
 }

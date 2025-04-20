@@ -30,6 +30,8 @@ class "**LayoutElement**" as LayoutElement {
         IntegerType y
         IntegerType width
         IntegerType height
+        IntegerType centerX
+        IntegerType centerY
         BoxFormat format
         LayoutElemConnection[] connections
         StringType[] tags
@@ -172,6 +174,8 @@ BoxesDocument  *--  BoxFormat
 LayoutElement  *--  LayoutElemContainer
 
 LayoutElement  *--  LayoutElemContainer
+
+
 
 
 

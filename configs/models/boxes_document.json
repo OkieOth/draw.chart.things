@@ -93,6 +93,14 @@
                     "type": "integer",
                     "description": "Height of the element"
                 },
+                "centerX": {
+                    "type": "integer",
+                    "description": "X position of the center of the element"
+                },
+                "centerY": {
+                    "type": "integer",
+                    "description": "X position of the center of the element"
+                },
                 "format": {
                     "$ref": "#/definitions/BoxFormat"
                 },
@@ -110,7 +118,7 @@
                     }
                 }
             },
-            "required": ["id", "x", "y", "width", "height", "caption", "text1", "text2"]
+            "required": ["id", "x", "y", "centerX", "centerY", "width", "height", "caption", "text1", "text2"]
         },
         "LayoutElemContainer": {
             "type": "object",

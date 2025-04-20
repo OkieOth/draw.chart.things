@@ -115,6 +115,10 @@ func TestInitDimensions(t *testing.T) {
 func checkLayoutElement(t *testing.T, le *types.LayoutElement, initX, initY int) {
 	require.GreaterOrEqual(t, le.X, initX)
 	require.GreaterOrEqual(t, le.Y, initY)
+	require.Greater(t, le.CenterX, 0)
+	require.Greater(t, le.CenterY, 0)
+	require.Equal(t, le.CenterX, le.X+(le.Width/2))
+	require.Equal(t, le.CenterY, le.Y+(le.Height/2))
 	if le.Vertical != nil {
 		require.GreaterOrEqual(t, le.Vertical.X, le.X)
 		require.GreaterOrEqual(t, le.Vertical.Y, le.Y)
@@ -133,24 +137,19 @@ func checkLayoutElement(t *testing.T, le *types.LayoutElement, initX, initY int)
 
 func TestCenteredCoordinates(t *testing.T) {
 	tests := []struct {
-		inputFile  string
-		outputFile string
+		inputFile string
 	}{
 		{
-			inputFile:  "../../resources/examples/simple_diamond.yaml",
-			outputFile: "../../temp/TestSimpleSvg_diamond.svg",
+			inputFile: "../../resources/examples/simple_diamond.yaml",
 		},
 		{
-			inputFile:  "../../resources/examples/horizontal_diamond.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hdiamond.svg",
+			inputFile: "../../resources/examples/horizontal_diamond.yaml",
 		},
 		{
-			inputFile:  "../../resources/examples/complex_vertical.yaml",
-			outputFile: "../../temp/TestSimpleSvg_vcomplex.svg",
+			inputFile: "../../resources/examples/complex_vertical.yaml",
 		},
 		{
-			inputFile:  "../../resources/examples/complex_horizontal.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hcomplex.svg",
+			inputFile: "../../resources/examples/complex_horizontal.yaml",
 		},
 	}
 	dc := NewDummyDimensionCalculator(100, 50)
@@ -160,6 +159,64 @@ func TestCenteredCoordinates(t *testing.T) {
 		doc, err := boxesimpl.InitialLayoutBoxes(b, dc)
 		require.Nil(t, err)
 		checkLayoutElement(t, &doc.Boxes, 0, 0)
+	}
+
+}
+
+func TestAreOnTheSameVerticalLevel(t *testing.T) {
+	tests := []struct {
+		inputFile string
+		checkFunc func(t *testing.T, doc *types.BoxesDocument)
+	}{
+		{
+			inputFile: "../../resources/examples/simple_diamond.yaml",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.NotNil(t, doc)
+				e1 := doc.Boxes.Vertical.Elems[0]
+				e2 := doc.Boxes.Vertical.Elems[1].Horizontal.Elems[0]
+				e3 := doc.Boxes.Vertical.Elems[1].Horizontal.Elems[1]
+				e4 := doc.Boxes.Vertical.Elems[1].Horizontal.Elems[2]
+				e5 := doc.Boxes.Vertical.Elems[2]
+				require.False(t, e1.AreOnTheSameVerticalLevel(&e2))
+				require.False(t, e1.AreOnTheSameVerticalLevel(&e3))
+				require.False(t, e1.AreOnTheSameVerticalLevel(&e4))
+				require.False(t, e1.AreOnTheSameVerticalLevel(&e5))
+
+				require.True(t, e2.AreOnTheSameVerticalLevel(&e3))
+				require.True(t, e2.AreOnTheSameVerticalLevel(&e4))
+				require.True(t, e3.AreOnTheSameVerticalLevel(&e4))
+				require.True(t, e4.AreOnTheSameVerticalLevel(&e2))
+				require.True(t, e4.AreOnTheSameVerticalLevel(&e3))
+				require.False(t, e5.AreOnTheSameVerticalLevel(&e2))
+				require.False(t, e5.AreOnTheSameVerticalLevel(&e3))
+				require.False(t, e5.AreOnTheSameVerticalLevel(&e4))
+			},
+		},
+		{
+			inputFile: "../../resources/examples/horizontal_diamond.yaml",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.NotNil(t, doc)
+				e1 := doc.Boxes.Horizontal.Elems[0]
+				e2 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0]
+				e3 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1]
+				e4 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[2]
+				e5 := doc.Boxes.Horizontal.Elems[2]
+				require.False(t, e1.AreOnTheSameVerticalLevel(&e2))
+				require.True(t, e1.AreOnTheSameVerticalLevel(&e3))
+				require.True(t, e3.AreOnTheSameVerticalLevel(&e1))
+				require.False(t, e1.AreOnTheSameVerticalLevel(&e4))
+				require.False(t, e4.AreOnTheSameVerticalLevel(&e1))
+				require.True(t, e3.AreOnTheSameVerticalLevel(&e5))
+			},
+		},
+	}
+	dc := NewDummyDimensionCalculator(100, 50)
+	for _, test := range tests {
+		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+		require.Nil(t, err)
+		doc, err := boxesimpl.InitialLayoutBoxes(b, dc)
+		require.Nil(t, err)
+		test.checkFunc(t, doc)
 	}
 
 }
