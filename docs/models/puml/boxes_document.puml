@@ -83,15 +83,10 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
  
 
 class "**ConnectionLine**" as ConnectionLine {
-        ConnectionPoint start
-        ConnectionPoint end
-}
-
- 
-
-class "**ConnectionPoint**" as ConnectionPoint {
-        IntegerType x
-        IntegerType y
+        IntegerType startX
+        IntegerType startY
+        IntegerType endX
+        IntegerType endY
 }
 
  
@@ -224,11 +219,8 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
 
     
-ConnectionLine  *--  ConnectionPoint
 
-ConnectionLine  *--  ConnectionPoint
 
-    
 
 
     

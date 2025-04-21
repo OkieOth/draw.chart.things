@@ -206,28 +206,20 @@
         "ConnectionLine": {
             "type": "object",
             "properties": {
-                "start": {
-                    "$ref": "#/definitions/ConnectionPoint"
+                "startX": {
+                    "type": "integer"
                 },
-                "end": {
-                    "$ref": "#/definitions/ConnectionPoint"
+                "startY": {
+                    "type": "integer"
+                },
+                "endX": {
+                    "type": "integer"
+                },
+                "endY": {
+                    "type": "integer"
                 }
             },
-            "required": ["start", "end"]
-        },
-        "ConnectionPoint": {
-            "type": "object",
-            "properties": {
-                "x": {
-                    "type": "integer",
-                    "description": "X position of the point"
-                },
-                "y": {
-                    "type": "integer",
-                    "description": "Y position of the point"
-                }
-            },
-            "required": ["x", "y"]
+            "required": ["startX", "startY", "endX", "endY"]
         },
         "BoxFormat": {
             "type": "object",

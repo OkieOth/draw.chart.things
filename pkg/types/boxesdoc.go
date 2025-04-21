@@ -219,23 +219,13 @@ func NewLayoutElemConnection() *LayoutElemConnection {
 
 type ConnectionLine struct {
 
-    Start ConnectionPoint  `yaml:"start"`
+    StartX int  `yaml:"startX"`
 
-    End ConnectionPoint  `yaml:"end"`
-}
+    StartY int  `yaml:"startY"`
 
+    EndX int  `yaml:"endX"`
 
-
-
-
-
-type ConnectionPoint struct {
-
-    // X position of the point
-    X int  `yaml:"x"`
-
-    // Y position of the point
-    Y int  `yaml:"y"`
+    EndY int  `yaml:"endY"`
 }
 
 

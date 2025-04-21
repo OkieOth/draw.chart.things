@@ -81,6 +81,33 @@ func (l *LayoutElement) AreOnTheSameVerticalLevel(otherElem *LayoutElement) bool
 		((otherElem.CenterY > l.Y) && (otherElem.CenterY < l.Y+l.Height))
 }
 
+type ConnDirection int
+
+const (
+	ConnDirectionLeft ConnDirection = iota
+	ConnDirectionUp
+	ConnDirectionRight
+	ConnDirectionDown
+)
+
+func (l *LayoutElement) ConnectorStart(otherElem *LayoutElement) (int, int, ConnDirection) {
+	if l.AreOnTheSameVerticalLevel(otherElem) {
+		// the elements are on the same vertical level
+		if l.CenterX < otherElem.CenterX {
+			return l.X + l.Width, l.CenterY, ConnDirectionRight
+		} else {
+			return l.X, l.CenterY, ConnDirectionLeft
+		}
+
+	} else if l.CenterY < otherElem.CenterY {
+		// connection from top to bottom
+		return l.CenterX, l.Y + l.Height, ConnDirectionDown
+	} else {
+		// connection from bottom to top
+		return l.CenterX, l.Y, ConnDirectionUp
+	}
+}
+
 func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
 		curX := l.X

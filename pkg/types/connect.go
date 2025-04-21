@@ -27,53 +27,219 @@ func (doc *BoxesDocument) findLayoutElementById(id string, startElem *LayoutElem
 	return nil, false
 }
 
-func (doc *BoxesDocument) getLeftNeighbor(startElem, currentElem, currentNeighbor *LayoutElement) *LayoutElement {
-	if currentElem == nil {
-		currentNeighbor = &doc.Boxes
+func (doc *BoxesDocument) checkForCollisionLeft(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+	closest := doc.elementClosestLeft(&doc.Boxes, nil, startElem)
+	if (closest == nil) || (closest.X < endX) {
+		return endX, endY
+	} else {
+		return closest.X + (doc.MinBoxMargin / 2), endY
 	}
-
-	return nil
 }
 
-func (doc *BoxesDocument) elementsAreHorizontalNeighbors(startElem, destElem *LayoutElement) bool {
-	// leftNeighbor := doc.getLeftNeighbor(startElem, nil)
-	// rightNeighbor := doc.getRightNeighbor(startElem, nil)
-	// return leftNeighbor == destElem || rightNeighbor == destElem
-	return false // TODO
+func (doc *BoxesDocument) checkForCollisionRight(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+	closest := doc.elementClosestRight(&doc.Boxes, nil, startElem)
+	if (closest == nil) || (closest.X > endX) {
+		return endX, endY
+	} else {
+		return closest.X - (doc.MinBoxMargin / 2), endY
+	}
+}
 
+func (doc *BoxesDocument) checkForCollisionUp(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+	closest := doc.elementClosestTop(&doc.Boxes, nil, startElem)
+	if (closest == nil) || (closest.Y < endY) {
+		return endX, endY
+	} else {
+		return endX, closest.Y + (doc.MinBoxMargin / 2)
+	}
+}
+
+func (doc *BoxesDocument) checkForCollisionDown(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+	closest := doc.elementClosestBottom(&doc.Boxes, nil, startElem)
+	if (closest == nil) || (closest.Y > endY) {
+		return endX, endY
+	} else {
+		return endX, closest.Y - (doc.MinBoxMargin / 2)
+	}
+}
+
+func (doc *BoxesDocument) isParentInContainer(container *LayoutElemContainer, possibleParent, elemToCheckFor *LayoutElement) bool {
+	if container != nil {
+		for _, subElem := range container.Elems {
+			if subElem.Id == elemToCheckFor.Id {
+				return true
+			}
+			if doc.isParent(&subElem, elemToCheckFor) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (doc *BoxesDocument) isParent(possibleParent, elemToCheckFor *LayoutElement) bool {
+	if doc.isParentInContainer(possibleParent.Vertical, possibleParent, elemToCheckFor) {
+		return true
+	}
+	return doc.isParentInContainer(possibleParent.Horizontal, possibleParent, elemToCheckFor)
+}
+
+func (doc *BoxesDocument) elementClosestLeft(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
+	if soFarClosest == nil {
+		soFarClosest = elem
+	} else {
+		// TODO only if elem is not the originalStartElem and
+		// elem is not parent that contains originalStartElem
+		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
+			(originalStartElem.CenterY > elem.Y) && (originalStartElem.CenterY < elem.Y+elem.Height) {
+			if (elem.X > soFarClosest.X) && (elem.X < originalStartElem.X) {
+				soFarClosest = elem
+			}
+		}
+	}
+	if elem.Vertical != nil {
+		for _, subElem := range elem.Vertical.Elems {
+			soFarClosest = doc.elementClosestLeft(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	if elem.Horizontal != nil {
+		for _, subElem := range elem.Horizontal.Elems {
+			soFarClosest = doc.elementClosestLeft(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	return soFarClosest
+}
+
+func (doc *BoxesDocument) elementClosestRight(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
+	if soFarClosest == nil {
+		soFarClosest = elem
+	} else {
+		// TODO only if elem is not the originalStartElem and
+		// elem is not parent that contains originalStartElem
+		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
+			(originalStartElem.CenterY > elem.Y) && (originalStartElem.CenterY < elem.Y+elem.Height) {
+			if (elem.X < soFarClosest.X) && (elem.X > originalStartElem.X) {
+				soFarClosest = elem
+			}
+		}
+	}
+	if elem.Vertical != nil {
+		for _, subElem := range elem.Vertical.Elems {
+			soFarClosest = doc.elementClosestRight(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	if elem.Horizontal != nil {
+		for _, subElem := range elem.Horizontal.Elems {
+			soFarClosest = doc.elementClosestRight(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	return soFarClosest
+}
+
+func (doc *BoxesDocument) elementClosestTop(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
+	if soFarClosest == nil {
+		soFarClosest = elem
+	} else {
+		// TODO only if elem is not the originalStartElem and
+		// elem is not parent that contains originalStartElem
+		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
+			(originalStartElem.CenterX > elem.X) && (originalStartElem.CenterX < elem.X+elem.Width) {
+			if (elem.Y > soFarClosest.Y) && (elem.Y < originalStartElem.Y) {
+				soFarClosest = elem
+			}
+		}
+	}
+	if elem.Vertical != nil {
+		for _, subElem := range elem.Vertical.Elems {
+			soFarClosest = doc.elementClosestTop(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	if elem.Horizontal != nil {
+		for _, subElem := range elem.Horizontal.Elems {
+			soFarClosest = doc.elementClosestTop(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	return soFarClosest
+}
+
+func (doc *BoxesDocument) elementClosestBottom(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
+	if soFarClosest == nil {
+		soFarClosest = elem
+	} else {
+		// TODO only if elem is not the originalStartElem and
+		// elem is not parent that contains originalStartElem
+		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
+			(originalStartElem.CenterX > elem.X) && (originalStartElem.CenterX < elem.X+elem.Width) {
+			if (elem.Y < soFarClosest.Y) && (elem.Y > originalStartElem.Y) {
+				soFarClosest = elem
+			}
+		}
+	}
+	if elem.Vertical != nil {
+		for _, subElem := range elem.Vertical.Elems {
+			soFarClosest = doc.elementClosestBottom(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	if elem.Horizontal != nil {
+		for _, subElem := range elem.Horizontal.Elems {
+			soFarClosest = doc.elementClosestBottom(&subElem, soFarClosest, originalStartElem)
+		}
+	}
+	return soFarClosest
+}
+
+func (doc *BoxesDocument) findNextConnectionParts(alreadyCollectedParts []ConnectionLine, startX, startY, endX, endY int) []ConnectionLine {
+	return alreadyCollectedParts // TODO
 }
 
 func (doc *BoxesDocument) getConnectionParts(alreadyCollectedParts []ConnectionLine, startElem, destElem *LayoutElement) []ConnectionLine {
-	if ((startElem.CenterY > destElem.Y) && (startElem.CenterY < destElem.Y+destElem.Height)) ||
-		((destElem.CenterY > startElem.Y) && (destElem.CenterY < startElem.Y+startElem.Height)) {
-		// the elements are on the same horizontal level
-		if doc.elementsAreHorizontalNeighbors(startElem, destElem) {
-			// TODO connect horizontally
-			return alreadyCollectedParts
-		}
-	}
-	if startElem.CenterY < destElem.CenterY {
-		// connection from top to bottom
-		if startElem.CenterX <= destElem.CenterX {
-			// connection from left/top to right/down ...
-			// connector starts at the bottom of the start element
-			// TODO
-
+	startX, startY, startDirection := startElem.ConnectorStart(destElem)
+	endX, endY, _ := destElem.ConnectorStart(startElem)
+	var nextX, nextY int
+	switch startDirection {
+	case ConnDirectionLeft:
+		if startY == endY {
+			// straight line
+			nextX = endX
 		} else {
-			// connection from right/top to left/down
-			// TODO
+			nextX = (startX - endX) / 2
 		}
-	} else {
-		// connection from bottom to top
-		if startElem.CenterX <= destElem.CenterX {
-			// connection from left/down to right/top
-			// TODO
+		nextX, nextY = doc.checkForCollisionLeft(startX, startY, nextX, startY, startElem)
+	case ConnDirectionRight:
+		if startY == endY {
+			// straight line
+			nextX = endX
 		} else {
-			// connection from right/down to left/top
-			// TODO
+			nextX = (endX - startX) / 2
 		}
+		nextX, nextY = doc.checkForCollisionRight(startX, startY, nextX, startY, startElem)
+	case ConnDirectionUp:
+		if startX == endX {
+			// straight line
+			nextY = endY
+		} else {
+			nextY = (startY - endY) / 2
+		}
+		nextX, nextY = doc.checkForCollisionUp(startX, startY, startX, nextY, startElem)
+	case ConnDirectionDown:
+		if startX == endX {
+			// straight line
+			nextY = endY
+		} else {
+			nextY = (endY - startY) / 2
+		}
+		nextX, nextY = doc.checkForCollisionDown(startX, startY, startX, nextY, startElem)
 	}
-	return alreadyCollectedParts
+	newAlreadyCollectedParts := append(alreadyCollectedParts, ConnectionLine{
+		StartX: startX,
+		StartY: startY,
+		EndX:   endX,
+		EndY:   endY,
+	})
+	if nextX == endX && nextY == endY {
+		return newAlreadyCollectedParts
+	}
+	return doc.findNextConnectionParts(newAlreadyCollectedParts, nextX, nextY, endX, endY)
 }
 
 func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *LayoutElemConnection) ConnectionElem {
