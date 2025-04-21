@@ -27,39 +27,63 @@ func (doc *BoxesDocument) findLayoutElementById(id string, startElem *LayoutElem
 	return nil, false
 }
 
-func (doc *BoxesDocument) checkForCollisionLeft(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+func (doc *BoxesDocument) checkForCollisionLeft(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection) {
 	closest := doc.elementClosestLeft(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.X < endX) {
-		return endX, endY
+	if (closest == nil) || (closest.X <= endX) {
+		return endX, endY, nil
 	} else {
-		return closest.X + (doc.MinBoxMargin / 2), endY
+		var nextDirection ConnDirection
+		if (closest.Y + (closest.Height / 2)) > startY {
+			nextDirection = ConnDirectionUp
+		} else {
+			nextDirection = ConnDirectionDown
+		}
+		return closest.X + (doc.MinBoxMargin / 2), endY, &nextDirection
 	}
 }
 
-func (doc *BoxesDocument) checkForCollisionRight(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+func (doc *BoxesDocument) checkForCollisionRight(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection) {
 	closest := doc.elementClosestRight(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.X > endX) {
-		return endX, endY
+	if (closest == nil) || (closest.X >= endX) {
+		return endX, endY, nil
 	} else {
-		return closest.X - (doc.MinBoxMargin / 2), endY
+		var nextDirection ConnDirection
+		if (closest.Y + (closest.Height / 2)) > startY {
+			nextDirection = ConnDirectionUp
+		} else {
+			nextDirection = ConnDirectionDown
+		}
+		return closest.X - (doc.MinBoxMargin / 2), endY, &nextDirection
 	}
 }
 
-func (doc *BoxesDocument) checkForCollisionUp(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+func (doc *BoxesDocument) checkForCollisionUp(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection) {
 	closest := doc.elementClosestTop(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.Y < endY) {
-		return endX, endY
+	if (closest == nil) || (closest.Y <= endY) {
+		return endX, endY, nil
 	} else {
-		return endX, closest.Y + (doc.MinBoxMargin / 2)
+		var nextDirection ConnDirection
+		if (closest.X + (closest.Width / 2)) > startX {
+			nextDirection = ConnDirectionLeft
+		} else {
+			nextDirection = ConnDirectionRight
+		}
+		return endX, closest.Y + (doc.MinBoxMargin / 2), &nextDirection
 	}
 }
 
-func (doc *BoxesDocument) checkForCollisionDown(startX, startY, endX, endY int, startElem *LayoutElement) (int, int) {
+func (doc *BoxesDocument) checkForCollisionDown(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection) {
 	closest := doc.elementClosestBottom(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.Y > endY) {
-		return endX, endY
+	if (closest == nil) || (closest.Y >= endY) {
+		return endX, endY, nil
 	} else {
-		return endX, closest.Y - (doc.MinBoxMargin / 2)
+		var nextDirection ConnDirection
+		if (closest.X + (closest.Width / 2)) > startX {
+			nextDirection = ConnDirectionLeft
+		} else {
+			nextDirection = ConnDirectionRight
+		}
+		return endX, closest.Y - (doc.MinBoxMargin / 2), &nextDirection
 	}
 }
 
@@ -188,7 +212,7 @@ func (doc *BoxesDocument) elementClosestBottom(elem *LayoutElement, soFarClosest
 	return soFarClosest
 }
 
-func (doc *BoxesDocument) findNextConnectionParts(alreadyCollectedParts []ConnectionLine, startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) findNextConnectionParts(alreadyCollectedParts []ConnectionLine, startX, startY, endX, endY int, nextDirection *ConnDirection) []ConnectionLine {
 	return alreadyCollectedParts // TODO
 }
 
@@ -196,6 +220,7 @@ func (doc *BoxesDocument) getConnectionParts(alreadyCollectedParts []ConnectionL
 	startX, startY, startDirection := startElem.ConnectorStart(destElem)
 	endX, endY, _ := destElem.ConnectorStart(startElem)
 	var nextX, nextY int
+	var nextDirection *ConnDirection
 	switch startDirection {
 	case ConnDirectionLeft:
 		if startY == endY {
@@ -204,7 +229,7 @@ func (doc *BoxesDocument) getConnectionParts(alreadyCollectedParts []ConnectionL
 		} else {
 			nextX = (startX - endX) / 2
 		}
-		nextX, nextY = doc.checkForCollisionLeft(startX, startY, nextX, startY, startElem)
+		nextX, nextY, nextDirection = doc.checkForCollisionLeft(startX, startY, nextX, startY, startElem)
 	case ConnDirectionRight:
 		if startY == endY {
 			// straight line
@@ -212,7 +237,7 @@ func (doc *BoxesDocument) getConnectionParts(alreadyCollectedParts []ConnectionL
 		} else {
 			nextX = (endX - startX) / 2
 		}
-		nextX, nextY = doc.checkForCollisionRight(startX, startY, nextX, startY, startElem)
+		nextX, nextY, nextDirection = doc.checkForCollisionRight(startX, startY, nextX, startY, startElem)
 	case ConnDirectionUp:
 		if startX == endX {
 			// straight line
@@ -220,7 +245,7 @@ func (doc *BoxesDocument) getConnectionParts(alreadyCollectedParts []ConnectionL
 		} else {
 			nextY = (startY - endY) / 2
 		}
-		nextX, nextY = doc.checkForCollisionUp(startX, startY, startX, nextY, startElem)
+		nextX, nextY, nextDirection = doc.checkForCollisionUp(startX, startY, startX, nextY, startElem)
 	case ConnDirectionDown:
 		if startX == endX {
 			// straight line
@@ -228,7 +253,7 @@ func (doc *BoxesDocument) getConnectionParts(alreadyCollectedParts []ConnectionL
 		} else {
 			nextY = (endY - startY) / 2
 		}
-		nextX, nextY = doc.checkForCollisionDown(startX, startY, startX, nextY, startElem)
+		nextX, nextY, nextDirection = doc.checkForCollisionDown(startX, startY, startX, nextY, startElem)
 	}
 	newAlreadyCollectedParts := append(alreadyCollectedParts, ConnectionLine{
 		StartX: startX,
@@ -239,7 +264,7 @@ func (doc *BoxesDocument) getConnectionParts(alreadyCollectedParts []ConnectionL
 	if nextX == endX && nextY == endY {
 		return newAlreadyCollectedParts
 	}
-	return doc.findNextConnectionParts(newAlreadyCollectedParts, nextX, nextY, endX, endY)
+	return doc.findNextConnectionParts(newAlreadyCollectedParts, nextX, nextY, endX, endY, nextDirection)
 }
 
 func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *LayoutElemConnection) ConnectionElem {
