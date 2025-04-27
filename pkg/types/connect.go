@@ -395,85 +395,134 @@ func (doc *BoxesDocument) initialHSConnection(startX, startY, endX, endY int) []
 	return connection
 }
 
-func (doc *BoxesDocument) solveCollisions(connection []ConnectionLine) []ConnectionLine {
+func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElement, conn ConnectionLine, startElem, destElem *LayoutElement) []ConnectionLine {
+	ret := make([]ConnectionLine, 0)
+	if (!doc.isParent(layoutElement, startElem)) && (!doc.isParent(layoutElement, destElem)) {
+		// current element is not a parent of start or dest element
+		if layoutElement.HasCollision(conn) {
+			return layoutElement.FixCollision(conn)
+		}
+	}
+	connToCheck := conn
+	if layoutElement.Vertical != nil {
+		for _, subElem := range layoutElement.Vertical.Elems {
+			fixedConnection := doc.checkAndSolveCollisionImpl(&subElem, connToCheck, startElem, destElem)
+			if len(fixedConnection) > 1 {
+				// connection was changed
+				l := len(fixedConnection)
+				connToCheck = fixedConnection[l-1]
+				ret = append(ret, fixedConnection[0:l-1]...)
+			}
+		}
+	}
+	if layoutElement.Horizontal != nil {
+		for _, subElem := range layoutElement.Horizontal.Elems {
+			fixedConnection := doc.checkAndSolveCollisionImpl(&subElem, connToCheck, startElem, destElem)
+			if len(fixedConnection) > 1 {
+				// connection was changed
+				l := len(fixedConnection)
+				connToCheck = fixedConnection[l-1]
+				ret = append(ret, fixedConnection[0:l-1]...)
+			}
+		}
+	}
+	ret = append(ret, connToCheck)
+	return ret
+}
+
+func (doc *BoxesDocument) checkAndSolveCollision(conn ConnectionLine, startElem, destElem *LayoutElement) []ConnectionLine {
+	ret := make([]ConnectionLine, 0)
+
 	// TODO
-	return connection
+	return ret
 }
 
-func (doc *BoxesDocument) lineConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) solveCollisions(connection []ConnectionLine, startElem, destElem *LayoutElement) []ConnectionLine {
+	ret := make([]ConnectionLine, 0)
+	for _, conn := range connection {
+		if conn.MovedOut {
+			ret = append(ret, conn)
+		} else {
+			ret = append(ret, doc.checkAndSolveCollision(conn, startElem, destElem)...)
+		}
+	}
+	return ret
+}
+
+func (doc *BoxesDocument) lineConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) []ConnectionLine {
 	connection := doc.initialLineConnection(startX, startY, endX, endY)
-	return doc.solveCollisions(connection)
+	return doc.solveCollisions(connection, startElem, destElem)
 }
 
-func (doc *BoxesDocument) uConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
+func (doc *BoxesDocument) uConnection(startX, startY, endX, endY, startLen int, startElem, destElem *LayoutElement) []ConnectionLine {
 	connection := doc.initialUConnection(startX, startY, endX, endY, startLen)
-	return doc.solveCollisions(connection)
+	return doc.solveCollisions(connection, startElem, destElem)
 }
 
-func (doc *BoxesDocument) vlConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) vlConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) []ConnectionLine {
 	connection := doc.initialVLConnection(startX, startY, endX, endY)
-	return doc.solveCollisions(connection)
+	return doc.solveCollisions(connection, startElem, destElem)
 }
 
-func (doc *BoxesDocument) hlConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) hlConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) []ConnectionLine {
 	connection := doc.initialHLConnection(startX, startY, endX, endY)
-	return doc.solveCollisions(connection)
+	return doc.solveCollisions(connection, startElem, destElem)
 }
 
-func (doc *BoxesDocument) hsConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) hsConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) []ConnectionLine {
 	connection := doc.initialHSConnection(startX, startY, endX, endY)
-	return doc.solveCollisions(connection)
+	return doc.solveCollisions(connection, startElem, destElem)
 }
 
-func (doc *BoxesDocument) vsConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) vsConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) []ConnectionLine {
 	connection := doc.initialVSConnection(startX, startY, endX, endY)
-	return doc.solveCollisions(connection)
+	return doc.solveCollisions(connection, startElem, destElem)
 }
 
 func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement) []ConnectionLine {
 	connectionVariants := make([][]ConnectionLine, 0)
 	if startElem.AreOnTheSameVerticalLevel(destElem) {
 		// 1. connect from right side to the left side
-		connectionVariants = append(connectionVariants, doc.lineConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY))
+		connectionVariants = append(connectionVariants, doc.lineConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem))
 		// 2. connect from top to top
-		connectionVariants = append(connectionVariants, doc.uConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y, doc.MinBoxMargin/-2))
+		connectionVariants = append(connectionVariants, doc.uConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y, doc.MinBoxMargin/-2, startElem, destElem))
 		// 3. connect from bottom to bottom
-		connectionVariants = append(connectionVariants, doc.uConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y+destElem.Height, doc.MinBoxMargin/2))
+		connectionVariants = append(connectionVariants, doc.uConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y+destElem.Height, doc.MinBoxMargin/2, startElem, destElem))
 	} else if startElem.CenterY < destElem.CenterY {
 		// 1. connect from bottom to top side
-		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y))
+		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y, startElem, destElem))
 		// 2. connect from left to top side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.CenterX, startElem.CenterY, destElem.CenterX, destElem.Y))
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.CenterX, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem))
 		// 3. connect from right to top side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y))
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem))
 		if startElem.CenterX < destElem.CenterX {
 			// 4. connect from bottom to left side
-			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X, destElem.CenterY, startElem, destElem))
 			// 5. connect from right to left side
-			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem))
 		} else {
 			// 6. connect from bottom to right side
-			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X+destElem.Width, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
 			// 7. connect from left to right side
-			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
 		}
 	} else {
 		// 1. connect from top to bottom side
-		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y+destElem.Height))
+		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
 		// 2. connect from left to bottom side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height))
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
 		// 3. connect from right to bottom side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height))
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
 		if startElem.CenterX < destElem.CenterX {
 			// 4. connect from top to left side
-			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X, destElem.CenterY, startElem, destElem))
 			// 5. connect from right to left side
-			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem))
 		} else {
 			// 6. connect from top to right side
-			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X+destElem.Width, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
 			// 7. connect from left to right side
-			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY))
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
 		}
 	}
 	var connection []ConnectionLine

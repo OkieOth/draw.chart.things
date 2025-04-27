@@ -228,7 +228,7 @@ type ConnectionLine struct {
     EndY int  `yaml:"endY"`
 
     // If the line is moved out by a box with a collision
-    MovedOut *bool  `yaml:"movedOut,omitempty"`
+    MovedOut bool  `yaml:"movedOut"`
 }
 
 

@@ -108,6 +108,21 @@ func (l *LayoutElement) ConnectorStart(otherElem *LayoutElement) (int, int, Conn
 	}
 }
 
+func (l *LayoutElement) HasCollision(conn ConnectionLine) bool {
+	if l.X > conn.X+conn.Width || l.X+l.Width < conn.X ||
+		l.Y > conn.Y+conn.Height || l.Y+l.Height < conn.Y {
+		return false
+	}
+	// TODO
+	return true
+}
+
+func (l *LayoutElement) FixCollision(conn ConnectionLine) []ConnectionLine {
+	ret := make([]ConnectionLine, 0)
+	// TODO
+	return ret
+}
+
 func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
 		curX := l.X
