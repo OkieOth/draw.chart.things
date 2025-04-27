@@ -87,6 +87,7 @@ class "**ConnectionLine**" as ConnectionLine {
         IntegerType startY
         IntegerType endX
         IntegerType endY
+        BooleanType movedOut
 }
 
  
@@ -219,6 +220,7 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
 
     
+
 
 
 

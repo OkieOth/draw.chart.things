@@ -217,6 +217,10 @@
                 },
                 "endY": {
                     "type": "integer"
+                },
+                "movedOut": {
+                    "type": "boolean",
+                    "description": "If the line is moved out by a box with a collision"
                 }
             },
             "required": ["startX", "startY", "endX", "endY"]

@@ -272,7 +272,8 @@ func (doc *BoxesDocument) handleDirection(direction ConnDirection, startX, start
 	return nextX, nextY, nextDirection, nextX2, nextY2
 }
 
-func (doc *BoxesDocument) lineConnection(startX, startY, endX, endY int) []ConnectionLine {
+// connects two points with a straight line
+func (doc *BoxesDocument) initialLineConnection(startX, startY, endX, endY int) []ConnectionLine {
 	connection := make([]ConnectionLine, 0)
 	connection = append(connection, ConnectionLine{
 		StartX: startX,
@@ -283,7 +284,8 @@ func (doc *BoxesDocument) lineConnection(startX, startY, endX, endY int) []Conne
 	return connection
 }
 
-func (doc *BoxesDocument) uConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
+// connects two points with a U-shaped line
+func (doc *BoxesDocument) initialUConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
 	connection := make([]ConnectionLine, 0)
 	y2 := startY + startLen
 	connection = append(connection, ConnectionLine{
@@ -307,6 +309,127 @@ func (doc *BoxesDocument) uConnection(startX, startY, endX, endY, startLen int) 
 	return connection
 }
 
+// connects two points with a L-shaped line, starting in a horizontal direction
+func (doc *BoxesDocument) initialHLConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := make([]ConnectionLine, 0)
+	connection = append(connection, ConnectionLine{
+		StartX: startX,
+		StartY: startY,
+		EndX:   endX,
+		EndY:   startY,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: endX,
+		StartY: startY,
+		EndX:   endX,
+		EndY:   endY,
+	})
+	return connection
+}
+
+// connects two points with a L-shaped line, starting in a vertical direction
+func (doc *BoxesDocument) initialVLConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := make([]ConnectionLine, 0)
+	connection = append(connection, ConnectionLine{
+		StartX: startX,
+		StartY: startY,
+		EndX:   startX,
+		EndY:   endY,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: startX,
+		StartY: endY,
+		EndX:   endX,
+		EndY:   endY,
+	})
+	return connection
+}
+
+// connects two points with a vertical "S"-shaped line
+func (doc *BoxesDocument) initialVSConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := make([]ConnectionLine, 0)
+	y2 := startY + (endY-startY)/2
+	connection = append(connection, ConnectionLine{
+		StartX: startX,
+		StartY: startY,
+		EndX:   startX,
+		EndY:   y2,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: startX,
+		StartY: y2,
+		EndX:   endX,
+		EndY:   y2,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: endX,
+		StartY: y2,
+		EndX:   endX,
+		EndY:   endY,
+	})
+	return connection
+}
+
+// connects two points with a horizontal "S"-shaped line
+func (doc *BoxesDocument) initialHSConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := make([]ConnectionLine, 0)
+	x2 := startX + (endX-startX)/2
+	connection = append(connection, ConnectionLine{
+		StartX: startX,
+		StartY: startY,
+		EndX:   x2,
+		EndY:   startY,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: x2,
+		StartY: startY,
+		EndX:   x2,
+		EndY:   endY,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: x2,
+		StartY: endY,
+		EndX:   endX,
+		EndY:   endY,
+	})
+	return connection
+}
+
+func (doc *BoxesDocument) solveCollisions(connection []ConnectionLine) []ConnectionLine {
+	// TODO
+	return connection
+}
+
+func (doc *BoxesDocument) lineConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := doc.initialLineConnection(startX, startY, endX, endY)
+	return doc.solveCollisions(connection)
+}
+
+func (doc *BoxesDocument) uConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
+	connection := doc.initialUConnection(startX, startY, endX, endY, startLen)
+	return doc.solveCollisions(connection)
+}
+
+func (doc *BoxesDocument) vlConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := doc.initialVLConnection(startX, startY, endX, endY)
+	return doc.solveCollisions(connection)
+}
+
+func (doc *BoxesDocument) hlConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := doc.initialHLConnection(startX, startY, endX, endY)
+	return doc.solveCollisions(connection)
+}
+
+func (doc *BoxesDocument) hsConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := doc.initialHSConnection(startX, startY, endX, endY)
+	return doc.solveCollisions(connection)
+}
+
+func (doc *BoxesDocument) vsConnection(startX, startY, endX, endY int) []ConnectionLine {
+	connection := doc.initialVSConnection(startX, startY, endX, endY)
+	return doc.solveCollisions(connection)
+}
+
 func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement) []ConnectionLine {
 	connectionVariants := make([][]ConnectionLine, 0)
 	if startElem.AreOnTheSameVerticalLevel(destElem) {
@@ -318,25 +441,39 @@ func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement)
 		connectionVariants = append(connectionVariants, doc.uConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y+destElem.Height, doc.MinBoxMargin/2))
 	} else if startElem.CenterY < destElem.CenterY {
 		// 1. connect from bottom to top side
+		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y))
 		// 2. connect from left to top side
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.CenterX, startElem.CenterY, destElem.CenterX, destElem.Y))
 		// 3. connect from right to top side
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y))
 		if startElem.CenterX < destElem.CenterX {
 			// 4. connect from bottom to left side
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X, destElem.CenterY))
 			// 5. connect from right to left side
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY))
 		} else {
 			// 6. connect from bottom to right side
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X+destElem.Width, destElem.CenterY))
 			// 7. connect from left to right side
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY))
 		}
 	} else {
 		// 1. connect from top to bottom side
+		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y+destElem.Height))
 		// 2. connect from left to bottom side
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height))
 		// 3. connect from right to bottom side
+		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height))
 		if startElem.CenterX < destElem.CenterX {
 			// 4. connect from top to left side
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X, destElem.CenterY))
 			// 5. connect from right to left side
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY))
 		} else {
 			// 6. connect from top to right side
+			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X+destElem.Width, destElem.CenterY))
 			// 7. connect from left to right side
+			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY))
 		}
 	}
 	var connection []ConnectionLine
@@ -346,102 +483,6 @@ func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement)
 		}
 	}
 	return connection
-	// startX, startY, startDirection := startElem.ConnectorStart(destElem)
-	// endX, endY, endDirection := destElem.ConnectorStart(startElem)
-	// startX2, startY2, _, x2, y2 := doc.handleDirection(startDirection, startX, startY, endX, endY, startElem)
-	// endX2, endY2, _, x3, y3 := doc.handleDirection(endDirection, endX, endY, startX, startY, destElem)
-
-	// if startX2 == endX2 && startY2 == endY2 {
-	// 	// straight line
-	// 	return append(alreadyCollectedParts, ConnectionLine{
-	// 		StartX: startX,
-	// 		StartY: startY,
-	// 		EndX:   endX,
-	// 		EndY:   endY,
-	// 	})
-	// } else {
-	// 	alreadyCollectedParts = append(alreadyCollectedParts, ConnectionLine{
-	// 		StartX: startX,
-	// 		StartY: startY,
-	// 		EndX:   startX2,
-	// 		EndY:   startY2,
-	// 	})
-	// 	alreadyCollectedParts = append(alreadyCollectedParts, ConnectionLine{
-	// 		StartX: startX2,
-	// 		StartY: startY2,
-	// 		EndX:   x2,
-	// 		EndY:   y2,
-	// 	})
-	// 	if x2 == x3 && y2 == y3 {
-	// 		alreadyCollectedParts = append(alreadyCollectedParts, ConnectionLine{
-	// 			StartX: x2,
-	// 			StartY: y2,
-	// 			EndX:   endX,
-	// 			EndY:   endY,
-	// 		})
-	// 	} else {
-	// 		alreadyCollectedParts = append(alreadyCollectedParts, ConnectionLine{
-	// 			StartX: x2,
-	// 			StartY: y2,
-	// 			EndX:   x3,
-	// 			EndY:   y3,
-	// 		})
-	// 		alreadyCollectedParts = append(alreadyCollectedParts, ConnectionLine{
-	// 			StartX: x3,
-	// 			StartY: y3,
-	// 			EndX:   endX2,
-	// 			EndY:   endY2,
-	// 		})
-	// 	}
-	// }
-
-	// return alreadyCollectedParts
-	// var nextX, nextY int
-	// var nextDirection *ConnDirection
-	// switch startDirection {
-	// case ConnDirectionLeft:
-	// 	if startY == endY {
-	// 		// straight line
-	// 		nextX = endX
-	// 	} else {
-	// 		nextX = (startX - endX) / 2
-	// 	}
-	// 	nextX, nextY, nextDirection = doc.checkForCollisionLeft(startX, startY, nextX, startY, startElem)
-	// case ConnDirectionRight:
-	// 	if startY == endY {
-	// 		// straight line
-	// 		nextX = endX
-	// 	} else {
-	// 		nextX = (endX - startX) / 2
-	// 	}
-	// 	nextX, nextY, nextDirection = doc.checkForCollisionRight(startX, startY, nextX, startY, startElem)
-	// case ConnDirectionUp:
-	// 	if startX == endX {
-	// 		// straight line
-	// 		nextY = endY
-	// 	} else {
-	// 		nextY = (startY - endY) / 2
-	// 	}
-	// 	nextX, nextY, nextDirection = doc.checkForCollisionUp(startX, startY, startX, nextY, startElem)
-	// case ConnDirectionDown:
-	// 	if startX == endX {
-	// 		// straight line
-	// 		nextY = endY
-	// 	} else {
-	// 		nextY = (endY - startY) / 2
-	// 	}
-	// 	nextX, nextY, nextDirection = doc.checkForCollisionDown(startX, startY, startX, nextY, startElem)
-	// }
-	// newAlreadyCollectedParts := append(alreadyCollectedParts, ConnectionLine{
-	// 	StartX: startX,
-	// 	StartY: startY,
-	// 	EndX:   endX,
-	// 	EndY:   endY,
-	// })
-	// if nextX == endX && nextY == endY {
-	// 	return newAlreadyCollectedParts
-	// }
-	// return doc.findNextConnectionParts(newAlreadyCollectedParts, nextX, nextY, endX, endY, nextDirection)
 }
 
 func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *LayoutElemConnection) ConnectionElem {
