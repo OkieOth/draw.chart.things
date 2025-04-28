@@ -399,8 +399,9 @@ func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElemen
 	ret := make([]ConnectionLine, 0)
 	if (!doc.isParent(layoutElement, startElem)) && (!doc.isParent(layoutElement, destElem)) {
 		// current element is not a parent of start or dest element
-		if layoutElement.HasCollision(conn) {
-			return layoutElement.FixCollision(conn)
+		ret := layoutElement.FixCollisionInCase(conn)
+		if len(ret) > 1 {
+			return ret
 		}
 	}
 	connToCheck := conn
