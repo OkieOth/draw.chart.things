@@ -241,8 +241,136 @@ func (l *LayoutElement) fixVerticalCollisionUp(conn ConnectionLine, distanceToBo
 	return ret
 }
 
-func (l *LayoutElement) fixHorizontalCollision(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
-	return []ConnectionLine{} // TODO
+func (l *LayoutElement) fixHorizontalCollisionRight(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	ret := make([]ConnectionLine, 5)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     l.X - distanceToBorder,
+		EndY:     conn.StartY,
+		MovedOut: true,
+	}
+	if conn.StartY < l.CenterY {
+		// fix to the top
+		ret[1] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	} else {
+		// fix to the bottom
+		ret[1] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	}
+	// this part needs to be checked for further collisions
+	ret[4] = ConnectionLine{
+		StartX: l.X + l.Width + distanceToBorder,
+		StartY: conn.StartY,
+		EndX:   conn.EndX,
+		EndY:   conn.EndY,
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixHorizontalCollisionLeft(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	ret := make([]ConnectionLine, 5)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     l.X + l.Width + distanceToBorder,
+		EndY:     conn.StartY,
+		MovedOut: true,
+	}
+	if conn.StartY < l.CenterY {
+		// fix to the top
+		ret[1] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	} else {
+		// fix to the bottom
+		ret[1] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	}
+	// this part needs to be checked for further collisions
+	ret[4] = ConnectionLine{
+		StartX: l.X - distanceToBorder,
+		StartY: conn.StartY,
+		EndX:   conn.EndX,
+		EndY:   conn.EndY,
+	}
+	return ret
 }
 
 func connToUpperLowerY(conn ConnectionLine) (int, int) {
