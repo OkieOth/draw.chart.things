@@ -175,6 +175,72 @@ func (l *LayoutElement) fixVerticalCollisionDown(conn ConnectionLine, distanceTo
 	return ret
 }
 
+func (l *LayoutElement) fixVerticalCollisionUp(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	ret := make([]ConnectionLine, 5)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     conn.StartX,
+		EndY:     l.Y + l.Height + distanceToBorder,
+		MovedOut: true,
+	}
+	if conn.StartX < l.CenterX {
+		// fix to the left
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     conn.StartX,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+	} else {
+		// fix to the right
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     conn.StartX,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+	}
+	// this part needs to be checked for further collisions
+	ret[4] = ConnectionLine{
+		StartX: conn.StartX,
+		StartY: l.Y - distanceToBorder,
+		EndX:   conn.StartX,
+		EndY:   conn.EndY,
+	}
+	return ret
+}
+
 func (l *LayoutElement) fixHorizontalCollision(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
 	return []ConnectionLine{} // TODO
 }
