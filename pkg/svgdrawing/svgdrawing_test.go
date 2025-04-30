@@ -87,6 +87,35 @@ func TestSimpleSvg(t *testing.T) {
 	}
 }
 
+func TestSvgWithConnections(t *testing.T) {
+	tests := []struct {
+		inputFile  string
+		outputFile string
+	}{
+		{
+			inputFile:  "../../resources/examples/complex_horizontal_connected.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected.svg",
+		},
+	}
+
+	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
+
+	for _, test := range tests {
+		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+		require.Nil(t, err)
+		doc, err := boxesimpl.InitialLayoutBoxes(b, textDimensionCalulator)
+		require.Nil(t, err)
+		output, err := os.Create(test.outputFile)
+		require.Nil(t, err)
+		svgdrawing := svgdrawing.NewDrawing(output)
+		doc.DrawBoxes(svgdrawing)
+		doc.ConnectBoxes()
+		doc.DrawConnections(svgdrawing)
+		svgdrawing.Done()
+		output.Close()
+	}
+}
+
 func TestSplitTxt(t *testing.T) {
 	textDimensionCalculator := svgdrawing.NewSvgTextDimensionCalculator()
 	tests := []struct {

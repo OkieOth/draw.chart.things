@@ -7,6 +7,8 @@ import (
 type BoxesDrawing interface {
 	Start(title string, height, width int) error
 	Draw(id, caption, text1, text2 string, x, y, width, height int, format BoxFormat) error
+	DrawLine(x1, y1, x2, y2 int, format LineDef) error
+	DrawArrow(x, y, angle int, format LineDef) error
 	Done() error
 }
 
@@ -229,6 +231,25 @@ func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
 		return fmt.Errorf("Error starting drawing: %w", err)
 	}
 	return d.Boxes.Draw(drawingImpl)
+}
+
+func (d *BoxesDocument) DrawConnections(drawingImpl BoxesDrawing) error {
+	b := "black"
+	w := 2
+	format := LineDef{
+		Width: &w,
+		Color: &b,
+	}
+
+	for _, elem := range d.Connections {
+		// iterate over the connections of the document
+		for _, l := range elem.Parts {
+			// drawing the connection lines
+			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
+		}
+
+	}
+	return nil
 }
 
 func (b *LayoutElement) Draw(drawing BoxesDrawing) error {

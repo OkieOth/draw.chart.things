@@ -8,20 +8,24 @@ func (doc *BoxesDocument) findLayoutElementById(id string, startElem *LayoutElem
 	if startElem.Id == id {
 		return startElem, true
 	}
-	for _, elem := range startElem.Vertical.Elems {
-		if elem.Id == id {
-			return &elem, true
-		}
-		if e, found := doc.findLayoutElementById(id, &elem); found {
-			return e, true
+	if startElem.Vertical != nil {
+		for _, elem := range startElem.Vertical.Elems {
+			if elem.Id == id {
+				return &elem, true
+			}
+			if e, found := doc.findLayoutElementById(id, &elem); found {
+				return e, true
+			}
 		}
 	}
-	for _, elem := range startElem.Horizontal.Elems {
-		if elem.Id == id {
-			return &elem, true
-		}
-		if e, found := doc.findLayoutElementById(id, &elem); found {
-			return e, true
+	if startElem.Horizontal != nil {
+		for _, elem := range startElem.Horizontal.Elems {
+			if elem.Id == id {
+				return &elem, true
+			}
+			if e, found := doc.findLayoutElementById(id, &elem); found {
+				return e, true
+			}
 		}
 	}
 	return nil, false
@@ -432,10 +436,7 @@ func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElemen
 }
 
 func (doc *BoxesDocument) checkAndSolveCollision(conn ConnectionLine, startElem, destElem *LayoutElement) []ConnectionLine {
-	ret := make([]ConnectionLine, 0)
-
-	// TODO
-	return ret
+	return doc.checkAndSolveCollisionImpl(&doc.Boxes, conn, startElem, destElem)
 }
 
 func (doc *BoxesDocument) solveCollisions(connection []ConnectionLine, startElem, destElem *LayoutElement) []ConnectionLine {
@@ -545,7 +546,7 @@ func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *L
 
 func (doc *BoxesDocument) doConnect(elem *LayoutElement) {
 	for _, conn := range elem.Connections {
-		destElem, found := doc.findLayoutElementById(conn.DestId, elem)
+		destElem, found := doc.findLayoutElementById(conn.DestId, &doc.Boxes)
 		if !found {
 			fmt.Println("Couldn't find destId: ", conn.DestId)
 			continue
