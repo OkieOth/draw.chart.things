@@ -108,6 +108,14 @@ func (l *LayoutElement) ConnectorStart(otherElem *LayoutElement) (int, int, Conn
 	}
 }
 
+func (l *LayoutElement) fixVerticalCollisionDownWithCorner(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	return make([]ConnectionLine, 0) // TODO
+}
+
+func (l *LayoutElement) fixVerticalCollisionUpWithCorner(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	return make([]ConnectionLine, 0) // TODO
+}
+
 func (l *LayoutElement) fixVerticalCollisionDown(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
 	ret := make([]ConnectionLine, 5)
 	ret[0] = ConnectionLine{
@@ -239,6 +247,14 @@ func (l *LayoutElement) fixVerticalCollisionUp(conn ConnectionLine, distanceToBo
 		EndY:   conn.EndY,
 	}
 	return ret
+}
+
+func (l *LayoutElement) fixHorizontalCollisionRightWithCorner(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	return make([]ConnectionLine, 0) // TODO
+}
+
+func (l *LayoutElement) fixHorizontalCollisionLeftWithCorner(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	return make([]ConnectionLine, 0) // TODO
 }
 
 func (l *LayoutElement) fixHorizontalCollisionRight(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
@@ -386,33 +402,70 @@ func connToLeftRightX(conn ConnectionLine) (int, int) {
 	return conn.EndX, conn.StartX
 }
 
+func (l *LayoutElement) ShouldBeDrawn() bool {
+	return l.Caption != "" || l.Text1 != "" || l.Text2 != ""
+}
+
 func (l *LayoutElement) FixCollisionInCase(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	if !l.ShouldBeDrawn() {
+		return []ConnectionLine{conn}
+	}
 	if conn.StartX == conn.EndX {
 		// vertical line
 		upperY, lowerY := connToUpperLowerY(conn)
+		// if (l.X < conn.StartX) && ((l.X + l.Width) > conn.StartX) &&
+		// 	(l.Y > upperY) && ((l.Y + l.Height) < lowerY) {
+
 		if (l.X < conn.StartX) && ((l.X + l.Width) > conn.StartX) &&
-			(l.Y > upperY) && ((l.Y + l.Height) < lowerY) {
+			(l.Y > upperY) {
 			// has collision
 			if conn.StartY < conn.EndY {
 				// going down
-				return l.fixVerticalCollisionDown(conn, distanceToBorder)
+				if lowerY > (l.Y + l.Height) {
+					// line going full through the box
+					return l.fixVerticalCollisionDown(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixVerticalCollisionDownWithCorner(conn, distanceToBorder)
+				}
 			} else {
 				// going up
-				return l.fixVerticalCollisionUp(conn, distanceToBorder)
+				if upperY < l.Y {
+					// line going full through the box
+					return l.fixVerticalCollisionUp(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixVerticalCollisionUpWithCorner(conn, distanceToBorder)
+				}
 			}
 		}
 	} else {
 		// horizontal line
 		leftX, rightX := connToLeftRightX(conn)
+		// if (l.Y < conn.StartY) && ((l.Y + l.Height) > conn.StartY) &&
+		// 	(l.X > leftX) && ((l.X + l.Width) < rightX) {
+
 		if (l.Y < conn.StartY) && ((l.Y + l.Height) > conn.StartY) &&
-			(l.X > leftX) && ((l.X + l.Width) < rightX) {
+			(l.X > leftX) {
 			// has collision
 			if conn.StartX < conn.EndX {
 				// going right
-				return l.fixHorizontalCollisionRight(conn, distanceToBorder)
+				if rightX > (l.X + l.Width) {
+					// line going full through the box
+					return l.fixHorizontalCollisionRight(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixHorizontalCollisionRightWithCorner(conn, distanceToBorder)
+				}
 			} else {
 				// going left
-				return l.fixHorizontalCollisionLeft(conn, distanceToBorder)
+				if leftX < l.X {
+					// line going full through the box
+					return l.fixHorizontalCollisionLeft(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixHorizontalCollisionLeftWithCorner(conn, distanceToBorder)
+				}
 			}
 		}
 	}

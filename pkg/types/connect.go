@@ -493,38 +493,38 @@ func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement)
 	} else if startElem.CenterY < destElem.CenterY {
 		// 1. connect from bottom to top side
 		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y, startElem, destElem))
-		// 2. connect from left to top side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.CenterX, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem))
-		// 3. connect from right to top side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem))
 		if startElem.CenterX < destElem.CenterX {
-			// 4. connect from bottom to left side
+			// 2. connect from bottom to left side
 			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X, destElem.CenterY, startElem, destElem))
-			// 5. connect from right to left side
+			// 3. connect from right to left side
 			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem))
+			// 4. connect from right to top side
+			connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem))
 		} else {
-			// 6. connect from bottom to right side
+			// 5. connect from bottom to right side
 			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
-			// 7. connect from left to right side
+			// 6. connect from left to right side
 			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
+			// 7. connect from left to top side
+			connectionVariants = append(connectionVariants, doc.hlConnection(startElem.CenterX, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem))
 		}
 	} else {
 		// 1. connect from top to bottom side
 		connectionVariants = append(connectionVariants, doc.vsConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
-		// 2. connect from left to bottom side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
-		// 3. connect from right to bottom side
-		connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
 		if startElem.CenterX < destElem.CenterX {
-			// 4. connect from top to left side
+			// 2. connect from top to left side
 			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X, destElem.CenterY, startElem, destElem))
-			// 5. connect from right to left side
+			// 3. connect from right to left side
 			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem))
+			// 4. connect from right to bottom side
+			connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
 		} else {
-			// 6. connect from top to right side
+			// 5. connect from top to right side
 			connectionVariants = append(connectionVariants, doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
-			// 7. connect from left to right side
+			// 6. connect from left to right side
 			connectionVariants = append(connectionVariants, doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem))
+			// 7. connect from left to bottom side
+			connectionVariants = append(connectionVariants, doc.hlConnection(startElem.X, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem))
 		}
 	}
 	var connection []ConnectionLine
