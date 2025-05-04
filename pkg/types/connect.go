@@ -292,6 +292,7 @@ func (doc *BoxesDocument) initialLineConnection(startX, startY, endX, endY int) 
 func (doc *BoxesDocument) initialUConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
 	connection := make([]ConnectionLine, 0)
 	y2 := startY + startLen
+
 	connection = append(connection, ConnectionLine{
 		StartX: startX,
 		StartY: startY,
@@ -314,8 +315,15 @@ func (doc *BoxesDocument) initialUConnection(startX, startY, endX, endY, startLe
 }
 
 // connects two points with a L-shaped line, starting in a horizontal direction
-func (doc *BoxesDocument) initialHLConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) initialHLConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
 	connection := make([]ConnectionLine, 0)
+
+	upperY, lowerY := minMax(startY, endY)
+
+	if (lowerY - upperY) < doc.MinBoxMargin/2 {
+		return nil, fmt.Errorf("HL connection would be too small")
+	}
+
 	connection = append(connection, ConnectionLine{
 		StartX: startX,
 		StartY: startY,
@@ -328,12 +336,26 @@ func (doc *BoxesDocument) initialHLConnection(startX, startY, endX, endY int) []
 		EndX:   endX,
 		EndY:   endY,
 	})
-	return connection
+	return connection, nil
+}
+
+func minMax(a, b int) (int, int) {
+	if a < b {
+		return a, b
+	}
+	return b, a
 }
 
 // connects two points with a L-shaped line, starting in a vertical direction
-func (doc *BoxesDocument) initialVLConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) initialVLConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
 	connection := make([]ConnectionLine, 0)
+
+	upperY, lowerY := minMax(startY, endY)
+
+	if (lowerY - upperY) < doc.MinBoxMargin/2 {
+		return nil, fmt.Errorf("HS connection would be too small")
+	}
+
 	connection = append(connection, ConnectionLine{
 		StartX: startX,
 		StartY: startY,
@@ -346,13 +368,16 @@ func (doc *BoxesDocument) initialVLConnection(startX, startY, endX, endY int) []
 		EndX:   endX,
 		EndY:   endY,
 	})
-	return connection
+	return connection, nil
 }
 
 // connects two points with a vertical "S"-shaped line
-func (doc *BoxesDocument) initialVSConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) initialVSConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
 	connection := make([]ConnectionLine, 0)
 	y2 := startY + (endY-startY)/2
+	if y2 < doc.MinBoxMargin/2 {
+		return nil, fmt.Errorf("VS connection would be too small")
+	}
 	connection = append(connection, ConnectionLine{
 		StartX: startX,
 		StartY: startY,
@@ -371,13 +396,16 @@ func (doc *BoxesDocument) initialVSConnection(startX, startY, endX, endY int) []
 		EndX:   endX,
 		EndY:   endY,
 	})
-	return connection
+	return connection, nil
 }
 
 // connects two points with a horizontal "S"-shaped line
-func (doc *BoxesDocument) initialHSConnection(startX, startY, endX, endY int) []ConnectionLine {
+func (doc *BoxesDocument) initialHSConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
 	connection := make([]ConnectionLine, 0)
 	x2 := startX + (endX-startX)/2
+	if x2 < doc.MinBoxMargin/2 {
+		return nil, fmt.Errorf("HS connection would be too small")
+	}
 	connection = append(connection, ConnectionLine{
 		StartX: startX,
 		StartY: startY,
@@ -396,7 +424,7 @@ func (doc *BoxesDocument) initialHSConnection(startX, startY, endX, endY int) []
 		EndX:   endX,
 		EndY:   endY,
 	})
-	return connection
+	return connection, nil
 }
 
 func needsInverseOrder(conn ConnectionLine) bool {
@@ -560,22 +588,34 @@ func (doc *BoxesDocument) uConnection(startX, startY, endX, endY, startLen int, 
 }
 
 func (doc *BoxesDocument) vlConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialVLConnection(startX, startY, endX, endY)
+	connection, err := doc.initialVLConnection(startX, startY, endX, endY)
+	if err != nil {
+		return nil, err
+	}
 	return doc.solveCollisions(connection, startElem, destElem)
 }
 
 func (doc *BoxesDocument) hlConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialHLConnection(startX, startY, endX, endY)
+	connection, err := doc.initialHLConnection(startX, startY, endX, endY)
+	if err != nil {
+		return nil, err
+	}
 	return doc.solveCollisions(connection, startElem, destElem)
 }
 
 func (doc *BoxesDocument) hsConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialHSConnection(startX, startY, endX, endY)
+	connection, err := doc.initialHSConnection(startX, startY, endX, endY)
+	if err != nil {
+		return nil, err
+	}
 	return doc.solveCollisions(connection, startElem, destElem)
 }
 
 func (doc *BoxesDocument) vsConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialVSConnection(startX, startY, endX, endY)
+	connection, err := doc.initialVSConnection(startX, startY, endX, endY)
+	if err != nil {
+		return nil, err
+	}
 	return doc.solveCollisions(connection, startElem, destElem)
 }
 

@@ -182,8 +182,12 @@ func TestSvgWithConnections(t *testing.T) {
 			outputFile: "../../temp/long_vertical_01.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 6, len(doc.Connections))
-				for _, c := range doc.Connections {
-					require.Equal(t, 2, len(c.Parts))
+				for i, c := range doc.Connections {
+					if i == 2 {
+						require.Equal(t, 3, len(c.Parts))
+					} else {
+						require.Equal(t, 2, len(c.Parts))
+					}
 				}
 			},
 		},
@@ -192,8 +196,12 @@ func TestSvgWithConnections(t *testing.T) {
 			outputFile: "../../temp/long_vertical_02.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 6, len(doc.Connections))
-				for _, c := range doc.Connections {
-					require.Equal(t, 2, len(c.Parts))
+				for i, c := range doc.Connections {
+					if i == 2 {
+						require.Equal(t, 3, len(c.Parts))
+					} else {
+						require.Equal(t, 2, len(c.Parts))
+					}
 				}
 			},
 		},
