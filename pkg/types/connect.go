@@ -403,14 +403,32 @@ func needsInverseOrder(conn ConnectionLine) bool {
 	return conn.StartX > conn.EndX || conn.StartY > conn.EndY
 }
 
-func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElement, connectionLines []ConnectionLine, index int, startElem, destElem *LayoutElement) []ConnectionLine {
+func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElement, connectionLines []ConnectionLine, index int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
 	ret := make([]ConnectionLine, 0)
-	if (!doc.isParent(layoutElement, startElem)) && (!doc.isParent(layoutElement, destElem)) {
+	isParentOfStartElem := doc.isParent(layoutElement, startElem)
+	isParentOfDestElem := doc.isParent(layoutElement, destElem)
+	if (!isParentOfStartElem) && (!isParentOfDestElem) {
 		// current element is not a parent of start or dest element
 		beforeFixing := len(connectionLines)
 		ret := layoutElement.FixCollisionInCase(connectionLines, index, doc.MinBoxMargin/2)
 		if len(ret) > beforeFixing {
-			return ret
+			return ret, nil
+		}
+	} else {
+		if layoutElement.Caption != "" || layoutElement.Text1 != "" || layoutElement.Text2 != "" {
+			// current element is a parent of start or dest element
+			// and has a caption or text ... if one of the lines goes vertical through the parent, then is has a collision
+			for _, l := range connectionLines {
+				if l.StartX == l.EndX {
+					// vertical line ...
+					leftX, rightX := connToLeftRightX(l)
+					topY, bottomY := connToUpperLowerY(l)
+					if ((leftX >= layoutElement.X) && (rightX <= layoutElement.X+layoutElement.Width)) &&
+						(((topY <= layoutElement.Y) && (bottomY > layoutElement.Y)) || ((topY > layoutElement.Y) && (topY < layoutElement.Y+layoutElement.Height))) {
+						return nil, fmt.Errorf("collision in caption or text: %s", layoutElement.Caption)
+					}
+				}
+			}
 		}
 	}
 	connToCheck := index
@@ -425,7 +443,10 @@ func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElemen
 			}
 			subElem := layoutElement.Vertical.Elems[index]
 			beforeFixing := len(connectionLinesToCheck)
-			fixedConnection := doc.checkAndSolveCollisionImpl(&subElem, connectionLinesToCheck, connToCheck, startElem, destElem)
+			fixedConnection, err := doc.checkAndSolveCollisionImpl(&subElem, connectionLinesToCheck, connToCheck, startElem, destElem)
+			if err != nil {
+				return nil, err
+			}
 			if len(fixedConnection) > beforeFixing {
 				// connection was changed
 				l := len(fixedConnection)
@@ -445,7 +466,10 @@ func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElemen
 			}
 			subElem := layoutElement.Horizontal.Elems[index]
 			beforeFixing := len(connectionLinesToCheck)
-			fixedConnection := doc.checkAndSolveCollisionImpl(&subElem, connectionLinesToCheck, connToCheck, startElem, destElem)
+			fixedConnection, err := doc.checkAndSolveCollisionImpl(&subElem, connectionLinesToCheck, connToCheck, startElem, destElem)
+			if err != nil {
+				return nil, err
+			}
 			if len(fixedConnection) > beforeFixing {
 				// connection was changed
 				l := len(fixedConnection)
@@ -461,10 +485,10 @@ func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElemen
 	} else {
 		ret = append(ret, connectionLines[index])
 	}
-	return ret
+	return ret, nil
 }
 
-func (doc *BoxesDocument) checkAndSolveCollision(connectionLines []ConnectionLine, index int, startElem, destElem *LayoutElement) []ConnectionLine {
+func (doc *BoxesDocument) checkAndSolveCollision(connectionLines []ConnectionLine, index int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
 	return doc.checkAndSolveCollisionImpl(&doc.Boxes, connectionLines, index, startElem, destElem)
 }
 
@@ -502,7 +526,11 @@ func (doc *BoxesDocument) solveCollisions(connectionLines []ConnectionLine, star
 		if connectionLines[i].MovedOut {
 			ret = append(ret, connectionLines[i])
 		} else {
-			ret = append(ret, doc.checkAndSolveCollision(connectionLines, i, startElem, destElem)...)
+			r, err := doc.checkAndSolveCollision(connectionLines, i, startElem, destElem)
+			if err != nil {
+				return nil, err
+			}
+			ret = append(ret, r...)
 		}
 	}
 	// check if the connection is valid
@@ -553,7 +581,7 @@ func (doc *BoxesDocument) vsConnection(startX, startY, endX, endY int, startElem
 
 func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement) [][]ConnectionLine {
 	connectionVariants := make([][]ConnectionLine, 0)
-	if startElem.AreOnTheSameVerticalLevel(destElem) {
+	if startElem.CenterY == destElem.CenterY {
 		// 1. connect from right side to the left side
 		if v, err := doc.lineConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem); err == nil {
 			connectionVariants = append(connectionVariants, v)

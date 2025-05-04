@@ -18,7 +18,9 @@ open-simple-in-browser:
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested2.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested3.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested4.svg \
-		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested5.svg &
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_box_nested5.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hdiamond_nestedx.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hdiamond_nestedx2.svg &
 
 open-complex-in-browser:
 	firefox file://$(CURRENT_DIR)/temp/TestSimpleSvg_diamond.svg \

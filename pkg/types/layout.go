@@ -749,8 +749,19 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 
 		l.Vertical.Height = h + defaultPadding
 		l.Height += l.Vertical.Height
-		if w > l.Width {
-			l.Width = w
+		l.adjustDimensionsBasedOnNested(w, defaultPadding)
+	}
+}
+
+func (l *LayoutElement) adjustDimensionsBasedOnNested(width, padding int) {
+	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+		l.Height += padding
+	}
+	if width > l.Width {
+		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+			l.Width = width + (2 * padding)
+		} else {
+			l.Width = width
 		}
 	}
 }
@@ -791,12 +802,10 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 		}
 
 		l.Horizontal.Height = h + defaultPadding
-		l.Height += l.Horizontal.Height
 		l.Horizontal.Width = w
+		l.Height += l.Horizontal.Height
 
-		if l.Width < w {
-			l.Width = w
-		}
+		l.adjustDimensionsBasedOnNested(w, defaultPadding)
 	}
 }
 
@@ -828,7 +837,7 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 		}
 		//yInnerOffset = l.Format.Padding + max(yCaptionOffset, max(yText1Offset, yText2Offset))
 		//yInnerOffset = l.Format.Padding + l.Height
-		yInnerOffset = l.Height
+		yInnerOffset = l.Height + l.Format.Padding
 		l.Width = max(cW, max(t1W, t2W)) + (2 * l.Format.Padding)
 	}
 	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
