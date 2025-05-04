@@ -76,43 +76,641 @@ func (l *LayoutElement) centerVerticalElems() {
 	}
 }
 
-// func (l *LayoutElement) centerVerticalElems() {
-// 	if l.Vertical != nil {
-// 		cont := l.Vertical
-// 		contYOffset := (l.Height - cont.Height) / 2
-// 		contXOffset := (l.Width - cont.Width) / 2
-// 		cont.Y = l.Y + contYOffset
-// 		cont.X = l.X + contXOffset
-// 		for i := 0; i < len(cont.Elems); i++ {
-// 			sub := &cont.Elems[i]
-// 			offsetY := ((cont.Height - sub.Height) / 2)
-// 			sub.incrementY(offsetY)
-// 			offsetX := contXOffset + ((cont.Width - sub.Width) / 2)
-// 			sub.incrementX(offsetX)
-// 			sub.centerVerticalElems()
-// 			if sub.Horizontal != nil && len(sub.Horizontal.Elems) == 1 {
-// 				sub.centerHorizontalElems()
-// 			}
-// 		}
-// 	}
-// }
+func (l *LayoutElement) AreOnTheSameVerticalLevel(otherElem *LayoutElement) bool {
+	return ((l.CenterY > otherElem.Y) && (l.CenterY < otherElem.Y+otherElem.Height)) ||
+		((otherElem.CenterY > l.Y) && (otherElem.CenterY < l.Y+l.Height))
+}
 
-// func (l *LayoutElement) centerLayoutElemContainer(cont *LayoutElemContainer) {
-// 	if cont != nil {
-// 		contYOffset := (l.Height - cont.Height) / 2
-// 		contXOffset := (l.Width - cont.Width) / 2
-// 		cont.Y = l.Y + contYOffset
-// 		cont.X = l.X + contXOffset
-// 		for i := 0; i < len(cont.Elems); i++ {
-// 			sub := &cont.Elems[i]
-// 			offsetY := ((cont.Height - sub.Height) / 2)
-// 			sub.incrementY(offsetY)
-// 			offsetX := contXOffset + ((cont.Width - sub.Width) / 2)
-// 			sub.incrementX(offsetX)
-// 			sub.Center()
-// 		}
-// 	}
-// }
+type ConnDirection int
+
+const (
+	ConnDirectionLeft ConnDirection = iota
+	ConnDirectionUp
+	ConnDirectionRight
+	ConnDirectionDown
+)
+
+func (l *LayoutElement) ConnectorStart(otherElem *LayoutElement) (int, int, ConnDirection) {
+	if l.AreOnTheSameVerticalLevel(otherElem) {
+		// the elements are on the same vertical level
+		if l.CenterX < otherElem.CenterX {
+			return l.X + l.Width, l.CenterY, ConnDirectionRight
+		} else {
+			return l.X, l.CenterY, ConnDirectionLeft
+		}
+
+	} else if l.CenterY < otherElem.CenterY {
+		// connection from top to bottom
+		return l.CenterX, l.Y + l.Height, ConnDirectionDown
+	} else {
+		// connection from bottom to top
+		return l.CenterX, l.Y, ConnDirectionUp
+	}
+}
+
+func (l *LayoutElement) fixVerticalCollisionDownWithCorner(connectionLines []ConnectionLine, index int, distanceToBorder int) []ConnectionLine {
+	// I don't test the index, because if it crashes then the understanding of the algorithm is wrong
+	conn := connectionLines[index]
+	nextConn := connectionLines[index+1]
+	// next Connection is a horizontal line
+	leftX, _ := connToLeftRightX(nextConn)
+	ret := make([]ConnectionLine, 3)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     conn.StartX,
+		EndY:     l.Y - distanceToBorder,
+		MovedOut: true,
+	}
+	if leftX < conn.StartX {
+		// next line is to the left
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     nextConn.StartY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		if nextConn.StartX > nextConn.EndX {
+			// next line is to the left
+			connectionLines[index+1].StartX = ret[2].EndX
+		} else {
+			connectionLines[index+1].EndX = ret[2].EndX
+		}
+	} else {
+		// next line is to the right
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     nextConn.StartY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		if nextConn.StartX < nextConn.EndX {
+			// next line is to the left
+			connectionLines[index+1].StartX = ret[2].EndX
+		} else {
+			connectionLines[index+1].EndX = ret[2].EndX
+		}
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixVerticalCollisionDown(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	ret := make([]ConnectionLine, 5)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     conn.StartX,
+		EndY:     l.Y - distanceToBorder,
+		MovedOut: true,
+	}
+	if conn.StartX < l.CenterX {
+		// fix to the left
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     conn.StartX,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+
+	} else {
+		// fix to the right
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     conn.StartX,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+	}
+	// this part needs to be checked for further collisions
+	ret[4] = ConnectionLine{
+		StartX: conn.StartX,
+		StartY: l.Y + l.Height + distanceToBorder,
+		EndX:   conn.StartX,
+		EndY:   conn.EndY,
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixVerticalCollisionUpWithCorner(connectionLines []ConnectionLine, index int, distanceToBorder int) []ConnectionLine {
+	// I don't test the index, because if it crashes then the understanding of the algorithm is wrong
+	conn := connectionLines[index]
+	nextConn := connectionLines[index+1]
+	// next Connection is a horizontal line
+	leftX, _ := connToLeftRightX(nextConn)
+	ret := make([]ConnectionLine, 3)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     conn.StartX,
+		EndY:     l.Y + l.Height + distanceToBorder,
+		MovedOut: true,
+	}
+	if leftX < conn.StartX {
+		// next line is to the left
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     nextConn.StartY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		if nextConn.StartX > nextConn.EndX {
+			// next line is to the left
+			connectionLines[index+1].StartX = ret[2].EndX
+		} else {
+			connectionLines[index+1].EndX = ret[2].EndX
+		}
+	} else {
+		// next line is to the right
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     nextConn.StartY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		if nextConn.StartX < nextConn.EndX {
+			// next line is to the left
+			connectionLines[index+1].StartX = ret[2].EndX
+		} else {
+			connectionLines[index+1].EndX = ret[2].EndX
+		}
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixVerticalCollisionUp(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	ret := make([]ConnectionLine, 5)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     conn.StartX,
+		EndY:     l.Y + l.Height + distanceToBorder,
+		MovedOut: true,
+	}
+	if conn.StartX < l.CenterX {
+		// fix to the left
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     conn.StartX,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+	} else {
+		// fix to the right
+		ret[1] = ConnectionLine{
+			StartX:   conn.StartX,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     conn.StartX,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+	}
+	// this part needs to be checked for further collisions
+	ret[4] = ConnectionLine{
+		StartX: conn.StartX,
+		StartY: l.Y - distanceToBorder,
+		EndX:   conn.StartX,
+		EndY:   conn.EndY,
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixHorizontalCollisionRightWithCorner(connectionLines []ConnectionLine, index int, distanceToBorder int) []ConnectionLine {
+	// I don't test the index, because if it crashes then the understanding of the algorithm is wrong
+	conn := connectionLines[index]
+	nextConn := connectionLines[index+1]
+	// next Connection is a vertical line
+	topY, _ := connToUpperLowerY(nextConn)
+	ret := make([]ConnectionLine, 3)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     l.X - distanceToBorder,
+		EndY:     conn.StartY,
+		MovedOut: true,
+	}
+	if topY < conn.StartY {
+		// next line is to the top
+		ret[1] = ConnectionLine{
+			StartX:   ret[0].EndX,
+			StartY:   conn.StartY,
+			EndX:     ret[0].EndX,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   ret[1].EndX,
+			StartY:   ret[1].EndY,
+			EndX:     nextConn.StartX,
+			EndY:     ret[1].EndY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		if nextConn.StartY > nextConn.EndY {
+			// next line is to the bottom
+			connectionLines[index+1].StartY = ret[2].EndY
+		} else {
+			connectionLines[index+1].EndY = ret[2].EndY
+		}
+	} else {
+		// next line is to the bottom
+		ret[1] = ConnectionLine{
+			StartX:   ret[0].EndX,
+			StartY:   conn.StartY,
+			EndX:     ret[0].EndX,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   ret[1].EndX,
+			StartY:   ret[1].EndY,
+			EndX:     nextConn.StartX,
+			EndY:     ret[1].EndY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		// adjust the next connection
+		if nextConn.StartY < nextConn.EndY {
+			// next line is to the bottom
+			connectionLines[index+1].StartY = ret[2].EndY
+		} else {
+			connectionLines[index+1].EndY = ret[2].EndY
+		}
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixHorizontalCollisionRight(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	ret := make([]ConnectionLine, 5)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     l.X - distanceToBorder,
+		EndY:     conn.StartY,
+		MovedOut: true,
+	}
+	if conn.StartY < l.CenterY {
+		// fix to the top
+		ret[1] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	} else {
+		// fix to the bottom
+		ret[1] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	}
+	// this part needs to be checked for further collisions
+	ret[4] = ConnectionLine{
+		StartX: l.X + l.Width + distanceToBorder,
+		StartY: conn.StartY,
+		EndX:   conn.EndX,
+		EndY:   conn.EndY,
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixHorizontalCollisionLeftWithCorner(connectionLines []ConnectionLine, index int, distanceToBorder int) []ConnectionLine {
+	// I don't test the index, because if it crashes then the understanding of the algorithm is wrong
+	conn := connectionLines[index]
+	nextConn := connectionLines[index+1]
+	// next Connection is a vertical line
+	topY, _ := connToUpperLowerY(nextConn)
+	ret := make([]ConnectionLine, 3)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     l.X + l.Width + distanceToBorder,
+		EndY:     conn.StartY,
+		MovedOut: true,
+	}
+	if topY < conn.StartY {
+		// next line is to the top
+		ret[1] = ConnectionLine{
+			StartX:   ret[0].EndX,
+			StartY:   conn.StartY,
+			EndX:     ret[0].EndX,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   ret[1].EndX,
+			StartY:   ret[1].EndY,
+			EndX:     conn.EndX,
+			EndY:     ret[1].EndY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		if nextConn.StartY > nextConn.EndY {
+			// next line is to the bottom
+			connectionLines[index+1].StartY = ret[2].EndY
+		} else {
+			connectionLines[index+1].EndY = ret[2].EndY
+		}
+	} else {
+		// next line is to the bottom
+		ret[1] = ConnectionLine{
+			StartX:   ret[0].EndX,
+			StartY:   conn.StartY,
+			EndX:     ret[0].EndX,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   ret[1].EndX,
+			StartY:   ret[1].EndY,
+			EndX:     conn.EndX,
+			EndY:     ret[1].EndY,
+			MovedOut: true,
+		}
+		// adjust the next connection
+		if nextConn.StartY < nextConn.EndY {
+			// next line is to the bottom
+			connectionLines[index+1].StartY = ret[2].EndY
+		} else {
+			connectionLines[index+1].EndY = ret[2].EndY
+		}
+	}
+	return ret
+}
+
+func (l *LayoutElement) fixHorizontalCollisionLeft(conn ConnectionLine, distanceToBorder int) []ConnectionLine {
+	ret := make([]ConnectionLine, 5)
+	ret[0] = ConnectionLine{
+		StartX:   conn.StartX,
+		StartY:   conn.StartY,
+		EndX:     l.X + l.Width + distanceToBorder,
+		EndY:     conn.StartY,
+		MovedOut: true,
+	}
+	if conn.StartY < l.CenterY {
+		// fix to the top
+		ret[1] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y - distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y - distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	} else {
+		// fix to the bottom
+		ret[1] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   conn.StartY,
+			EndX:     l.X + l.Width + distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[2] = ConnectionLine{
+			StartX:   l.X + l.Width + distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     l.Y + l.Height + distanceToBorder,
+			MovedOut: true,
+		}
+		ret[3] = ConnectionLine{
+			StartX:   l.X - distanceToBorder,
+			StartY:   l.Y + l.Height + distanceToBorder,
+			EndX:     l.X - distanceToBorder,
+			EndY:     conn.StartY,
+			MovedOut: true,
+		}
+	}
+	// this part needs to be checked for further collisions
+	ret[4] = ConnectionLine{
+		StartX: l.X - distanceToBorder,
+		StartY: conn.StartY,
+		EndX:   conn.EndX,
+		EndY:   conn.EndY,
+	}
+	return ret
+}
+
+func connToUpperLowerY(conn ConnectionLine) (int, int) {
+	if conn.StartY < conn.EndY {
+		return conn.StartY, conn.EndY
+	}
+	return conn.EndY, conn.StartY
+}
+func connToLeftRightX(conn ConnectionLine) (int, int) {
+	if conn.StartX < conn.EndX {
+		return conn.StartX, conn.EndX
+	}
+	return conn.EndX, conn.StartX
+}
+
+func (l *LayoutElement) ShouldBeDrawn() bool {
+	return l.Caption != "" || l.Text1 != "" || l.Text2 != ""
+}
+
+func between(value, min, max int) bool {
+	return value > min && value < max
+}
+
+func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, index int, distanceToBorder int) []ConnectionLine {
+	if !l.ShouldBeDrawn() {
+		return []ConnectionLine{connectionLines[index]}
+	}
+	conn := connectionLines[index]
+	if conn.StartX == conn.EndX {
+		// vertical line
+		upperY, lowerY := connToUpperLowerY(conn)
+		if (l.X < conn.StartX) && ((l.X + l.Width) > conn.StartX) &&
+			(((l.Y > upperY) && ((l.Y + l.Height) < lowerY)) || between(lowerY, l.Y, l.Y+l.Height) || between(upperY, l.Y, l.Y+l.Height)) {
+			// has collision
+			if conn.StartY < conn.EndY {
+				// going down
+				if lowerY > (l.Y + l.Height) {
+					// line going full through the box
+					return l.fixVerticalCollisionDown(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixVerticalCollisionDownWithCorner(connectionLines, index, distanceToBorder)
+				}
+			} else {
+				// going up
+				if upperY < l.Y {
+					// line going full through the box
+					return l.fixVerticalCollisionUp(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixVerticalCollisionUpWithCorner(connectionLines, index, distanceToBorder)
+				}
+			}
+		}
+	} else {
+		// horizontal line
+		leftX, rightX := connToLeftRightX(conn)
+		if (l.Y < conn.StartY) && ((l.Y + l.Height) > conn.StartY) &&
+			(((l.X > leftX) && ((l.X + l.Width) < rightX)) || between(leftX, l.X, l.X+l.Width) || between(rightX, l.X, l.X+l.Width)) {
+			// has collision
+			if conn.StartX < conn.EndX {
+				// going right
+				if rightX > (l.X + l.Width) {
+					// line going full through the box
+					return l.fixHorizontalCollisionRight(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixHorizontalCollisionRightWithCorner(connectionLines, index, distanceToBorder)
+				}
+			} else {
+				// going left
+				if leftX < l.X {
+					// line going full through the box
+					return l.fixHorizontalCollisionLeft(conn, distanceToBorder)
+				} else {
+					// line going only partially through the box
+					return l.fixHorizontalCollisionLeftWithCorner(connectionLines, index, distanceToBorder)
+				}
+			}
+		}
+	}
+	return []ConnectionLine{conn}
+}
 
 func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
@@ -238,6 +836,8 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 }
 
 func (l *LayoutElement) Center() {
+	l.CenterX = l.X + (l.Width / 2)
+	l.CenterY = l.Y + (l.Height / 2)
 	l.centerHorizontalElems()
 	l.centerVerticalElems()
 }

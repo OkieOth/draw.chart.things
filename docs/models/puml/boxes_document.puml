@@ -30,7 +30,10 @@ class "**LayoutElement**" as LayoutElement {
         IntegerType y
         IntegerType width
         IntegerType height
+        IntegerType centerX
+        IntegerType centerY
         BoxFormat format
+        LayoutElemConnection[] connections
         StringType[] tags
 }
 
@@ -42,7 +45,7 @@ class "**ConnectionElem**" as ConnectionElem {
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
-        ConnectionPoint[] points
+        ConnectionLine[] parts
 }
 
  
@@ -70,9 +73,21 @@ class "**LayoutElemContainer**" as LayoutElemContainer {
 
  
 
-class "**ConnectionPoint**" as ConnectionPoint {
-        IntegerType x
-        IntegerType y
+class "**LayoutElemConnection**" as LayoutElemConnection {
+        StringType destId
+        BooleanType sourceArrow
+        BooleanType destArrow
+        StringType[] tags
+}
+
+ 
+
+class "**ConnectionLine**" as ConnectionLine {
+        IntegerType startX
+        IntegerType startY
+        IntegerType endX
+        IntegerType endY
+        BooleanType movedOut
 }
 
  
@@ -160,7 +175,11 @@ LayoutElement  *--  LayoutElemContainer
 
 
 
+
+
 LayoutElement  *--  BoxFormat
+
+LayoutElement "0" *-- "n" LayoutElemConnection
 
 
     
@@ -172,7 +191,7 @@ ConnectionElem  *--  LayoutElement
 
 ConnectionElem  *--  LineDef
 
-ConnectionElem "0" *-- "n" ConnectionPoint
+ConnectionElem "0" *-- "n" ConnectionLine
 
     
     
@@ -196,6 +215,14 @@ BoxFormat  *--  FillDef
 LayoutElemContainer "0" *-- "n" LayoutElement
 
     
+
+
+
+
+    
+
+
+
 
 
     

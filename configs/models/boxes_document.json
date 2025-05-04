@@ -93,8 +93,22 @@
                     "type": "integer",
                     "description": "Height of the element"
                 },
+                "centerX": {
+                    "type": "integer",
+                    "description": "X position of the center of the element"
+                },
+                "centerY": {
+                    "type": "integer",
+                    "description": "X position of the center of the element"
+                },
                 "format": {
                     "$ref": "#/definitions/BoxFormat"
+                },
+                "connections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LayoutElemConnection"
+                    }
                 },
                 "tags": {
                     "description": "Tags to annotate the box, tags are used to format and filter",
@@ -104,7 +118,7 @@
                     }
                 }
             },
-            "required": ["id", "x", "y", "width", "height", "caption", "text1", "text2"]
+            "required": ["id", "x", "y", "centerX", "centerY", "width", "height", "caption", "text1", "text2"]
         },
         "LayoutElemContainer": {
             "type": "object",
@@ -134,6 +148,31 @@
             },
             "required": ["x", "y", "width", "height", "elems"]
         },
+        "LayoutElemConnection": {
+            "type": "object",
+            "properties": {
+                "destId": {
+                    "description": "box id of the destination",
+                    "type": "string"
+                },
+                "sourceArrow": {
+                    "description": "Arrow at the source box",
+                    "type": "boolean"
+                },
+                "destArrow": {
+                    "description": "Arrow at the destination box",
+                    "type": "boolean"
+                },
+                "tags": {
+                    "description": "Tags to annotate the connection, tags are used to format",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["destId", "sourceArrow", "destArrow", "tags"]
+        },
         "ConnectionElem": {
             "type": "object",
             "properties": {
@@ -156,26 +195,35 @@
                 "format": {
                     "$ref": "./formats.json#/definitions/LineDef"
                 },
-                "points": {
+                "parts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ConnectionPoint"
+                        "$ref": "#/definitions/ConnectionLine"
                     }
                 }
             }
         },
-        "ConnectionPoint": {
+        "ConnectionLine": {
             "type": "object",
             "properties": {
-                "x": {
-                    "type": "integer",
-                    "description": "X position of the point"
+                "startX": {
+                    "type": "integer"
                 },
-                "y": {
-                    "type": "integer",
-                    "description": "Y position of the point"
+                "startY": {
+                    "type": "integer"
+                },
+                "endX": {
+                    "type": "integer"
+                },
+                "endY": {
+                    "type": "integer"
+                },
+                "movedOut": {
+                    "type": "boolean",
+                    "description": "If the line is moved out by a box with a collision"
                 }
-            }
+            },
+            "required": ["startX", "startY", "endX", "endY", "movedOut"]
         },
         "BoxFormat": {
             "type": "object",

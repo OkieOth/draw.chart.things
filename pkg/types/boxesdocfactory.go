@@ -7,6 +7,8 @@ import (
 type BoxesDrawing interface {
 	Start(title string, height, width int) error
 	Draw(id, caption, text1, text2 string, x, y, width, height int, format BoxFormat) error
+	DrawLine(x1, y1, x2, y2 int, format LineDef) error
+	DrawArrow(x, y, angle int, format LineDef) error
 	Done() error
 }
 
@@ -20,6 +22,19 @@ func initLayoutElemContainer(l []Layout, inputFormats map[string]BoxFormat) *Lay
 		ret.Elems = append(ret.Elems, initLayoutElement(&elem, inputFormats))
 	}
 	return &ret
+}
+
+func initConnections(l []Connection) []LayoutElemConnection {
+	ret := make([]LayoutElemConnection, 0)
+	for _, elem := range l {
+		var conn LayoutElemConnection
+		conn.DestId = elem.DestId
+		conn.SourceArrow = elem.SourceArrow
+		conn.DestArrow = elem.DestArrow
+		conn.Tags = elem.Tags
+		ret = append(ret, conn)
+	}
+	return ret
 }
 
 func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, defaultItalic bool, spaceTop int) FontDef {
@@ -183,13 +198,14 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		}
 	}
 	return LayoutElement{
-		Id:         l.Id,
-		Caption:    l.Caption,
-		Text1:      l.Text1,
-		Text2:      l.Text2,
-		Vertical:   initLayoutElemContainer(l.Vertical, inputFormats),
-		Horizontal: initLayoutElemContainer(l.Horizontal, inputFormats),
-		Format:     f,
+		Id:          l.Id,
+		Caption:     l.Caption,
+		Text1:       l.Text1,
+		Text2:       l.Text2,
+		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats),
+		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats),
+		Format:      f,
+		Connections: initConnections(l.Connections),
 	}
 }
 
@@ -215,6 +231,45 @@ func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
 		return fmt.Errorf("Error starting drawing: %w", err)
 	}
 	return d.Boxes.Draw(drawingImpl)
+}
+
+func (d *BoxesDocument) DrawConnections(drawingImpl BoxesDrawing) error {
+	b := "black"
+	w := 1
+	// format := LineDef{
+	// 	Width: &w,
+	// 	Color: &b,
+	// }
+
+	for i, elem := range d.Connections {
+		// iterate over the connections of the document
+		switch i {
+		case 0:
+			b = "red"
+		case 1:
+			b = "blue"
+		case 2:
+			b = "green"
+		case 3:
+			b = "pink"
+		case 4:
+			b = "orange"
+		default:
+			b = "black"
+		}
+
+		f := LineDef{
+			Width: &w,
+			Color: &b,
+		}
+
+		for _, l := range elem.Parts {
+			// drawing the connection lines
+			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, f)
+		}
+
+	}
+	return nil
 }
 
 func (b *LayoutElement) Draw(drawing BoxesDrawing) error {

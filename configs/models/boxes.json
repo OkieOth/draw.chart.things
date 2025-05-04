@@ -108,7 +108,8 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "required": ["destId", "sourceArrow", "destArrow", "tags"]
         },
         "Format": {
             "type": "object",

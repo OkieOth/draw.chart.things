@@ -317,6 +317,24 @@ func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int
 	return nil
 }
 
+func (d *Drawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
+	color := "black"
+	if (format.Color != nil) && (*format.Color != "") {
+		color = *format.Color
+	}
+	width := 1
+	if (format.Width != nil) && (*format.Width != 0) {
+		width = *format.Width
+	}
+	d.canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:%d", color, width))
+	return nil
+}
+
+func (d *Drawing) DrawArrow(x, y, angle int, format types.LineDef) error {
+	// TODO
+	return nil
+}
+
 // Done finalizes the SVG document
 func (d *Drawing) Done() error {
 	d.canvas.End()

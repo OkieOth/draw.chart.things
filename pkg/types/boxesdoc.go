@@ -80,7 +80,15 @@ type LayoutElement struct {
     // Height of the element
     Height int  `yaml:"height"`
 
+    // X position of the center of the element
+    CenterX int  `yaml:"centerX"`
+
+    // X position of the center of the element
+    CenterY int  `yaml:"centerY"`
+
     Format *BoxFormat  `yaml:"format,omitempty"`
+
+    Connections []LayoutElemConnection  `yaml:"connections,omitempty"`
 
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
@@ -90,6 +98,7 @@ func NewLayoutElement() *LayoutElement {
         return &LayoutElement{
             Vertical: NewLayoutElemContainer(),
             Horizontal: NewLayoutElemContainer(),
+            Connections: make([]LayoutElemConnection, 0),
             Tags: make([]string, 0),
         }
 }
@@ -114,14 +123,14 @@ type ConnectionElem struct {
 
     Format *LineDef  `yaml:"format,omitempty"`
 
-    Points []ConnectionPoint  `yaml:"points,omitempty"`
+    Parts []ConnectionLine  `yaml:"parts,omitempty"`
 }
 
 func NewConnectionElem() *ConnectionElem {
         return &ConnectionElem{
             From: NewLayoutElement(),
             To: NewLayoutElement(),
-            Points: make([]ConnectionPoint, 0),
+            Parts: make([]ConnectionLine, 0),
         }
 }
 
@@ -183,13 +192,43 @@ func NewLayoutElemContainer() *LayoutElemContainer {
 
 
 
-type ConnectionPoint struct {
+type LayoutElemConnection struct {
 
-    // X position of the point
-    X *int  `yaml:"x,omitempty"`
+    // box id of the destination
+    DestId string  `yaml:"destId"`
 
-    // Y position of the point
-    Y *int  `yaml:"y,omitempty"`
+    // Arrow at the source box
+    SourceArrow bool  `yaml:"sourceArrow"`
+
+    // Arrow at the destination box
+    DestArrow bool  `yaml:"destArrow"`
+
+    // Tags to annotate the connection, tags are used to format
+    Tags []string  `yaml:"tags,omitempty"`
+}
+
+func NewLayoutElemConnection() *LayoutElemConnection {
+        return &LayoutElemConnection{
+            Tags: make([]string, 0),
+        }
+}
+
+
+
+
+
+type ConnectionLine struct {
+
+    StartX int  `yaml:"startX"`
+
+    StartY int  `yaml:"startY"`
+
+    EndX int  `yaml:"endX"`
+
+    EndY int  `yaml:"endY"`
+
+    // If the line is moved out by a box with a collision
+    MovedOut bool  `yaml:"movedOut"`
 }
 
 
