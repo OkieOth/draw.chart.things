@@ -29,6 +29,16 @@ open-complex-in-browser:
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hcomplex.svg \
 		file://$(CURRENT_DIR)/temp/TestSimpleSvg_vcomplex.svg &
 
+open-connected-in-browser:
+	firefox file://$(CURRENT_DIR)/temp/long_horizontal_01.svg \
+		file://$(CURRENT_DIR)/temp/long_horizontal_02.svg \
+		file://$(CURRENT_DIR)/temp/long_vertical_01.svg \
+		file://$(CURRENT_DIR)/temp/long_vertical_02.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hcomplex_connected_01.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hcomplex_connected_02.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hcomplex_connected_03.svg \
+		file://$(CURRENT_DIR)/temp/TestSimpleSvg_hcomplex_connected_04.svg &
+
 
 test:
 	go test ./... && echo ":)" || echo ":-/"

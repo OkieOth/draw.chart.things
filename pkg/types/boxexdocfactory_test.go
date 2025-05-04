@@ -162,7 +162,7 @@ func TestLoadFromFile(t *testing.T) {
 		require.Equal(t, 1, len(b.Boxes.Horizontal[2].Vertical[3].Connections))
 		require.Equal(t, "r4_1", b.Boxes.Horizontal[2].Vertical[3].Connections[0].DestId)
 		require.Equal(t, "r6_5", b.Boxes.Horizontal[2].Vertical[4].Id)
-		require.Equal(t, 0, len(b.Boxes.Horizontal[2].Vertical[4].Connections))
+		require.Equal(t, 1, len(b.Boxes.Horizontal[2].Vertical[4].Connections))
 
 	}
 }

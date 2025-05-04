@@ -84,65 +84,121 @@ func TestSimpleSvg(t *testing.T) {
 		doc.DrawBoxes(svgdrawing)
 		svgdrawing.Done()
 		output.Close()
+		_, err = os.Stat(test.outputFile)
+		require.Nil(t, err)
 	}
 }
 
 func TestSvgWithConnections(t *testing.T) {
-	tests := []struct {
+	type testData struct {
 		inputFile  string
 		outputFile string
-	}{
+		checkFunc  func(t *testing.T, doc *types.BoxesDocument)
+	}
+	runTests := func(tests []testData) {
+		textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
+
+		for _, test := range tests {
+			b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+			require.Nil(t, err)
+			doc, err := boxesimpl.InitialLayoutBoxes(b, textDimensionCalulator)
+			require.Nil(t, err)
+			// debug - can help to see all possible connections in the created file
+			//doc.ConnectBoxesFull()
+			doc.ConnectBoxes()
+			output, err := os.Create(test.outputFile)
+			require.Nil(t, err)
+			svgdrawing := svgdrawing.NewDrawing(output)
+			doc.DrawBoxes(svgdrawing)
+			doc.DrawConnections(svgdrawing)
+			svgdrawing.Done()
+			output.Close()
+			_, err = os.Stat(test.outputFile)
+			require.Nil(t, err)
+			test.checkFunc(t, doc)
+		}
+	}
+
+	tests := []testData{
 		{
 			inputFile:  "../../resources/examples/complex_horizontal_connected_01.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 1, len(doc.Connections))
+				require.Equal(t, 4, len(doc.Connections[0].Parts))
+			},
 		},
 		{
 			inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 1, len(doc.Connections))
+				require.Equal(t, 2, len(doc.Connections[0].Parts))
+			},
 		},
 		{
 			inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 1, len(doc.Connections))
+				require.Equal(t, 2, len(doc.Connections[0].Parts))
+			},
 		},
 		{
 			inputFile:  "../../resources/examples/complex_horizontal_connected_04.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_04.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 5, len(doc.Connections))
+				require.Equal(t, 2, len(doc.Connections[0].Parts))
+				require.Equal(t, 2, len(doc.Connections[1].Parts))
+				require.Equal(t, 4, len(doc.Connections[2].Parts))
+				require.Equal(t, 2, len(doc.Connections[3].Parts))
+				require.Equal(t, 2, len(doc.Connections[4].Parts))
+				// TODO
+			},
 		},
 		{
 			inputFile:  "../../resources/examples/long_horizontal_01.yaml",
 			outputFile: "../../temp/long_horizontal_01.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for _, c := range doc.Connections {
+					require.Equal(t, 2, len(c.Parts))
+				}
+			},
 		},
 		{
 			inputFile:  "../../resources/examples/long_horizontal_02.yaml",
 			outputFile: "../../temp/long_horizontal_02.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for _, c := range doc.Connections {
+					require.Equal(t, 2, len(c.Parts))
+				}
+			},
 		},
 		{
 			inputFile:  "../../resources/examples/long_vertical_01.yaml",
 			outputFile: "../../temp/long_vertical_01.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for _, c := range doc.Connections {
+					require.Equal(t, 2, len(c.Parts))
+				}
+			},
 		},
 		{
 			inputFile:  "../../resources/examples/long_vertical_02.yaml",
 			outputFile: "../../temp/long_vertical_02.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for _, c := range doc.Connections {
+					require.Equal(t, 2, len(c.Parts))
+				}
+			},
 		},
 	}
-
-	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
-
-	for _, test := range tests {
-		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
-		require.Nil(t, err)
-		doc, err := boxesimpl.InitialLayoutBoxes(b, textDimensionCalulator)
-		require.Nil(t, err)
-		//doc.ConnectBoxesFull()
-		doc.ConnectBoxes()
-		output, err := os.Create(test.outputFile)
-		require.Nil(t, err)
-		svgdrawing := svgdrawing.NewDrawing(output)
-		doc.DrawBoxes(svgdrawing)
-		doc.DrawConnections(svgdrawing)
-		svgdrawing.Done()
-		output.Close()
-	}
+	runTests(tests)
 }
 
 func TestSplitTxt(t *testing.T) {
