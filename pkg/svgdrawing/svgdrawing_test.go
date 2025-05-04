@@ -93,8 +93,36 @@ func TestSvgWithConnections(t *testing.T) {
 		outputFile string
 	}{
 		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected.svg",
+			inputFile:  "../../resources/examples/complex_horizontal_connected_01.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/complex_horizontal_connected_04.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_04.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/long_horizontal_01.yaml",
+			outputFile: "../../temp/long_horizontal_01.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/long_horizontal_02.yaml",
+			outputFile: "../../temp/long_horizontal_02.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/long_vertical_01.yaml",
+			outputFile: "../../temp/long_vertical_01.svg",
+		},
+		{
+			inputFile:  "../../resources/examples/long_vertical_02.yaml",
+			outputFile: "../../temp/long_vertical_02.svg",
 		},
 	}
 
@@ -105,11 +133,12 @@ func TestSvgWithConnections(t *testing.T) {
 		require.Nil(t, err)
 		doc, err := boxesimpl.InitialLayoutBoxes(b, textDimensionCalulator)
 		require.Nil(t, err)
+		//doc.ConnectBoxesFull()
+		doc.ConnectBoxes()
 		output, err := os.Create(test.outputFile)
 		require.Nil(t, err)
 		svgdrawing := svgdrawing.NewDrawing(output)
 		doc.DrawBoxes(svgdrawing)
-		doc.ConnectBoxes()
 		doc.DrawConnections(svgdrawing)
 		svgdrawing.Done()
 		output.Close()

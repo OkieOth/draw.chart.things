@@ -27,3 +27,5 @@ go.work.sum
 *.tmp
 tmp
 temp
+*\ copy.*
+*\ copy\ *.*
