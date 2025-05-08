@@ -218,7 +218,7 @@ func DocumentFromBoxes(b *Boxes) *BoxesDocument {
 		doc.MinBoxMargin = GlobalMinBoxMargin
 	}
 	if doc.MinConnectorMargin == 0 {
-		doc.MinConnectorMargin = GlobalMinBoxMargin
+		doc.MinConnectorMargin = GlobalMinConnectorMargin
 	}
 	if doc.GlobalPadding == 0 {
 		doc.GlobalPadding = GlobalPadding

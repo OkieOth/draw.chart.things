@@ -209,7 +209,7 @@ func TestSvgWithConnections(t *testing.T) {
 			inputFile:  "../../resources/examples/horizontal_nested_diamond2_connected.yaml",
 			outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-				require.Equal(t, 4, len(doc.Connections))
+				require.Equal(t, 8, len(doc.Connections))
 				// for _, c := range doc.Connections {
 				// 	require.Equal(t, 4, len(c.Parts))
 				// }

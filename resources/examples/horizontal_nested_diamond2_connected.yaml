@@ -29,6 +29,9 @@ boxes:
           - id: r2_1_1
             caption: I am another inner Element
             text1:
+            connections:
+              - destId: r2_3
+              - destId: r2_3_1
       - id: r2_2
         caption: Center Element
         text1: I am in the second line
@@ -44,3 +47,6 @@ boxes:
     - id: r3_1
       caption: Right Element
       text1: I am in the first line
+      connections:
+        - destId: r2_3
+        - destId: r2_3_1

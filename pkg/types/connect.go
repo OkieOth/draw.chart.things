@@ -289,7 +289,7 @@ func (doc *BoxesDocument) initialLineConnection(startX, startY, endX, endY int) 
 }
 
 // connects two points with a U-shaped line
-func (doc *BoxesDocument) initialUConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
+func (doc *BoxesDocument) initialHUConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
 	connection := make([]ConnectionLine, 0)
 	y2 := startY + startLen
 
@@ -308,6 +308,30 @@ func (doc *BoxesDocument) initialUConnection(startX, startY, endX, endY, startLe
 	connection = append(connection, ConnectionLine{
 		StartX: endX,
 		StartY: y2,
+		EndX:   endX,
+		EndY:   endY,
+	})
+	return connection
+}
+
+func (doc *BoxesDocument) initialVUConnection(startX, startY, endX, endY, x2 int) []ConnectionLine {
+	connection := make([]ConnectionLine, 0)
+
+	connection = append(connection, ConnectionLine{
+		StartX: startX,
+		StartY: startY,
+		EndX:   x2,
+		EndY:   startY,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: x2,
+		StartY: startY,
+		EndX:   x2,
+		EndY:   endY,
+	})
+	connection = append(connection, ConnectionLine{
+		StartX: x2,
+		StartY: endY,
 		EndX:   endX,
 		EndY:   endY,
 	})
@@ -582,8 +606,13 @@ func (doc *BoxesDocument) lineConnection(startX, startY, endX, endY int, startEl
 	return doc.solveCollisions(connection, startElem, destElem)
 }
 
-func (doc *BoxesDocument) uConnection(startX, startY, endX, endY, startLen int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialUConnection(startX, startY, endX, endY, startLen)
+func (doc *BoxesDocument) huConnection(startX, startY, endX, endY, startLen int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
+	connection := doc.initialHUConnection(startX, startY, endX, endY, startLen)
+	return doc.solveCollisions(connection, startElem, destElem)
+}
+
+func (doc *BoxesDocument) vuConnection(startX, startY, endX, endY, startLen int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
+	connection := doc.initialVUConnection(startX, startY, endX, endY, startLen)
 	return doc.solveCollisions(connection, startElem, destElem)
 }
 
@@ -627,11 +656,31 @@ func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement)
 			connectionVariants = append(connectionVariants, v)
 		}
 		// 2. connect from top to top
-		if v, err := doc.uConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y, doc.MinBoxMargin/-2, startElem, destElem); err == nil {
+		if v, err := doc.huConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y, doc.MinBoxMargin/-2, startElem, destElem); err == nil {
 			connectionVariants = append(connectionVariants, v)
 		}
 		// 3. connect from bottom to bottom
-		if v, err := doc.uConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y+destElem.Height, doc.MinBoxMargin/2, startElem, destElem); err == nil {
+		if v, err := doc.huConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y+destElem.Height, doc.MinBoxMargin/2, startElem, destElem); err == nil {
+			connectionVariants = append(connectionVariants, v)
+		}
+	} else if startElem.CenterX == destElem.CenterX {
+		if startElem.CenterY < destElem.CenterY {
+			// 1. connect from with straight line: bottom to top
+			if v, err := doc.lineConnection(startElem.CenterX, startElem.Y+startElem.Width, destElem.CenterX, destElem.Y, startElem, destElem); err == nil {
+				connectionVariants = append(connectionVariants, v)
+			}
+		} else {
+			// 1. connect from with straight line: top to bottom
+			if v, err := doc.lineConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y+destElem.Width, startElem, destElem); err == nil {
+				connectionVariants = append(connectionVariants, v)
+			}
+		}
+		// 2. connect from left to left
+		if v, err := doc.vuConnection(startElem.X, startElem.CenterY, destElem.X, destElem.CenterY, startElem.X-(doc.MinBoxMargin/2), startElem, destElem); err == nil {
+			connectionVariants = append(connectionVariants, v)
+		}
+		// 3. connect from right to right
+		if v, err := doc.vuConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem.X+startElem.Width+(doc.MinBoxMargin/2), startElem, destElem); err == nil {
 			connectionVariants = append(connectionVariants, v)
 		}
 	} else if startElem.CenterY < destElem.CenterY {
@@ -711,7 +760,10 @@ func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *L
 	variants := doc.getConnectionParts(start, destElem)
 	var connection []ConnectionLine
 	for _, conn := range variants {
-		if connection == nil || len(conn) < len(connection) {
+		if len(conn) == 0 {
+			continue
+		}
+		if connection == nil || (len(conn) < len(connection)) {
 			connection = conn
 		}
 	}
@@ -770,6 +822,11 @@ func (doc *BoxesDocument) connectContainer(cont *LayoutElemContainer, full bool)
 
 func (doc *BoxesDocument) ConnectBoxes() {
 	doc.connectLayoutElem(&doc.Boxes, false)
+	doc.moveTooCloseVerticalConnectionLinesFromBorders()
+	doc.moveTooCloseHorizontalConnectionLinesFromBorders()
+	doc.moveTooCloseVerticalConnectionLines()
+	doc.moveTooCloseHorizontalConnectionLines()
+	doc.truncateJoiningConnectionLines()
 }
 
 func (doc *BoxesDocument) ConnectBoxesFull() {
