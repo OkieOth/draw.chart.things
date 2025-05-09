@@ -823,7 +823,7 @@ func (doc *BoxesDocument) connectContainer(cont *LayoutElemContainer, full bool)
 func (doc *BoxesDocument) ConnectBoxes() {
 	doc.connectLayoutElem(&doc.Boxes, false)
 	doc.moveTooCloseVerticalConnectionLinesFromBorders()
-	// doc.moveTooCloseHorizontalConnectionLinesFromBorders()
+	doc.moveTooCloseHorizontalConnectionLinesFromBorders()
 	// doc.moveTooCloseVerticalConnectionLines()
 	// doc.moveTooCloseHorizontalConnectionLines()
 	doc.truncateJoiningConnectionLines()

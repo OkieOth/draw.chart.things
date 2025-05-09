@@ -252,16 +252,36 @@ func (doc *BoxesDocument) moveAllConnectorsMoreRightRight2(x, dist int) {
 }
 
 func (doc *BoxesDocument) checkLayoutElemForVerticalCollision(le *LayoutElement, connIndex, partIndex, y int) {
-	if isIn, isMoreDown, dist := isInDistance(y, le.Y, doc.MinConnectorMargin); isIn {
-		if isMoreDown {
-			// the connector is to close to the lower border of the box ... move the connector down
-			// ... and all objects equal or lower to y will be moved down, too
-			doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, true)
-			doc.moveAllConnectorsLowerAndEqualDown(y, dist)
-		} else {
-			// the connector is to close to the upper border of the box ... move all objects lower than y, down
-			doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, false)
-			doc.moveAllConnectorsLowerDown(y, dist)
+	if le != &doc.Boxes {
+		part := doc.Connections[connIndex].Parts[partIndex]
+		if !le.IsInXRange(part.StartX, part.EndX) {
+			return
+		}
+		if isIn, isMoreDown, dist := isInDistance(y, le.Y, doc.MinConnectorMargin); isIn {
+			if isMoreDown {
+				// the connector is to close to the upper border of the box ... move the connector down
+				// ... and all objects equal or lower to y will be moved down, too
+				doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, true)
+				doc.moveAllConnectorsLowerDown(y, dist)
+			} else {
+				// the connector is to close to the upper border of the box ... move all objects lower than y, down
+				doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, false)
+				doc.moveAllConnectorsLowerDown(y, dist)
+			}
+			return
+		}
+		if isIn, isMoreDown, dist := isInDistance(y, le.Y+le.Height, doc.MinConnectorMargin); isIn {
+			if isMoreDown {
+				// the connector is to close to the lower border of the box ... move the connector down
+				// ... and all objects equal or lower to y will be moved down, too
+				doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, true)
+				doc.moveAllConnectorsLowerDown(y, dist)
+			} else {
+				// the connector is to close to the upper border of the box ... move all objects lower than y, down
+				doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, false)
+				doc.moveAllConnectorsLowerDown(y, dist)
+			}
+			return
 		}
 	}
 	if le.Horizontal != nil {
@@ -279,6 +299,10 @@ func (doc *BoxesDocument) checkLayoutElemForVerticalCollision(le *LayoutElement,
 func (doc *BoxesDocument) checkLayoutElemForHorizontalCollision(le *LayoutElement, connIndex, partIndex, x int) {
 	if le != &doc.Boxes {
 		// ignores the first box of the document
+		part := doc.Connections[connIndex].Parts[partIndex]
+		if !le.IsInYRange(part.StartY, part.EndY) {
+			return
+		}
 		if isIn, isMoreRight, dist := isInDistance(x, le.X, doc.MinConnectorMargin); isIn {
 			if isMoreRight {
 				// the connector is to close to the right border of the box ... move the connector to the right
@@ -358,7 +382,7 @@ func (doc *BoxesDocument) moveTooCloseVerticalConnectionLinesFromBorders() {
 			doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, part.StartX)
 			// in case that the left border triggered a change, we have to check the right border, too
 			part = doc.Connections[i].Parts[j]
-			doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, part.StartX)
+			doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, doc.Connections[i].Parts[j].StartX)
 		}
 	}
 }
@@ -374,6 +398,7 @@ func (doc *BoxesDocument) moveTooCloseHorizontalConnectionLinesFromBorders() {
 				continue // is no horizontal line
 			}
 			doc.checkLayoutElemForVerticalCollision(&doc.Boxes, i, j, part.StartY)
+			doc.checkLayoutElemForVerticalCollision(&doc.Boxes, i, j, doc.Connections[i].Parts[j].StartY)
 		}
 	}
 }
