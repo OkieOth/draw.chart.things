@@ -649,16 +649,24 @@ func (l *LayoutElement) ShouldBeDrawn() bool {
 
 func (l *LayoutElement) IsInYRange(y1, y2 int) bool {
 	if y1 < y2 {
-		return (l.Y >= y1) && ((l.Y + l.Height) <= y2)
+		return l.CenterY > y1 && l.CenterY < y2
 	}
-	return (l.Y <= y2) && ((l.Y + l.Height) >= y1)
+	return l.CenterY < y1 && l.CenterY > y2
+	// if y1 < y2 {
+	// 	return (l.Y > y1) && ((l.Y + l.Height) < y2)
+	// }
+	// return (l.Y < y2) && ((l.Y + l.Height) > y1)
 }
 
 func (l *LayoutElement) IsInXRange(x1, x2 int) bool {
 	if x1 < x2 {
-		return (l.X >= x1) && ((l.X + l.Width) <= x2)
+		return l.CenterX > x1 && l.CenterX < x2
 	}
-	return (l.X <= x2) && ((l.X + l.Width) >= x1)
+	return l.CenterX < x1 && l.CenterX > x2
+	// if x1 < x2 {
+	// 	return (l.X > x1) && ((l.X + l.Width) < x2)
+	// }
+	// return (l.X < x2) && ((l.X + l.Width) > x1)
 }
 
 func between(value, min, max int) bool {

@@ -120,30 +120,30 @@ func TestSvgWithConnections(t *testing.T) {
 	}
 
 	tests := []testData{
-		// {
-		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_01.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 1, len(doc.Connections))
-		// 		require.Equal(t, 4, len(doc.Connections[0].Parts))
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 1, len(doc.Connections))
-		// 		require.Equal(t, 2, len(doc.Connections[0].Parts))
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 1, len(doc.Connections))
-		// 		require.Equal(t, 2, len(doc.Connections[0].Parts))
-		// 	},
-		// },
+		{
+			inputFile:  "../../resources/examples/complex_horizontal_connected_01.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 1, len(doc.Connections))
+				require.Equal(t, 4, len(doc.Connections[0].Parts))
+			},
+		},
+		{
+			inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 1, len(doc.Connections))
+				require.Equal(t, 2, len(doc.Connections[0].Parts))
+			},
+		},
+		{
+			inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 1, len(doc.Connections))
+				require.Equal(t, 2, len(doc.Connections[0].Parts))
+			},
+		},
 		{
 			inputFile:  "../../resources/examples/complex_horizontal_connected_04.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_04.svg",
@@ -170,64 +170,64 @@ func TestSvgWithConnections(t *testing.T) {
 				// TODO
 			},
 		},
-		// {
-		// 	inputFile:  "../../resources/examples/long_horizontal_01.yaml",
-		// 	outputFile: "../../temp/long_horizontal_01.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 6, len(doc.Connections))
-		// 		for _, c := range doc.Connections {
-		// 			require.Equal(t, 2, len(c.Parts))
-		// 		}
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples/long_horizontal_02.yaml",
-		// 	outputFile: "../../temp/long_horizontal_02.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 6, len(doc.Connections))
-		// 		for _, c := range doc.Connections {
-		// 			require.Equal(t, 2, len(c.Parts))
-		// 		}
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples/long_vertical_01.yaml",
-		// 	outputFile: "../../temp/long_vertical_01.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 6, len(doc.Connections))
-		// 		for i, c := range doc.Connections {
-		// 			if i == 2 {
-		// 				require.Equal(t, 3, len(c.Parts))
-		// 			} else {
-		// 				require.Equal(t, 2, len(c.Parts))
-		// 			}
-		// 		}
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples/long_vertical_02.yaml",
-		// 	outputFile: "../../temp/long_vertical_02.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 6, len(doc.Connections))
-		// 		for i, c := range doc.Connections {
-		// 			if i == 2 {
-		// 				require.Equal(t, 3, len(c.Parts))
-		// 			} else {
-		// 				require.Equal(t, 2, len(c.Parts))
-		// 			}
-		// 		}
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples/horizontal_nested_diamond2_connected.yaml",
-		// 	outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 8, len(doc.Connections))
-		// 		// for _, c := range doc.Connections {
-		// 		// 	require.Equal(t, 4, len(c.Parts))
-		// 		// }
-		// 	},
-		// },
+		{
+			inputFile:  "../../resources/examples/long_horizontal_01.yaml",
+			outputFile: "../../temp/long_horizontal_01.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for _, c := range doc.Connections {
+					require.Equal(t, 2, len(c.Parts))
+				}
+			},
+		},
+		{
+			inputFile:  "../../resources/examples/long_horizontal_02.yaml",
+			outputFile: "../../temp/long_horizontal_02.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for _, c := range doc.Connections {
+					require.Equal(t, 2, len(c.Parts))
+				}
+			},
+		},
+		{
+			inputFile:  "../../resources/examples/long_vertical_01.yaml",
+			outputFile: "../../temp/long_vertical_01.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for i, c := range doc.Connections {
+					if i == 2 {
+						require.Equal(t, 3, len(c.Parts))
+					} else {
+						require.Equal(t, 2, len(c.Parts))
+					}
+				}
+			},
+		},
+		{
+			inputFile:  "../../resources/examples/long_vertical_02.yaml",
+			outputFile: "../../temp/long_vertical_02.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for i, c := range doc.Connections {
+					if i == 2 {
+						require.Equal(t, 3, len(c.Parts))
+					} else {
+						require.Equal(t, 2, len(c.Parts))
+					}
+				}
+			},
+		},
+		{
+			inputFile:  "../../resources/examples/horizontal_nested_diamond2_connected.yaml",
+			outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 8, len(doc.Connections))
+				// for _, c := range doc.Connections {
+				// 	require.Equal(t, 4, len(c.Parts))
+				// }
+			},
+		},
 	}
 	runTests(tests)
 }

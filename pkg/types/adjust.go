@@ -3,15 +3,15 @@ package types
 func isInDistance(v1, v2, distance int) (bool, bool, int) {
 	if v1 > v2 {
 		dist := v1 - v2
-		return (dist <= distance), true, distance
+		return (dist <= distance), true, dist
 	}
 	dist := v2 - v1
-	return (dist <= distance), false, distance
+	return (dist <= distance), false, dist
 }
 
 func (doc *BoxesDocument) moveAllObjectsLowerDown(le *LayoutElement, y, dist int, allowEqual bool) {
 	if le != &doc.Boxes {
-		if (le.Y > y) || (allowEqual && le.Y == y) {
+		if ((le.Y) > y) || (allowEqual && (le.Y) == y) {
 			// the object is lower than y
 			le.Y += dist
 			le.CenterY += dist
@@ -62,57 +62,59 @@ func (doc *BoxesDocument) moveAllObjectsMoreRightRight(le *LayoutElement, x, dis
 	}
 }
 
-func (doc *BoxesDocument) moveAllConnectorsLowerAndEqualDown(y, dist int) {
-	for i := 0; i < len(doc.Connections); i++ {
-		for j := 0; j < len(doc.Connections[i].Parts); j++ {
-			part := doc.Connections[i].Parts[j]
-			if part.StartY != part.EndY {
-				// vertical line
-				if part.StartY < part.EndY {
-					// line moves down
-					if part.EndY > y {
-						if part.StartY >= y {
-							// line starts after or at the y position
-							doc.Connections[i].Parts[j].StartY += dist
-						}
-						doc.Connections[i].Parts[j].EndY += dist
-					} else if part.EndY == y {
-						// line ends at the y position
-						doc.Connections[i].Parts[j].EndY += dist
-					}
-				} else {
-					// line moves up
-					if part.StartY > y {
-						if part.EndY >= y {
-							// line starts before or at the y position
-							doc.Connections[i].Parts[j].EndY += dist
-						}
-						doc.Connections[i].Parts[j].StartY += dist
-					} else if part.StartY == y {
-						// line starts at the y position
-						doc.Connections[i].Parts[j].StartY += dist
-					}
-				}
-			} else {
-				// horizontal line
-				if part.StartY >= y {
-					doc.Connections[i].Parts[j].StartY += dist
-					doc.Connections[i].Parts[j].EndY += dist
-				}
+func (doc *BoxesDocument) isConnectedToUpperOrLowerBoxBorder(le *LayoutElement, line *ConnectionLine) bool {
+	// check upper border
+	if le.Id == "r6_2" {
+		// Debug
+		le.Id = le.Id
+	}
+	if (le.Y == line.StartY || le.Y == line.EndY) && (line.StartX > le.X && line.StartX < le.X+le.Width) {
+		return true
+	}
+	if ((le.Y+le.Height) == line.StartY || (le.Y+le.Height) == line.EndY) && (line.StartX > le.X && line.StartX < le.X+le.Width) {
+		return true
+	}
+	if le.Vertical != nil {
+		for i := 0; i < len(le.Vertical.Elems); i++ {
+			if doc.isConnectedToUpperOrLowerBoxBorder(&le.Vertical.Elems[i], line) {
+				return true
 			}
 		}
 	}
+	if le.Horizontal != nil {
+		for i := 0; i < len(le.Horizontal.Elems); i++ {
+			if doc.isConnectedToUpperOrLowerBoxBorder(&le.Horizontal.Elems[i], line) {
+				return true
+			}
+		}
+	}
+	return false
 }
+
+func (doc *BoxesDocument) partIsntConnectedToUpperOrLowerBoxBorder(line *ConnectionLine, linePos, connPartCount int) bool {
+	if linePos != 0 && linePos != connPartCount-1 {
+		// the line is not the first or last part of the connection
+		return true
+	}
+	if line.StartX != line.EndX {
+		// the line is not vertical ... should be an error
+		return true
+	}
+	return !doc.isConnectedToUpperOrLowerBoxBorder(&doc.Boxes, line)
+}
+
 func (doc *BoxesDocument) moveAllConnectorsLowerDown(y, dist int) {
 	for i := 0; i < len(doc.Connections); i++ {
-		for j := 0; j < len(doc.Connections[i].Parts); j++ {
+		lp := len(doc.Connections[i].Parts)
+		for j := 0; j < lp; j++ {
 			part := doc.Connections[i].Parts[j]
 			if part.StartY != part.EndY {
 				// vertical line
 				if part.StartY < part.EndY {
 					// line moves down
 					if part.EndY > y {
-						if part.StartY > y {
+						// ... need to check that the line isn't a connector start that belongs to a unmoved box
+						if (part.StartY > y) && doc.partIsntConnectedToUpperOrLowerBoxBorder(&part, j, lp) {
 							// line starts after the y position
 							doc.Connections[i].Parts[j].StartY += dist
 						}
@@ -121,7 +123,8 @@ func (doc *BoxesDocument) moveAllConnectorsLowerDown(y, dist int) {
 				} else {
 					// line moves up
 					if part.StartY > y {
-						if part.EndY > y {
+						// ... need to check that the line isn't a connector start that belongs to a unmoved box
+						if (part.EndY > y) && doc.partIsntConnectedToUpperOrLowerBoxBorder(&part, j, lp) {
 							// line starts before or at the y position
 							doc.Connections[i].Parts[j].EndY += dist
 						}
@@ -140,7 +143,8 @@ func (doc *BoxesDocument) moveAllConnectorsLowerDown(y, dist int) {
 }
 func (doc *BoxesDocument) moveAllConnectorsMoreRightAndEqualRight(x, dist int) {
 	for i := 0; i < len(doc.Connections); i++ {
-		for j := 0; j < len(doc.Connections[i].Parts); j++ {
+		lp := len(doc.Connections[i].Parts)
+		for j := 0; j < lp; j++ {
 			part := doc.Connections[i].Parts[j]
 			if part.StartY != part.EndY {
 				// vertical line
@@ -153,7 +157,7 @@ func (doc *BoxesDocument) moveAllConnectorsMoreRightAndEqualRight(x, dist int) {
 				if part.StartX < part.EndX {
 					// line moves to the right
 					if part.EndX >= x {
-						if part.StartX > x {
+						if (part.StartX > x) && (j > 0) && (j < lp-1) {
 							// line starts after the x position
 							doc.Connections[i].Parts[j].StartX += dist
 						}
@@ -165,7 +169,7 @@ func (doc *BoxesDocument) moveAllConnectorsMoreRightAndEqualRight(x, dist int) {
 				} else {
 					// line moves to the left
 					if part.StartX >= x {
-						if part.EndX > x {
+						if (part.EndX > x) && (j > 0) && (j < lp-1) {
 							// line starts before or at the y position
 							doc.Connections[i].Parts[j].EndX += dist
 						}
@@ -181,7 +185,8 @@ func (doc *BoxesDocument) moveAllConnectorsMoreRightAndEqualRight(x, dist int) {
 }
 func (doc *BoxesDocument) moveAllConnectorsMoreRightRight(x, dist int) {
 	for i := 0; i < len(doc.Connections); i++ {
-		for j := 0; j < len(doc.Connections[i].Parts); j++ {
+		lp := len(doc.Connections[i].Parts)
+		for j := 0; j < lp; j++ {
 			part := doc.Connections[i].Parts[j]
 			if part.StartX == part.EndX {
 				// vertical line
@@ -194,7 +199,7 @@ func (doc *BoxesDocument) moveAllConnectorsMoreRightRight(x, dist int) {
 				if part.StartX < part.EndX {
 					// line moves to the right
 					if part.EndX > x {
-						if part.StartX > x {
+						if (part.StartX > x) && (j > 0) && (j < lp-1) {
 							// line starts after the x position
 							doc.Connections[i].Parts[j].StartX += dist
 						}
@@ -203,43 +208,7 @@ func (doc *BoxesDocument) moveAllConnectorsMoreRightRight(x, dist int) {
 				} else {
 					// line moves to the left
 					if part.StartX > x {
-						if part.EndX > x {
-							// line starts before or at the y position
-							doc.Connections[i].Parts[j].EndX += dist
-						}
-						doc.Connections[i].Parts[j].StartX += dist
-					}
-				}
-			}
-		}
-	}
-}
-
-func (doc *BoxesDocument) moveAllConnectorsMoreRightRight2(x, dist int) {
-	for i := 0; i < len(doc.Connections); i++ {
-		for j := 0; j < len(doc.Connections[i].Parts); j++ {
-			part := doc.Connections[i].Parts[j]
-			if part.StartX == part.EndX {
-				// vertical line
-				if part.StartX > x {
-					doc.Connections[i].Parts[j].StartX += dist
-					doc.Connections[i].Parts[j].EndX += dist
-				}
-			} else {
-				// horizontal line
-				if part.StartX < part.EndX {
-					// line moves to the right
-					if part.EndX > x {
-						if part.StartX > x {
-							// line starts after the x position
-							doc.Connections[i].Parts[j].StartX += dist
-						}
-						doc.Connections[i].Parts[j].EndX += dist
-					}
-				} else {
-					// line moves to the left
-					if part.StartX > x {
-						if part.EndX > x {
+						if (part.EndX > x) && (j > 0) && (j < lp-1) {
 							// line starts before or at the y position
 							doc.Connections[i].Parts[j].EndX += dist
 						}
@@ -257,9 +226,9 @@ func (doc *BoxesDocument) checkLayoutElemForVerticalCollision(le *LayoutElement,
 		if !le.IsInXRange(part.StartX, part.EndX) {
 			return
 		}
-		if isIn, isMoreDown, dist := isInDistance(y, le.Y, doc.MinConnectorMargin); isIn {
+		if isIn, isMoreDown, dist := isInDistance(y, le.Y+le.Height, doc.MinConnectorMargin); isIn {
 			if isMoreDown {
-				// the connector is to close to the upper border of the box ... move the connector down
+				// the connector is to close to the lower border of the box ... move the connector down
 				// ... and all objects equal or lower to y will be moved down, too
 				doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, true)
 				doc.moveAllConnectorsLowerDown(y, dist)
@@ -270,11 +239,11 @@ func (doc *BoxesDocument) checkLayoutElemForVerticalCollision(le *LayoutElement,
 			}
 			return
 		}
-		if isIn, isMoreDown, dist := isInDistance(y, le.Y+le.Height, doc.MinConnectorMargin); isIn {
+		if isIn, isMoreDown, dist := isInDistance(y, le.Y, doc.MinConnectorMargin); isIn {
 			if isMoreDown {
-				// the connector is to close to the lower border of the box ... move the connector down
+				// the connector is to close to the upper border of the box ... move the connector down
 				// ... and all objects equal or lower to y will be moved down, too
-				doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, true)
+				doc.moveAllObjectsLowerDown(&doc.Boxes, y, dist, false)
 				doc.moveAllConnectorsLowerDown(y, dist)
 			} else {
 				// the connector is to close to the upper border of the box ... move all objects lower than y, down
@@ -300,22 +269,11 @@ func (doc *BoxesDocument) checkLayoutElemForHorizontalCollision(le *LayoutElemen
 	if le != &doc.Boxes {
 		// ignores the first box of the document
 		part := doc.Connections[connIndex].Parts[partIndex]
-		if !le.IsInYRange(part.StartY, part.EndY) {
-			return
+		if le.Id == "h1_4" {
+			// Debug
+			le.Id = le.Id
 		}
-		if isIn, isMoreRight, dist := isInDistance(x, le.X, doc.MinConnectorMargin); isIn {
-			if isMoreRight {
-				// the connector is to close to the right border of the box ... move the connector to the right
-				// ... and all objects equal or more to the right will be moved to the right, too
-				doc.moveAllObjectsMoreRightRight(&doc.Boxes, x, dist, true)
-				doc.moveAllConnectorsMoreRightRight(x, dist)
-			} else {
-				// the connector is to close to the left border of the box ... move all objects more to the right of x
-				// to the right
-				doc.moveAllObjectsMoreRightRight(&doc.Boxes, x, dist, false)
-				// eiko
-				doc.moveAllConnectorsMoreRightRight2(x, dist)
-			}
+		if !le.IsInYRange(part.StartY, part.EndY) {
 			return
 		}
 		if isIn, isMoreRight, dist := isInDistance(x, le.X+le.Width, doc.MinConnectorMargin); isIn {
@@ -330,30 +288,19 @@ func (doc *BoxesDocument) checkLayoutElemForHorizontalCollision(le *LayoutElemen
 				doc.moveAllObjectsMoreRightRight(&doc.Boxes, x, dist, false)
 				doc.moveAllConnectorsMoreRightRight(x, dist)
 			}
-			doc.Connections[connIndex].Parts[partIndex].StartX += dist
-			doc.Connections[connIndex].Parts[partIndex].EndX += dist
-			if doc.Connections[connIndex].Parts[partIndex].StartX < doc.Connections[connIndex].Parts[partIndex].EndX {
-				before := partIndex - 1
-				after := partIndex + 1
-				if before >= 0 {
-					// adjust the part before ... has to be a horizontal line
-					doc.Connections[connIndex].Parts[before].EndX += dist
-				}
-				if after < len(doc.Connections[connIndex].Parts) {
-					// adjust the part after ... has to be a horizontal line
-					doc.Connections[connIndex].Parts[after].StartX += dist
-				}
+			return
+		}
+		if isIn, isMoreRight, dist := isInDistance(x, le.X, doc.MinConnectorMargin); isIn {
+			if isMoreRight {
+				// the connector is to close to the right border of the box ... move the connector to the right
+				// ... and all objects equal or more to the right will be moved to the right, too
+				doc.moveAllObjectsMoreRightRight(&doc.Boxes, x, dist, true)
+				doc.moveAllConnectorsMoreRightRight(x, dist)
 			} else {
-				before := partIndex + 1
-				after := partIndex - 1
-				if after >= 0 {
-					// adjust the part after ... has to be a horizontal line
-					doc.Connections[connIndex].Parts[after].EndX += dist
-				}
-				if before < len(doc.Connections[connIndex].Parts) {
-					// adjust the part before ... has to be a horizontal line
-					doc.Connections[connIndex].Parts[before].StartX += dist
-				}
+				// the connector is to close to the left border of the box ... move all objects more to the right of x
+				// to the right
+				doc.moveAllObjectsMoreRightRight(&doc.Boxes, x, dist, false)
+				doc.moveAllConnectorsMoreRightRight(x, dist)
 			}
 			return
 		}
@@ -381,7 +328,6 @@ func (doc *BoxesDocument) moveTooCloseVerticalConnectionLinesFromBorders() {
 			}
 			doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, part.StartX)
 			// in case that the left border triggered a change, we have to check the right border, too
-			part = doc.Connections[i].Parts[j]
 			doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, doc.Connections[i].Parts[j].StartX)
 		}
 	}
