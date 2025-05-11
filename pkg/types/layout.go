@@ -652,10 +652,6 @@ func (l *LayoutElement) IsInYRange(y1, y2 int) bool {
 		return l.CenterY > y1 && l.CenterY < y2
 	}
 	return l.CenterY < y1 && l.CenterY > y2
-	// if y1 < y2 {
-	// 	return (l.Y > y1) && ((l.Y + l.Height) < y2)
-	// }
-	// return (l.Y < y2) && ((l.Y + l.Height) > y1)
 }
 
 func (l *LayoutElement) IsInXRange(x1, x2 int) bool {
@@ -663,10 +659,6 @@ func (l *LayoutElement) IsInXRange(x1, x2 int) bool {
 		return l.CenterX > x1 && l.CenterX < x2
 	}
 	return l.CenterX < x1 && l.CenterX > x2
-	// if x1 < x2 {
-	// 	return (l.X > x1) && ((l.X + l.Width) < x2)
-	// }
-	// return (l.X < x2) && ((l.X + l.Width) > x1)
 }
 
 func between(value, min, max int) bool {
@@ -740,21 +732,22 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		l.Vertical.X = curX
 		curY := l.Y + yInnerOffset
 		l.Vertical.Y = curY
-		var h, w int
+		var w int
 		var hasChilds bool
-		for i := 0; i < len(l.Vertical.Elems); i++ {
+		lv := len(l.Vertical.Elems)
+		for i := 0; i < lv; i++ {
 			sub := &l.Vertical.Elems[i]
+			if sub.Id == "r4_1" {
+				sub.Id = sub.Id
+			}
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
-			}
-			if h > 0 {
-				h += defaultBoxMargin
 			}
 			sub.X = curX
 			sub.Y = curY
 			sub.InitDimensions(c, defaultPadding, defaultBoxMargin)
+			// eiko: creates issues?
 			curY += (sub.Height + defaultBoxMargin)
-			h += sub.Height
 			if sub.Width > w {
 				w = sub.Width
 			}
@@ -769,7 +762,7 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 			}
 		}
 
-		l.Vertical.Height = h + defaultPadding
+		l.Vertical.Height = l.Vertical.Elems[lv-1].Y + l.Vertical.Elems[lv-1].Height - l.Vertical.Y
 		l.Height += l.Vertical.Height
 		l.adjustDimensionsBasedOnNested(w, defaultPadding)
 	}
@@ -823,7 +816,7 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 			}
 		}
 
-		l.Horizontal.Height = h + defaultPadding
+		l.Horizontal.Height = h
 		l.Horizontal.Width = w
 		l.Height += l.Horizontal.Height
 
@@ -857,13 +850,20 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 			t2W, t2H = c.Dimensions(l.Text2, &l.Format.FontText2)
 			l.Height += t2H + p + l.Format.FontText2.SpaceBottom
 		}
-		//yInnerOffset = l.Format.Padding + max(yCaptionOffset, max(yText1Offset, yText2Offset))
-		//yInnerOffset = l.Format.Padding + l.Height
-		yInnerOffset = l.Height + l.Format.Padding
-		l.Width = max(cW, max(t1W, t2W)) + (2 * l.Format.Padding)
+		yInnerOffset = l.adjuctToRaster(l.Height + l.Format.Padding)
+		l.Width = l.adjuctToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
+		l.Height = l.adjuctToRaster(l.Height)
 	}
 	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 	l.initHorizontal(c, yInnerOffset, defaultPadding, defaultBoxMargin)
+}
+
+func (l *LayoutElement) adjuctToRaster(value int) int {
+	if value > 0 {
+		rasterRest := value % (RasterSize * 2)
+		return value + (RasterSize - rasterRest)
+	}
+	return value
 }
 
 func (l *LayoutElement) Center() {

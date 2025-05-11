@@ -221,7 +221,7 @@ func (doc *BoxesDocument) moveAllConnectorsMoreRightRight(x, dist int) {
 }
 
 func (doc *BoxesDocument) checkLayoutElemForVerticalCollision(le *LayoutElement, connIndex, partIndex, y int) {
-	if le != &doc.Boxes {
+	if le != &doc.Boxes && (le.Id != "" || le.Caption != "" || le.Text1 != "" || le.Text2 != "") {
 		part := doc.Connections[connIndex].Parts[partIndex]
 		if !le.IsInXRange(part.StartX, part.EndX) {
 			return
@@ -266,13 +266,9 @@ func (doc *BoxesDocument) checkLayoutElemForVerticalCollision(le *LayoutElement,
 }
 
 func (doc *BoxesDocument) checkLayoutElemForHorizontalCollision(le *LayoutElement, connIndex, partIndex, x int) {
-	if le != &doc.Boxes {
+	if le != &doc.Boxes && (le.Id != "" || le.Caption != "" || le.Text1 != "" || le.Text2 != "") {
 		// ignores the first box of the document
 		part := doc.Connections[connIndex].Parts[partIndex]
-		if le.Id == "h1_4" {
-			// Debug
-			le.Id = le.Id
-		}
 		if !le.IsInYRange(part.StartY, part.EndY) {
 			return
 		}
@@ -328,7 +324,9 @@ func (doc *BoxesDocument) moveTooCloseVerticalConnectionLinesFromBorders() {
 			}
 			doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, part.StartX)
 			// in case that the left border triggered a change, we have to check the right border, too
-			doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, doc.Connections[i].Parts[j].StartX)
+			if part.StartX != doc.Connections[i].Parts[j].StartX || part.StartY != doc.Connections[i].Parts[j].StartY {
+				doc.checkLayoutElemForHorizontalCollision(&doc.Boxes, i, j, doc.Connections[i].Parts[j].StartX)
+			}
 		}
 	}
 }
@@ -344,7 +342,9 @@ func (doc *BoxesDocument) moveTooCloseHorizontalConnectionLinesFromBorders() {
 				continue // is no horizontal line
 			}
 			doc.checkLayoutElemForVerticalCollision(&doc.Boxes, i, j, part.StartY)
-			doc.checkLayoutElemForVerticalCollision(&doc.Boxes, i, j, doc.Connections[i].Parts[j].StartY)
+			if part.StartX != doc.Connections[i].Parts[j].StartX || part.StartY != doc.Connections[i].Parts[j].StartY {
+				doc.checkLayoutElemForVerticalCollision(&doc.Boxes, i, j, doc.Connections[i].Parts[j].StartY)
+			}
 		}
 	}
 }

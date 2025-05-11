@@ -272,6 +272,25 @@ func (d *BoxesDocument) DrawConnections(drawingImpl BoxesDrawing) error {
 	return nil
 }
 
+func (doc *BoxesDocument) AdjustDocHeight(le *LayoutElement, currentMax int) int {
+	if le != &doc.Boxes {
+		if le.Y+le.Height > currentMax {
+			currentMax = le.Y + le.Height
+		}
+	}
+	if le.Vertical != nil {
+		for _, elem := range le.Vertical.Elems {
+			currentMax = doc.AdjustDocHeight(&elem, currentMax)
+		}
+	}
+	if le.Horizontal != nil {
+		for _, elem := range le.Horizontal.Elems {
+			currentMax = doc.AdjustDocHeight(&elem, currentMax)
+		}
+	}
+	return currentMax
+}
+
 func (b *LayoutElement) Draw(drawing BoxesDrawing) error {
 	if b.Format != nil {
 		if err := drawing.Draw(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, *b.Format); err != nil {

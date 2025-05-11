@@ -219,6 +219,17 @@ func (d *Drawing) Start(title string, height, width int) error {
 	return nil
 }
 
+func (d *Drawing) DrawRaster(width, height, rasterSize int) {
+	for x := rasterSize; x < width; x += rasterSize {
+		for y := rasterSize; y < height; y += rasterSize {
+			// vertical lines
+			d.canvas.Line(x, y-1, x, y+1, "stroke:lightgray;stroke-width:0.5")
+			// horizontal lines
+			d.canvas.Line(x-1, y, x+1, y, "stroke:lightgray;stroke-width:0.5")
+		}
+	}
+}
+
 // textFormat generates CSS formatting for text
 func (d *Drawing) textFormat(fontDef *types.FontDef) string {
 	var font string
