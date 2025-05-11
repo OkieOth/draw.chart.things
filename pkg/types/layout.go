@@ -765,6 +765,9 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		l.Vertical.Height = l.Vertical.Elems[lv-1].Y + l.Vertical.Elems[lv-1].Height - l.Vertical.Y
 		l.Height += l.Vertical.Height
 		l.adjustDimensionsBasedOnNested(w, defaultPadding)
+		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+			l.Height += defaultPadding
+		}
 	}
 }
 
@@ -821,6 +824,9 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 		l.Height += l.Horizontal.Height
 
 		l.adjustDimensionsBasedOnNested(w, defaultPadding)
+		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+			l.Height += defaultPadding
+		}
 	}
 }
 
@@ -829,10 +835,17 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
 	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
-		l.Height = (2 * l.Format.Padding)
+		l.Height = 0
 		if l.Caption != "" {
+			p := l.Format.Padding
+			if l.Format.FontCaption.SpaceTop > 0 {
+				p = l.Format.FontCaption.SpaceTop
+			}
 			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
-			l.Height += cH + l.Format.FontCaption.SpaceTop + l.Format.FontCaption.SpaceBottom
+			l.Height += cH + p + l.Format.FontCaption.SpaceBottom
+			if l.Text1 == "" && l.Text2 == "" {
+				l.Height += l.Format.Padding
+			}
 		}
 		if l.Text1 != "" {
 			p := l.Format.Padding
@@ -841,6 +854,9 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 			}
 			t1W, t1H = c.Dimensions(l.Text1, &l.Format.FontText1)
 			l.Height += t1H + p + l.Format.FontText1.SpaceBottom
+			if l.Text2 == "" {
+				l.Height += l.Format.Padding
+			}
 		}
 		if l.Text2 != "" {
 			p := l.Format.Padding
@@ -849,10 +865,11 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 			}
 			t2W, t2H = c.Dimensions(l.Text2, &l.Format.FontText2)
 			l.Height += t2H + p + l.Format.FontText2.SpaceBottom
+			l.Height += l.Format.Padding
 		}
-		yInnerOffset = l.adjuctToRaster(l.Height + l.Format.Padding)
-		l.Width = l.adjuctToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
 		l.Height = l.adjuctToRaster(l.Height)
+		yInnerOffset = l.Height
+		l.Width = l.adjuctToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
 	}
 	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 	l.initHorizontal(c, yInnerOffset, defaultPadding, defaultBoxMargin)
