@@ -867,18 +867,18 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 			l.Height += t2H + p + l.Format.FontText2.SpaceBottom
 			l.Height += l.Format.Padding
 		}
-		l.Height = l.adjuctToRaster(l.Height)
+		l.Height = l.adjustToRaster(l.Height)
 		yInnerOffset = l.Height
-		l.Width = l.adjuctToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
+		l.Width = l.adjustToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
 	}
 	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 	l.initHorizontal(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 }
 
-func (l *LayoutElement) adjuctToRaster(value int) int {
+func (l *LayoutElement) adjustToRaster(value int) int {
 	if value > 0 {
 		rasterRest := value % (RasterSize * 2)
-		return value + (RasterSize - rasterRest)
+		return value + ((RasterSize * 2) - rasterRest)
 	}
 	return value
 }
