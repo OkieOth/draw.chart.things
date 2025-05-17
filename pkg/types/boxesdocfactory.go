@@ -233,6 +233,61 @@ func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
 	return d.Boxes.Draw(drawingImpl)
 }
 
+func (doc *BoxesDocument) drawStartPositionsImpl(drawingImpl *BoxesDrawing, elem *LayoutElement, f *LineDef) {
+	if doc.ShouldHandle(elem) {
+		(*drawingImpl).DrawLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y-RasterSize, *f)
+		(*drawingImpl).DrawLine(*elem.BottomXToStart, elem.Y+elem.Height, *elem.BottomXToStart, elem.Y+elem.Height+RasterSize, *f)
+		(*drawingImpl).DrawLine(elem.X, *elem.LeftYToStart, elem.X-RasterSize, *elem.LeftYToStart, *f)
+		(*drawingImpl).DrawLine(elem.X+elem.Width, *elem.RightYToStart, elem.X+elem.Width+RasterSize, *elem.RightYToStart, *f)
+	}
+	if elem.Vertical != nil {
+		for i := 0; i < len(elem.Vertical.Elems); i++ {
+			doc.drawStartPositionsImpl(drawingImpl, &elem.Vertical.Elems[i], f)
+		}
+	}
+	if elem.Horizontal != nil {
+		for i := 0; i < len(elem.Horizontal.Elems); i++ {
+			doc.drawStartPositionsImpl(drawingImpl, &elem.Horizontal.Elems[i], f)
+		}
+	}
+}
+
+func (d *BoxesDocument) ShouldHandle(elem *LayoutElement) bool {
+	if elem == &d.Boxes {
+		return false
+	}
+	if elem.Caption == "" && elem.Text1 == "" && elem.Text2 == "" && elem.Id == "" {
+		return false
+	}
+	return true
+}
+
+func (d *BoxesDocument) DrawStartPositions(drawingImpl BoxesDrawing) {
+	w := 2
+	b := "blue"
+	f := LineDef{
+		Width: &w,
+		Color: &b,
+	}
+	d.InitStartPositions()
+	d.drawStartPositionsImpl(&drawingImpl, &d.Boxes, &f)
+}
+
+func (d *BoxesDocument) DrawRoads(drawingImpl BoxesDrawing) {
+	w := 1
+	b := "green"
+	f := LineDef{
+		Width: &w,
+		Color: &b,
+	}
+	for _, r := range d.VerticalRoads {
+		drawingImpl.DrawLine(r.StartX, r.StartY, r.EndX, r.EndY, f)
+	}
+	for _, r := range d.HorizontalRoads {
+		drawingImpl.DrawLine(r.StartX, r.StartY, r.EndX, r.EndY, f)
+	}
+}
+
 func (d *BoxesDocument) DrawConnections(drawingImpl BoxesDrawing) error {
 	b := "black"
 	w := 1

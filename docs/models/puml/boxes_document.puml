@@ -14,6 +14,8 @@ class "**BoxesDocument**" as BoxesDocument {
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
         Map<BoxFormat> formats
+        ConnectionLine[] verticalRoads
+        ConnectionLine[] horizontalRoads
 }
 note top: Internal model to describe the\nlayout if the boxes chart
 
@@ -34,6 +36,10 @@ class "**LayoutElement**" as LayoutElement {
         IntegerType centerY
         BoxFormat format
         LayoutElemConnection[] connections
+        IntegerType leftYToStart
+        IntegerType rightYToStart
+        IntegerType topXToStart
+        IntegerType bottomXToStart
         StringType[] tags
 }
 
@@ -63,6 +69,16 @@ class "**BoxFormat**" as BoxFormat {
 
  
 
+class "**ConnectionLine**" as ConnectionLine {
+        IntegerType startX
+        IntegerType startY
+        IntegerType endX
+        IntegerType endY
+        BooleanType movedOut
+}
+
+ 
+
 class "**LayoutElemContainer**" as LayoutElemContainer {
         IntegerType x
         IntegerType y
@@ -78,16 +94,6 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         BooleanType sourceArrow
         BooleanType destArrow
         StringType[] tags
-}
-
- 
-
-class "**ConnectionLine**" as ConnectionLine {
-        IntegerType startX
-        IntegerType startY
-        IntegerType endX
-        IntegerType endY
-        BooleanType movedOut
 }
 
  
@@ -162,6 +168,10 @@ BoxesDocument "0" *-- "n" ConnectionElem
 
 BoxesDocument  *--  BoxFormat
 
+BoxesDocument "0" *-- "n" ConnectionLine
+
+BoxesDocument "0" *-- "n" ConnectionLine
+
     
 
 
@@ -180,6 +190,10 @@ LayoutElement  *--  LayoutElemContainer
 LayoutElement  *--  BoxFormat
 
 LayoutElement "0" *-- "n" LayoutElemConnection
+
+
+
+
 
 
     
@@ -212,15 +226,15 @@ BoxFormat  *--  FillDef
 
 
 
+
+    
+
+
+
+
 LayoutElemContainer "0" *-- "n" LayoutElement
 
     
-
-
-
-
-    
-
 
 
 

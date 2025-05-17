@@ -36,6 +36,12 @@ type BoxesDocument struct {
 
     // Map of formats available to be used in the boxes
     Formats map[string]BoxFormat  `yaml:"formats,omitempty"`
+
+    // Vertical roads available to connect boxes in a vertical way
+    VerticalRoads []ConnectionLine  `yaml:"verticalRoads,omitempty"`
+
+    // Horizontal roads available to connect boxes in a horizontal way
+    HorizontalRoads []ConnectionLine  `yaml:"horizontalRoads,omitempty"`
 }
 
 func NewBoxesDocument() *BoxesDocument {
@@ -43,6 +49,8 @@ func NewBoxesDocument() *BoxesDocument {
             Boxes: *NewLayoutElement(),
             Connections: make([]ConnectionElem, 0),
             Formats: make(map[string]BoxFormat, 0),
+            VerticalRoads: make([]ConnectionLine, 0),
+            HorizontalRoads: make([]ConnectionLine, 0),
         }
 }
 
@@ -89,6 +97,18 @@ type LayoutElement struct {
     Format *BoxFormat  `yaml:"format,omitempty"`
 
     Connections []LayoutElemConnection  `yaml:"connections,omitempty"`
+
+    // Y position of the left side of the element to start the connection
+    LeftYToStart *int  `yaml:"leftYToStart,omitempty"`
+
+    // Y position of the right side of the element to start the connection
+    RightYToStart *int  `yaml:"rightYToStart,omitempty"`
+
+    // X position of the top side of the element to start the connection
+    TopXToStart *int  `yaml:"topXToStart,omitempty"`
+
+    // X position of the bottom side of the element to start the connection
+    BottomXToStart *int  `yaml:"bottomXToStart,omitempty"`
 
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
@@ -165,6 +185,25 @@ type BoxFormat struct {
 
 
 
+type ConnectionLine struct {
+
+    StartX int  `yaml:"startX"`
+
+    StartY int  `yaml:"startY"`
+
+    EndX int  `yaml:"endX"`
+
+    EndY int  `yaml:"endY"`
+
+    // If the line is moved out by a box with a collision
+    MovedOut bool  `yaml:"movedOut"`
+}
+
+
+
+
+
+
 type LayoutElemContainer struct {
 
     // X position of the element
@@ -212,25 +251,6 @@ func NewLayoutElemConnection() *LayoutElemConnection {
             Tags: make([]string, 0),
         }
 }
-
-
-
-
-
-type ConnectionLine struct {
-
-    StartX int  `yaml:"startX"`
-
-    StartY int  `yaml:"startY"`
-
-    EndX int  `yaml:"endX"`
-
-    EndY int  `yaml:"endY"`
-
-    // If the line is moved out by a box with a collision
-    MovedOut bool  `yaml:"movedOut"`
-}
-
 
 
 

@@ -673,12 +673,12 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 	if conn.StartX == conn.EndX {
 		// vertical line
 		upperY, lowerY := connToUpperLowerY(conn)
-		if (l.X < conn.StartX) && ((l.X + l.Width) > conn.StartX) &&
-			(((l.Y > upperY) && ((l.Y + l.Height) < lowerY)) || between(lowerY, l.Y, l.Y+l.Height) || between(upperY, l.Y, l.Y+l.Height)) {
+		if (l.X <= conn.StartX) && ((l.X + l.Width) >= conn.StartX) &&
+			(((l.Y >= upperY) && ((l.Y + l.Height) <= lowerY)) || between(lowerY, l.Y, l.Y+l.Height) || between(upperY, l.Y, l.Y+l.Height)) {
 			// has collision
 			if conn.StartY < conn.EndY {
 				// going down
-				if lowerY > (l.Y + l.Height) {
+				if lowerY >= (l.Y + l.Height) {
 					// line going full through the box
 					return l.fixVerticalCollisionDown(conn, distanceToBorder)
 				} else {
@@ -687,7 +687,7 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 				}
 			} else {
 				// going up
-				if upperY < l.Y {
+				if upperY <= l.Y {
 					// line going full through the box
 					return l.fixVerticalCollisionUp(conn, distanceToBorder)
 				} else {
@@ -699,8 +699,8 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 	} else {
 		// horizontal line
 		leftX, rightX := connToLeftRightX(conn)
-		if (l.Y < conn.StartY) && ((l.Y + l.Height) > conn.StartY) &&
-			(((l.X > leftX) && ((l.X + l.Width) < rightX)) || between(leftX, l.X, l.X+l.Width) || between(rightX, l.X, l.X+l.Width)) {
+		if (l.Y <= conn.StartY) && ((l.Y + l.Height) >= conn.StartY) &&
+			(((l.X >= leftX) && ((l.X + l.Width) <= rightX)) || between(leftX, l.X, l.X+l.Width) || between(rightX, l.X, l.X+l.Width)) {
 			// has collision
 			if conn.StartX < conn.EndX {
 				// going right

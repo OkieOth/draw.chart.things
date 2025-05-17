@@ -4,116 +4,59 @@ import (
 	"fmt"
 )
 
-func (doc *BoxesDocument) findLayoutElementById(id string, startElem *LayoutElement) (*LayoutElement, bool) {
-	if startElem.Id == id {
-		return startElem, true
-	}
-	if startElem.Vertical != nil {
-		for _, elem := range startElem.Vertical.Elems {
-			if elem.Id == id {
-				return &elem, true
-			}
-			if e, found := doc.findLayoutElementById(id, &elem); found {
-				return e, true
-			}
-		}
-	}
-	if startElem.Horizontal != nil {
-		for _, elem := range startElem.Horizontal.Elems {
-			if elem.Id == id {
-				return &elem, true
-			}
-			if e, found := doc.findLayoutElementById(id, &elem); found {
-				return e, true
-			}
-		}
-	}
-	return nil, false
+type PointToTest struct {
+	X            int
+	Y            int
+	HasCollision bool
 }
 
-func (doc *BoxesDocument) checkForCollisionLeft(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection, int, int) {
-	closest := doc.elementClosestLeft(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.X <= endX) {
-		return endX, endY, nil, endX, endY
-	} else {
-		var nextDirection ConnDirection
-		var x, y int
-		x = closest.X + (doc.MinBoxMargin / 2)
-		if closest.CenterY > startY {
-			nextDirection = ConnDirectionUp
-			y = closest.Y - (doc.MinBoxMargin / 2)
+func getRelevantPoints(p1, p2, other int, verticalBorder bool) []PointToTest {
+	// expects always to go from top to bottom or left to right
+	start, end := p1, p2
+	if p1 > p2 {
+		start, end = p2, p1
+	}
+	endVal := end - RasterSize
+	ret := make([]PointToTest, 0)
+	for i := start + RasterSize; i <= endVal; i += RasterSize {
+		var p PointToTest
+		if verticalBorder {
+			p.X = other
+			p.Y = i
 		} else {
-			nextDirection = ConnDirectionDown
-			y = closest.Y + closest.Height + (doc.MinBoxMargin / 2)
+			p.Y = other
+			p.X = i
 		}
-		return x, endY, &nextDirection, x, y
+		ret = append(ret, p)
 	}
+	return ret
 }
 
-func (doc *BoxesDocument) checkForCollisionRight(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection, int, int) {
-	closest := doc.elementClosestRight(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.X >= endX) {
-		return endX, endY, nil, endX, endY
-	} else {
-		var nextDirection ConnDirection
-		var x, y int
-		x = closest.X - (doc.MinBoxMargin / 2)
-		if closest.CenterY > startY {
-			nextDirection = ConnDirectionUp
-			y = closest.Y - (doc.MinBoxMargin / 2)
-		} else {
-			nextDirection = ConnDirectionDown
-			y = closest.Y + closest.Height + (doc.MinBoxMargin / 2)
-		}
-		return x, endY, &nextDirection, x, y
-	}
-}
+type checkForCollFunc func(relevantPoints *[]PointToTest, currentElem, elemToHandle *LayoutElement)
+type checkForCollFunc2 func(x, y int, currentElem, startElem, endElem *LayoutElement) bool
 
-func (doc *BoxesDocument) checkForCollisionUp(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection, int, int) {
-	closest := doc.elementClosestTop(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.Y <= endY) {
-		return endX, endY, nil, endX, endY
-	} else {
-		var nextDirection ConnDirection
-		var x, y int
-		y = closest.Y + (doc.MinBoxMargin / 2)
-		if closest.CenterX > startX {
-			nextDirection = ConnDirectionLeft
-			x = closest.X + (doc.MinBoxMargin / 2)
-		} else {
-			nextDirection = ConnDirectionRight
-			x = closest.X + closest.Width + (doc.MinBoxMargin / 2)
-		}
-		return endX, y, &nextDirection, x, y
-	}
-}
-
-func (doc *BoxesDocument) checkForCollisionDown(startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection, int, int) {
-	closest := doc.elementClosestBottom(&doc.Boxes, nil, startElem)
-	if (closest == nil) || (closest.Y >= endY) {
-		return endX, endY, nil, endX, endY
-	} else {
-		var nextDirection ConnDirection
-		var x, y int
-		y = closest.Y - (doc.MinBoxMargin / 2)
-		if closest.CenterX > startX {
-			nextDirection = ConnDirectionLeft
-			x = closest.X + (doc.MinBoxMargin / 2)
-		} else {
-			nextDirection = ConnDirectionRight
-			x = closest.X + closest.Width + (doc.MinBoxMargin / 2)
-		}
-		return endX, y, &nextDirection, x, y
-	}
-}
-
-func (doc *BoxesDocument) isParentInContainer(container *LayoutElemContainer, possibleParent, elemToCheckFor *LayoutElement) bool {
-	if container != nil {
-		for _, subElem := range container.Elems {
-			if subElem.Id == elemToCheckFor.Id {
-				return true
+func (doc *BoxesDocument) checkForCollInContainer(cont *LayoutElemContainer, f checkForCollFunc, relevantPoints *[]PointToTest, elemToHandle *LayoutElement) {
+	if cont != nil {
+		l := len(cont.Elems)
+		for i := 0; i < l; i++ {
+			e := &cont.Elems[i]
+			if e == elemToHandle {
+				continue
 			}
-			if doc.isParent(&subElem, elemToCheckFor) {
+			f(relevantPoints, e, elemToHandle)
+		}
+	}
+}
+
+func (doc *BoxesDocument) checkForCollInContainer2(cont *LayoutElemContainer, f checkForCollFunc2, x, y int, startElem, endElem *LayoutElement) bool {
+	if cont != nil {
+		l := len(cont.Elems)
+		for i := 0; i < l; i++ {
+			e := &cont.Elems[i]
+			if e == startElem || e == endElem {
+				continue
+			}
+			if f(x, y, e, startElem, endElem) {
 				return true
 			}
 		}
@@ -121,646 +64,1145 @@ func (doc *BoxesDocument) isParentInContainer(container *LayoutElemContainer, po
 	return false
 }
 
-func (doc *BoxesDocument) isParent(possibleParent, elemToCheckFor *LayoutElement) bool {
-	if doc.isParentInContainer(possibleParent.Vertical, possibleParent, elemToCheckFor) {
+// checks if a point is inside a box, returns true if so
+func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *LayoutElement) bool {
+	if (currentElem != startElem) && (currentElem != endElem) &&
+		(doc.ShouldHandle(currentElem)) &&
+		((startElem == nil) || (!doc.isParent(currentElem, startElem))) &&
+		((endElem == nil) || (!doc.isParent(currentElem, endElem))) {
+		curMinX := currentElem.X
+		curMaxX := currentElem.X + currentElem.Width
+		curMinY := currentElem.Y
+		curMaxY := currentElem.Y + currentElem.Height
+		if (x <= curMaxX) && (x >= curMinX) && (y >= curMinY) && (y <= curMaxY) {
+			return true
+		}
+	}
+	if doc.checkForCollInContainer2(currentElem.Vertical, doc.checkColl, x, y, startElem, endElem) {
 		return true
 	}
-	return doc.isParentInContainer(possibleParent.Horizontal, possibleParent, elemToCheckFor)
+	return doc.checkForCollInContainer2(currentElem.Horizontal, doc.checkColl, x, y, startElem, endElem)
 }
 
-func (doc *BoxesDocument) elementClosestLeft(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
-	if soFarClosest == nil {
-		soFarClosest = elem
-	} else {
-		// TODO only if elem is not the originalStartElem and
-		// elem is not parent that contains originalStartElem
-		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
-			(originalStartElem.CenterY > elem.Y) && (originalStartElem.CenterY < elem.Y+elem.Height) {
-			if (elem.X > soFarClosest.X) && (elem.X < originalStartElem.X) {
-				soFarClosest = elem
+func (doc *BoxesDocument) checkForLeftColl(relevantPoints *[]PointToTest, currentElem, elemToHandle *LayoutElement) {
+	if (currentElem != elemToHandle) && doc.ShouldHandle(currentElem) && (!doc.isParent(currentElem, elemToHandle)) {
+		curMinX := currentElem.X
+		curMaxX := currentElem.X + currentElem.Width
+		curMinY := currentElem.Y
+		curMaxY := currentElem.Y + currentElem.Height
+		for i := 0; i < len(*relevantPoints); i++ {
+			x := (*relevantPoints)[i].X - (4 * RasterSize)
+			y := (*relevantPoints)[i].Y
+			if (x <= curMaxX) && (x > curMinX) && (y >= curMinY) && (y <= curMaxY) {
+				(*relevantPoints)[i].HasCollision = true
 			}
 		}
 	}
-	if elem.Vertical != nil {
-		for _, subElem := range elem.Vertical.Elems {
-			soFarClosest = doc.elementClosestLeft(&subElem, soFarClosest, originalStartElem)
-		}
-	}
-	if elem.Horizontal != nil {
-		for _, subElem := range elem.Horizontal.Elems {
-			soFarClosest = doc.elementClosestLeft(&subElem, soFarClosest, originalStartElem)
-		}
-	}
-	return soFarClosest
+	doc.checkForCollInContainer(currentElem.Vertical, doc.checkForLeftColl, relevantPoints, elemToHandle)
+	doc.checkForCollInContainer(currentElem.Horizontal, doc.checkForLeftColl, relevantPoints, elemToHandle)
 }
 
-func (doc *BoxesDocument) elementClosestRight(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
-	if soFarClosest == nil {
-		soFarClosest = elem
-	} else {
-		// TODO only if elem is not the originalStartElem and
-		// elem is not parent that contains originalStartElem
-		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
-			(originalStartElem.CenterY > elem.Y) && (originalStartElem.CenterY < elem.Y+elem.Height) {
-			if (elem.X < soFarClosest.X) && (elem.X > originalStartElem.X) {
-				soFarClosest = elem
+func minMaxXY(currentElem *LayoutElement) (int, int, int, int) {
+	curMinX := currentElem.X
+	curMaxX := currentElem.X + currentElem.Width
+	curMinY := currentElem.Y
+	curMaxY := currentElem.Y + currentElem.Height
+	return curMinX, curMaxX, curMinY, curMaxY
+}
+
+func (doc *BoxesDocument) checkForRightColl(relevantPoints *[]PointToTest, currentElem, elemToHandle *LayoutElement) {
+	if (currentElem != elemToHandle) && doc.ShouldHandle(currentElem) && (!doc.isParent(currentElem, elemToHandle)) {
+		curMinX, curMaxX, curMinY, curMaxY := minMaxXY(currentElem)
+		for i := 0; i < len(*relevantPoints); i++ {
+			x := (*relevantPoints)[i].X + (4 * RasterSize)
+			y := (*relevantPoints)[i].Y
+			if (x >= curMinX) && (x < curMaxX) && (y >= curMinY) && (y <= curMaxY) {
+				(*relevantPoints)[i].HasCollision = true
 			}
 		}
 	}
-	if elem.Vertical != nil {
-		for _, subElem := range elem.Vertical.Elems {
-			soFarClosest = doc.elementClosestRight(&subElem, soFarClosest, originalStartElem)
-		}
-	}
-	if elem.Horizontal != nil {
-		for _, subElem := range elem.Horizontal.Elems {
-			soFarClosest = doc.elementClosestRight(&subElem, soFarClosest, originalStartElem)
-		}
-	}
-	return soFarClosest
+	doc.checkForCollInContainer(currentElem.Vertical, doc.checkForRightColl, relevantPoints, elemToHandle)
+	doc.checkForCollInContainer(currentElem.Horizontal, doc.checkForRightColl, relevantPoints, elemToHandle)
 }
 
-func (doc *BoxesDocument) elementClosestTop(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
-	if soFarClosest == nil {
-		soFarClosest = elem
-	} else {
-		// TODO only if elem is not the originalStartElem and
-		// elem is not parent that contains originalStartElem
-		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
-			(originalStartElem.CenterX > elem.X) && (originalStartElem.CenterX < elem.X+elem.Width) {
-			if (elem.Y > soFarClosest.Y) && (elem.Y < originalStartElem.Y) {
-				soFarClosest = elem
+func (doc *BoxesDocument) checkForAboveColl(relevantPoints *[]PointToTest, currentElem, elemToHandle *LayoutElement) {
+	if (currentElem != elemToHandle) && doc.ShouldHandle(currentElem) && (!doc.isParent(currentElem, elemToHandle)) {
+		curMinX, curMaxX, curMinY, curMaxY := minMaxXY(currentElem)
+		for i := 0; i < len(*relevantPoints); i++ {
+			x := (*relevantPoints)[i].X
+			y := (*relevantPoints)[i].Y - (4 * RasterSize)
+			if (y <= curMaxY) && (y > curMinY) && (x >= curMinX) && (x <= curMaxX) {
+				(*relevantPoints)[i].HasCollision = true
 			}
 		}
 	}
-	if elem.Vertical != nil {
-		for _, subElem := range elem.Vertical.Elems {
-			soFarClosest = doc.elementClosestTop(&subElem, soFarClosest, originalStartElem)
-		}
-	}
-	if elem.Horizontal != nil {
-		for _, subElem := range elem.Horizontal.Elems {
-			soFarClosest = doc.elementClosestTop(&subElem, soFarClosest, originalStartElem)
-		}
-	}
-	return soFarClosest
+	doc.checkForCollInContainer(currentElem.Vertical, doc.checkForAboveColl, relevantPoints, elemToHandle)
+	doc.checkForCollInContainer(currentElem.Horizontal, doc.checkForAboveColl, relevantPoints, elemToHandle)
 }
 
-func (doc *BoxesDocument) elementClosestBottom(elem *LayoutElement, soFarClosest, originalStartElem *LayoutElement) *LayoutElement {
-	if soFarClosest == nil {
-		soFarClosest = elem
-	} else {
-		// TODO only if elem is not the originalStartElem and
-		// elem is not parent that contains originalStartElem
-		if (elem.Id != originalStartElem.Id) && (!doc.isParent(elem, soFarClosest)) &&
-			(originalStartElem.CenterX > elem.X) && (originalStartElem.CenterX < elem.X+elem.Width) {
-			if (elem.Y < soFarClosest.Y) && (elem.Y > originalStartElem.Y) {
-				soFarClosest = elem
+func (doc *BoxesDocument) checkForBelowColl(relevantPoints *[]PointToTest, currentElem, elemToHandle *LayoutElement) {
+	if (currentElem != elemToHandle) && doc.ShouldHandle(currentElem) && (!doc.isParent(currentElem, elemToHandle)) {
+		curMinX, curMaxX, curMinY, curMaxY := minMaxXY(currentElem)
+		for i := 0; i < len(*relevantPoints); i++ {
+			x := (*relevantPoints)[i].X
+			y := (*relevantPoints)[i].Y + (4 * RasterSize)
+			if (y >= curMinY) && (y < curMaxY) && (x >= curMinX) && (x <= curMaxX) {
+				(*relevantPoints)[i].HasCollision = true
 			}
 		}
 	}
-	if elem.Vertical != nil {
-		for _, subElem := range elem.Vertical.Elems {
-			soFarClosest = doc.elementClosestBottom(&subElem, soFarClosest, originalStartElem)
-		}
+	doc.checkForCollInContainer(currentElem.Vertical, doc.checkForBelowColl, relevantPoints, elemToHandle)
+	doc.checkForCollInContainer(currentElem.Horizontal, doc.checkForBelowColl, relevantPoints, elemToHandle)
+}
+
+func abs(v1 int) int {
+	if v1 < 0 {
+		return -v1
 	}
-	if elem.Horizontal != nil {
-		for _, subElem := range elem.Horizontal.Elems {
-			soFarClosest = doc.elementClosestBottom(&subElem, soFarClosest, originalStartElem)
-		}
+	return v1
+}
+
+func valWithShortestDistanceToCenter(centerVal, currentVal, newVal int) int {
+	if currentVal == -1 {
+		return newVal
 	}
-	return soFarClosest
-}
-
-func (doc *BoxesDocument) findNextConnectionParts(alreadyCollectedParts []ConnectionLine, startX, startY, endX, endY int, nextDirection *ConnDirection) []ConnectionLine {
-	return alreadyCollectedParts // TODO
-}
-
-func (doc *BoxesDocument) handleDirection(direction ConnDirection, startX, startY, endX, endY int, startElem *LayoutElement) (int, int, *ConnDirection, int, int) {
-	var nextX, nextY, nextX2, nextY2 int
-	var nextDirection *ConnDirection
-	switch direction {
-	case ConnDirectionLeft:
-		if startY == endY {
-			// straight line
-			nextX = endX
-		} else {
-			nextX = (startX - endX) / 2
-		}
-		nextX, nextY, nextDirection, nextX2, nextY2 = doc.checkForCollisionLeft(startX, startY, nextX, startY, startElem)
-	case ConnDirectionRight:
-		if startY == endY {
-			// straight line
-			nextX = endX
-		} else {
-			nextX = (endX - startX) / 2
-		}
-		nextX, nextY, nextDirection, nextX2, nextY2 = doc.checkForCollisionRight(startX, startY, nextX, startY, startElem)
-	case ConnDirectionUp:
-		if startX == endX {
-			// straight line
-			nextY = endY
-		} else {
-			nextY = (startY - endY) / 2
-		}
-		nextX, nextY, nextDirection, nextX2, nextY2 = doc.checkForCollisionUp(startX, startY, startX, nextY, startElem)
-	case ConnDirectionDown:
-		if startX == endX {
-			// straight line
-			nextY = endY
-		} else {
-			nextY = (endY - startY) / 2
-		}
-		nextX, nextY, nextDirection, nextX2, nextY2 = doc.checkForCollisionDown(startX, startY, startX, nextY, startElem)
+	if abs(centerVal-newVal) < abs(centerVal-currentVal) {
+		return newVal
 	}
-	return nextX, nextY, nextDirection, nextX2, nextY2
+	return currentVal
 }
 
-// connects two points with a straight line
-func (doc *BoxesDocument) initialLineConnection(startX, startY, endX, endY int) []ConnectionLine {
-	connection := make([]ConnectionLine, 0)
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: startY,
-		EndX:   endX,
-		EndY:   endY,
-	})
-	return connection
+// finds the best Y starting point for connections going from/to the right border
+func (doc *BoxesDocument) initRightYToStart(elem *LayoutElement) {
+	// Attention, this function works only with three raster points between boxes
+
+	// the general algorithm is to take the relevant raster points from the border
+	// and check the document elements if the point coordinate + 4 raster points in
+	// the specific direction are free ... if so then the point is used. In case of
+	// multiple matching points the one closest to the center of the element is used.
+	relevantPoints := getRelevantPoints(elem.Y, elem.Y+elem.Height, elem.X+elem.Width, true)
+	doc.checkForRightColl(&relevantPoints, &doc.Boxes, elem)
+	found := false
+	curVal := -1
+	for _, p := range relevantPoints {
+		if !p.HasCollision {
+			if found {
+				// check if the point is closer to the center of the element
+				curVal = valWithShortestDistanceToCenter(elem.CenterY, curVal, p.Y)
+			} else {
+				found = true
+				continue
+			}
+		}
+		found = false
+	}
+	if curVal > -1 {
+		elem.RightYToStart = &curVal
+	} else {
+		elem.RightYToStart = &elem.CenterY
+	}
 }
 
-// connects two points with a U-shaped line
-func (doc *BoxesDocument) initialHUConnection(startX, startY, endX, endY, startLen int) []ConnectionLine {
-	connection := make([]ConnectionLine, 0)
-	y2 := startY + startLen
-
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: startY,
-		EndX:   startX,
-		EndY:   y2,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: y2,
-		EndX:   endX,
-		EndY:   y2,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: endX,
-		StartY: y2,
-		EndX:   endX,
-		EndY:   endY,
-	})
-	return connection
+// finds the best Y starting point for connections going from/to the left border
+func (doc *BoxesDocument) initLeftYToStart(elem *LayoutElement) {
+	relevantPoints := getRelevantPoints(elem.Y, elem.Y+elem.Height, elem.X, true)
+	doc.checkForLeftColl(&relevantPoints, &doc.Boxes, elem)
+	found := false
+	curVal := -1
+	for _, p := range relevantPoints {
+		if !p.HasCollision {
+			if found {
+				// check if the point is closer to the center of the element
+				curVal = valWithShortestDistanceToCenter(elem.CenterY, curVal, p.Y)
+			} else {
+				found = true
+				continue
+			}
+		}
+		found = false
+	}
+	if curVal > -1 {
+		elem.LeftYToStart = &curVal
+	} else {
+		elem.LeftYToStart = &elem.CenterY
+	}
 }
 
-func (doc *BoxesDocument) initialVUConnection(startX, startY, endX, endY, x2 int) []ConnectionLine {
-	connection := make([]ConnectionLine, 0)
+// finds the best X starting point for connections going from/to the top border
+func (doc *BoxesDocument) initTopXToStart(elem *LayoutElement) {
+	relevantPoints := getRelevantPoints(elem.X, elem.X+elem.Width, elem.Y, false)
+	doc.checkForAboveColl(&relevantPoints, &doc.Boxes, elem)
+	found := false
+	curVal := -1
+	for _, p := range relevantPoints {
+		if !p.HasCollision {
+			if found {
+				// check if the point is closer to the center of the element
+				curVal = valWithShortestDistanceToCenter(elem.CenterX, curVal, p.X)
+			} else {
+				found = true
+				continue
+			}
+		}
+		found = false
+	}
+	if curVal > -1 {
+		elem.TopXToStart = &curVal
+	} else {
+		elem.TopXToStart = &elem.CenterX
+	}
+}
 
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: startY,
+// finds the best X starting point for connections going from/to the bottom border
+func (doc *BoxesDocument) initBottomXToStart(elem *LayoutElement) {
+	relevantPoints := getRelevantPoints(elem.X, elem.X+elem.Width, elem.Y+elem.Height, false)
+	doc.checkForBelowColl(&relevantPoints, &doc.Boxes, elem)
+	found := false
+	curVal := -1
+	for _, p := range relevantPoints {
+		if !p.HasCollision {
+			if found {
+				// check if the point is closer to the center of the element
+				curVal = valWithShortestDistanceToCenter(elem.CenterX, curVal, p.X)
+			} else {
+				found = true
+				continue
+			}
+		}
+		found = false
+	}
+	if curVal > -1 {
+		elem.BottomXToStart = &curVal
+	} else {
+		elem.BottomXToStart = &elem.CenterX
+	}
+}
+
+func emptyVariant(indexToRemove int, variants [][]ConnectionLine) [][]ConnectionLine {
+	variants[indexToRemove] = make([]ConnectionLine, 0)
+	return variants
+}
+
+func newConnectionLine(x1, y1, x2, y2 int) ConnectionLine {
+	return ConnectionLine{
+		StartX: x1,
+		StartY: y1,
 		EndX:   x2,
-		EndY:   startY,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: x2,
-		StartY: startY,
-		EndX:   x2,
-		EndY:   endY,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: x2,
-		StartY: endY,
-		EndX:   endX,
-		EndY:   endY,
-	})
-	return connection
-}
-
-// connects two points with a L-shaped line, starting in a horizontal direction
-func (doc *BoxesDocument) initialHLConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
-	connection := make([]ConnectionLine, 0)
-
-	upperY, lowerY := minMax(startY, endY)
-
-	if (lowerY - upperY) < doc.MinBoxMargin/2 {
-		return nil, fmt.Errorf("HL connection would be too small")
-	}
-
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: startY,
-		EndX:   endX,
-		EndY:   startY,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: endX,
-		StartY: startY,
-		EndX:   endX,
-		EndY:   endY,
-	})
-	return connection, nil
-}
-
-func minMax(a, b int) (int, int) {
-	if a < b {
-		return a, b
-	}
-	return b, a
-}
-
-// connects two points with a L-shaped line, starting in a vertical direction
-func (doc *BoxesDocument) initialVLConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
-	connection := make([]ConnectionLine, 0)
-
-	upperY, lowerY := minMax(startY, endY)
-
-	if (lowerY - upperY) < doc.MinBoxMargin/2 {
-		return nil, fmt.Errorf("HS connection would be too small")
-	}
-
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: startY,
-		EndX:   startX,
-		EndY:   endY,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: endY,
-		EndX:   endX,
-		EndY:   endY,
-	})
-	return connection, nil
-}
-
-// connects two points with a vertical "S"-shaped line
-func (doc *BoxesDocument) initialVSConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
-	connection := make([]ConnectionLine, 0)
-	y2 := startY + (endY-startY)/2
-	if y2 < doc.MinBoxMargin/2 {
-		return nil, fmt.Errorf("VS connection would be too small")
-	}
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: startY,
-		EndX:   startX,
 		EndY:   y2,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: y2,
-		EndX:   endX,
-		EndY:   y2,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: endX,
-		StartY: y2,
-		EndX:   endX,
-		EndY:   endY,
-	})
-	return connection, nil
+	}
 }
 
-// connects two points with a horizontal "S"-shaped line
-func (doc *BoxesDocument) initialHSConnection(startX, startY, endX, endY int) ([]ConnectionLine, error) {
-	connection := make([]ConnectionLine, 0)
-	x2 := startX + (endX-startX)/2
-	if x2 < doc.MinBoxMargin/2 {
-		return nil, fmt.Errorf("HS connection would be too small")
+// func (doc *BoxesDocument) goToLeft(
+// 	startX, startY, endX, endY int,
+// 	currentVariantIndex, currentLineIndex int,
+// 	variants [][]ConnectionLine,
+// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
+// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
+// 		return variants, nil
+// 	}
+// 	if startX < endX {
+// 		// moved too far left
+// 		return removeLineFromVariants(currentVariantIndex, variants), nil
+// 	}
+
+// 	if (startX == endX) && (startY == endY) {
+// 		return variants, nil
+// 	}
+
+// 	if startX == endX {
+// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
+// 			x := startX
+// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(x, startY, x, endY)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	if (startX - RasterSize) == endX {
+// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
+// 			x := startX - RasterSize
+// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(x, startY, x, endY)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	x := startX - (2 * RasterSize)
+// 	if (x == endX) && (startY == endY) {
+// 		line := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
+// 		variants[currentVariantIndex][currentLineIndex] = line
+// 		return variants, nil
+// 	}
+
+// 	if doc.checkColl(x, startY, &doc.Boxes, startElem, destElem) {
+// 		// has collision
+// 		if startX == variants[currentVariantIndex][currentLineIndex].StartX {
+// 			// line is to short and should be removed
+// 			return removeLineFromVariants(currentVariantIndex, variants), nil
+// 		}
+// 		x += 2 * RasterSize
+// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
+// 		nextLine := newConnectionLine(x, startY, x, startY)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
+// 		newVariant := variants[currentVariantIndex][:]
+// 		nextLineIndex := currentLineIndex + 1
+// 		// check if the line is not too long
+// 		variants = append(variants, newVariant)
+// 		vIndex := len(variants) - 1
+// 		ret, _ := doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
+// 		return doc.goToDown(x, startY, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
+// 	} else {
+// 		// no collision ... going more left
+// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		ret := variants[:]
+// 		if startY < endY {
+// 			// check if there is down a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(x, startY, x, startY)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToDown(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		} else if startY > endY {
+// 			// check if there is up a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(x, startY, x, startY)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		}
+// 		if len(ret[currentVariantIndex]) == 0 {
+// 			return ret, nil
+// 		}
+// 		return doc.goToLeft(x, startY, endX, endY, currentVariantIndex, currentLineIndex, ret, startElem, destElem)
+// 	}
+// }
+
+// func (doc *BoxesDocument) goToRight(
+// 	startX, startY, endX, endY int,
+// 	currentVariantIndex, currentLineIndex int,
+// 	variants [][]ConnectionLine,
+// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
+// 	if currentVariantIndex == 0 && startX == 224 {
+// 		currentVariantIndex = 0 // DEBUG
+// 	}
+// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
+// 		return variants, nil
+// 	}
+
+// 	if startX > endX {
+// 		// moved too far right
+// 		return removeLineFromVariants(currentVariantIndex, variants), nil
+// 	}
+
+// 	if (startX == endX) && (startY == endY) {
+// 		return variants, nil
+// 	}
+
+// 	if startX == endX {
+// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
+// 			x := startX
+// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(x, startY, x, endY)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	if (startX + RasterSize) == endX {
+// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
+// 			x := startX + RasterSize
+// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(x, startY, x, endY)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	x := startX + (2 * RasterSize)
+// 	if (x == endX) && (startY == endY) {
+// 		line := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
+// 		variants[currentVariantIndex][currentLineIndex] = line
+// 		return variants, nil
+// 	}
+
+// 	if doc.checkColl(x, startY, &doc.Boxes, startElem, destElem) {
+// 		// has collision
+// 		if startX == variants[currentVariantIndex][currentLineIndex].StartX {
+// 			// line is to short and should be removed
+// 			return removeLineFromVariants(currentVariantIndex, variants), nil
+// 		}
+// 		x -= (2 * RasterSize)
+// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
+// 		nextLine := newConnectionLine(x, startY, x, startY)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
+// 		newVariant := variants[currentVariantIndex][:]
+// 		nextLineIndex := currentLineIndex + 1
+// 		variants = append(variants, newVariant)
+// 		vIndex := len(variants) - 1
+// 		ret, _ := doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
+// 		return doc.goToDown(x, startY, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
+// 	} else {
+// 		// no collision ... going more right
+// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		ret := variants[:]
+// 		if startY < endY {
+// 			// check if there is down a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(x, startY, x, startY)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToDown(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		} else if startY > endY {
+// 			// check if there is up a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(x, startY, x, startY)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		}
+// 		if len(ret[currentVariantIndex]) == 0 {
+// 			return ret, nil
+// 		}
+// 		return doc.goToRight(x, startY, endX, endY, currentVariantIndex, currentLineIndex, ret, startElem, destElem)
+// 	}
+// }
+
+// func (doc *BoxesDocument) goToDown(
+// 	startX, startY, endX, endY int,
+// 	currentVariantIndex, currentLineIndex int,
+// 	variants [][]ConnectionLine,
+// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
+// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
+// 		return variants, nil
+// 	}
+
+// 	if startY > endY {
+// 		// moved too far down
+// 		return removeLineFromVariants(currentVariantIndex, variants), nil
+// 	}
+
+// 	if (startX == endX) && (startY == endY) {
+// 		return variants, nil
+// 	}
+
+// 	if startY == endY {
+// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
+// 			y := startY
+// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(startX, y, endX, y)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	if (startY + RasterSize) == endY {
+// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
+// 			y := startY + RasterSize
+// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(startX, y, endX, y)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	y := startY + (2 * RasterSize)
+// 	if (y == endY) && (startX == endX) {
+// 		line := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 		variants[currentVariantIndex][currentLineIndex] = line
+// 		return variants, nil
+// 	}
+
+// 	if doc.checkColl(startX, y, &doc.Boxes, startElem, destElem) {
+// 		// has collision
+// 		if startY == variants[currentVariantIndex][currentLineIndex].StartY {
+// 			// line is to short and should be removed
+// 			return removeLineFromVariants(currentVariantIndex, variants), nil
+// 		}
+// 		y -= (2 * RasterSize)
+// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 		nextLine := newConnectionLine(startX, y, startX, y)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
+// 		newVariant := variants[currentVariantIndex][:]
+// 		nextLineIndex := currentLineIndex + 1
+// 		variants = append(variants, newVariant)
+// 		vIndex := len(variants) - 1
+// 		ret, _ := doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
+// 		return doc.goToRight(startX, y, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
+// 	} else {
+// 		// no collision ... going more down
+// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		ret := variants[:]
+// 		if startX < endX {
+// 			// check if there is to the right a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(startX, y, startX, y)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToRight(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		} else if startX > endX {
+// 			// check if there is to the left a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(startX, y, startX, y)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		}
+// 		if len(ret[currentVariantIndex]) == 0 {
+// 			return ret, nil
+// 		}
+// 		return doc.goToDown(startX, y, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+// 	}
+// }
+
+// func (doc *BoxesDocument) goToUp(
+// 	startX, startY, endX, endY int,
+// 	currentVariantIndex, currentLineIndex int,
+// 	variants [][]ConnectionLine,
+// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
+// 	if currentVariantIndex == 19 {
+// 		currentVariantIndex = 19 // DEBUG
+// 	}
+// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
+// 		return variants, nil
+// 	}
+// 	if startY < endY {
+// 		// moved too far down
+// 		return removeLineFromVariants(currentVariantIndex, variants), nil
+// 	}
+
+// 	if (startX == endX) && (startY == endY) {
+// 		return variants, nil
+// 	}
+
+// 	if startY == endY {
+// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
+// 			y := startY
+// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(startX, y, endX, y)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	if (startY - RasterSize) == endY {
+// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
+// 			y := startY - RasterSize
+// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 			variants[currentVariantIndex][currentLineIndex] = prevLine
+// 			line := newConnectionLine(startX, y, endX, y)
+// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
+// 			return variants, nil
+// 		}
+// 	}
+
+// 	y := startY - (2 * RasterSize)
+// 	if (y == endY) && (startX == endX) {
+// 		line := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 		variants[currentVariantIndex][currentLineIndex] = line
+// 		return variants, nil
+// 	}
+
+// 	if doc.checkColl(startX, y, &doc.Boxes, startElem, destElem) {
+// 		// has collision
+// 		if startY == variants[currentVariantIndex][currentLineIndex].StartY {
+// 			// line is to short and should be removed
+// 			return removeLineFromVariants(currentVariantIndex, variants), nil
+// 		}
+// 		y -= (2 * RasterSize)
+// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 		nextLine := newConnectionLine(startX, y, startX, y)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
+// 		newVariant := variants[currentVariantIndex][:]
+// 		nextLineIndex := currentLineIndex + 1
+// 		variants = append(variants, newVariant)
+// 		vIndex := len(variants) - 1
+// 		ret, _ := doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
+// 		return doc.goToRight(startX, y, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
+// 	} else {
+// 		// no collision ... going more down
+// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
+// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
+// 		ret := variants[:]
+// 		if startX < endX {
+// 			// check if there is to the right a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(startX, y, startX, y)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToRight(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		} else if startX > endX {
+// 			// check if there is to the left a free way
+// 			newVariant := variants[currentVariantIndex][:]
+// 			nextLine := newConnectionLine(startX, y, startX, y)
+// 			newVariant = append(newVariant, nextLine)
+// 			ret = append(ret, newVariant)
+// 			vIndex := len(ret) - 1
+// 			nextLineIndex := len(newVariant) - 1
+// 			ret, _ = doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
+// 		}
+// 		if len(ret[currentVariantIndex]) == 0 {
+// 			return ret, nil
+// 		}
+// 		return doc.goToUp(startX, y, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+// 	}
+// }
+
+// start from the right border - connect from right side to the left side
+func (doc *BoxesDocument) connectFromRightBorderToLeftBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	// connect from left to right
+	if startElem.RightYToStart == nil {
+		doc.initRightYToStart(startElem)
 	}
-	connection = append(connection, ConnectionLine{
-		StartX: startX,
-		StartY: startY,
-		EndX:   x2,
-		EndY:   startY,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: x2,
-		StartY: startY,
-		EndX:   x2,
-		EndY:   endY,
-	})
-	connection = append(connection, ConnectionLine{
-		StartX: x2,
-		StartY: endY,
-		EndX:   endX,
-		EndY:   endY,
-	})
-	return connection, nil
+	if destElem.LeftYToStart == nil {
+		doc.initLeftYToStart(destElem)
+	}
+	startX := startElem.X + startElem.Width
+	startY := *startElem.RightYToStart
+	endX := destElem.X
+	destY := destElem.LeftYToStart
+	variant := []ConnectionLine{
+		newConnectionLine(startX, startY, startX, startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToRight(startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
 }
 
-func needsInverseOrder(conn ConnectionLine) bool {
-	return conn.StartX > conn.EndX || conn.StartY > conn.EndY
+// start from the right border - connect from left side to the right side
+func (doc *BoxesDocument) connectFromLeftBorderToRightBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	// connect from right to left
+	if startElem.LeftYToStart == nil {
+		doc.initLeftYToStart(startElem)
+	}
+	if destElem.LeftYToStart == nil {
+		doc.initRightYToStart(destElem)
+	}
+	startX := startElem.X
+	startY := startElem.LeftYToStart
+	endX := destElem.X + destElem.Width
+	destY := destElem.RightYToStart
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX, *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToLeft(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
 }
 
-func (doc *BoxesDocument) checkAndSolveCollisionImpl(layoutElement *LayoutElement, connectionLines []ConnectionLine, index int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	ret := make([]ConnectionLine, 0)
-	isParentOfStartElem := doc.isParent(layoutElement, startElem)
-	isParentOfDestElem := doc.isParent(layoutElement, destElem)
-	if (!isParentOfStartElem) && (!isParentOfDestElem) {
-		// current element is not a parent of start or dest element
-		beforeFixing := len(connectionLines)
-		ret := layoutElement.FixCollisionInCase(connectionLines, index, doc.MinBoxMargin/2)
-		if len(ret) > beforeFixing {
-			return ret, nil
-		}
-	} else {
-		if layoutElement.Caption != "" || layoutElement.Text1 != "" || layoutElement.Text2 != "" {
-			// current element is a parent of start or dest element
-			// and has a caption or text ... if one of the lines goes vertical through the parent, then is has a collision
-			for _, l := range connectionLines {
-				if l.StartX == l.EndX {
-					// vertical line ...
-					leftX, rightX := connToLeftRightX(l)
-					topY, bottomY := connToUpperLowerY(l)
-					if ((leftX >= layoutElement.X) && (rightX <= layoutElement.X+layoutElement.Width)) &&
-						(((topY <= layoutElement.Y) && (bottomY > layoutElement.Y)) || ((topY > layoutElement.Y) && (topY < layoutElement.Y+layoutElement.Height))) {
-						return nil, fmt.Errorf("collision in caption or text: %s", layoutElement.Caption)
-					}
-				}
-			}
-		}
+// start from the top - connect from top to top, left ro right ...
+func (doc *BoxesDocument) connectFromTopBorderToRight(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	// horizontal connection to the right, starting at the top ... most likely a U from
+	if startElem.TopXToStart == nil {
+		doc.initTopXToStart(startElem)
 	}
-	connToCheck := index
-	connectionLinesToCheck := connectionLines
-	inverseOrder := needsInverseOrder(connectionLines[index])
-	if layoutElement.Vertical != nil {
-		lv := len(layoutElement.Vertical.Elems)
-		for i := 0; i < lv; i++ {
-			index := i
-			if inverseOrder {
-				index = lv - 1 - i
-			}
-			subElem := layoutElement.Vertical.Elems[index]
-			beforeFixing := len(connectionLinesToCheck)
-			fixedConnection, err := doc.checkAndSolveCollisionImpl(&subElem, connectionLinesToCheck, connToCheck, startElem, destElem)
-			if err != nil {
-				return nil, err
-			}
-			if len(fixedConnection) > beforeFixing {
-				// connection was changed
-				l := len(fixedConnection)
-				connToCheck = 0
-				connectionLinesToCheck = fixedConnection[l-1 : l]
-				ret = append(ret, fixedConnection[0:l-1]...)
-				break
-			}
-		}
+	if destElem.RightYToStart == nil {
+		doc.initRightYToStart(destElem)
 	}
-	if layoutElement.Horizontal != nil {
-		lh := len(layoutElement.Horizontal.Elems)
-		for i := 0; i < lh; i++ {
-			index := i
-			if inverseOrder {
-				index = lh - 1 - i
-			}
-			subElem := layoutElement.Horizontal.Elems[index]
-			beforeFixing := len(connectionLinesToCheck)
-			fixedConnection, err := doc.checkAndSolveCollisionImpl(&subElem, connectionLinesToCheck, connToCheck, startElem, destElem)
-			if err != nil {
-				return nil, err
-			}
-			if len(fixedConnection) > beforeFixing {
-				// connection was changed
-				l := len(fixedConnection)
-				connToCheck = 0
-				connectionLinesToCheck = fixedConnection[l-1 : l]
-				ret = append(ret, fixedConnection[0:l-1]...)
-				break
-			}
-		}
-	}
-	if len(ret) > 0 {
-		ret = append(ret, connectionLinesToCheck...)
-	} else {
-		ret = append(ret, connectionLines[index])
-	}
-	return ret, nil
+
+	startX := startElem.TopXToStart
+	startY := startElem.Y
+	endX := destElem.X + destElem.Width
+	destY := destElem.RightYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY-(2*RasterSize))}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToRight(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
 }
 
-func (doc *BoxesDocument) checkAndSolveCollision(connectionLines []ConnectionLine, index int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	return doc.checkAndSolveCollisionImpl(&doc.Boxes, connectionLines, index, startElem, destElem)
+// start from the bottom - connect from bottom to bottom, left ro right
+func (doc *BoxesDocument) connectFromBottomBorderToRight(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	// horizontal connection to the right, starting at the bottom ... most likely a U from
+	if startElem.BottomXToStart == nil {
+		doc.initBottomXToStart(startElem)
+	}
+	if destElem.BottomXToStart == nil {
+		doc.initBottomXToStart(destElem)
+	}
+
+	startX := startElem.BottomXToStart
+	startY := startElem.Y + startElem.Height
+	endX := destElem.BottomXToStart
+	destY := destElem.Y + destElem.Height
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY+(2*RasterSize))}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToRight(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
 }
 
-func isStepForAndBack(previous, current ConnectionLine) bool {
-	xdiff1 := current.StartX - previous.StartX
-	if xdiff1 < 0 {
-		xdiff1 = -xdiff1
+// start from the top - connect from top to top, right to left
+func (doc *BoxesDocument) connectFromTopBorderToLeft(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	// horizontal connection to the left, starting at the top ... most likely a U from
+	if startElem.TopXToStart == nil {
+		doc.initTopXToStart(startElem)
 	}
-	ydiff1 := current.StartY - previous.StartY
-	if ydiff1 < 0 {
-		ydiff1 = -ydiff1
+	if destElem.TopXToStart == nil {
+		doc.initTopXToStart(destElem)
 	}
-	xdiff2 := current.EndX - previous.EndX
-	if xdiff2 < 0 {
-		xdiff2 = -xdiff2
-	}
-	ydiff2 := current.EndY - previous.EndY
-	if ydiff2 < 0 {
-		ydiff2 = -ydiff2
-	}
-	xdiff := xdiff1 + xdiff2
-	ydiff := ydiff1 + ydiff2
 
-	// two steps draw a horizontal line
-	if xdiff <= 2 || ydiff <= 2 {
-		return true
-	}
-	return false
+	startX := startElem.TopXToStart
+	startY := startElem.Y
+	endX := destElem.TopXToStart
+	destY := destElem.Y
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY-(2*RasterSize))}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToLeft(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
 }
 
-func (doc *BoxesDocument) solveCollisions(connectionLines []ConnectionLine, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	// return connectionLines, nil // TODO, DEBUG
-	ret := make([]ConnectionLine, 0)
-	for i := range len(connectionLines) {
-		if connectionLines[i].MovedOut {
-			ret = append(ret, connectionLines[i])
-		} else {
-			r, err := doc.checkAndSolveCollision(connectionLines, i, startElem, destElem)
-			if err != nil {
-				return nil, err
-			}
-			ret = append(ret, r...)
-		}
+// start from the bottom - connect from bottom to bottom, right to left
+func (doc *BoxesDocument) connectFromBottomBorderLeft(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	// horizontal connection to the left, starting at the bottom ... most likely a U from
+	if startElem.BottomXToStart == nil {
+		doc.initBottomXToStart(startElem)
 	}
-	// check if the connection is valid
-	for i := 0; i < len(ret); i++ {
-		if i > 0 {
-			current := ret[i]
-			previous := ret[i-1]
-			if (current.StartX != previous.EndX) || (current.StartY != previous.EndY) {
-				return nil, fmt.Errorf("invalid connection line: %v", current)
-			}
-			if isStepForAndBack(previous, current) {
-				return nil, fmt.Errorf("invalid connection line: %v", current)
-			}
-		}
+	if destElem.BottomXToStart == nil {
+		doc.initBottomXToStart(destElem)
 	}
-	return ret, nil
+
+	startX := startElem.BottomXToStart
+	startY := startElem.Y + startElem.Height
+	endX := destElem.BottomXToStart
+	destY := destElem.Y + destElem.Height
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY+(2*RasterSize))}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToLeft(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
 }
 
-func (doc *BoxesDocument) lineConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialLineConnection(startX, startY, endX, endY)
-	return doc.solveCollisions(connection, startElem, destElem)
-}
-
-func (doc *BoxesDocument) huConnection(startX, startY, endX, endY, startLen int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialHUConnection(startX, startY, endX, endY, startLen)
-	return doc.solveCollisions(connection, startElem, destElem)
-}
-
-func (doc *BoxesDocument) vuConnection(startX, startY, endX, endY, startLen int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection := doc.initialVUConnection(startX, startY, endX, endY, startLen)
-	return doc.solveCollisions(connection, startElem, destElem)
-}
-
-func (doc *BoxesDocument) vlConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection, err := doc.initialVLConnection(startX, startY, endX, endY)
-	if err != nil {
-		return nil, err
+// connect from with straight line: bottom to top
+func (doc *BoxesDocument) connectFromBottomBorderToTopBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.BottomXToStart == nil {
+		doc.initBottomXToStart(startElem)
 	}
-	return doc.solveCollisions(connection, startElem, destElem)
-}
-
-func (doc *BoxesDocument) hlConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection, err := doc.initialHLConnection(startX, startY, endX, endY)
-	if err != nil {
-		return nil, err
+	if destElem.TopXToStart == nil {
+		doc.initTopXToStart(destElem)
 	}
-	return doc.solveCollisions(connection, startElem, destElem)
+	startX := startElem.BottomXToStart
+	startY := startElem.Y + startElem.Height
+	endX := destElem.TopXToStart
+	destY := destElem.Y
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToDown(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
 }
 
-func (doc *BoxesDocument) hsConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection, err := doc.initialHSConnection(startX, startY, endX, endY)
-	if err != nil {
-		return nil, err
+// connect from left to left
+func (doc *BoxesDocument) connectFromLeftBorderDown(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.LeftYToStart == nil {
+		doc.initLeftYToStart(startElem)
 	}
-	return doc.solveCollisions(connection, startElem, destElem)
-}
-
-func (doc *BoxesDocument) vsConnection(startX, startY, endX, endY int, startElem, destElem *LayoutElement) ([]ConnectionLine, error) {
-	connection, err := doc.initialVSConnection(startX, startY, endX, endY)
-	if err != nil {
-		return nil, err
+	if destElem.LeftYToStart == nil {
+		doc.initLeftYToStart(destElem)
 	}
-	return doc.solveCollisions(connection, startElem, destElem)
+
+	startX := startElem.X
+	startY := startElem.LeftYToStart
+	endX := destElem.X
+	destY := destElem.LeftYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX-(2*RasterSize), *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToDown(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
 }
 
-func (doc *BoxesDocument) getConnectionParts(startElem, destElem *LayoutElement) [][]ConnectionLine {
+// connect from right to right
+func (doc *BoxesDocument) connectFromRightBorderDown(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.RightYToStart == nil {
+		doc.initRightYToStart(startElem)
+	}
+	if destElem.RightYToStart == nil {
+		doc.initRightYToStart(destElem)
+	}
+
+	startX := startElem.X + startElem.Width
+	startY := startElem.RightYToStart
+	endX := destElem.X + destElem.Width
+	destY := destElem.RightYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX+(2*RasterSize), *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToDown(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from with straight line: top to bottom
+func (doc *BoxesDocument) connectFromTopBorderToBottomBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.TopXToStart == nil {
+		doc.initTopXToStart(startElem)
+	}
+	if destElem.BottomXToStart == nil {
+		doc.initBottomXToStart(destElem)
+	}
+	startX := startElem.TopXToStart
+	startY := startElem.Y
+	endX := destElem.BottomXToStart
+	destY := destElem.Y + destElem.Height
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToUp(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from left to left
+func (doc *BoxesDocument) connectFromLeftBorderUp(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.LeftYToStart == nil {
+		doc.initLeftYToStart(startElem)
+	}
+	if destElem.LeftYToStart == nil {
+		doc.initLeftYToStart(destElem)
+	}
+
+	startX := startElem.X
+	startY := startElem.LeftYToStart
+	endX := destElem.X
+	destY := destElem.LeftYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX-(2*RasterSize), *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToUp(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from right to right
+func (doc *BoxesDocument) connectFromRightBorderUp(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.RightYToStart == nil {
+		doc.initRightYToStart(startElem)
+	}
+	if destElem.RightYToStart == nil {
+		doc.initRightYToStart(destElem)
+	}
+
+	startX := startElem.X + startElem.Width
+	startY := startElem.RightYToStart
+	endX := destElem.X + destElem.Width
+	destY := destElem.RightYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX+(2*RasterSize), *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToUp(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from bottom to left side
+func (doc *BoxesDocument) connectFromBottomBorderToLeftBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.BottomXToStart == nil {
+		doc.initBottomXToStart(startElem)
+	}
+	if destElem.LeftYToStart == nil {
+		doc.initLeftYToStart(destElem)
+	}
+	startX := startElem.BottomXToStart
+	startY := startElem.Y + startElem.Height
+	endX := destElem.X
+	destY := destElem.LeftYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToDown(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from right to top side
+func (doc *BoxesDocument) connectFromRightBorderToTopBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.RightYToStart == nil {
+		doc.initRightYToStart(startElem)
+	}
+	if destElem.TopXToStart == nil {
+		doc.initTopXToStart(destElem)
+	}
+	startX := startElem.X + startElem.Width
+	startY := startElem.RightYToStart
+	endX := destElem.TopXToStart
+	destY := destElem.Y
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX, *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToRight(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from bottom to right side
+func (doc *BoxesDocument) connectFromBottomBorderToRightBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.BottomXToStart == nil {
+		doc.initBottomXToStart(startElem)
+	}
+	if destElem.RightYToStart == nil {
+		doc.initRightYToStart(destElem)
+	}
+	startX := startElem.BottomXToStart
+	startY := startElem.Y + startElem.Height
+	endX := destElem.X
+	destY := destElem.RightYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToDown(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from left to top side
+func (doc *BoxesDocument) connectFromLeftBorderToTopBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.LeftYToStart == nil {
+		doc.initLeftYToStart(startElem)
+	}
+	if destElem.TopXToStart == nil {
+		doc.initTopXToStart(destElem)
+	}
+	startX := startElem.X
+	startY := startElem.LeftYToStart
+	endX := destElem.TopXToStart
+	destY := destElem.Y
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX, *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToLeft(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from top to left side
+func (doc *BoxesDocument) connectFromTopBorderToLeftBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.TopXToStart == nil {
+		doc.initTopXToStart(startElem)
+	}
+	if destElem.LeftYToStart == nil {
+		doc.initLeftYToStart(destElem)
+	}
+	startX := startElem.TopXToStart
+	startY := startElem.Y
+	endX := destElem.X
+	destY := destElem.LeftYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToUp(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from right to bottom side
+func (doc *BoxesDocument) connectFromRightBorderToBottomBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.RightYToStart == nil {
+		doc.initRightYToStart(startElem)
+	}
+	if destElem.BottomXToStart == nil {
+		doc.initBottomXToStart(destElem)
+	}
+	startX := startElem.X + startElem.Width
+	startY := startElem.RightYToStart
+	endX := destElem.BottomXToStart
+	destY := destElem.Y + destElem.Height
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX, *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToRight(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from top to right side
+func (doc *BoxesDocument) connectFromTopBorderToRightBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.TopXToStart == nil {
+		doc.initTopXToStart(startElem)
+	}
+	if destElem.RightYToStart == nil {
+		doc.initRightYToStart(destElem)
+	}
+	startX := startElem.TopXToStart
+	startY := startElem.Y
+	endX := destElem.X
+	destY := destElem.RightYToStart
+
+	variant := []ConnectionLine{
+		newConnectionLine(*startX, startY, *startX, startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToUp(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+}
+
+// connect from left to bottom side
+func (doc *BoxesDocument) connectFromLeftBorderToBottomBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
+	if startElem.LeftYToStart == nil {
+		doc.initLeftYToStart(startElem)
+	}
+	if destElem.BottomXToStart == nil {
+		doc.initBottomXToStart(destElem)
+	}
+	startX := startElem.X
+	startY := startElem.LeftYToStart
+	endX := destElem.BottomXToStart
+	destY := destElem.Y + destElem.Height
+
+	variant := []ConnectionLine{
+		newConnectionLine(startX, *startY, startX, *startY)}
+	ret := make([][]ConnectionLine, 0)
+	ret = append(ret, variant)
+	return doc.goToLeft(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+}
+
+func (doc *BoxesDocument) getConnectionVariants(startElem, destElem *LayoutElement) [][]ConnectionLine {
 	connectionVariants := make([][]ConnectionLine, 0)
 	if startElem.CenterY == destElem.CenterY {
-		// 1. connect from right side to the left side
-		if v, err := doc.lineConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem); err == nil {
-			connectionVariants = append(connectionVariants, v)
-		}
-		// 2. connect from top to top
-		if v, err := doc.huConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y, doc.MinBoxMargin/-2, startElem, destElem); err == nil {
-			connectionVariants = append(connectionVariants, v)
-		}
-		// 3. connect from bottom to bottom
-		if v, err := doc.huConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y+destElem.Height, doc.MinBoxMargin/2, startElem, destElem); err == nil {
-			connectionVariants = append(connectionVariants, v)
+		// horizontal connection
+		if startElem.CenterX < destElem.CenterX {
+			// connect from left to right
+			// start from the right border - connect from right side to the left side
+			v := doc.connectFromRightBorderToLeftBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// start from the top - connect from top to top, left ro right
+			v = doc.connectFromTopBorderToRight(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// start from the bottom - connect from bottom to bottom, left ro right
+			v = doc.connectFromBottomBorderToRight(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+		} else {
+			// connect from right to left
+			// start from the right border - connect from left side to the right side
+			v := doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// start from the top - connect from top to top, right to left
+			v = doc.connectFromTopBorderToLeft(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// start from the bottom - connect from bottom to bottom, right to left
+			v = doc.connectFromBottomBorderLeft(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
 		}
 	} else if startElem.CenterX == destElem.CenterX {
+		// vertical connection
 		if startElem.CenterY < destElem.CenterY {
-			// 1. connect from with straight line: bottom to top
-			if v, err := doc.lineConnection(startElem.CenterX, startElem.Y+startElem.Width, destElem.CenterX, destElem.Y, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
+			// connect from with straight line: bottom to top
+			v := doc.connectFromBottomBorderToTopBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to left
+			v = doc.connectFromLeftBorderDown(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to right
+			v = doc.connectFromRightBorderDown(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
 		} else {
-			// 1. connect from with straight line: top to bottom
-			if v, err := doc.lineConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y+destElem.Width, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-		}
-		// 2. connect from left to left
-		if v, err := doc.vuConnection(startElem.X, startElem.CenterY, destElem.X, destElem.CenterY, startElem.X-(doc.MinBoxMargin/2), startElem, destElem); err == nil {
-			connectionVariants = append(connectionVariants, v)
-		}
-		// 3. connect from right to right
-		if v, err := doc.vuConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem.X+startElem.Width+(doc.MinBoxMargin/2), startElem, destElem); err == nil {
-			connectionVariants = append(connectionVariants, v)
+			// connect from with straight line: top to bottom
+			v := doc.connectFromTopBorderToBottomBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to left
+			v = doc.connectFromLeftBorderUp(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to right
+			v = doc.connectFromRightBorderUp(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
 		}
 	} else if startElem.CenterY < destElem.CenterY {
-		// 1. connect from bottom to top side
+		// top -> down: connect from bottom to top side
+		v := doc.connectFromBottomBorderToTopBorder(startElem, destElem)
+		connectionVariants = append(connectionVariants, v...)
 		if startElem.CenterX < destElem.CenterX {
-			// 2. connect from bottom to left side
-			if v, err := doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 3. connect from right to left side
-			if v, err := doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 4. connect from right to top side
-			if v, err := doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
+			// connect from bottom to left side
+			v = doc.connectFromBottomBorderToLeftBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to left side
+			v = doc.connectFromRightBorderToLeftBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to top side
+			v = doc.connectFromRightBorderToTopBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
 		} else {
-			// 5. connect from bottom to right side
-			if v, err := doc.vlConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 6. connect from left to right side
-			if v, err := doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 7. connect from left to top side
-			if v, err := doc.hlConnection(startElem.X, startElem.CenterY, destElem.CenterX, destElem.Y, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-		}
-		if (destElem.Y - (startElem.Y + startElem.Height)) >= (doc.MinBoxMargin) {
-			if v, err := doc.vsConnection(startElem.CenterX, startElem.Y+startElem.Height, destElem.CenterX, destElem.Y, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
+			// connect from bottom to right side
+			v = doc.connectFromBottomBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to right side
+			v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to top side
+			v = doc.connectFromLeftBorderToTopBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
 		}
 	} else {
+		// down -> top: connect from top to bottom side
+		v := doc.connectFromTopBorderToBottomBorder(startElem, destElem)
+		connectionVariants = append(connectionVariants, v...)
 		if startElem.CenterX < destElem.CenterX {
-			// 2. connect from top to left side
-			if v, err := doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 3. connect from right to left side
-			if v, err := doc.hsConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.X, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 4. connect from right to bottom side
-			if v, err := doc.hlConnection(startElem.X+startElem.Width, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
+			// connect from top to left side
+			v = doc.connectFromTopBorderToLeftBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to left side
+			v = doc.connectFromRightBorderToLeftBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to bottom side
+			v = doc.connectFromRightBorderToBottomBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
 		} else {
-			// 5. connect from top to right side
-			if v, err := doc.vlConnection(startElem.CenterX, startElem.Y, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 6. connect from left to right side
-			if v, err := doc.hsConnection(startElem.X, startElem.CenterY, destElem.X+destElem.Width, destElem.CenterY, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-			// 7. connect from left to bottom side
-			if v, err := doc.hlConnection(startElem.X, startElem.CenterY, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
-		}
-		if (startElem.Y - (destElem.Y + destElem.Height)) >= (doc.MinBoxMargin) {
-			// 1. connect from top to bottom side
-			if v, err := doc.vsConnection(startElem.CenterX, startElem.Y, destElem.CenterX, destElem.Y+destElem.Height, startElem, destElem); err == nil {
-				connectionVariants = append(connectionVariants, v)
-			}
+			// connect from top to right side
+			v = doc.connectFromTopBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to right side
+			v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to bottom side
+			v = doc.connectFromLeftBorderToBottomBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
 		}
 	}
 	return connectionVariants
 }
 
 func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *LayoutElemConnection) {
-
-	variants := doc.getConnectionParts(start, destElem)
+	variants := doc.getConnectionVariants(start, destElem)
 	var connection []ConnectionLine
 	for _, conn := range variants {
-		if len(conn) == 0 {
+		l := len(conn)
+		if l == 0 {
+			continue
+		}
+
+		if conn[l-1].StartX == conn[l-1].EndX && conn[l-1].StartY == conn[l-1].EndY {
 			continue
 		}
 		if connection == nil || (len(conn) < len(connection)) {
@@ -775,8 +1217,7 @@ func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *L
 }
 
 func (doc *BoxesDocument) connectTwoElemsFull(start, destElem *LayoutElement, lec *LayoutElemConnection) {
-
-	variants := doc.getConnectionParts(start, destElem)
+	variants := doc.getConnectionVariants(start, destElem)
 	for _, v := range variants {
 		var ret ConnectionElem
 		ret.DestArrow = &lec.DestArrow
@@ -821,6 +1262,8 @@ func (doc *BoxesDocument) connectContainer(cont *LayoutElemContainer, full bool)
 }
 
 func (doc *BoxesDocument) ConnectBoxes() {
+	doc.InitStartPositions()
+	doc.InitRoads()
 	doc.connectLayoutElem(&doc.Boxes, false)
 	// doc.moveTooCloseVerticalConnectionLinesFromBorders()
 	// doc.moveTooCloseHorizontalConnectionLinesFromBorders()
@@ -830,5 +1273,30 @@ func (doc *BoxesDocument) ConnectBoxes() {
 }
 
 func (doc *BoxesDocument) ConnectBoxesFull() {
+	doc.InitStartPositions()
+	doc.InitRoads()
 	doc.connectLayoutElem(&doc.Boxes, true)
+}
+
+func (doc *BoxesDocument) InitStartPositions() {
+	doc.initStartPositionsImpl(&doc.Boxes)
+}
+
+func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
+	if doc.ShouldHandle(elem) {
+		doc.initBottomXToStart(elem)
+		doc.initLeftYToStart(elem)
+		doc.initRightYToStart(elem)
+		doc.initTopXToStart(elem)
+	}
+	if elem.Vertical != nil {
+		for i := 0; i < len(elem.Vertical.Elems); i++ {
+			doc.initStartPositionsImpl(&elem.Vertical.Elems[i])
+		}
+	}
+	if elem.Horizontal != nil {
+		for i := 0; i < len(elem.Horizontal.Elems); i++ {
+			doc.initStartPositionsImpl(&elem.Horizontal.Elems[i])
+		}
+	}
 }
