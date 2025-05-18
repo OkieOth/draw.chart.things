@@ -1,6 +1,10 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+	"sort"
+)
 
 // traces the document and finds all reasonable "roads" to connect
 func (doc *BoxesDocument) InitRoads() {
@@ -25,7 +29,7 @@ func (doc *BoxesDocument) addRoad(line ConnectionLine, roads *[]ConnectionLine) 
 			return
 		}
 	}
-	doc.VerticalRoads = append(doc.VerticalRoads, line)
+	*roads = append(*roads, line)
 }
 
 func (doc *BoxesDocument) roadUp(line *ConnectionLine, startElem *LayoutElement) {
@@ -71,9 +75,6 @@ func (doc *BoxesDocument) roadLeft(line *ConnectionLine, startElem *LayoutElemen
 }
 
 func (doc *BoxesDocument) roadRight(line *ConnectionLine, startElem *LayoutElement) {
-	if startElem.Id == "r5_1" {
-		fmt.Println("Debug: r5_1")
-	}
 	if line.EndX >= doc.Width {
 		return
 	}
@@ -161,14 +162,48 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement) {
 // The third value is the list of x-coordinates where the road has
 // leftwards junctions down.
 func (doc *BoxesDocument) checkRoadsToTheLeft(startX, startY int) (int, []int, []int, error) {
-	for _, r := range doc.HorizontalRoads {
-		leftX, rightX := minMax(r.StartX, r.EndX)
-		if (r.StartY == startY) && (leftX <= startX) && (rightX >= startX) {
+	for _, h := range doc.HorizontalRoads {
+		leftX, rightX := minMax(h.StartX, h.EndX)
+		leftX2, rightX2 := minMax(leftX, startX)
+		if (h.StartY == startY) && (leftX <= startX) && (rightX >= startX) {
 			// found the road
-			// TODO
+			upJunctions := make([]int, 0)
+			downJunctions := make([]int, 0)
+			retX := leftX
+			for _, v := range doc.VerticalRoads {
+				if (v.StartX >= leftX2) && (v.StartX <= rightX2) {
+					minY, maxY := minMax(v.StartY, v.EndY)
+					if startY >= minY && startY <= maxY {
+						if minY < startY {
+							// junction upwards
+							if !slices.Contains(upJunctions, v.StartX) {
+								upJunctions = append(upJunctions, v.StartX)
+							}
+						}
+						if maxY > startY {
+							// junction downwards
+							if !slices.Contains(downJunctions, v.StartX) {
+								downJunctions = append(downJunctions, v.StartX)
+							}
+						}
+					}
+				}
+			}
+			// sort the junctions, so they are going to the left
+			SortDescending(upJunctions)
+			SortAscending(downJunctions)
+			return retX, upJunctions, downJunctions, nil
 		}
 	}
 	return 0, nil, nil, fmt.Errorf("no road found to move left for %d,%d", startX, startY)
+}
+
+func SortDescending(a []int) {
+	sort.Sort(sort.Reverse(sort.IntSlice(a)))
+}
+
+func SortAscending(a []int) {
+	sort.IntSlice(a).Sort()
 }
 
 // function goes over the horizontal roads, finds a related road and
@@ -177,11 +212,37 @@ func (doc *BoxesDocument) checkRoadsToTheLeft(startX, startY int) (int, []int, [
 // The third value is the list of x-coordinates where the road has
 // rightwards junctions down.
 func (doc *BoxesDocument) checkRoadsToTheRight(startX, startY int) (int, []int, []int, error) {
-	for _, r := range doc.HorizontalRoads {
-		leftX, rightX := minMax(r.StartX, r.EndX)
-		if (r.StartY == startY) && (leftX <= startX) && (rightX >= startX) {
+	for _, h := range doc.HorizontalRoads {
+		leftX, rightX := minMax(h.StartX, h.EndX)
+		leftX2, rightX2 := minMax(rightX, startX)
+		if (h.StartY == startY) && (leftX <= startX) && (rightX >= startX) {
 			// found the road
-			// TODO
+			upJunctions := make([]int, 0)
+			downJunctions := make([]int, 0)
+			retX := rightX
+			for _, v := range doc.VerticalRoads {
+				if (v.StartX > leftX2) && (v.StartX <= rightX2) {
+					minY, maxY := minMax(v.StartY, v.EndY)
+					if startY >= minY && startY <= maxY {
+						if minY < startY {
+							// junction upwards
+							if !slices.Contains(upJunctions, v.StartX) {
+								upJunctions = append(upJunctions, v.StartX)
+							}
+						}
+						if maxY > startY {
+							// junction downwards
+							if !slices.Contains(downJunctions, v.StartX) {
+								downJunctions = append(downJunctions, v.StartX)
+							}
+						}
+					}
+				}
+			}
+			// sort the junctions, so they are going to the left
+			SortDescending(upJunctions)
+			SortAscending(downJunctions)
+			return retX, upJunctions, downJunctions, nil
 		}
 	}
 	return 0, nil, nil, fmt.Errorf("no road found to move right for %d,%d", startX, startY)
@@ -193,11 +254,38 @@ func (doc *BoxesDocument) checkRoadsToTheRight(startX, startY int) (int, []int, 
 // The third value is the list of y-coordinates where the road has
 // upwards junctions to the right.
 func (doc *BoxesDocument) checkRoadsToTheTop(startX, startY int) (int, []int, []int, error) {
-	for _, r := range doc.VerticalRoads {
-		topY, bottomY := minMax(r.StartY, r.EndY)
-		if (r.StartX == startX) && (topY <= startY) && (bottomY >= startY) {
+	for _, v := range doc.VerticalRoads {
+		topY, bottomY := minMax(v.StartY, v.EndY)
+		topY2, bottomY2 := minMax(topY, startY)
+
+		if (v.StartX == startX) && (topY <= startY) && (bottomY >= startY) {
 			// found the road
-			// TODO
+			leftJunctions := make([]int, 0)
+			rightJunctions := make([]int, 0)
+			retY := topY
+			for _, h := range doc.HorizontalRoads {
+				if (h.StartY >= topY2) && (h.StartY <= bottomY2) {
+					minX, maxX := minMax(h.StartX, h.EndX)
+					if startX >= minX && startX <= maxX {
+						if minX < startX {
+							// junction to the left
+							if !slices.Contains(leftJunctions, h.StartY) {
+								leftJunctions = append(leftJunctions, h.StartY)
+							}
+						}
+						if maxX > startX {
+							// junction to the right
+							if !slices.Contains(rightJunctions, h.StartY) {
+								rightJunctions = append(rightJunctions, h.StartY)
+							}
+						}
+					}
+				}
+			}
+			// sort the junctions, so they are going to the left
+			SortDescending(leftJunctions)
+			SortAscending(rightJunctions)
+			return retY, leftJunctions, rightJunctions, nil
 		}
 	}
 	return 0, nil, nil, fmt.Errorf("no road found to move upwards for %d,%d", startX, startY)
@@ -209,11 +297,33 @@ func (doc *BoxesDocument) checkRoadsToTheTop(startX, startY int) (int, []int, []
 // The third value is the list of y-coordinates where the road has
 // downwards junctions to the right.
 func (doc *BoxesDocument) checkRoadsToTheBottom(startX, startY int) (int, []int, []int, error) {
-	for _, r := range doc.VerticalRoads {
-		topY, bottomY := minMax(r.StartY, r.EndY)
-		if (r.StartX == startX) && (topY <= startY) && (bottomY >= startY) {
+	for _, v := range doc.VerticalRoads {
+		topY, bottomY := minMax(v.StartY, v.EndY)
+		topY2, bottomY2 := minMax(bottomY, startY)
+		if (v.StartX == startX) && (topY <= startY) && (bottomY >= startY) {
 			// found the road
-			// TODO
+			leftJunctions := make([]int, 0)
+			rightJunctions := make([]int, 0)
+			retY := bottomY
+			for _, h := range doc.HorizontalRoads {
+				if (h.StartY >= topY2) && (h.StartY <= bottomY2) {
+					minX, maxX := minMax(h.StartX, h.EndX)
+					if startX >= minX && startX <= maxX {
+						if minX < startX {
+							// junction to the left
+							leftJunctions = append(leftJunctions, h.StartY)
+						}
+						if maxX > startX {
+							// junction to the right
+							rightJunctions = append(rightJunctions, h.StartY)
+						}
+					}
+				}
+			}
+			// sort the junctions, so they are going to the left
+			SortDescending(leftJunctions)
+			SortAscending(rightJunctions)
+			return retY, leftJunctions, rightJunctions, nil
 		}
 	}
 	return 0, nil, nil, fmt.Errorf("no road found to move downwards for %d,%d", startX, startY)

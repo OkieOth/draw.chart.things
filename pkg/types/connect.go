@@ -1179,12 +1179,12 @@ func (doc *BoxesDocument) getConnectionVariants(startElem, destElem *LayoutEleme
 			v = doc.connectFromRightBorderToBottomBorder(startElem, destElem)
 			connectionVariants = append(connectionVariants, v...)
 		} else {
-			// connect from top to right side
-			v = doc.connectFromTopBorderToRightBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
-			// connect from left to right side
-			v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
+			// // connect from top to right side
+			// v = doc.connectFromTopBorderToRightBorder(startElem, destElem)
+			// connectionVariants = append(connectionVariants, v...)
+			// // connect from left to right side
+			// v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+			// connectionVariants = append(connectionVariants, v...)
 			// connect from left to bottom side
 			v = doc.connectFromLeftBorderToBottomBorder(startElem, destElem)
 			connectionVariants = append(connectionVariants, v...)

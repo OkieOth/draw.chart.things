@@ -291,36 +291,16 @@ func (d *BoxesDocument) DrawRoads(drawingImpl BoxesDrawing) {
 func (d *BoxesDocument) DrawConnections(drawingImpl BoxesDrawing) error {
 	b := "black"
 	w := 1
-	// format := LineDef{
-	// 	Width: &w,
-	// 	Color: &b,
-	// }
+	format := LineDef{
+		Width: &w,
+		Color: &b,
+	}
 
-	for i, elem := range d.Connections {
+	for _, elem := range d.Connections {
 		// iterate over the connections of the document
-		switch i {
-		case 0:
-			b = "red"
-		case 1:
-			b = "blue"
-		case 2:
-			b = "green"
-		case 3:
-			b = "pink"
-		case 4:
-			b = "orange"
-		default:
-			b = "black"
-		}
-
-		f := LineDef{
-			Width: &w,
-			Color: &b,
-		}
-
 		for _, l := range elem.Parts {
 			// drawing the connection lines
-			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, f)
+			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
 		}
 
 	}

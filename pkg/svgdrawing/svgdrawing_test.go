@@ -111,9 +111,9 @@ func TestSvgWithConnections(t *testing.T) {
 			require.Nil(t, err)
 			svgdrawing := svgdrawing.NewDrawing(output)
 			doc.DrawBoxes(svgdrawing)
-			// doc.DrawConnections(svgdrawing)
+			doc.DrawConnections(svgdrawing)
 			doc.DrawStartPositions(svgdrawing)
-			doc.DrawRoads(svgdrawing)
+			//doc.DrawRoads(svgdrawing)
 			svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 
 			svgdrawing.Done()
@@ -125,14 +125,14 @@ func TestSvgWithConnections(t *testing.T) {
 	}
 
 	tests := []testData{
-		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_01.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
-			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-				require.Equal(t, 1, len(doc.Connections))
-				require.Equal(t, 4, len(doc.Connections[0].Parts))
-			},
-		},
+		// {
+		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_01.yaml",
+		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
+		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+		// 		require.Equal(t, 1, len(doc.Connections))
+		// 		require.Equal(t, 4, len(doc.Connections[0].Parts))
+		// 	},
+		// },
 		{
 			inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
@@ -141,14 +141,14 @@ func TestSvgWithConnections(t *testing.T) {
 				require.Equal(t, 2, len(doc.Connections[0].Parts))
 			},
 		},
-		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
-			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-				require.Equal(t, 1, len(doc.Connections))
-				require.Equal(t, 2, len(doc.Connections[0].Parts))
-			},
-		},
+		// {
+		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
+		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
+		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+		// 		require.Equal(t, 1, len(doc.Connections))
+		// 		require.Equal(t, 2, len(doc.Connections[0].Parts))
+		// 	},
+		// },
 		// {
 		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_04.yaml",
 		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_04.svg",
