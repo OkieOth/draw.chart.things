@@ -278,9 +278,8 @@ func (doc *BoxesDocument) initBottomXToStart(elem *LayoutElement) {
 	}
 }
 
-func emptyVariant(indexToRemove int, variants [][]ConnectionLine) [][]ConnectionLine {
-	variants[indexToRemove] = make([]ConnectionLine, 0)
-	return variants
+func emptyVariant(indexToRemove int, variants *[][]ConnectionLine) {
+	(*variants)[indexToRemove] = make([]ConnectionLine, 0)
 }
 
 func newConnectionLine(x1, y1, x2, y2 int) ConnectionLine {
@@ -694,7 +693,8 @@ func (doc *BoxesDocument) connectFromRightBorderToLeftBorder(startElem, destElem
 		newConnectionLine(startX, startY, startX, startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToRight(startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToRight(startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // start from the right border - connect from left side to the right side
@@ -714,7 +714,8 @@ func (doc *BoxesDocument) connectFromLeftBorderToRightBorder(startElem, destElem
 		newConnectionLine(startX, *startY, startX, *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToLeft(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToLeft(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // start from the top - connect from top to top, left ro right ...
@@ -736,7 +737,8 @@ func (doc *BoxesDocument) connectFromTopBorderToRight(startElem, destElem *Layou
 		newConnectionLine(*startX, startY, *startX, startY-(2*RasterSize))}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToRight(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToRight(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // start from the bottom - connect from bottom to bottom, left ro right
@@ -758,7 +760,8 @@ func (doc *BoxesDocument) connectFromBottomBorderToRight(startElem, destElem *La
 		newConnectionLine(*startX, startY, *startX, startY+(2*RasterSize))}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToRight(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToRight(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // start from the top - connect from top to top, right to left
@@ -780,7 +783,8 @@ func (doc *BoxesDocument) connectFromTopBorderToLeft(startElem, destElem *Layout
 		newConnectionLine(*startX, startY, *startX, startY-(2*RasterSize))}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToLeft(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToLeft(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // start from the bottom - connect from bottom to bottom, right to left
@@ -802,7 +806,8 @@ func (doc *BoxesDocument) connectFromBottomBorderLeft(startElem, destElem *Layou
 		newConnectionLine(*startX, startY, *startX, startY+(2*RasterSize))}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToLeft(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToLeft(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from with straight line: bottom to top
@@ -822,7 +827,8 @@ func (doc *BoxesDocument) connectFromBottomBorderToTopBorder(startElem, destElem
 		newConnectionLine(*startX, startY, *startX, startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToDown(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToDown(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from left to left
@@ -843,7 +849,8 @@ func (doc *BoxesDocument) connectFromLeftBorderDown(startElem, destElem *LayoutE
 		newConnectionLine(startX, *startY, startX-(2*RasterSize), *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToDown(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToDown(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from right to right
@@ -864,7 +871,8 @@ func (doc *BoxesDocument) connectFromRightBorderDown(startElem, destElem *Layout
 		newConnectionLine(startX, *startY, startX+(2*RasterSize), *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToDown(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToDown(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from with straight line: top to bottom
@@ -884,7 +892,8 @@ func (doc *BoxesDocument) connectFromTopBorderToBottomBorder(startElem, destElem
 		newConnectionLine(*startX, startY, *startX, startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToUp(*startX, startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToUp(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from left to left
@@ -905,7 +914,8 @@ func (doc *BoxesDocument) connectFromLeftBorderUp(startElem, destElem *LayoutEle
 		newConnectionLine(startX, *startY, startX-(2*RasterSize), *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToUp(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToUp(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from right to right
@@ -926,7 +936,8 @@ func (doc *BoxesDocument) connectFromRightBorderUp(startElem, destElem *LayoutEl
 		newConnectionLine(startX, *startY, startX+(2*RasterSize), *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToUp(startX, *startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToUp(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from bottom to left side
@@ -946,7 +957,8 @@ func (doc *BoxesDocument) connectFromBottomBorderToLeftBorder(startElem, destEle
 		newConnectionLine(*startX, startY, *startX, startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToDown(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToDown(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from right to top side
@@ -966,7 +978,8 @@ func (doc *BoxesDocument) connectFromRightBorderToTopBorder(startElem, destElem 
 		newConnectionLine(startX, *startY, startX, *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToRight(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToRight(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from bottom to right side
@@ -986,7 +999,8 @@ func (doc *BoxesDocument) connectFromBottomBorderToRightBorder(startElem, destEl
 		newConnectionLine(*startX, startY, *startX, startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToDown(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToDown(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from left to top side
@@ -1006,7 +1020,8 @@ func (doc *BoxesDocument) connectFromLeftBorderToTopBorder(startElem, destElem *
 		newConnectionLine(startX, *startY, startX, *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToLeft(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToLeft(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from top to left side
@@ -1026,7 +1041,8 @@ func (doc *BoxesDocument) connectFromTopBorderToLeftBorder(startElem, destElem *
 		newConnectionLine(*startX, startY, *startX, startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToUp(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToUp(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from right to bottom side
@@ -1046,7 +1062,8 @@ func (doc *BoxesDocument) connectFromRightBorderToBottomBorder(startElem, destEl
 		newConnectionLine(startX, *startY, startX, *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToRight(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToRight(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from top to right side
@@ -1066,7 +1083,8 @@ func (doc *BoxesDocument) connectFromTopBorderToRightBorder(startElem, destElem 
 		newConnectionLine(*startX, startY, *startX, startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToUp(*startX, startY, endX, *destY, 0, 0, ret, startElem, destElem)
+	doc.goToUp(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 // connect from left to bottom side
@@ -1086,7 +1104,8 @@ func (doc *BoxesDocument) connectFromLeftBorderToBottomBorder(startElem, destEle
 		newConnectionLine(startX, *startY, startX, *startY)}
 	ret := make([][]ConnectionLine, 0)
 	ret = append(ret, variant)
-	return doc.goToLeft(startX, *startY, *endX, destY, 0, 0, ret, startElem, destElem)
+	doc.goToLeft(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+	return ret
 }
 
 func (doc *BoxesDocument) getConnectionVariants(startElem, destElem *LayoutElement) [][]ConnectionLine {

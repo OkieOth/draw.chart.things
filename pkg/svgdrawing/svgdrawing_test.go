@@ -105,15 +105,15 @@ func TestSvgWithConnections(t *testing.T) {
 			doc, err := boxesimpl.InitialLayoutBoxes(b, textDimensionCalulator)
 			require.Nil(t, err)
 			// debug - can help to see all possible connections in the created file
-			//doc.ConnectBoxesFull()
-			doc.ConnectBoxes()
+			doc.ConnectBoxesFull()
+			//doc.ConnectBoxes()
 			output, err := os.Create(test.outputFile)
 			require.Nil(t, err)
 			svgdrawing := svgdrawing.NewDrawing(output)
 			doc.DrawBoxes(svgdrawing)
+			doc.DrawRoads(svgdrawing)
 			doc.DrawConnections(svgdrawing)
 			doc.DrawStartPositions(svgdrawing)
-			//doc.DrawRoads(svgdrawing)
 			svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 
 			svgdrawing.Done()

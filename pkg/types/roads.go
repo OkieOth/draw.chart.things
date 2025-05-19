@@ -161,15 +161,15 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement) {
 // is the list of x-coordinates where the road has leftwards junctions up.
 // The third value is the list of x-coordinates where the road has
 // leftwards junctions down.
-func (doc *BoxesDocument) checkRoadsToTheLeft(startX, startY int) (int, []int, []int, error) {
+func (doc *BoxesDocument) checkRoadsToTheLeft(startX, startY, minX int) (int, []int, []int, error) {
 	for _, h := range doc.HorizontalRoads {
 		leftX, rightX := minMax(h.StartX, h.EndX)
-		leftX2, rightX2 := minMax(leftX, startX)
+		leftX2, rightX2 := minMax(leftX, minX)
 		if (h.StartY == startY) && (leftX <= startX) && (rightX >= startX) {
 			// found the road
 			upJunctions := make([]int, 0)
 			downJunctions := make([]int, 0)
-			retX := leftX
+			retX := rightX2
 			for _, v := range doc.VerticalRoads {
 				if (v.StartX >= leftX2) && (v.StartX <= rightX2) {
 					minY, maxY := minMax(v.StartY, v.EndY)
@@ -211,15 +211,15 @@ func SortAscending(a []int) {
 // is the list of x-coordinates where the road has rightwards junctions up.
 // The third value is the list of x-coordinates where the road has
 // rightwards junctions down.
-func (doc *BoxesDocument) checkRoadsToTheRight(startX, startY int) (int, []int, []int, error) {
+func (doc *BoxesDocument) checkRoadsToTheRight(startX, startY, maxX int) (int, []int, []int, error) {
 	for _, h := range doc.HorizontalRoads {
 		leftX, rightX := minMax(h.StartX, h.EndX)
-		leftX2, rightX2 := minMax(rightX, startX)
+		leftX2, rightX2 := minMax(rightX, maxX)
 		if (h.StartY == startY) && (leftX <= startX) && (rightX >= startX) {
 			// found the road
 			upJunctions := make([]int, 0)
 			downJunctions := make([]int, 0)
-			retX := rightX
+			retX := leftX2
 			for _, v := range doc.VerticalRoads {
 				if (v.StartX > leftX2) && (v.StartX <= rightX2) {
 					minY, maxY := minMax(v.StartY, v.EndY)
@@ -253,16 +253,16 @@ func (doc *BoxesDocument) checkRoadsToTheRight(startX, startY int) (int, []int, 
 // is the list of y-coordinates where the road has upwards junctions to the left.
 // The third value is the list of y-coordinates where the road has
 // upwards junctions to the right.
-func (doc *BoxesDocument) checkRoadsToTheTop(startX, startY int) (int, []int, []int, error) {
+func (doc *BoxesDocument) checkRoadsToTheTop(startX, startY, minY int) (int, []int, []int, error) {
 	for _, v := range doc.VerticalRoads {
 		topY, bottomY := minMax(v.StartY, v.EndY)
-		topY2, bottomY2 := minMax(topY, startY)
+		topY2, bottomY2 := minMax(topY, minY)
 
 		if (v.StartX == startX) && (topY <= startY) && (bottomY >= startY) {
 			// found the road
 			leftJunctions := make([]int, 0)
 			rightJunctions := make([]int, 0)
-			retY := topY
+			retY := bottomY2
 			for _, h := range doc.HorizontalRoads {
 				if (h.StartY >= topY2) && (h.StartY <= bottomY2) {
 					minX, maxX := minMax(h.StartX, h.EndX)
@@ -296,15 +296,15 @@ func (doc *BoxesDocument) checkRoadsToTheTop(startX, startY int) (int, []int, []
 // is the list of y-coordinates where the road has downwards junctions to the left.
 // The third value is the list of y-coordinates where the road has
 // downwards junctions to the right.
-func (doc *BoxesDocument) checkRoadsToTheBottom(startX, startY int) (int, []int, []int, error) {
+func (doc *BoxesDocument) checkRoadsToTheBottom(startX, startY, maxY int) (int, []int, []int, error) {
 	for _, v := range doc.VerticalRoads {
 		topY, bottomY := minMax(v.StartY, v.EndY)
-		topY2, bottomY2 := minMax(bottomY, startY)
+		topY2, bottomY2 := minMax(bottomY, maxY)
 		if (v.StartX == startX) && (topY <= startY) && (bottomY >= startY) {
 			// found the road
 			leftJunctions := make([]int, 0)
 			rightJunctions := make([]int, 0)
-			retY := bottomY
+			retY := topY2
 			for _, h := range doc.HorizontalRoads {
 				if (h.StartY >= topY2) && (h.StartY <= bottomY2) {
 					minX, maxX := minMax(h.StartX, h.EndX)

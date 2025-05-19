@@ -275,7 +275,7 @@ func (d *BoxesDocument) DrawStartPositions(drawingImpl BoxesDrawing) {
 
 func (d *BoxesDocument) DrawRoads(drawingImpl BoxesDrawing) {
 	w := 1
-	b := "green"
+	b := "lightgray"
 	f := LineDef{
 		Width: &w,
 		Color: &b,
