@@ -1159,30 +1159,33 @@ func (doc *BoxesDocument) getConnectionVariants(startElem, destElem *LayoutEleme
 			connectionVariants = append(connectionVariants, v...)
 		}
 	} else if startElem.CenterY < destElem.CenterY {
-		// top -> down: connect from bottom to top side
-		v := doc.connectFromBottomBorderToTopBorder(startElem, destElem)
+		// connect from left to top side
+		v := doc.connectFromLeftBorderToTopBorder(startElem, destElem)
 		connectionVariants = append(connectionVariants, v...)
-		if startElem.CenterX < destElem.CenterX {
-			// connect from bottom to left side
-			v = doc.connectFromBottomBorderToLeftBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
-			// connect from right to left side
-			v = doc.connectFromRightBorderToLeftBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
-			// connect from right to top side
-			v = doc.connectFromRightBorderToTopBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
-		} else {
-			// connect from bottom to right side
-			v = doc.connectFromBottomBorderToRightBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
-			// connect from left to right side
-			v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
-			// connect from left to top side
-			v = doc.connectFromLeftBorderToTopBorder(startElem, destElem)
-			connectionVariants = append(connectionVariants, v...)
-		}
+		// // top -> down: connect from bottom to top side
+		// v := doc.connectFromBottomBorderToTopBorder(startElem, destElem)
+		// connectionVariants = append(connectionVariants, v...)
+		// if startElem.CenterX < destElem.CenterX {
+		// 	// connect from bottom to left side
+		// 	v = doc.connectFromBottomBorderToLeftBorder(startElem, destElem)
+		// 	connectionVariants = append(connectionVariants, v...)
+		// 	// connect from right to left side
+		// 	v = doc.connectFromRightBorderToLeftBorder(startElem, destElem)
+		// 	connectionVariants = append(connectionVariants, v...)
+		// 	// connect from right to top side
+		// 	v := doc.connectFromRightBorderToTopBorder(startElem, destElem)
+		// 	connectionVariants = append(connectionVariants, v...)
+		// } else {
+		// 	// connect from bottom to right side
+		// 	v = doc.connectFromBottomBorderToRightBorder(startElem, destElem)
+		// 	connectionVariants = append(connectionVariants, v...)
+		// 	// connect from left to right side
+		// 	v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+		// 	connectionVariants = append(connectionVariants, v...)
+		// 	// connect from left to top side
+		// 	v := doc.connectFromLeftBorderToTopBorder(startElem, destElem)
+		// 	connectionVariants = append(connectionVariants, v...)
+		// }
 	} else {
 		// down -> top: connect from top to bottom side
 		v := doc.connectFromTopBorderToBottomBorder(startElem, destElem)
@@ -1198,18 +1201,38 @@ func (doc *BoxesDocument) getConnectionVariants(startElem, destElem *LayoutEleme
 			v = doc.connectFromRightBorderToBottomBorder(startElem, destElem)
 			connectionVariants = append(connectionVariants, v...)
 		} else {
-			// // connect from top to right side
-			// v = doc.connectFromTopBorderToRightBorder(startElem, destElem)
-			// connectionVariants = append(connectionVariants, v...)
-			// // connect from left to right side
-			// v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
-			// connectionVariants = append(connectionVariants, v...)
-			// connect from left to bottom side
+			// connect from top to right side
+			v = doc.connectFromTopBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to right side
+			v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			//connect from left to bottom side
 			v = doc.connectFromLeftBorderToBottomBorder(startElem, destElem)
 			connectionVariants = append(connectionVariants, v...)
 		}
 	}
 	return connectionVariants
+}
+
+func isConnectedToDest(line *ConnectionLine, destElem *LayoutElement) bool {
+	// either connected to top
+	if line.EndX == *destElem.TopXToStart && line.EndY == destElem.Y {
+		return true
+	}
+	// or to bottom
+	if line.EndX == *destElem.BottomXToStart && line.EndY == destElem.Y+destElem.Height {
+		return true
+	}
+	// or to left
+	if line.EndX == destElem.X && line.EndY == *destElem.LeftYToStart {
+		return true
+	}
+	// or to right
+	if line.EndX == destElem.X+destElem.Width && line.EndY == *destElem.RightYToStart {
+		return true
+	}
+	return false
 }
 
 func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *LayoutElemConnection) {
@@ -1220,11 +1243,16 @@ func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *L
 		if l == 0 {
 			continue
 		}
-
-		if conn[l-1].StartX == conn[l-1].EndX && conn[l-1].StartY == conn[l-1].EndY {
+		lastLine := conn[l-1]
+		if l == 2 {
+			fmt.Println("DEBUG: updated connection: ", conn)
+		}
+		if !isConnectedToDest(&lastLine, destElem) {
 			continue
 		}
+		fmt.Println("DEBUG: updated connection: ", conn)
 		if connection == nil || (len(conn) < len(connection)) {
+			fmt.Println("DEBUG: updated connection: ", conn)
 			connection = conn
 		}
 	}

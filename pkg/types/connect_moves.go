@@ -32,9 +32,9 @@ func (doc *BoxesDocument) horizontalNewVariants(
 		(*newVariant)[currentLineIndex] = changedCurrentLine
 		var newLine ConnectionLine
 		if up {
-			newLine = newConnectionLine(newX, newY, newX, newY-RasterSize)
+			newLine = newConnectionLine(newX, newY, newX, newY-(2*RasterSize))
 		} else {
-			newLine = newConnectionLine(newX, newY, newX, newY+RasterSize)
+			newLine = newConnectionLine(newX, newY, newX, newY+(2*RasterSize))
 		}
 		*newVariant = append(*newVariant, newLine)
 		newVariantIndex := currentVariantIndex
@@ -82,9 +82,9 @@ func (doc *BoxesDocument) verticalNewVariants(
 		(*newVariant)[currentLineIndex] = changedCurrentLine
 		var newLine ConnectionLine
 		if left {
-			newLine = newConnectionLine(newX, newY, newX-RasterSize, newY)
+			newLine = newConnectionLine(newX, newY, newX-(2*RasterSize), newY)
 		} else {
-			newLine = newConnectionLine(newX, newY, newX+RasterSize, newY)
+			newLine = newConnectionLine(newX, newY, newX+(2*RasterSize), newY)
 		}
 		*newVariant = append(*newVariant, newLine)
 		newVariantIndex := currentVariantIndex
@@ -101,20 +101,13 @@ func (doc *BoxesDocument) verticalNewVariants(
 	}
 }
 
-func (doc *BoxesDocument) addNewLineToVariant(useCurrentVariant bool, newLine *ConnectionLine, variants *[][]ConnectionLine, variantIndex, lineIndex int) (int, int) {
+func (doc *BoxesDocument) addNewLineToVariant(newLine *ConnectionLine, baseVariant *[]ConnectionLine, variants *[][]ConnectionLine) (int, int) {
 	var newVariantIndex, newLineIndex int
-	if useCurrentVariant {
-		// work with the current variant
-		(*variants)[variantIndex] = append((*variants)[variantIndex], *newLine)
-		newVariantIndex = variantIndex
-		newLineIndex = len((*variants)[variantIndex]) - 1
-	} else {
-		newVariant := (*variants)[variantIndex][:]
-		newVariant = append(newVariant, *newLine)
-		*variants = append(*variants, newVariant)
-		newVariantIndex = len(*variants) - 1
-		newLineIndex = len(newVariant) - 1
-	}
+	newVariant := (*baseVariant)[:]
+	newVariant = append(newVariant, *newLine)
+	*variants = append(*variants, newVariant)
+	newVariantIndex = len(*variants) - 1
+	newLineIndex = len(newVariant) - 1
 	return newVariantIndex, newLineIndex
 }
 
@@ -133,11 +126,17 @@ func (doc *BoxesDocument) goToLeft(
 		emptyVariant(currentVariantIndex, variants)
 		return
 	}
+	if startX < endX {
+		// wrong direction
+		fmt.Println("DEBUG: goToLeft - emptyVariant-3", startX, startY, endX, endY, currentVariantIndex)
+		emptyVariant(currentVariantIndex, variants)
+		return
+	}
 
 	if (startX == endX) && (startY == endY) {
 		return
 	}
-	x, straightAhead, upwards, downwards, mostLeftX, err := doc.getNextJunctionLeft(startX, startY)
+	x, upwards, downwards, straightAhead, _, err := doc.getNextJunctionLeft(startX, startY)
 	if err != nil {
 		fmt.Println("DEBUG: goToLeft - emptyVariant-2", startX, startY, endX, endY, currentVariantIndex)
 		emptyVariant(currentVariantIndex, variants)
@@ -153,28 +152,43 @@ func (doc *BoxesDocument) goToLeft(
 		// horizontal line ... extend the current line to x
 		(*variants)[currentVariantIndex][currentLineIndex].EndX = x
 	}
-
-	if upwards {
-		newLine := newConnectionLine(x, currentLine.EndY, x, currentLine.EndY-RasterSize)
-		newVariantIndex, newLineIndex := doc.addNewLineToVariant((!straightAhead) && (!downwards), &newLine, variants, currentVariantIndex, currentLineIndex)
-		doc.goToUp(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+	if ((*variants)[currentVariantIndex][currentLineIndex].EndX == endX) && ((*variants)[currentVariantIndex][currentLineIndex].EndY == endY) {
+		// reached the end
+		return
 	}
-	if downwards {
-		newLine := newConnectionLine(x, currentLine.EndY, x, currentLine.EndY+RasterSize)
-		newVariantIndex, newLineIndex := doc.addNewLineToVariant((!straightAhead) && (!downwards), &newLine, variants, currentVariantIndex, currentLineIndex)
-		doc.goToDown(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+	possibleEnd := x - 2*RasterSize
+	if (endX == possibleEnd) && (endY == startY) {
+		// reached the end
+		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, possibleEnd, currentLine.StartY)
+		(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
+		return
 	}
+	baseVariant := (*variants)[currentVariantIndex][:]
 	if straightAhead {
-		possibleEnd := x - 2*RasterSize
-		if (mostLeftX == possibleEnd) && (endX == possibleEnd) && (endY == startY) {
-			// reached the end
-			changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, possibleEnd, currentLine.StartY)
-			(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
+		// not already visited this junction ... no circle
+		doc.goToLeft(x, startY, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+		if len((*variants)[currentVariantIndex]) == 0 && currentLineIndex > 0 {
 			return
 		}
-		if mostLeftX > possibleEnd {
-			// new downwards variant
-			doc.goToLeft(x, startY, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+		currentLine := (*variants)[currentVariantIndex][currentLineIndex]
+		if currentLine.StartX == currentLine.EndX {
+			return
+		}
+	}
+	if upwards && currentLine.EndY > destElem.Y {
+		newLineEndX, newLineEndY := x, currentLine.EndY-(2*RasterSize)
+		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToUp(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+		}
+	}
+	if downwards && currentLine.EndY < destElem.Y {
+		newLineEndX, newLineEndY := x, currentLine.EndY+(2*RasterSize)
+		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToDown(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
 		}
 	}
 }
@@ -188,6 +202,13 @@ func (doc *BoxesDocument) goToRight(
 	if len((*variants)[currentVariantIndex]) == 0 && currentLineIndex > 0 {
 		return
 	}
+	if startX > endX {
+		// wrong direction
+		fmt.Println("DEBUG: goToRight - emptyVariant-3", startX, startY, endX, endY, currentVariantIndex)
+		emptyVariant(currentVariantIndex, variants)
+		return
+	}
+
 	if startX > doc.Width {
 		// moved too far right
 		fmt.Println("DEBUG: goToRight - emptyVariant-1", startX, startY, endX, endY, currentVariantIndex)
@@ -198,7 +219,7 @@ func (doc *BoxesDocument) goToRight(
 	if (startX == endX) && (startY == endY) {
 		return
 	}
-	x, straightAhead, upwards, downwards, mostRightX, err := doc.getNextJunctionRight(startX, startY)
+	x, upwards, downwards, straightAhead, _, err := doc.getNextJunctionRight(startX, startY)
 	if err != nil {
 		fmt.Println("DEBUG: goToRight - emptyVariant-2", startX, startY, endX, endY, currentVariantIndex)
 		emptyVariant(currentVariantIndex, variants)
@@ -214,28 +235,43 @@ func (doc *BoxesDocument) goToRight(
 		// horizontal line ... extend the current line to x
 		(*variants)[currentVariantIndex][currentLineIndex].EndX = x
 	}
-
-	if upwards {
-		newLine := newConnectionLine(x, currentLine.EndY, x, currentLine.EndY-RasterSize)
-		newVariantIndex, newLineIndex := doc.addNewLineToVariant((!straightAhead) && (!downwards), &newLine, variants, currentVariantIndex, currentLineIndex)
-		doc.goToUp(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+	if ((*variants)[currentVariantIndex][currentLineIndex].EndX == endX) && ((*variants)[currentVariantIndex][currentLineIndex].EndY == endY) {
+		// reached the end
+		return
 	}
-	if downwards {
-		newLine := newConnectionLine(x, currentLine.EndY, x, currentLine.EndY+RasterSize)
-		newVariantIndex, newLineIndex := doc.addNewLineToVariant((!straightAhead) && (!downwards), &newLine, variants, currentVariantIndex, currentLineIndex)
-		doc.goToDown(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+	possibleEnd := x + 2*RasterSize
+	if (endX == possibleEnd) && (endY == startY) {
+		// reached the end
+		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, possibleEnd, currentLine.StartY)
+		(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
+		return
 	}
+	baseVariant := (*variants)[currentVariantIndex][:]
 	if straightAhead {
-		possibleEnd := x + 2*RasterSize
-		if (mostRightX == possibleEnd) && (endX == possibleEnd) && (endY == startY) {
-			// reached the end
-			changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, possibleEnd, currentLine.StartY)
-			(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
+		doc.goToRight(x, startY, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+		if len((*variants)[currentVariantIndex]) == 0 && currentLineIndex > 0 {
 			return
 		}
-		if mostRightX > possibleEnd {
-			// new downwards variant
-			doc.goToRight(x, startY, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+		currentLine := (*variants)[currentVariantIndex][currentLineIndex]
+		if currentLine.StartX == currentLine.EndX {
+			return
+		}
+	}
+	if upwards && currentLine.EndY > destElem.Y {
+		newLineEndX, newLineEndY := x, currentLine.EndY-(2*RasterSize)
+		// not already visited this junction ... no circle
+		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToUp(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+		}
+	}
+	if downwards && currentLine.EndY < destElem.Y {
+		newLineEndX, newLineEndY := x, currentLine.EndY+(2*RasterSize)
+		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToDown(x, newLine.EndY, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
 		}
 	}
 }
@@ -249,6 +285,12 @@ func (doc *BoxesDocument) goToDown(
 	if len((*variants)[currentVariantIndex]) == 0 && currentLineIndex > 0 {
 		return
 	}
+	if startY > endY {
+		// wrong direction
+		fmt.Println("DEBUG: goToUp - emptyVariant-3", startX, startY, endX, endY, currentVariantIndex)
+		emptyVariant(currentVariantIndex, variants)
+		return
+	}
 	if startY > doc.Height {
 		// moved too far down
 		fmt.Println("DEBUG: goToDown - emptyVariant-1", startX, startY, endX, endY, currentVariantIndex)
@@ -259,48 +301,59 @@ func (doc *BoxesDocument) goToDown(
 	if (startX == endX) && (startY == endY) {
 		return
 	}
-	_, maxY := minMax(startY, endY)
-	y, junctionPointsToLeft, junctionPointsToRight, err := doc.checkRoadsToTheBottom(startX, startY, maxY)
+
+	y, leftwards, rightwards, straightAhead, _, err := doc.getNextJunctionDown(startX, startY)
 	if err != nil {
 		fmt.Println("DEBUG: goToDown - emptyVariant-2", startX, startY, endX, endY, currentVariantIndex)
 		emptyVariant(currentVariantIndex, variants)
 		return
 	}
-	if maxY == endY {
-		// up to down line
+	currentLine := (*variants)[currentVariantIndex][currentLineIndex]
+	if currentLine.StartX != currentLine.EndX {
+		// horizontal line ... create a new line to y
+		newLine := newConnectionLine(currentLine.EndX, currentLine.EndY, currentLine.EndX, y)
+		(*variants)[currentVariantIndex] = append((*variants)[currentVariantIndex], newLine)
+		currentLineIndex = len((*variants)[currentVariantIndex]) - 1
+	} else {
+		// vertical line ... extend the current line to y
 		(*variants)[currentVariantIndex][currentLineIndex].EndY = y
-	} else {
-		(*variants)[currentVariantIndex][currentLineIndex].StartY = y
 	}
-
-	if startX < endX {
-		// to the right
-		doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-			variants, startElem, destElem, false, false, junctionPointsToRight, false)
+	if ((*variants)[currentVariantIndex][currentLineIndex].EndX == endX) && ((*variants)[currentVariantIndex][currentLineIndex].EndY == endY) {
+		// reached the end
 		return
-	} else if startY > endY {
-		// to the left
-		doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-			variants, startElem, destElem, true, false, junctionPointsToLeft, false)
+	}
+	possibleEnd := y + 2*RasterSize
+	if (endY == possibleEnd) && (endX == startX) {
+		// reached the end
+		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, currentLine.StartX, possibleEnd)
+		(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
 		return
-	} else {
-		// same level: startY == endY
-		if endY == y {
-			// reached the end
-			l := (*variants)[currentVariantIndex][currentLineIndex]
-			changedCurrentLine := newConnectionLine(l.StartX, l.StartY, l.StartX, y)
-			(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
+	}
+	baseVariant := (*variants)[currentVariantIndex][:]
+	if straightAhead {
+		doc.goToDown(startX, y, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+		if len((*variants)[currentVariantIndex]) == 0 && currentLineIndex > 0 {
 			return
-		} else if y < endY {
-			// trying to the right
-			doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-				variants, startElem, destElem, false, true, []int{y}, false)
-			// trying to the left
-			doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-				variants, startElem, destElem, true, false, []int{y}, false)
-		} else {
-			// error
-			emptyVariant(currentVariantIndex, variants)
+		}
+		currentLine := (*variants)[currentVariantIndex][currentLineIndex]
+		if currentLine.StartX == currentLine.EndX {
+			return
+		}
+	}
+	if leftwards && currentLine.EndX > destElem.X {
+		newLineEndX, newLineEndY := currentLine.EndX-(2*RasterSize), y
+		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToLeft(newLine.EndX, y, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+		}
+	}
+	if rightwards && currentLine.EndX > destElem.X {
+		newLineEndX, newLineEndY := currentLine.EndX+(2*RasterSize), y
+		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToRight(newLine.EndX, y, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
 		}
 	}
 }
@@ -317,6 +370,13 @@ func (doc *BoxesDocument) goToUp(
 	if len((*variants)[currentVariantIndex]) == 0 && currentLineIndex > 0 {
 		return
 	}
+	if startY < endY {
+		// wrong direction
+		fmt.Println("DEBUG: goToUp - emptyVariant-3", startX, startY, endX, endY, currentVariantIndex)
+		emptyVariant(currentVariantIndex, variants)
+		return
+	}
+
 	if startY < 0 {
 		// moved too far up
 		fmt.Println("DEBUG: goToUp - emptyVariant-1", startX, startY, endX, endY, currentVariantIndex)
@@ -328,48 +388,73 @@ func (doc *BoxesDocument) goToUp(
 		return
 	}
 
-	minY, _ := minMax(startY, endY)
-	y, junctionPointsToLeft, junctionPointsToRight, err := doc.checkRoadsToTheTop(startX, startY, minY)
+	y, leftwards, rightwards, straightAhead, _, err := doc.getNextJunctionUp(startX, startY)
 	if err != nil {
 		fmt.Println("DEBUG: goToUp - emptyVariant-2", startX, startY, endX, endY, currentVariantIndex)
 		emptyVariant(currentVariantIndex, variants)
 		return
 	}
-	if minY == startY {
-		// up to down line
-		(*variants)[currentVariantIndex][currentLineIndex].StartY = y
+	currentLine := (*variants)[currentVariantIndex][currentLineIndex]
+	if currentLine.StartX != currentLine.EndX {
+		// horizontal line ... create a new line to y
+		newLine := newConnectionLine(currentLine.EndX, currentLine.EndY, currentLine.EndX, y)
+		(*variants)[currentVariantIndex] = append((*variants)[currentVariantIndex], newLine)
+		currentLineIndex = len((*variants)[currentVariantIndex]) - 1
 	} else {
+		// vertical line ... extend the current line to y
 		(*variants)[currentVariantIndex][currentLineIndex].EndY = y
 	}
-
-	if startX < endX {
-		// to the right
-		doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-			variants, startElem, destElem, false, false, junctionPointsToRight, true)
+	if ((*variants)[currentVariantIndex][currentLineIndex].EndX == endX) && ((*variants)[currentVariantIndex][currentLineIndex].EndY == endY) {
+		// reached the end
 		return
-	} else if startY > endY {
-		// to the left
-		doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-			variants, startElem, destElem, true, false, junctionPointsToLeft, true)
+	}
+	possibleEnd := y - 2*RasterSize
+	if (endY == possibleEnd) && (endX == startX) {
+		// reached the end
+		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, currentLine.StartX, possibleEnd)
+		(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
 		return
-	} else {
-		// same level: startY == endY
-		if endY == y {
-			// reached the end
-			l := (*variants)[currentVariantIndex][currentLineIndex]
-			changedCurrentLine := newConnectionLine(l.StartX, l.StartY, l.StartX, y)
-			(*variants)[currentVariantIndex][currentLineIndex] = changedCurrentLine
-			return
-		} else if y > endY {
-			// trying to the right
-			doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-				variants, startElem, destElem, false, true, []int{y}, true)
-			// trying to the left
-			doc.verticalNewVariants(startX, startY, endX, endY, currentVariantIndex, currentLineIndex,
-				variants, startElem, destElem, true, false, []int{y}, true)
-		} else {
-			// error
-			emptyVariant(currentVariantIndex, variants)
+	}
+	baseVariant := (*variants)[currentVariantIndex][:]
+	if straightAhead {
+		doc.goToUp(startX, y, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+		if straightAhead {
+			doc.goToDown(startX, y, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
+			if len((*variants)[currentVariantIndex]) == 0 && currentLineIndex > 0 {
+				return
+			}
+			currentLine := (*variants)[currentVariantIndex][currentLineIndex]
+			if currentLine.StartX == currentLine.EndX {
+				return
+			}
 		}
 	}
+	if leftwards && currentLine.EndX > destElem.X {
+		newLineEndX, newLineEndY := currentLine.EndX-(2*RasterSize), y
+		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToLeft(newLine.EndX, y, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+		}
+	}
+	if rightwards && currentLine.EndX < destElem.X {
+		newLineEndX, newLineEndY := currentLine.EndX+(2*RasterSize), y
+		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
+		if !alreadyVisitedJunction(&newLine, currentVariantIndex, variants) {
+			newVariantIndex, newLineIndex := doc.addNewLineToVariant(&newLine, &baseVariant, variants)
+			doc.goToRight(newLine.EndX, y, endX, endY, newVariantIndex, newLineIndex, variants, startElem, destElem)
+		}
+	}
+}
+
+func alreadyVisitedJunction(newLine *ConnectionLine, currentVariantIndex int, variants *[][]ConnectionLine) bool {
+	for _, l := range (*variants)[currentVariantIndex] {
+		if l.StartX == newLine.StartX &&
+			l.StartY == newLine.StartY &&
+			l.EndX == newLine.EndX &&
+			l.EndY == newLine.EndY {
+			return true
+		}
+	}
+	return false
 }

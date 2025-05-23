@@ -105,8 +105,8 @@ func TestSvgWithConnections(t *testing.T) {
 			doc, err := boxesimpl.InitialLayoutBoxes(b, textDimensionCalulator)
 			require.Nil(t, err)
 			// debug - can help to see all possible connections in the created file
-			doc.ConnectBoxesFull()
-			//doc.ConnectBoxes()
+			//doc.ConnectBoxesFull()
+			doc.ConnectBoxes()
 			output, err := os.Create(test.outputFile)
 			require.Nil(t, err)
 			svgdrawing := svgdrawing.NewDrawing(output)
@@ -133,14 +133,14 @@ func TestSvgWithConnections(t *testing.T) {
 		// 		require.Equal(t, 4, len(doc.Connections[0].Parts))
 		// 	},
 		// },
-		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
-			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-				require.Equal(t, 1, len(doc.Connections))
-				require.Equal(t, 2, len(doc.Connections[0].Parts))
-			},
-		},
+		// {
+		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
+		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
+		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+		// 		require.Equal(t, 1, len(doc.Connections))
+		// 		require.Equal(t, 2, len(doc.Connections[0].Parts))
+		// 	},
+		// },
 		// {
 		// 	inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
 		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
@@ -195,20 +195,20 @@ func TestSvgWithConnections(t *testing.T) {
 		// 		}
 		// 	},
 		// },
-		// {
-		// 	inputFile:  "../../resources/examples/long_vertical_01.yaml",
-		// 	outputFile: "../../temp/long_vertical_01.svg",
-		// 	checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
-		// 		require.Equal(t, 6, len(doc.Connections))
-		// 		for i, c := range doc.Connections {
-		// 			if i == 2 {
-		// 				require.Equal(t, 3, len(c.Parts))
-		// 			} else {
-		// 				require.Equal(t, 2, len(c.Parts))
-		// 			}
-		// 		}
-		// 	},
-		// },
+		{
+			inputFile:  "../../resources/examples/long_vertical_01.yaml",
+			outputFile: "../../temp/long_vertical_01.svg",
+			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+				require.Equal(t, 6, len(doc.Connections))
+				for i, c := range doc.Connections {
+					if i == 2 {
+						require.Equal(t, 3, len(c.Parts))
+					} else {
+						require.Equal(t, 2, len(c.Parts))
+					}
+				}
+			},
+		},
 		// {
 		// 	inputFile:  "../../resources/examples/long_vertical_02.yaml",
 		// 	outputFile: "../../temp/long_vertical_02.svg",
