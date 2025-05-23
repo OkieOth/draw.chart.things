@@ -291,391 +291,6 @@ func newConnectionLine(x1, y1, x2, y2 int) ConnectionLine {
 	}
 }
 
-// func (doc *BoxesDocument) goToLeft(
-// 	startX, startY, endX, endY int,
-// 	currentVariantIndex, currentLineIndex int,
-// 	variants [][]ConnectionLine,
-// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
-// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
-// 		return variants, nil
-// 	}
-// 	if startX < endX {
-// 		// moved too far left
-// 		return removeLineFromVariants(currentVariantIndex, variants), nil
-// 	}
-
-// 	if (startX == endX) && (startY == endY) {
-// 		return variants, nil
-// 	}
-
-// 	if startX == endX {
-// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
-// 			x := startX
-// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(x, startY, x, endY)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	if (startX - RasterSize) == endX {
-// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
-// 			x := startX - RasterSize
-// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(x, startY, x, endY)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	x := startX - (2 * RasterSize)
-// 	if (x == endX) && (startY == endY) {
-// 		line := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
-// 		variants[currentVariantIndex][currentLineIndex] = line
-// 		return variants, nil
-// 	}
-
-// 	if doc.checkColl(x, startY, &doc.Boxes, startElem, destElem) {
-// 		// has collision
-// 		if startX == variants[currentVariantIndex][currentLineIndex].StartX {
-// 			// line is to short and should be removed
-// 			return removeLineFromVariants(currentVariantIndex, variants), nil
-// 		}
-// 		x += 2 * RasterSize
-// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
-// 		nextLine := newConnectionLine(x, startY, x, startY)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
-// 		newVariant := variants[currentVariantIndex][:]
-// 		nextLineIndex := currentLineIndex + 1
-// 		// check if the line is not too long
-// 		variants = append(variants, newVariant)
-// 		vIndex := len(variants) - 1
-// 		ret, _ := doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
-// 		return doc.goToDown(x, startY, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
-// 	} else {
-// 		// no collision ... going more left
-// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		ret := variants[:]
-// 		if startY < endY {
-// 			// check if there is down a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(x, startY, x, startY)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToDown(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		} else if startY > endY {
-// 			// check if there is up a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(x, startY, x, startY)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		}
-// 		if len(ret[currentVariantIndex]) == 0 {
-// 			return ret, nil
-// 		}
-// 		return doc.goToLeft(x, startY, endX, endY, currentVariantIndex, currentLineIndex, ret, startElem, destElem)
-// 	}
-// }
-
-// func (doc *BoxesDocument) goToRight(
-// 	startX, startY, endX, endY int,
-// 	currentVariantIndex, currentLineIndex int,
-// 	variants [][]ConnectionLine,
-// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
-// 	if currentVariantIndex == 0 && startX == 224 {
-// 		currentVariantIndex = 0 // DEBUG
-// 	}
-// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
-// 		return variants, nil
-// 	}
-
-// 	if startX > endX {
-// 		// moved too far right
-// 		return removeLineFromVariants(currentVariantIndex, variants), nil
-// 	}
-
-// 	if (startX == endX) && (startY == endY) {
-// 		return variants, nil
-// 	}
-
-// 	if startX == endX {
-// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
-// 			x := startX
-// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(x, startY, x, endY)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	if (startX + RasterSize) == endX {
-// 		if (startY == (endY - (2 * RasterSize))) || (startY == (endY + (2 * RasterSize))) {
-// 			x := startX + RasterSize
-// 			prevLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, endY)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(x, startY, x, endY)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	x := startX + (2 * RasterSize)
-// 	if (x == endX) && (startY == endY) {
-// 		line := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
-// 		variants[currentVariantIndex][currentLineIndex] = line
-// 		return variants, nil
-// 	}
-
-// 	if doc.checkColl(x, startY, &doc.Boxes, startElem, destElem) {
-// 		// has collision
-// 		if startX == variants[currentVariantIndex][currentLineIndex].StartX {
-// 			// line is to short and should be removed
-// 			return removeLineFromVariants(currentVariantIndex, variants), nil
-// 		}
-// 		x -= (2 * RasterSize)
-// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
-// 		nextLine := newConnectionLine(x, startY, x, startY)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
-// 		newVariant := variants[currentVariantIndex][:]
-// 		nextLineIndex := currentLineIndex + 1
-// 		variants = append(variants, newVariant)
-// 		vIndex := len(variants) - 1
-// 		ret, _ := doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
-// 		return doc.goToDown(x, startY, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
-// 	} else {
-// 		// no collision ... going more right
-// 		connectionLine := newConnectionLine(variants[currentVariantIndex][currentLineIndex].StartX, startY, x, startY)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		ret := variants[:]
-// 		if startY < endY {
-// 			// check if there is down a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(x, startY, x, startY)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToDown(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		} else if startY > endY {
-// 			// check if there is up a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(x, startY, x, startY)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToUp(x, startY, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		}
-// 		if len(ret[currentVariantIndex]) == 0 {
-// 			return ret, nil
-// 		}
-// 		return doc.goToRight(x, startY, endX, endY, currentVariantIndex, currentLineIndex, ret, startElem, destElem)
-// 	}
-// }
-
-// func (doc *BoxesDocument) goToDown(
-// 	startX, startY, endX, endY int,
-// 	currentVariantIndex, currentLineIndex int,
-// 	variants [][]ConnectionLine,
-// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
-// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
-// 		return variants, nil
-// 	}
-
-// 	if startY > endY {
-// 		// moved too far down
-// 		return removeLineFromVariants(currentVariantIndex, variants), nil
-// 	}
-
-// 	if (startX == endX) && (startY == endY) {
-// 		return variants, nil
-// 	}
-
-// 	if startY == endY {
-// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
-// 			y := startY
-// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(startX, y, endX, y)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	if (startY + RasterSize) == endY {
-// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
-// 			y := startY + RasterSize
-// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(startX, y, endX, y)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	y := startY + (2 * RasterSize)
-// 	if (y == endY) && (startX == endX) {
-// 		line := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 		variants[currentVariantIndex][currentLineIndex] = line
-// 		return variants, nil
-// 	}
-
-// 	if doc.checkColl(startX, y, &doc.Boxes, startElem, destElem) {
-// 		// has collision
-// 		if startY == variants[currentVariantIndex][currentLineIndex].StartY {
-// 			// line is to short and should be removed
-// 			return removeLineFromVariants(currentVariantIndex, variants), nil
-// 		}
-// 		y -= (2 * RasterSize)
-// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 		nextLine := newConnectionLine(startX, y, startX, y)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
-// 		newVariant := variants[currentVariantIndex][:]
-// 		nextLineIndex := currentLineIndex + 1
-// 		variants = append(variants, newVariant)
-// 		vIndex := len(variants) - 1
-// 		ret, _ := doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
-// 		return doc.goToRight(startX, y, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
-// 	} else {
-// 		// no collision ... going more down
-// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		ret := variants[:]
-// 		if startX < endX {
-// 			// check if there is to the right a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(startX, y, startX, y)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToRight(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		} else if startX > endX {
-// 			// check if there is to the left a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(startX, y, startX, y)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		}
-// 		if len(ret[currentVariantIndex]) == 0 {
-// 			return ret, nil
-// 		}
-// 		return doc.goToDown(startX, y, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
-// 	}
-// }
-
-// func (doc *BoxesDocument) goToUp(
-// 	startX, startY, endX, endY int,
-// 	currentVariantIndex, currentLineIndex int,
-// 	variants [][]ConnectionLine,
-// 	startElem, destElem *LayoutElement) [][]ConnectionLine {
-// 	if currentVariantIndex == 19 {
-// 		currentVariantIndex = 19 // DEBUG
-// 	}
-// 	if len(variants[currentVariantIndex]) == 0 && currentLineIndex > 0 {
-// 		return variants, nil
-// 	}
-// 	if startY < endY {
-// 		// moved too far down
-// 		return removeLineFromVariants(currentVariantIndex, variants), nil
-// 	}
-
-// 	if (startX == endX) && (startY == endY) {
-// 		return variants, nil
-// 	}
-
-// 	if startY == endY {
-// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
-// 			y := startY
-// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(startX, y, endX, y)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	if (startY - RasterSize) == endY {
-// 		if (startX == (endX - (2 * RasterSize))) || (startX == (endX + (2 * RasterSize))) {
-// 			y := startY - RasterSize
-// 			prevLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 			variants[currentVariantIndex][currentLineIndex] = prevLine
-// 			line := newConnectionLine(startX, y, endX, y)
-// 			variants[currentVariantIndex] = append(variants[currentVariantIndex], line)
-// 			return variants, nil
-// 		}
-// 	}
-
-// 	y := startY - (2 * RasterSize)
-// 	if (y == endY) && (startX == endX) {
-// 		line := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 		variants[currentVariantIndex][currentLineIndex] = line
-// 		return variants, nil
-// 	}
-
-// 	if doc.checkColl(startX, y, &doc.Boxes, startElem, destElem) {
-// 		// has collision
-// 		if startY == variants[currentVariantIndex][currentLineIndex].StartY {
-// 			// line is to short and should be removed
-// 			return removeLineFromVariants(currentVariantIndex, variants), nil
-// 		}
-// 		y -= (2 * RasterSize)
-// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 		nextLine := newConnectionLine(startX, y, startX, y)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		variants[currentVariantIndex] = append(variants[currentVariantIndex], nextLine)
-// 		newVariant := variants[currentVariantIndex][:]
-// 		nextLineIndex := currentLineIndex + 1
-// 		variants = append(variants, newVariant)
-// 		vIndex := len(variants) - 1
-// 		ret, _ := doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, variants, startElem, destElem)
-// 		return doc.goToRight(startX, y, endX, endY, currentVariantIndex, nextLineIndex, ret, startElem, destElem)
-// 	} else {
-// 		// no collision ... going more down
-// 		connectionLine := newConnectionLine(startX, variants[currentVariantIndex][currentLineIndex].StartY, startX, y)
-// 		variants[currentVariantIndex][currentLineIndex] = connectionLine
-// 		ret := variants[:]
-// 		if startX < endX {
-// 			// check if there is to the right a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(startX, y, startX, y)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToRight(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		} else if startX > endX {
-// 			// check if there is to the left a free way
-// 			newVariant := variants[currentVariantIndex][:]
-// 			nextLine := newConnectionLine(startX, y, startX, y)
-// 			newVariant = append(newVariant, nextLine)
-// 			ret = append(ret, newVariant)
-// 			vIndex := len(ret) - 1
-// 			nextLineIndex := len(newVariant) - 1
-// 			ret, _ = doc.goToLeft(startX, y, endX, endY, vIndex, nextLineIndex, ret, startElem, destElem)
-// 		}
-// 		if len(ret[currentVariantIndex]) == 0 {
-// 			return ret, nil
-// 		}
-// 		return doc.goToUp(startX, y, endX, endY, currentVariantIndex, currentLineIndex, variants, startElem, destElem)
-// 	}
-// }
-
 // start from the right border - connect from right side to the left side
 func (doc *BoxesDocument) connectFromRightBorderToLeftBorder(startElem, destElem *LayoutElement) [][]ConnectionLine {
 	// connect from left to right
@@ -690,10 +305,12 @@ func (doc *BoxesDocument) connectFromRightBorderToLeftBorder(startElem, destElem
 	endX := destElem.X
 	destY := destElem.LeftYToStart
 	variant := []ConnectionLine{
-		newConnectionLine(startX, startY, startX, startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToRight(startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, startY, startX+RasterSize, startY)}
+
+	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -711,10 +328,11 @@ func (doc *BoxesDocument) connectFromLeftBorderToRightBorder(startElem, destElem
 	endX := destElem.X + destElem.Width
 	destY := destElem.RightYToStart
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToLeft(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX-RasterSize, *startY)}
+	ret, err := doc.goToLeft(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -734,10 +352,11 @@ func (doc *BoxesDocument) connectFromTopBorderToRight(startElem, destElem *Layou
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY-(2*RasterSize))}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToRight(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX+RasterSize, startY)}
+	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -757,10 +376,11 @@ func (doc *BoxesDocument) connectFromBottomBorderToRight(startElem, destElem *La
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY+(2*RasterSize))}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToRight(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX+RasterSize, startY)}
+	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -780,10 +400,11 @@ func (doc *BoxesDocument) connectFromTopBorderToLeft(startElem, destElem *Layout
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY-(2*RasterSize))}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToLeft(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX-RasterSize, startY)}
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -803,10 +424,12 @@ func (doc *BoxesDocument) connectFromBottomBorderLeft(startElem, destElem *Layou
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY+(2*RasterSize))}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToLeft(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX-RasterSize, startY)}
+
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -824,10 +447,11 @@ func (doc *BoxesDocument) connectFromBottomBorderToTopBorder(startElem, destElem
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToDown(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX, startY+RasterSize)}
+	ret, err := doc.goToDown(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -846,10 +470,11 @@ func (doc *BoxesDocument) connectFromLeftBorderDown(startElem, destElem *LayoutE
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX-(2*RasterSize), *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToDown(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX, *startY+RasterSize)}
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -868,10 +493,11 @@ func (doc *BoxesDocument) connectFromRightBorderDown(startElem, destElem *Layout
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX+(2*RasterSize), *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToDown(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX, *startY+RasterSize)}
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -889,10 +515,12 @@ func (doc *BoxesDocument) connectFromTopBorderToBottomBorder(startElem, destElem
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToUp(*startX, startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX, startY-RasterSize)}
+
+	ret, err := doc.goToUp(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -911,10 +539,11 @@ func (doc *BoxesDocument) connectFromLeftBorderUp(startElem, destElem *LayoutEle
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX-(2*RasterSize), *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToUp(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX, *startY-RasterSize)}
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -933,10 +562,11 @@ func (doc *BoxesDocument) connectFromRightBorderUp(startElem, destElem *LayoutEl
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX+(2*RasterSize), *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToUp(startX, *startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX, *startY-RasterSize)}
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -954,10 +584,11 @@ func (doc *BoxesDocument) connectFromBottomBorderToLeftBorder(startElem, destEle
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToDown(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX, startY+RasterSize)}
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -975,10 +606,11 @@ func (doc *BoxesDocument) connectFromRightBorderToTopBorder(startElem, destElem 
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToRight(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX+RasterSize, *startY)}
+	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -996,10 +628,11 @@ func (doc *BoxesDocument) connectFromBottomBorderToRightBorder(startElem, destEl
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToDown(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX, startY+RasterSize)}
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -1017,10 +650,11 @@ func (doc *BoxesDocument) connectFromLeftBorderToTopBorder(startElem, destElem *
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToLeft(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX-RasterSize, *startY)}
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -1038,10 +672,11 @@ func (doc *BoxesDocument) connectFromTopBorderToLeftBorder(startElem, destElem *
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToUp(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX, startY-RasterSize)}
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -1059,10 +694,11 @@ func (doc *BoxesDocument) connectFromRightBorderToBottomBorder(startElem, destEl
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToRight(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX+RasterSize, *startY)}
+	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -1080,10 +716,11 @@ func (doc *BoxesDocument) connectFromTopBorderToRightBorder(startElem, destElem 
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToUp(*startX, startY, endX, *destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(*startX, startY, *startX, startY-RasterSize)}
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -1101,10 +738,11 @@ func (doc *BoxesDocument) connectFromLeftBorderToBottomBorder(startElem, destEle
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY)}
-	ret := make([][]ConnectionLine, 0)
-	ret = append(ret, variant)
-	doc.goToLeft(startX, *startY, *endX, destY, 0, 0, &ret, startElem, destElem)
+		newConnectionLine(startX, *startY, startX-RasterSize, *startY)}
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	if err != nil {
+		ret = make([][]ConnectionLine, 0)
+	}
 	return ret
 }
 
@@ -1159,33 +797,30 @@ func (doc *BoxesDocument) getConnectionVariants(startElem, destElem *LayoutEleme
 			connectionVariants = append(connectionVariants, v...)
 		}
 	} else if startElem.CenterY < destElem.CenterY {
-		// connect from left to top side
-		v := doc.connectFromLeftBorderToTopBorder(startElem, destElem)
+		// top -> down: connect from bottom to top side
+		v := doc.connectFromBottomBorderToTopBorder(startElem, destElem)
 		connectionVariants = append(connectionVariants, v...)
-		// // top -> down: connect from bottom to top side
-		// v := doc.connectFromBottomBorderToTopBorder(startElem, destElem)
-		// connectionVariants = append(connectionVariants, v...)
-		// if startElem.CenterX < destElem.CenterX {
-		// 	// connect from bottom to left side
-		// 	v = doc.connectFromBottomBorderToLeftBorder(startElem, destElem)
-		// 	connectionVariants = append(connectionVariants, v...)
-		// 	// connect from right to left side
-		// 	v = doc.connectFromRightBorderToLeftBorder(startElem, destElem)
-		// 	connectionVariants = append(connectionVariants, v...)
-		// 	// connect from right to top side
-		// 	v := doc.connectFromRightBorderToTopBorder(startElem, destElem)
-		// 	connectionVariants = append(connectionVariants, v...)
-		// } else {
-		// 	// connect from bottom to right side
-		// 	v = doc.connectFromBottomBorderToRightBorder(startElem, destElem)
-		// 	connectionVariants = append(connectionVariants, v...)
-		// 	// connect from left to right side
-		// 	v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
-		// 	connectionVariants = append(connectionVariants, v...)
-		// 	// connect from left to top side
-		// 	v := doc.connectFromLeftBorderToTopBorder(startElem, destElem)
-		// 	connectionVariants = append(connectionVariants, v...)
-		// }
+		if startElem.CenterX < destElem.CenterX {
+			// connect from bottom to left side
+			v = doc.connectFromBottomBorderToLeftBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to left side
+			v = doc.connectFromRightBorderToLeftBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from right to top side
+			v := doc.connectFromRightBorderToTopBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+		} else {
+			// connect from bottom to right side
+			v = doc.connectFromBottomBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to right side
+			v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+			// connect from left to top side
+			v := doc.connectFromLeftBorderToTopBorder(startElem, destElem)
+			connectionVariants = append(connectionVariants, v...)
+		}
 	} else {
 		// down -> top: connect from top to bottom side
 		v := doc.connectFromTopBorderToBottomBorder(startElem, destElem)
