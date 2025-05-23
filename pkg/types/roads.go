@@ -85,14 +85,47 @@ func (doc *BoxesDocument) roadRight(line *ConnectionLine, startElem *LayoutEleme
 	}
 }
 
+func (doc *BoxesDocument) elemHasParentWithTextImpl(elemToCheck, currentElem *LayoutElement, parentTxt bool) bool {
+	if currentElem.Id != "" && currentElem.Id == elemToCheck.Id {
+		return parentTxt
+	}
+	myParentTxt := currentElem.Caption != "" || currentElem.Text1 != "" || currentElem.Text2 != "" || parentTxt
+	if doc.elemHasParentWithTextCont(elemToCheck, myParentTxt, currentElem.Horizontal) {
+		return true
+	}
+	return doc.elemHasParentWithTextCont(elemToCheck, myParentTxt, currentElem.Vertical)
+}
+
+func (doc *BoxesDocument) elemHasParentWithTextCont(elem *LayoutElement, parentTxt bool, cont *LayoutElemContainer) bool {
+	if cont == nil {
+		return false
+	}
+	for _, e := range cont.Elems {
+		if doc.elemHasParentWithTextImpl(elem, &e, parentTxt) {
+			return true
+		}
+	}
+	return false
+}
+
+func (doc *BoxesDocument) elemHasParentWithText(elem *LayoutElement) bool {
+	if elem.Id == "r2_1_1" {
+		fmt.Println("debug")
+	}
+	return doc.elemHasParentWithTextImpl(elem, &doc.Boxes, false)
+}
+
 func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement) {
 	if doc.ShouldHandle(elem) {
 		stepSize := 2 * RasterSize
 		// draw line from the top x start, till the first collision
-		upRoad := newConnectionLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y+stepSize)
-		doc.roadUp(&upRoad, elem)
-		doc.addRoad(upRoad, &doc.VerticalRoads)
-
+		// check that it has no parent that has a text
+		var upRoad ConnectionLine
+		if !doc.elemHasParentWithText(elem) {
+			upRoad = newConnectionLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y+stepSize)
+			doc.roadUp(&upRoad, elem)
+			doc.addRoad(upRoad, &doc.VerticalRoads)
+		}
 		// draw line from the bottom x start, till the first collision
 		downRoad := newConnectionLine(*elem.BottomXToStart, elem.Y+elem.Height,
 			*elem.BottomXToStart, elem.Y+elem.Height+stepSize)

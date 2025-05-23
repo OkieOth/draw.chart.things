@@ -214,10 +214,6 @@ func (doc *BoxesDocument) goToDown(
 		return ret, nil
 	}
 
-	if startX == 40 {
-		startX = 40
-	}
-
 	y, leftwards, rightwards, straightAhead, _, err := doc.getNextJunctionDown(startX, startY)
 	if err != nil {
 		return nil, err
