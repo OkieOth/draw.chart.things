@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 )
 
 type BoxesDrawing interface {
@@ -186,8 +187,12 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		}
 	}
 	if (f == nil) && (l.Caption != "" || l.Text1 != "" || l.Text2 != "") {
+		formatKey := "default"
+		if l.Format != nil {
+			formatKey = *l.Format
+		}
 		for key, format := range inputFormats {
-			if key == "default" {
+			if key == formatKey {
 				f = &format
 				break
 			}
@@ -195,6 +200,11 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		if f == nil {
 			d := getDefaultFormat()
 			f = &d
+		}
+	}
+	if l.Id == "" {
+		if l.Caption != "" {
+			l.Id = strings.ToLower(l.Caption)
 		}
 	}
 	return LayoutElement{
@@ -218,7 +228,7 @@ func DocumentFromBoxes(b *Boxes) *BoxesDocument {
 		doc.MinBoxMargin = GlobalMinBoxMargin
 	}
 	if doc.MinConnectorMargin == 0 {
-		doc.MinConnectorMargin = GlobalMinBoxMargin
+		doc.MinConnectorMargin = GlobalMinConnectorMargin
 	}
 	if doc.GlobalPadding == 0 {
 		doc.GlobalPadding = GlobalPadding
@@ -227,49 +237,100 @@ func DocumentFromBoxes(b *Boxes) *BoxesDocument {
 }
 
 func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
-	if err := drawingImpl.Start(d.Title, d.Height, d.Width); err != nil {
-		return fmt.Errorf("Error starting drawing: %w", err)
-	}
 	return d.Boxes.Draw(drawingImpl)
+}
+
+func (doc *BoxesDocument) drawStartPositionsImpl(drawingImpl *BoxesDrawing, elem *LayoutElement, f *LineDef) {
+	if doc.ShouldHandle(elem) {
+		(*drawingImpl).DrawLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y-RasterSize, *f)
+		(*drawingImpl).DrawLine(*elem.BottomXToStart, elem.Y+elem.Height, *elem.BottomXToStart, elem.Y+elem.Height+RasterSize, *f)
+		(*drawingImpl).DrawLine(elem.X, *elem.LeftYToStart, elem.X-RasterSize, *elem.LeftYToStart, *f)
+		(*drawingImpl).DrawLine(elem.X+elem.Width, *elem.RightYToStart, elem.X+elem.Width+RasterSize, *elem.RightYToStart, *f)
+	}
+	if elem.Vertical != nil {
+		for i := 0; i < len(elem.Vertical.Elems); i++ {
+			doc.drawStartPositionsImpl(drawingImpl, &elem.Vertical.Elems[i], f)
+		}
+	}
+	if elem.Horizontal != nil {
+		for i := 0; i < len(elem.Horizontal.Elems); i++ {
+			doc.drawStartPositionsImpl(drawingImpl, &elem.Horizontal.Elems[i], f)
+		}
+	}
+}
+
+func (d *BoxesDocument) ShouldHandle(elem *LayoutElement) bool {
+	if elem == &d.Boxes {
+		return false
+	}
+	if elem.Caption == "" && elem.Text1 == "" && elem.Text2 == "" && elem.Id == "" {
+		return false
+	}
+	return true
+}
+
+func (d *BoxesDocument) DrawStartPositions(drawingImpl BoxesDrawing) {
+	w := 2
+	b := "blue"
+	f := LineDef{
+		Width: &w,
+		Color: &b,
+	}
+	d.InitStartPositions()
+	d.drawStartPositionsImpl(&drawingImpl, &d.Boxes, &f)
+}
+
+func (d *BoxesDocument) DrawRoads(drawingImpl BoxesDrawing) {
+	w := 1
+	b := "lightgray"
+	f := LineDef{
+		Width: &w,
+		Color: &b,
+	}
+	for _, r := range d.VerticalRoads {
+		drawingImpl.DrawLine(r.StartX, r.StartY, r.EndX, r.EndY, f)
+	}
+	for _, r := range d.HorizontalRoads {
+		drawingImpl.DrawLine(r.StartX, r.StartY, r.EndX, r.EndY, f)
+	}
 }
 
 func (d *BoxesDocument) DrawConnections(drawingImpl BoxesDrawing) error {
 	b := "black"
 	w := 1
-	// format := LineDef{
-	// 	Width: &w,
-	// 	Color: &b,
-	// }
+	format := LineDef{
+		Width: &w,
+		Color: &b,
+	}
 
-	for i, elem := range d.Connections {
+	for _, elem := range d.Connections {
 		// iterate over the connections of the document
-		switch i {
-		case 0:
-			b = "red"
-		case 1:
-			b = "blue"
-		case 2:
-			b = "green"
-		case 3:
-			b = "pink"
-		case 4:
-			b = "orange"
-		default:
-			b = "black"
-		}
-
-		f := LineDef{
-			Width: &w,
-			Color: &b,
-		}
-
 		for _, l := range elem.Parts {
 			// drawing the connection lines
-			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, f)
+			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
 		}
 
 	}
 	return nil
+}
+
+func (doc *BoxesDocument) AdjustDocHeight(le *LayoutElement, currentMax int) int {
+	if le != &doc.Boxes {
+		if le.Y+le.Height > currentMax {
+			currentMax = le.Y + le.Height
+		}
+	}
+	if le.Vertical != nil {
+		for _, elem := range le.Vertical.Elems {
+			currentMax = doc.AdjustDocHeight(&elem, currentMax)
+		}
+	}
+	if le.Horizontal != nil {
+		for _, elem := range le.Horizontal.Elems {
+			currentMax = doc.AdjustDocHeight(&elem, currentMax)
+		}
+	}
+	return currentMax
 }
 
 func (b *LayoutElement) Draw(drawing BoxesDrawing) error {

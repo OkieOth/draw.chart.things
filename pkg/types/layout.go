@@ -647,6 +647,20 @@ func (l *LayoutElement) ShouldBeDrawn() bool {
 	return l.Caption != "" || l.Text1 != "" || l.Text2 != ""
 }
 
+func (l *LayoutElement) IsInYRange(y1, y2 int) bool {
+	if y1 < y2 {
+		return l.CenterY > y1 && l.CenterY < y2
+	}
+	return l.CenterY < y1 && l.CenterY > y2
+}
+
+func (l *LayoutElement) IsInXRange(x1, x2 int) bool {
+	if x1 < x2 {
+		return l.CenterX > x1 && l.CenterX < x2
+	}
+	return l.CenterX < x1 && l.CenterX > x2
+}
+
 func between(value, min, max int) bool {
 	return value > min && value < max
 }
@@ -659,12 +673,12 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 	if conn.StartX == conn.EndX {
 		// vertical line
 		upperY, lowerY := connToUpperLowerY(conn)
-		if (l.X < conn.StartX) && ((l.X + l.Width) > conn.StartX) &&
-			(((l.Y > upperY) && ((l.Y + l.Height) < lowerY)) || between(lowerY, l.Y, l.Y+l.Height) || between(upperY, l.Y, l.Y+l.Height)) {
+		if (l.X <= conn.StartX) && ((l.X + l.Width) >= conn.StartX) &&
+			(((l.Y >= upperY) && ((l.Y + l.Height) <= lowerY)) || between(lowerY, l.Y, l.Y+l.Height) || between(upperY, l.Y, l.Y+l.Height)) {
 			// has collision
 			if conn.StartY < conn.EndY {
 				// going down
-				if lowerY > (l.Y + l.Height) {
+				if lowerY >= (l.Y + l.Height) {
 					// line going full through the box
 					return l.fixVerticalCollisionDown(conn, distanceToBorder)
 				} else {
@@ -673,7 +687,7 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 				}
 			} else {
 				// going up
-				if upperY < l.Y {
+				if upperY <= l.Y {
 					// line going full through the box
 					return l.fixVerticalCollisionUp(conn, distanceToBorder)
 				} else {
@@ -685,8 +699,8 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 	} else {
 		// horizontal line
 		leftX, rightX := connToLeftRightX(conn)
-		if (l.Y < conn.StartY) && ((l.Y + l.Height) > conn.StartY) &&
-			(((l.X > leftX) && ((l.X + l.Width) < rightX)) || between(leftX, l.X, l.X+l.Width) || between(rightX, l.X, l.X+l.Width)) {
+		if (l.Y <= conn.StartY) && ((l.Y + l.Height) >= conn.StartY) &&
+			(((l.X >= leftX) && ((l.X + l.Width) <= rightX)) || between(leftX, l.X, l.X+l.Width) || between(rightX, l.X, l.X+l.Width)) {
 			// has collision
 			if conn.StartX < conn.EndX {
 				// going right
@@ -718,21 +732,22 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		l.Vertical.X = curX
 		curY := l.Y + yInnerOffset
 		l.Vertical.Y = curY
-		var h, w int
+		var w int
 		var hasChilds bool
-		for i := 0; i < len(l.Vertical.Elems); i++ {
+		lv := len(l.Vertical.Elems)
+		for i := 0; i < lv; i++ {
 			sub := &l.Vertical.Elems[i]
+			if sub.Id == "r4_1" {
+				sub.Id = sub.Id
+			}
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
-			}
-			if h > 0 {
-				h += defaultBoxMargin
 			}
 			sub.X = curX
 			sub.Y = curY
 			sub.InitDimensions(c, defaultPadding, defaultBoxMargin)
+			// eiko: creates issues?
 			curY += (sub.Height + defaultBoxMargin)
-			h += sub.Height
 			if sub.Width > w {
 				w = sub.Width
 			}
@@ -747,10 +762,24 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 			}
 		}
 
-		l.Vertical.Height = h + defaultPadding
+		l.Vertical.Height = l.Vertical.Elems[lv-1].Y + l.Vertical.Elems[lv-1].Height - l.Vertical.Y
 		l.Height += l.Vertical.Height
-		if w > l.Width {
-			l.Width = w
+		l.adjustDimensionsBasedOnNested(w, defaultPadding)
+		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+			l.Height += defaultPadding
+		}
+	}
+}
+
+func (l *LayoutElement) adjustDimensionsBasedOnNested(width, padding int) {
+	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+		l.Height += padding
+	}
+	if width > l.Width {
+		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+			l.Width = width + (2 * padding)
+		} else {
+			l.Width = width
 		}
 	}
 }
@@ -790,12 +819,13 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 			}
 		}
 
-		l.Horizontal.Height = h + defaultPadding
-		l.Height += l.Horizontal.Height
+		l.Horizontal.Height = h
 		l.Horizontal.Width = w
+		l.Height += l.Horizontal.Height
 
-		if l.Width < w {
-			l.Width = w
+		l.adjustDimensionsBasedOnNested(w, defaultPadding)
+		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+			l.Height += defaultPadding
 		}
 	}
 }
@@ -805,10 +835,17 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
 	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
-		l.Height = (2 * l.Format.Padding)
+		l.Height = 0
 		if l.Caption != "" {
+			p := l.Format.Padding
+			if l.Format.FontCaption.SpaceTop > 0 {
+				p = l.Format.FontCaption.SpaceTop
+			}
 			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
-			l.Height += cH + l.Format.FontCaption.SpaceTop + l.Format.FontCaption.SpaceBottom
+			l.Height += cH + p + l.Format.FontCaption.SpaceBottom
+			if l.Text1 == "" && l.Text2 == "" {
+				l.Height += l.Format.Padding
+			}
 		}
 		if l.Text1 != "" {
 			p := l.Format.Padding
@@ -817,6 +854,9 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 			}
 			t1W, t1H = c.Dimensions(l.Text1, &l.Format.FontText1)
 			l.Height += t1H + p + l.Format.FontText1.SpaceBottom
+			if l.Text2 == "" {
+				l.Height += l.Format.Padding
+			}
 		}
 		if l.Text2 != "" {
 			p := l.Format.Padding
@@ -825,14 +865,22 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 			}
 			t2W, t2H = c.Dimensions(l.Text2, &l.Format.FontText2)
 			l.Height += t2H + p + l.Format.FontText2.SpaceBottom
+			l.Height += l.Format.Padding
 		}
-		//yInnerOffset = l.Format.Padding + max(yCaptionOffset, max(yText1Offset, yText2Offset))
-		//yInnerOffset = l.Format.Padding + l.Height
+		l.Height = l.adjustToRaster(l.Height)
 		yInnerOffset = l.Height
-		l.Width = max(cW, max(t1W, t2W)) + (2 * l.Format.Padding)
+		l.Width = l.adjustToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
 	}
 	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 	l.initHorizontal(c, yInnerOffset, defaultPadding, defaultBoxMargin)
+}
+
+func (l *LayoutElement) adjustToRaster(value int) int {
+	if value > 0 {
+		rasterRest := value % (RasterSize * 2)
+		return value + ((RasterSize * 2) - rasterRest)
+	}
+	return value
 }
 
 func (l *LayoutElement) Center() {

@@ -25,6 +25,7 @@ class "**Layout**" as Layout {
         Layout[] horizontal
         StringType[] tags
         Connection[] connections
+        StringType format
 }
 
  
@@ -130,6 +131,7 @@ Layout "0" *-- "n" Layout
 
 
 Layout "0" *-- "n" Connection
+
 
     
     

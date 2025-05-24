@@ -64,6 +64,9 @@ type Layout struct {
 
     // List of connections to other boxes
     Connections []Connection  `yaml:"connections,omitempty"`
+
+    // reference to the format to use for this box
+    Format *string  `yaml:"format,omitempty"`
 }
 
 func NewLayout() *Layout {

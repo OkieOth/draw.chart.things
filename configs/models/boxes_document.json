@@ -48,6 +48,20 @@
             "additionalProperties": {
                 "$ref": "#/definitions/BoxFormat"
             }
+        },
+        "verticalRoads": {
+            "description": "Vertical roads available to connect boxes in a vertical way",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ConnectionLine"
+            }
+        },
+        "horizontalRoads": {
+            "description": "Horizontal roads available to connect boxes in a horizontal way",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ConnectionLine"
+            }
         }
     },
     "required": ["title", "boxes", "height", "width", "minBoxMargin", "minConnectorMargin", "globalPadding"],
@@ -109,6 +123,22 @@
                     "items": {
                         "$ref": "#/definitions/LayoutElemConnection"
                     }
+                },
+                "leftYToStart": {
+                    "type": "integer",
+                    "description": "Y position of the left side of the element to start the connection"
+                },
+                "rightYToStart": {
+                    "type": "integer",
+                    "description": "Y position of the right side of the element to start the connection"
+                },
+                "topXToStart": {
+                    "type": "integer",
+                    "description": "X position of the top side of the element to start the connection"
+                },
+                "bottomXToStart": {
+                    "type": "integer",
+                    "description": "X position of the bottom side of the element to start the connection"
                 },
                 "tags": {
                     "description": "Tags to annotate the box, tags are used to format and filter",

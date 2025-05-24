@@ -76,6 +76,10 @@
                     "items": {
                         "$ref": "#/definitions/Connection"
                     }
+                },
+                "format": {
+                    "description": "reference to the format to use for this box",
+                    "type": "string"
                 }
             },
             "required": ["type", "id", "caption", "text1", "text2"]
