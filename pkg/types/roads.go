@@ -109,9 +109,6 @@ func (doc *BoxesDocument) elemHasParentWithTextCont(elem *LayoutElement, parentT
 }
 
 func (doc *BoxesDocument) elemHasParentWithText(elem *LayoutElement) bool {
-	if elem.Id == "r2_1_1" {
-		fmt.Println("debug")
-	}
 	return doc.elemHasParentWithTextImpl(elem, &doc.Boxes, false)
 }
 
@@ -121,7 +118,8 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement) {
 		// draw line from the top x start, till the first collision
 		// check that it has no parent that has a text
 		var upRoad ConnectionLine
-		if !doc.elemHasParentWithText(elem) {
+		hasParentWithTxt := doc.elemHasParentWithText(elem)
+		if !hasParentWithTxt {
 			upRoad = newConnectionLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y+stepSize)
 			doc.roadUp(&upRoad, elem)
 			doc.addRoad(upRoad, &doc.VerticalRoads)
@@ -142,37 +140,39 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement) {
 		doc.roadRight(&rightRoad, elem)
 		doc.addRoad(rightRoad, &doc.HorizontalRoads)
 
-		// draw the line parallel to the left border, till the first collision, up and down
-		upRoad = newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y-stepSize)
-		doc.roadUp(&upRoad, elem)
-		downRoad = newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y+elem.Height+stepSize)
-		doc.roadDown(&downRoad, elem)
-		l := newConnectionLine(upRoad.EndX, upRoad.EndY, downRoad.EndX, downRoad.EndY)
-		doc.addRoad(l, &doc.VerticalRoads)
+		if !hasParentWithTxt {
+			// draw the line parallel to the left border, till the first collision, up and down
+			upRoad = newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y-stepSize)
+			doc.roadUp(&upRoad, elem)
+			downRoad = newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y+elem.Height+stepSize)
+			doc.roadDown(&downRoad, elem)
+			l := newConnectionLine(upRoad.EndX, upRoad.EndY, downRoad.EndX, downRoad.EndY)
+			doc.addRoad(l, &doc.VerticalRoads)
 
-		// draw the line parallel to the right border, till the first collision, up and down
-		upRoad = newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y-stepSize)
-		doc.roadUp(&upRoad, elem)
-		downRoad = newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
-		doc.roadDown(&downRoad, elem)
-		l = newConnectionLine(upRoad.EndX, upRoad.EndY, downRoad.EndX, downRoad.EndY)
-		doc.addRoad(l, &doc.VerticalRoads)
+			// draw the line parallel to the right border, till the first collision, up and down
+			upRoad = newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y-stepSize)
+			doc.roadUp(&upRoad, elem)
+			downRoad = newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
+			doc.roadDown(&downRoad, elem)
+			l = newConnectionLine(upRoad.EndX, upRoad.EndY, downRoad.EndX, downRoad.EndY)
+			doc.addRoad(l, &doc.VerticalRoads)
 
-		// draw the line parallel to the top border, till the first collision, left and right
-		leftRoad = newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X-stepSize, elem.Y-stepSize)
-		doc.roadLeft(&leftRoad, elem)
-		rightRoad = newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X+elem.Width+stepSize, elem.Y-stepSize)
-		doc.roadRight(&rightRoad, elem)
-		l = newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
-		doc.addRoad(l, &doc.HorizontalRoads)
+			// draw the line parallel to the top border, till the first collision, left and right
+			leftRoad = newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X-stepSize, elem.Y-stepSize)
+			doc.roadLeft(&leftRoad, elem)
+			rightRoad = newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X+elem.Width+stepSize, elem.Y-stepSize)
+			doc.roadRight(&rightRoad, elem)
+			l = newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
+			doc.addRoad(l, &doc.HorizontalRoads)
 
-		// draw the line parallel to the bottom border, till the first collision, left and right
-		leftRoad = newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X-stepSize, elem.Y+elem.Height+stepSize)
-		doc.roadLeft(&leftRoad, elem)
-		rightRoad = newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
-		doc.roadRight(&rightRoad, elem)
-		l = newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
-		doc.addRoad(l, &doc.HorizontalRoads)
+			// draw the line parallel to the bottom border, till the first collision, left and right
+			leftRoad = newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X-stepSize, elem.Y+elem.Height+stepSize)
+			doc.roadLeft(&leftRoad, elem)
+			rightRoad = newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
+			doc.roadRight(&rightRoad, elem)
+			l = newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
+			doc.addRoad(l, &doc.HorizontalRoads)
+		}
 	}
 	if elem.Vertical != nil {
 		for i := 0; i < len(elem.Vertical.Elems); i++ {

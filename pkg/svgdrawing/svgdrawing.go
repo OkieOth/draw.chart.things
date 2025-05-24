@@ -297,6 +297,9 @@ func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int
 
 		if format.Fill != nil {
 			attr = fmt.Sprintf("fill: %s", *(*format.Fill).Color)
+			if (*format.Fill).Opacity != nil {
+				attr += fmt.Sprintf(";opacity: %f", *(*format.Fill).Opacity)
+			}
 		}
 
 		if format.Border != nil {

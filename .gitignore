@@ -21,6 +21,7 @@ private
 # Go workspace file
 go.work
 go.work.sum
+advanced_test.go
 
 # env file
 .env

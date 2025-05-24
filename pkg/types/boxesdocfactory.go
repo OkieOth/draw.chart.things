@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 )
 
 type BoxesDrawing interface {
@@ -186,8 +187,12 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		}
 	}
 	if (f == nil) && (l.Caption != "" || l.Text1 != "" || l.Text2 != "") {
+		formatKey := "default"
+		if l.Format != nil {
+			formatKey = *l.Format
+		}
 		for key, format := range inputFormats {
-			if key == "default" {
+			if key == formatKey {
 				f = &format
 				break
 			}
@@ -195,6 +200,11 @@ func initLayoutElement(l *Layout, inputFormats map[string]BoxFormat) LayoutEleme
 		if f == nil {
 			d := getDefaultFormat()
 			f = &d
+		}
+	}
+	if l.Id == "" {
+		if l.Caption != "" {
+			l.Id = strings.ToLower(l.Caption)
 		}
 	}
 	return LayoutElement{
@@ -227,9 +237,6 @@ func DocumentFromBoxes(b *Boxes) *BoxesDocument {
 }
 
 func (d *BoxesDocument) DrawBoxes(drawingImpl BoxesDrawing) error {
-	if err := drawingImpl.Start(d.Title, d.Height, d.Width); err != nil {
-		return fmt.Errorf("Error starting drawing: %w", err)
-	}
 	return d.Boxes.Draw(drawingImpl)
 }
 
