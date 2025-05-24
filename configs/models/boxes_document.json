@@ -280,9 +280,14 @@
                 "minBoxMargin": {
                     "type": "integer",
                     "description": "Minimum margin between boxes"
+                },
+                "verticalTxt": {
+                    "type": "boolean",
+                    "description": "If true, the text will be displayed vertically",
+                    "default": false
                 }
             },
-            "required": ["padding", "lineHeight", "fontCaption", "fontText1", "fontText2", "minBoxMargin"]
+            "required": ["padding", "lineHeight", "fontCaption", "fontText1", "fontText2", "minBoxMargin", "verticalTxt"]
         }
     }
 }

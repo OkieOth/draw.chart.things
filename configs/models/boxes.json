@@ -118,6 +118,11 @@
         "Format": {
             "type": "object",
             "properties": {
+                "verticalTxt": {
+                    "type": "boolean",
+                    "description": "If true, the text will be displayed vertically",
+                    "default": false
+                },
                 "fontCaption": {
                     "$ref": "./formats.json#/definitions/FontDef"
                 },

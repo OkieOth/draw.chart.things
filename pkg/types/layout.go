@@ -842,9 +842,19 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 				p = l.Format.FontCaption.SpaceTop
 			}
 			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
-			l.Height += cH + p + l.Format.FontCaption.SpaceBottom
-			if l.Text1 == "" && l.Text2 == "" {
-				l.Height += l.Format.Padding
+			if !l.Format.VerticalTxt {
+				// normal horizontal text
+				l.Height += cH + p + l.Format.FontCaption.SpaceBottom
+				if l.Text1 == "" && l.Text2 == "" {
+					l.Height += l.Format.Padding
+				}
+			} else {
+				// vertical text
+				cW, cH = cH, cW
+				l.Width += cW + p + l.Format.FontCaption.SpaceBottom
+				if l.Text1 == "" && l.Text2 == "" {
+					l.Width += l.Format.Padding
+				}
 			}
 		}
 		if l.Text1 != "" {
@@ -853,9 +863,17 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 				p = l.Format.FontText1.SpaceTop
 			}
 			t1W, t1H = c.Dimensions(l.Text1, &l.Format.FontText1)
-			l.Height += t1H + p + l.Format.FontText1.SpaceBottom
-			if l.Text2 == "" {
-				l.Height += l.Format.Padding
+			if !l.Format.VerticalTxt {
+				l.Height += t1H + p + l.Format.FontText1.SpaceBottom
+				if l.Text2 == "" {
+					l.Height += l.Format.Padding
+				}
+			} else {
+				t1W, t1H = t1H, t1W
+				l.Width += t1W + p + l.Format.FontText1.SpaceBottom
+				if l.Text2 == "" {
+					l.Width += l.Format.Padding
+				}
 			}
 		}
 		if l.Text2 != "" {
@@ -864,13 +882,28 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 				p = l.Format.FontText2.SpaceTop
 			}
 			t2W, t2H = c.Dimensions(l.Text2, &l.Format.FontText2)
-			l.Height += t2H + p + l.Format.FontText2.SpaceBottom
-			l.Height += l.Format.Padding
+			if !l.Format.VerticalTxt {
+				l.Height += t2H + p + l.Format.FontText2.SpaceBottom
+				l.Height += l.Format.Padding
+			} else {
+				t2W, t2H = t2H, t2W
+				l.Width += t2W + p + l.Format.FontText2.SpaceBottom
+				l.Width += l.Format.Padding
+			}
 		}
-		l.Height = l.adjustToRaster(l.Height)
-		yInnerOffset = l.Height
-		l.Width = l.adjustToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
+		if !l.Format.VerticalTxt {
+			// normal horizontal text
+			l.Height = l.adjustToRaster(l.Height)
+			yInnerOffset = l.Height
+			l.Width = l.adjustToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
+		} else {
+			// vertical text
+			l.Width = l.adjustToRaster(l.Width)
+			yInnerOffset = l.Width
+			l.Height = l.adjustToRaster(max(cH, max(t1H, t2H)) + (2 * l.Format.Padding))
+		}
 	}
+
 	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 	l.initHorizontal(c, yInnerOffset, defaultPadding, defaultBoxMargin)
 }

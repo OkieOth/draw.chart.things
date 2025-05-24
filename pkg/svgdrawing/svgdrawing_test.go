@@ -69,6 +69,10 @@ func TestSimpleSvg(t *testing.T) {
 			inputFile:  "../../resources/examples/horizontal_nested_diamond2.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx2.svg",
 		},
+		{
+			inputFile:  "../../resources/examples/long_horizontal_vertical.yaml",
+			outputFile: "../../temp/long_horizontal_vertical.svg",
+		},
 	}
 
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
@@ -81,8 +85,9 @@ func TestSimpleSvg(t *testing.T) {
 		output, err := os.Create(test.outputFile)
 		require.Nil(t, err)
 		svgdrawing := svgdrawing.NewDrawing(output)
-		doc.DrawBoxes(svgdrawing)
+		svgdrawing.Start(doc.Title, doc.Height, doc.Width)
 		svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+		doc.DrawBoxes(svgdrawing)
 		svgdrawing.Done()
 		output.Close()
 		_, err = os.Stat(test.outputFile)
@@ -110,6 +115,7 @@ func TestSvgWithConnections(t *testing.T) {
 			output, err := os.Create(test.outputFile)
 			require.Nil(t, err)
 			svgdrawing := svgdrawing.NewDrawing(output)
+			svgdrawing.Start(doc.Title, doc.Height, doc.Width)
 			doc.DrawBoxes(svgdrawing)
 			doc.DrawRoads(svgdrawing)
 			doc.DrawConnections(svgdrawing)

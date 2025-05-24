@@ -5,6 +5,13 @@ formats:
       color: black
     fill:
       color: lightgreen
+  vertical:
+    border:
+      width: 2
+      color: black
+    fill:
+      color: lightgreen
+    verticalTxt: true
 boxes:
   vertical:
     - horizontal:
@@ -13,26 +20,17 @@ boxes:
     - horizontal:
       - id: h1_2
         caption: Ich bin H1 öfa fadföadsf a
-        connections:
-          - destId: h1_1
+        format: vertical
       - id: h1_3
         caption: Ich bin H1 asf
-        connections:
-          - destId: h1_1
       - id: h1_4
         caption: Ich bin asf dföas 
-        connections:
-          - destId: h1_1
+        format: vertical
       - id: h1_5
         caption: Ich bin H1 asöfadf
-        connections:
-          - destId: h1_1
       - id: h1_6
         caption: Ich bin H1 df
-        connections:
-          - destId: h1_1
+        format: vertical
       - id: h1_7
         caption: Ich bin H1 af
-        connections:
-          - destId: h1_1
 

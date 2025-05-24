@@ -87,6 +87,9 @@ func NewLayout() *Layout {
 
 type Format struct {
 
+    // If true, the text will be displayed vertically
+    VerticalTxt *bool  `yaml:"verticalTxt,omitempty"`
+
     FontCaption *FontDef  `yaml:"fontCaption,omitempty"`
 
     FontText1 *FontDef  `yaml:"fontText1,omitempty"`

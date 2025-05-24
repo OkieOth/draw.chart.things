@@ -426,6 +426,12 @@ func (svg *SVG) Text(x int, y int, t string, s ...string) {
 	svg.println(`</text>`)
 }
 
+func (svg *SVG) TextRotated(x int, y int, t string, rotation int, s ...string) {
+	svg.printf(`<text %s transform="rotate(%d, %d, %d)"  %s`, loc(x, y), rotation, x, y, endstyle(s, ">"))
+	xml.Escape(svg.Writer, []byte(t))
+	svg.println(`</text>`)
+}
+
 // Textspan begins text, assuming a tspan will be included, end with TextEnd()
 // Standard Reference: https://www.w3.org/TR/SVG11/text.html#TSpanElement
 func (svg *SVG) Textspan(x int, y int, t string, s ...string) {

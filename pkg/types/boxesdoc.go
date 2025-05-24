@@ -178,6 +178,9 @@ type BoxFormat struct {
 
     // Minimum margin between boxes
     MinBoxMargin int  `yaml:"minBoxMargin"`
+
+    // If true, the text will be displayed vertically
+    VerticalTxt bool  `yaml:"verticalTxt"`
 }
 
 

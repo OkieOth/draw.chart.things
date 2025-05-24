@@ -130,6 +130,7 @@ func initBoxFormat(f *Format) BoxFormat {
 	var fontCaption *FontDef
 	var fontText1 *FontDef
 	var fontText2 *FontDef
+	var verticalTxt bool
 	padding := GlobalPadding
 	boxMargin := GlobalMinBoxMargin
 	if f != nil {
@@ -144,6 +145,9 @@ func initBoxFormat(f *Format) BoxFormat {
 		if f.BoxMargin != nil {
 			boxMargin = *f.BoxMargin
 		}
+		if f.VerticalTxt != nil {
+			verticalTxt = *f.VerticalTxt
+		}
 	}
 
 	return BoxFormat{
@@ -154,6 +158,7 @@ func initBoxFormat(f *Format) BoxFormat {
 		FontText2:    InitFontDef(fontText2, "monospace", 8, false, true, 10),
 		Border:       border,
 		Fill:         fill,
+		VerticalTxt:  verticalTxt,
 	}
 }
 

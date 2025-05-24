@@ -290,6 +290,34 @@ func (d *Drawing) drawText(text string, currentY, x, width int, fontDef *types.F
 	return currentY
 }
 
+// drawText renders text with appropriate positioning and returns the updated X-position
+func (d *Drawing) drawVerticalText(text string, y, currentX, height int, fontDef *types.FontDef) int {
+	if text == "" {
+		return currentX
+	}
+
+	if fontDef.SpaceTop != 0 {
+		currentX += fontDef.SpaceTop
+	}
+
+	txtFormat := d.textFormat(fontDef)
+	_, _, lines := d.txtDimensionCalculator.SplitTxt(text, fontDef)
+
+	for _, l := range lines {
+		yTxt := y + fontDef.Size
+		xTxt := currentX
+		// fmt.Sprintf("%s;transform=\"rotate(-90, %d, %d)\"", txtFormat, xTxt, yTxt)
+		d.canvas.TextRotated(xTxt, yTxt, l.Text, -90, txtFormat)
+		currentX += l.Height
+	}
+
+	if fontDef.SpaceBottom != 0 {
+		currentX += fontDef.SpaceBottom
+	}
+
+	return currentX
+}
+
 // Draw renders a box with text elements
 func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int, format types.BoxFormat) error {
 	if format.Fill != nil || format.Border != nil {
@@ -323,11 +351,18 @@ func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int
 		d.canvas.RectWithId(id, x, y, width, height, attr)
 	}
 
-	currentY := y + format.Padding
-	currentY = d.drawText(caption, currentY, x, width, &format.FontCaption)
-	currentY = d.drawText(text1, currentY, x, width, &format.FontText1)
-	currentY = d.drawText(text2, currentY, x, width, &format.FontText2)
-
+	if format.VerticalTxt {
+		currentX := x + format.Padding
+		currentY := y + (height / 2)
+		currentX = d.drawVerticalText(caption, currentY, currentX, width, &format.FontCaption)
+		currentX = d.drawVerticalText(text1, currentY, currentX, width, &format.FontText1)
+		currentX = d.drawVerticalText(text2, currentY, currentX, width, &format.FontText2)
+	} else {
+		currentY := y + format.Padding
+		currentY = d.drawText(caption, currentY, x, width, &format.FontCaption)
+		currentY = d.drawText(text1, currentY, x, width, &format.FontText1)
+		currentY = d.drawText(text2, currentY, x, width, &format.FontText2)
+	}
 	return nil
 }
 

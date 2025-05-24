@@ -32,6 +32,7 @@ class "**Layout**" as Layout {
 
 
 class "**Format**" as Format {
+        BooleanType verticalTxt
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
@@ -135,6 +136,7 @@ Layout "0" *-- "n" Connection
 
     
     
+
 Format  *--  FontDef
 
 Format  *--  FontDef
