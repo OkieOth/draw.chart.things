@@ -304,8 +304,8 @@ func (d *Drawing) drawVerticalText(text string, y, currentX, height int, fontDef
 	_, _, lines := d.txtDimensionCalculator.SplitTxt(text, fontDef)
 
 	for _, l := range lines {
-		yTxt := y + fontDef.Size
-		xTxt := currentX
+		yTxt := y
+		xTxt := currentX + fontDef.Size
 		// fmt.Sprintf("%s;transform=\"rotate(-90, %d, %d)\"", txtFormat, xTxt, yTxt)
 		d.canvas.TextRotated(xTxt, yTxt, l.Text, -90, txtFormat)
 		currentX += l.Height

@@ -765,9 +765,10 @@ func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, de
 		l.Vertical.Height = l.Vertical.Elems[lv-1].Y + l.Vertical.Elems[lv-1].Height - l.Vertical.Y
 		l.Height += l.Vertical.Height
 		l.adjustDimensionsBasedOnNested(w, defaultPadding)
-		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
-			l.Height += defaultPadding
-		}
+		// TODO: remove later if it proves as working
+		// if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+		// 	l.Height += defaultPadding
+		// }
 	}
 }
 
@@ -824,9 +825,10 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 		l.Height += l.Horizontal.Height
 
 		l.adjustDimensionsBasedOnNested(w, defaultPadding)
-		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
-			l.Height += defaultPadding
-		}
+		// TODO: remove later if it proves as working
+		// if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+		// 	l.Height += defaultPadding
+		// }
 	}
 }
 

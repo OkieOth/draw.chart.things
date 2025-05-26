@@ -20,11 +20,14 @@ boxes:
     - horizontal:
       - id: h1_2
         caption: Ich bin H1 öfa fadföadsf a
+        text1: I am a text1, don't know what this should tell you :D        
         format: vertical
       - id: h1_3
         caption: Ich bin H1 asf
       - id: h1_4
         caption: Ich bin asf dföas 
+        text1: "<<Dummy Text>>" 
+        text2: I am a text2, and guess whath, don't know what this should tell you :D        
         format: vertical
       - id: h1_5
         caption: Ich bin H1 asöfadf

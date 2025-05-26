@@ -95,7 +95,7 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 			f.SpaceTop = spaceTop
 		}
 		f.SpaceBottom = l.SpaceBottom
-		if f.MaxLenBeforeBreak != 0 {
+		if l.MaxLenBeforeBreak != 0 {
 			f.MaxLenBeforeBreak = l.MaxLenBeforeBreak
 		} else {
 			f.MaxLenBeforeBreak = 90
