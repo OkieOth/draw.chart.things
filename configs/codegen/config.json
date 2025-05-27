@@ -116,5 +116,52 @@
         }
       }
     ]
+  },
+  {
+    "name": "gantt",
+    "description": "code gen configuration for gantt input types",
+    "models": [
+      {
+        "schema": "/project/configs/models/gantt.json"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "input",
+        "whiteListed": [
+          {
+            "name": "input",
+            "type": "domain"
+          }
+        ],
+        "singleFileTask": {
+          "template": "/project/configs/codegen/templates/golang_types.mako",
+          "destFile": "/project/pkg/gantttypes/gantt.go",
+          "templateParams": [
+            {
+              "name": "modelPackage",
+              "value": "gantttypes"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Plantuml",
+        "whiteListed": [
+          {
+            "name": "input",
+            "type": "domain"
+          },
+          {
+            "name": "base",
+            "type": "domain"
+          }
+        ],
+        "singleFileTask": {
+          "template": "plantUml",
+          "destFile": "/project/docs/models/puml/gantt.puml"
+        }
+      }
+    ]
   }
 ]

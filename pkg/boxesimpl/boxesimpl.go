@@ -13,7 +13,6 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(layout) // Dummy
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
 
 	doc, err := InitialLayoutBoxes(layout, textDimensionCalulator)
