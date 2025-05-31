@@ -36,6 +36,8 @@ type FontDef struct {
 
     // Maximum length of the text before it breaks
     MaxLenBeforeBreak int  `yaml:"maxLenBeforeBreak"`
+
+    Anchor FontDefAnchorEnum  `yaml:"anchor"`
 }
 
 
@@ -166,6 +168,54 @@ func (s *FontDefAlignedEnum) UnmarshalJSON(data []byte) error {
         *s = FontDefAlignedEnum_center 
     case "right":
         *s = FontDefAlignedEnum_right 
+    default:
+		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
+		return errors.New(msg)
+    }
+    return nil
+}
+
+
+
+
+type FontDefAnchorEnum int64
+
+const (
+    FontDefAnchorEnum_middle FontDefAnchorEnum = iota
+        FontDefAnchorEnum_left
+        FontDefAnchorEnum_right
+)
+
+func (s FontDefAnchorEnum) String() string {
+	switch s {
+	case FontDefAnchorEnum_middle:
+		return "middle"
+	case FontDefAnchorEnum_left:
+		return "left"
+	case FontDefAnchorEnum_right:
+		return "right"
+    default:
+        return "???"
+	}
+}
+
+func (s FontDefAnchorEnum) MarshalJSON() ([]byte, error) {
+    return json.Marshal(s.String())
+}
+
+func (s *FontDefAnchorEnum) UnmarshalJSON(data []byte) error {
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
+
+    switch value {
+    case "middle":
+        *s = FontDefAnchorEnum_middle 
+    case "left":
+        *s = FontDefAnchorEnum_left 
+    case "right":
+        *s = FontDefAnchorEnum_right 
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)

@@ -249,8 +249,8 @@ func (d *Drawing) textFormat(fontDef *types.FontDef) string {
 		}
 	}
 
-	txtFormat := fmt.Sprintf("text-anchor:middle;font-family:%s;font-size:%dpx;fill:%s",
-		font, fontDef.Size, fontDef.Color)
+	txtFormat := fmt.Sprintf("text-anchor:%s;font-family:%s;font-size:%dpx;fill:%s",
+		fontDef.Anchor, font, fontDef.Size, fontDef.Color)
 
 	if fontDef.Weight != nil && *fontDef.Weight == types.FontDefWeightEnum_bold {
 		txtFormat += ";font-weight:bold"
@@ -264,7 +264,7 @@ func (d *Drawing) textFormat(fontDef *types.FontDef) string {
 }
 
 // drawText renders text with appropriate positioning and returns the updated y-position
-func (d *Drawing) drawText(text string, currentY, x, width int, fontDef *types.FontDef) int {
+func (d *Drawing) DrawText(text string, x, currentY, width int, fontDef *types.FontDef) int {
 	if text == "" {
 		return currentY
 	}
@@ -278,7 +278,10 @@ func (d *Drawing) drawText(text string, currentY, x, width int, fontDef *types.F
 
 	for _, l := range lines {
 		yTxt := currentY + fontDef.Size
-		xTxt := x + (width / 2)
+		xTxt := x
+		if fontDef.Anchor == types.FontDefAnchorEnum_middle {
+			xTxt = x + (width / 2)
+		}
 		d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
 		currentY += l.Height
 	}
@@ -291,7 +294,7 @@ func (d *Drawing) drawText(text string, currentY, x, width int, fontDef *types.F
 }
 
 // drawText renders text with appropriate positioning and returns the updated X-position
-func (d *Drawing) drawVerticalText(text string, y, currentX, height int, fontDef *types.FontDef) int {
+func (d *Drawing) DrawVerticalText(text string, currentX, y, height int, fontDef *types.FontDef) int {
 	if text == "" {
 		return currentX
 	}
@@ -354,14 +357,14 @@ func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int
 	if format.VerticalTxt {
 		currentX := x + format.Padding
 		currentY := y + (height / 2)
-		currentX = d.drawVerticalText(caption, currentY, currentX, width, &format.FontCaption)
-		currentX = d.drawVerticalText(text1, currentY, currentX, width, &format.FontText1)
-		currentX = d.drawVerticalText(text2, currentY, currentX, width, &format.FontText2)
+		currentX = d.DrawVerticalText(caption, currentX, currentY, width, &format.FontCaption)
+		currentX = d.DrawVerticalText(text1, currentX, currentY, width, &format.FontText1)
+		currentX = d.DrawVerticalText(text2, currentX, currentY, width, &format.FontText2)
 	} else {
 		currentY := y + format.Padding
-		currentY = d.drawText(caption, currentY, x, width, &format.FontCaption)
-		currentY = d.drawText(text1, currentY, x, width, &format.FontText1)
-		currentY = d.drawText(text2, currentY, x, width, &format.FontText2)
+		currentY = d.DrawText(caption, x, currentY, width, &format.FontCaption)
+		currentY = d.DrawText(text1, x, currentY, width, &format.FontText1)
+		currentY = d.DrawText(text2, x, currentY, width, &format.FontText2)
 	}
 	return nil
 }
@@ -381,6 +384,18 @@ func (d *Drawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 
 func (d *Drawing) DrawArrow(x, y, angle int, format types.LineDef) error {
 	// TODO
+	return nil
+}
+
+func (d *Drawing) DrawSolidRect(x, y, width, height int, format types.LineDef) error {
+	attr := ""
+	if format.Color != nil {
+		attr = fmt.Sprintf("fill: %s", *format.Color)
+		if format.Opacity != nil {
+			attr += fmt.Sprintf(";opacity: %f", *format.Opacity)
+		}
+	}
+	d.canvas.Rect(x, y, width, height, attr)
 	return nil
 }
 

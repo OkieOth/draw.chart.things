@@ -110,6 +110,7 @@ class "**FontDef**" as FontDef {
         IntegerType spaceTop
         IntegerType spaceBottom
         IntegerType maxLenBeforeBreak
+        FontDefAnchorEnum anchor
 }
 note top: Defines the font a text
 
@@ -128,6 +129,12 @@ enum "FontDefWeightEnum" as FontDefWeightEnum {
 enum "FontDefAlignedEnum" as FontDefAlignedEnum {
     LEFT
     CENTER
+    RIGHT
+}
+
+enum "FontDefAnchorEnum" as FontDefAnchorEnum {
+    MIDDLE
+    LEFT
     RIGHT
 }
 
@@ -252,6 +259,8 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
 
 
+
+    
     
     
     

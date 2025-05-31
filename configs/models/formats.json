@@ -42,9 +42,12 @@
                 "maxLenBeforeBreak": {
                     "type": "integer",
                     "description": "Maximum length of the text before it breaks"
+                },
+                "anchor": {
+                    "enum": ["middle", "left", "right"]
                 }
             },
-            "required": ["size", "font", "lineHeight", "color", "spaceTop", "spaceBottom", "maxLenBeforeBreak"]
+            "required": ["size", "font", "lineHeight", "color", "spaceTop", "spaceBottom", "maxLenBeforeBreak", "anchor"]
         },
         "LineDef": {
             "type": "object",

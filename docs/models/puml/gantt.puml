@@ -4,54 +4,68 @@ hide empty methods
 hide empty fields
 
 
-class "**Boxes**" as Boxes {
+class "**Gantt**" as Gantt {
         StringType title
-        Layout boxes
-        Map<Format> formats
-        IntegerType globalPadding
-        IntegerType minBoxMargin
-        IntegerType minConnectorMargin
+        Group[] groups
+        Event[] events
+        Map<GanttFormat> formats
 }
-note top: Model to describe the input\nof block diagrams
+note top: Model to describe the input\nof gantt diagrams
 
  
 
-class "**Layout**" as Layout {
-        StringType id
-        StringType caption
-        StringType text1
-        StringType text2
-        Layout[] vertical
-        Layout[] horizontal
-        StringType[] tags
-        Connection[] connections
-        StringType format
+class "**Group**" as Group {
+        StringType name
+        DateTimeType start
+        DateTimeType end
+        Entry[] entries
 }
 
  
 
+class "**Event**" as Event {
+        DateTimeType date
+        StringType text
+        StringType description
+        EntryRef[] entryRefs
+}
+note top: an event that is displayed\nin the gantt chart and\nhas references to specific group\nentries
 
-class "**Format**" as Format {
-        BooleanType verticalTxt
-        FontDef fontCaption
-        FontDef fontText1
-        FontDef fontText2
-        LineDef border
-        FillDef fill
-        IntegerType padding
-        IntegerType boxMargin
+ 
+
+
+class "**GanttFormat**" as GanttFormat {
+        FontDef font
+        FontDef groupFont
+        FontDef entryFont
+        FontDef eventFont
+        FillDef entryFill
 }
 
  
 
-class "**LayoutArray**" as LayoutArray extends List {
+class "**Entry**" as Entry {
+        StringType name
+        DateTimeType start
+        RelativeStart startsAfter
+        DateTimeType end
+        IntegerType duration
+        StringType description
+        StringType[] resources
 }
 
-class "**Connection**" as Connection {
-        StringType destId
-        BooleanType sourceArrow
-        BooleanType destArrow
-        StringType[] tags
+ 
+
+class "**RelativeStart**" as RelativeStart {
+        StringType groupRef
+        StringType entryRef
+}
+
+ 
+
+class "**EntryRef**" as EntryRef {
+        StringType groupRef
+        StringType entryRef
 }
 
  
@@ -122,9 +136,41 @@ note top: Defines the fill of the\nbox
 
     
 
-Boxes  *--  Layout
+Gantt "0" *-- "n" Group
 
-Boxes  *--  Format
+Gantt "0" *-- "n" Event
+
+Gantt  *--  GanttFormat
+
+    
+
+
+
+Group "0" *-- "n" Entry
+
+    
+
+
+
+Event "0" *-- "n" EntryRef
+
+    
+    
+GanttFormat  *--  FontDef
+
+GanttFormat  *--  FontDef
+
+GanttFormat  *--  FontDef
+
+GanttFormat  *--  FontDef
+
+GanttFormat  *--  FillDef
+
+    
+
+
+Entry  *--  RelativeStart
+
 
 
 
@@ -132,34 +178,7 @@ Boxes  *--  Format
     
 
 
-
-
-Layout "0" *-- "n" Layout
-
-
-
-Layout "0" *-- "n" Connection
-
-
     
-    
-
-Format  *--  FontDef
-
-Format  *--  FontDef
-
-Format  *--  FontDef
-
-Format  *--  LineDef
-
-Format  *--  FillDef
-
-
-
-    
-    
-
-
 
 
     

@@ -3,7 +3,7 @@ package sub
 import (
 	"fmt"
 
-	"github.com/okieoth/draw.chart.things/pkg/gantimpl"
+	"github.com/okieoth/draw.chart.things/pkg/ganttimpl"
 
 	"github.com/spf13/cobra"
 )

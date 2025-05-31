@@ -1,0 +1,100 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "GanttDocument",
+    "description": "Model to describe the input of gantt diagrams",
+    "x-domain": "implementation",
+    "type": "object",
+    "properties": {
+        "title": {
+            "type": "string",
+            "description": "Title of the document"
+        },
+
+        "height": {
+            "type": "integer",
+            "description": "Height of the document"
+        },
+        "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date of the document, used to calculate the x position of the boxes"
+        },
+        "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End date of the document, used to calculate the x position of the boxes"
+        },
+        "width": {
+            "type": "integer",
+            "description": "Width of the document"
+        },
+        "globalPadding": {
+            "type": "integer",
+            "description": "Padding used as default over the whole diagram",
+            "default": 5
+        },
+        "minBoxMargin": {
+            "type": "integer",
+            "description": "Minimum margin between boxes",
+            "default": 10
+        },
+        "groups": {
+            "description": "List of groups to be displayed in the gantt chart",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/DocGanttGroup"
+            },
+            "minItems": 1
+        },
+        "events": {
+            "description": "List of events to be displayed in the gantt chart",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/DocGanttEvent"
+            }
+        },
+        "formats": {
+            "$comment": "if the map contains an key 'default' it will be used as default format",
+            "description": "Map of formats available to be used in the boxes",
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/DocGanttFormat"
+            }
+        }
+    },
+    "required": ["title", "groups"],
+    "definitions": {
+        "DocGanttEvent": {
+            "type": "object",
+            "properties": {
+
+            }
+        },
+        "DocGanttGroup": {
+            "type": "object",
+            "properties": {
+
+            }
+        },
+        "DocGanttFormat": {
+            "type": "object",
+            "properties": {
+                "font": {
+                    "$ref": "./formats.json#/definitions/FontDef"
+                },
+                "groupFont": {
+                    "$ref": "./formats.json#/definitions/FontDef"
+                },
+                "entryFont": {
+                    "$ref": "./formats.json#/definitions/FontDef"
+                },
+                "eventFont": {
+                    "$ref": "./formats.json#/definitions/FontDef"
+                },
+                "entryFill": {
+                    "$ref": "./formats.json#/definitions/FillDef"
+                }
+            }
+        }
+   }
+}

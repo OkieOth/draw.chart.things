@@ -136,11 +136,11 @@
         ],
         "singleFileTask": {
           "template": "/project/configs/codegen/templates/golang_types.mako",
-          "destFile": "/project/pkg/gantttypes/gantt.go",
+          "destFile": "/project/pkg/types/gantt.go",
           "templateParams": [
             {
               "name": "modelPackage",
-              "value": "gantttypes"
+              "value": "types"
             }
           ]
         }
@@ -160,6 +160,53 @@
         "singleFileTask": {
           "template": "plantUml",
           "destFile": "/project/docs/models/puml/gantt.puml"
+        }
+      }
+    ]
+  },
+  {
+    "name": "gantt-document",
+    "description": "code gen configuration for gantt document types",
+    "models": [
+      {
+        "schema": "/project/configs/models/gantt_document.json"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "input",
+        "whiteListed": [
+          {
+            "name": "implementation",
+            "type": "domain"
+          }
+        ],
+        "singleFileTask": {
+          "template": "/project/configs/codegen/templates/golang_types.mako",
+          "destFile": "/project/pkg/types/ganttdoc.go",
+          "templateParams": [
+            {
+              "name": "modelPackage",
+              "value": "types"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Plantuml",
+        "whiteListed": [
+          {
+            "name": "input",
+            "type": "domain"
+          },
+          {
+            "name": "base",
+            "type": "domain"
+          }
+        ],
+        "singleFileTask": {
+          "template": "plantUml",
+          "destFile": "/project/docs/models/puml/ganttdoc.puml"
         }
       }
     ]

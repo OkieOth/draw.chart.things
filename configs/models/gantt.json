@@ -29,7 +29,7 @@
             "description": "Map of formats available to be used in the gantt chart",
             "type": "object",
             "additionalProperties": {
-                "$ref": "#/definitions/Format"
+                "$ref": "#/definitions/GanttFormat"
             }
         }
     },
@@ -157,7 +157,7 @@
             },
             "required": ["entryRef"]
         },
-        "Format": {
+        "GanttFormat": {
             "type": "object",
             "properties": {
                 "font": {

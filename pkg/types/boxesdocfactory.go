@@ -10,6 +10,9 @@ type BoxesDrawing interface {
 	Draw(id, caption, text1, text2 string, x, y, width, height int, format BoxFormat) error
 	DrawLine(x1, y1, x2, y2 int, format LineDef) error
 	DrawArrow(x, y, angle int, format LineDef) error
+	DrawSolidRect(x, y, width, height int, format LineDef) error
+	DrawText(text string, x, y, width int, fontDef *FontDef) int
+	DrawVerticalText(text string, currentX, y, height int, fontDef *FontDef) int
 	Done() error
 }
 
