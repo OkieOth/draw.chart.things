@@ -140,16 +140,16 @@ func TestCenteredCoordinates(t *testing.T) {
 		inputFile string
 	}{
 		{
-			inputFile: "../../resources/examples/simple_diamond.yaml",
+			inputFile: "../../resources/examples_boxes/simple_diamond.yaml",
 		},
 		{
-			inputFile: "../../resources/examples/horizontal_diamond.yaml",
+			inputFile: "../../resources/examples_boxes/horizontal_diamond.yaml",
 		},
 		{
-			inputFile: "../../resources/examples/complex_vertical.yaml",
+			inputFile: "../../resources/examples_boxes/complex_vertical.yaml",
 		},
 		{
-			inputFile: "../../resources/examples/complex_horizontal.yaml",
+			inputFile: "../../resources/examples_boxes/complex_horizontal.yaml",
 		},
 	}
 	dc := NewDummyDimensionCalculator(100, 50)
@@ -169,7 +169,7 @@ func TestAreOnTheSameVerticalLevel(t *testing.T) {
 		checkFunc func(t *testing.T, doc *types.BoxesDocument)
 	}{
 		{
-			inputFile: "../../resources/examples/simple_diamond.yaml",
+			inputFile: "../../resources/examples_boxes/simple_diamond.yaml",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.NotNil(t, doc)
 				e1 := doc.Boxes.Vertical.Elems[0]
@@ -193,7 +193,7 @@ func TestAreOnTheSameVerticalLevel(t *testing.T) {
 			},
 		},
 		{
-			inputFile: "../../resources/examples/horizontal_diamond.yaml",
+			inputFile: "../../resources/examples_boxes/horizontal_diamond.yaml",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.NotNil(t, doc)
 				e1 := doc.Boxes.Horizontal.Elems[0]

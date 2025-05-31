@@ -21,7 +21,7 @@ func TestLoadBoxes(t *testing.T) {
 		fileName string
 		verify   testFunc
 	}{{
-		fileName: "../../resources/examples/simple_box.yaml",
+		fileName: "../../resources/examples_boxes/simple_box.yaml",
 		verify: func(t *testing.T, b *types.Boxes) {
 			assert.NotNil(t, b)
 			checkLayout(t, &b.Boxes, "main", 0, 0)
@@ -49,7 +49,7 @@ func TestLoadBoxes(t *testing.T) {
 		},
 	},
 		{
-			fileName: "../../resources/examples/simple_diamond.yaml",
+			fileName: "../../resources/examples_boxes/simple_diamond.yaml",
 			verify: func(t *testing.T, b *types.Boxes) {
 				assert.NotNil(t, b)
 				assert.Len(t, b.Boxes.Horizontal, 0)

@@ -134,7 +134,7 @@ func TestLoadFromFile(t *testing.T) {
 		inputFile string
 	}{
 		{
-			inputFile: "../../resources/examples/complex_horizontal_connected.yaml",
+			inputFile: "../../resources/examples_boxes/complex_horizontal_connected.yaml",
 		},
 	}
 

@@ -15,10 +15,10 @@ func TestDrawBoxesFromFile(t *testing.T) {
 		inputFile string
 	}{
 		// {
-		// 	inputFile:  "../../resources/examples/simple_box.yaml",
+		// 	inputFile:  "../../resources/examples_boxes/simple_box.yaml",
 		// },
 		{
-			inputFile: "../../resources/examples/simple_diamond.yaml",
+			inputFile: "../../resources/examples_boxes/simple_diamond.yaml",
 		}}
 
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()

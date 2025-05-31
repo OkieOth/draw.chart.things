@@ -18,59 +18,59 @@ func TestSimpleSvg(t *testing.T) {
 		outputFile string
 	}{
 		{
-			inputFile:  "../../resources/examples/simple_box.yaml",
+			inputFile:  "../../resources/examples_boxes/simple_box.yaml",
 			outputFile: "../../temp/TestSimpleSvg_box.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/simple_box_nested.yaml",
+			inputFile:  "../../resources/examples_boxes/simple_box_nested.yaml",
 			outputFile: "../../temp/TestSimpleSvg_box_nested.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/simple_box_nested2.yaml",
+			inputFile:  "../../resources/examples_boxes/simple_box_nested2.yaml",
 			outputFile: "../../temp/TestSimpleSvg_box_nested2.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/simple_box_nested3.yaml",
+			inputFile:  "../../resources/examples_boxes/simple_box_nested3.yaml",
 			outputFile: "../../temp/TestSimpleSvg_box_nested3.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/simple_box_nested4.yaml",
+			inputFile:  "../../resources/examples_boxes/simple_box_nested4.yaml",
 			outputFile: "../../temp/TestSimpleSvg_box_nested4.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/simple_box_nested5.yaml",
+			inputFile:  "../../resources/examples_boxes/simple_box_nested5.yaml",
 			outputFile: "../../temp/TestSimpleSvg_box_nested5.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/simple_diamond.yaml",
+			inputFile:  "../../resources/examples_boxes/simple_diamond.yaml",
 			outputFile: "../../temp/TestSimpleSvg_diamond.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/horizontal_diamond.yaml",
+			inputFile:  "../../resources/examples_boxes/horizontal_diamond.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hdiamond.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/complex_vertical.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
 			outputFile: "../../temp/TestSimpleSvg_vcomplex.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/complex_horizontal.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_horizontal.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/complex_complex.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_complex.yaml",
 			outputFile: "../../temp/TestSimpleSvg_ccomplex.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/horizontal_nested_diamond.yaml",
+			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/horizontal_nested_diamond2.yaml",
+			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond2.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx2.svg",
 		},
 		{
-			inputFile:  "../../resources/examples/long_horizontal_vertical.yaml",
+			inputFile:  "../../resources/examples_boxes/long_horizontal_vertical.yaml",
 			outputFile: "../../temp/long_horizontal_vertical.svg",
 		},
 	}
@@ -132,7 +132,7 @@ func TestSvgWithConnections(t *testing.T) {
 
 	tests := []testData{
 		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_01.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_01.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 1, len(doc.Connections))
@@ -140,7 +140,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_02.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_02.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 1, len(doc.Connections))
@@ -148,7 +148,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_03.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_03.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 1, len(doc.Connections))
@@ -156,7 +156,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_04.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_04.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_04.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 5, len(doc.Connections))
@@ -169,7 +169,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/complex_horizontal_connected_05.yaml",
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_05.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_05.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 5, len(doc.Connections))
@@ -182,7 +182,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/long_horizontal_01.yaml",
+			inputFile:  "../../resources/examples_boxes/long_horizontal_01.yaml",
 			outputFile: "../../temp/long_horizontal_01.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 6, len(doc.Connections))
@@ -192,7 +192,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/long_horizontal_02.yaml",
+			inputFile:  "../../resources/examples_boxes/long_horizontal_02.yaml",
 			outputFile: "../../temp/long_horizontal_02.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 6, len(doc.Connections))
@@ -202,7 +202,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/long_vertical_01.yaml",
+			inputFile:  "../../resources/examples_boxes/long_vertical_01.yaml",
 			outputFile: "../../temp/long_vertical_01.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 6, len(doc.Connections))
@@ -216,7 +216,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/long_vertical_02.yaml",
+			inputFile:  "../../resources/examples_boxes/long_vertical_02.yaml",
 			outputFile: "../../temp/long_vertical_02.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 6, len(doc.Connections))
@@ -230,7 +230,7 @@ func TestSvgWithConnections(t *testing.T) {
 			},
 		},
 		{
-			inputFile:  "../../resources/examples/horizontal_nested_diamond2_connected.yaml",
+			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond2_connected.yaml",
 			outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
 			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
 				require.Equal(t, 8, len(doc.Connections))
