@@ -8,14 +8,14 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
-func DrawGanttFromFile(inputFile, outputFile string) error {
+func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Time) error {
 	input, err := types.LoadInputFromFile[types.Gantt](inputFile)
 	if err != nil {
 		return err
 	}
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
 
-	doc, err := InitialLayoutGantt(input, textDimensionCalulator)
+	doc, err := InitialLayoutGantt(input, textDimensionCalulator, startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -26,8 +26,8 @@ func DrawGanttFromFile(inputFile, outputFile string) error {
 	return nil
 }
 
-func InitialLayoutGantt(b *types.Gantt, c types.TextDimensionCalculator) (*types.GanttDocument, error) {
-	doc := types.DocumentFromGantt(b)
+func InitialLayoutGantt(b *types.Gantt, c types.TextDimensionCalculator, startDate, endDate time.Time) (*types.GanttDocument, error) {
+	doc := types.DocumentFromGantt(b, startDate, endDate)
 	// doc.Boxes.X = doc.GlobalPadding
 	// doc.Boxes.Y = doc.GlobalPadding
 	// doc.Boxes.InitDimensions(c, doc.GlobalPadding, doc.MinBoxMargin)
@@ -46,7 +46,7 @@ func InitialLayoutGantt(b *types.Gantt, c types.TextDimensionCalculator) (*types
 	return doc, nil
 }
 
-func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.Drawing, xOffset, yOffset, length int) error {
+func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, xOffset, yOffset, length int) error {
 	if startDate.After(endDate) {
 		return fmt.Errorf("end date must be after start date")
 	}

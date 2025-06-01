@@ -1,7 +1,8 @@
-package types
+package boxes
 
 import (
 	"fmt"
+	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
 type PointToTest struct {
@@ -16,9 +17,9 @@ func getRelevantPoints(p1, p2, other int, verticalBorder bool) []PointToTest {
 	if p1 > p2 {
 		start, end = p2, p1
 	}
-	endVal := end - RasterSize
+	endVal := end - types.RasterSize
 	ret := make([]PointToTest, 0)
-	for i := start + RasterSize; i <= endVal; i += RasterSize {
+	for i := start + types.RasterSize; i <= endVal; i += types.RasterSize {
 		var p PointToTest
 		if verticalBorder {
 			p.X = other
@@ -91,7 +92,7 @@ func (doc *BoxesDocument) checkForLeftColl(relevantPoints *[]PointToTest, curren
 		curMinY := currentElem.Y
 		curMaxY := currentElem.Y + currentElem.Height
 		for i := 0; i < len(*relevantPoints); i++ {
-			x := (*relevantPoints)[i].X - (4 * RasterSize)
+			x := (*relevantPoints)[i].X - (4 * types.RasterSize)
 			y := (*relevantPoints)[i].Y
 			if (x <= curMaxX) && (x > curMinX) && (y >= curMinY) && (y <= curMaxY) {
 				(*relevantPoints)[i].HasCollision = true
@@ -114,7 +115,7 @@ func (doc *BoxesDocument) checkForRightColl(relevantPoints *[]PointToTest, curre
 	if (currentElem != elemToHandle) && doc.ShouldHandle(currentElem) && (!doc.isParent(currentElem, elemToHandle)) {
 		curMinX, curMaxX, curMinY, curMaxY := minMaxXY(currentElem)
 		for i := 0; i < len(*relevantPoints); i++ {
-			x := (*relevantPoints)[i].X + (4 * RasterSize)
+			x := (*relevantPoints)[i].X + (4 * types.RasterSize)
 			y := (*relevantPoints)[i].Y
 			if (x >= curMinX) && (x < curMaxX) && (y >= curMinY) && (y <= curMaxY) {
 				(*relevantPoints)[i].HasCollision = true
@@ -130,7 +131,7 @@ func (doc *BoxesDocument) checkForAboveColl(relevantPoints *[]PointToTest, curre
 		curMinX, curMaxX, curMinY, curMaxY := minMaxXY(currentElem)
 		for i := 0; i < len(*relevantPoints); i++ {
 			x := (*relevantPoints)[i].X
-			y := (*relevantPoints)[i].Y - (4 * RasterSize)
+			y := (*relevantPoints)[i].Y - (4 * types.RasterSize)
 			if (y <= curMaxY) && (y > curMinY) && (x >= curMinX) && (x <= curMaxX) {
 				(*relevantPoints)[i].HasCollision = true
 			}
@@ -145,7 +146,7 @@ func (doc *BoxesDocument) checkForBelowColl(relevantPoints *[]PointToTest, curre
 		curMinX, curMaxX, curMinY, curMaxY := minMaxXY(currentElem)
 		for i := 0; i < len(*relevantPoints); i++ {
 			x := (*relevantPoints)[i].X
-			y := (*relevantPoints)[i].Y + (4 * RasterSize)
+			y := (*relevantPoints)[i].Y + (4 * types.RasterSize)
 			if (y >= curMinY) && (y < curMaxY) && (x >= curMinX) && (x <= curMaxX) {
 				(*relevantPoints)[i].HasCollision = true
 			}
@@ -305,7 +306,7 @@ func (doc *BoxesDocument) connectFromRightBorderToLeftBorder(startElem, destElem
 	endX := destElem.X
 	destY := destElem.LeftYToStart
 	variant := []ConnectionLine{
-		newConnectionLine(startX, startY, startX+RasterSize, startY)}
+		newConnectionLine(startX, startY, startX+types.RasterSize, startY)}
 
 	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem)
 	if err != nil {
@@ -328,7 +329,7 @@ func (doc *BoxesDocument) connectFromLeftBorderToRightBorder(startElem, destElem
 	endX := destElem.X + destElem.Width
 	destY := destElem.RightYToStart
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX-RasterSize, *startY)}
+		newConnectionLine(startX, *startY, startX-types.RasterSize, *startY)}
 	ret, err := doc.goToLeft(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -352,7 +353,7 @@ func (doc *BoxesDocument) connectFromTopBorderToRight(startElem, destElem *Layou
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX+RasterSize, startY)}
+		newConnectionLine(*startX, startY, *startX+types.RasterSize, startY)}
 	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -376,7 +377,7 @@ func (doc *BoxesDocument) connectFromBottomBorderToRight(startElem, destElem *La
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX+RasterSize, startY)}
+		newConnectionLine(*startX, startY, *startX+types.RasterSize, startY)}
 	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -400,7 +401,7 @@ func (doc *BoxesDocument) connectFromTopBorderToLeft(startElem, destElem *Layout
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX-RasterSize, startY)}
+		newConnectionLine(*startX, startY, *startX-types.RasterSize, startY)}
 	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -424,7 +425,7 @@ func (doc *BoxesDocument) connectFromBottomBorderLeft(startElem, destElem *Layou
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX-RasterSize, startY)}
+		newConnectionLine(*startX, startY, *startX-types.RasterSize, startY)}
 
 	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
 	if err != nil {
@@ -447,7 +448,7 @@ func (doc *BoxesDocument) connectFromBottomBorderToTopBorder(startElem, destElem
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY+RasterSize)}
+		newConnectionLine(*startX, startY, *startX, startY+types.RasterSize)}
 	ret, err := doc.goToDown(*endX, destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -470,7 +471,7 @@ func (doc *BoxesDocument) connectFromLeftBorderDown(startElem, destElem *LayoutE
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY+RasterSize)}
+		newConnectionLine(startX, *startY, startX, *startY+types.RasterSize)}
 	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -493,7 +494,7 @@ func (doc *BoxesDocument) connectFromRightBorderDown(startElem, destElem *Layout
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY+RasterSize)}
+		newConnectionLine(startX, *startY, startX, *startY+types.RasterSize)}
 	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -515,7 +516,7 @@ func (doc *BoxesDocument) connectFromTopBorderToBottomBorder(startElem, destElem
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY-RasterSize)}
+		newConnectionLine(*startX, startY, *startX, startY-types.RasterSize)}
 
 	ret, err := doc.goToUp(*endX, destY, variant, startElem, destElem)
 	if err != nil {
@@ -539,7 +540,7 @@ func (doc *BoxesDocument) connectFromLeftBorderUp(startElem, destElem *LayoutEle
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY-RasterSize)}
+		newConnectionLine(startX, *startY, startX, *startY-types.RasterSize)}
 	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -562,7 +563,7 @@ func (doc *BoxesDocument) connectFromRightBorderUp(startElem, destElem *LayoutEl
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX, *startY-RasterSize)}
+		newConnectionLine(startX, *startY, startX, *startY-types.RasterSize)}
 	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -584,7 +585,7 @@ func (doc *BoxesDocument) connectFromBottomBorderToLeftBorder(startElem, destEle
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY+RasterSize)}
+		newConnectionLine(*startX, startY, *startX, startY+types.RasterSize)}
 	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -606,7 +607,7 @@ func (doc *BoxesDocument) connectFromRightBorderToTopBorder(startElem, destElem 
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX+RasterSize, *startY)}
+		newConnectionLine(startX, *startY, startX+types.RasterSize, *startY)}
 	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -628,7 +629,7 @@ func (doc *BoxesDocument) connectFromBottomBorderToRightBorder(startElem, destEl
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY+RasterSize)}
+		newConnectionLine(*startX, startY, *startX, startY+types.RasterSize)}
 	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -650,7 +651,7 @@ func (doc *BoxesDocument) connectFromLeftBorderToTopBorder(startElem, destElem *
 	destY := destElem.Y
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX-RasterSize, *startY)}
+		newConnectionLine(startX, *startY, startX-types.RasterSize, *startY)}
 	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -672,7 +673,7 @@ func (doc *BoxesDocument) connectFromTopBorderToLeftBorder(startElem, destElem *
 	destY := destElem.LeftYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY-RasterSize)}
+		newConnectionLine(*startX, startY, *startX, startY-types.RasterSize)}
 	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -694,7 +695,7 @@ func (doc *BoxesDocument) connectFromRightBorderToBottomBorder(startElem, destEl
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX+RasterSize, *startY)}
+		newConnectionLine(startX, *startY, startX+types.RasterSize, *startY)}
 	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -716,7 +717,7 @@ func (doc *BoxesDocument) connectFromTopBorderToRightBorder(startElem, destElem 
 	destY := destElem.RightYToStart
 
 	variant := []ConnectionLine{
-		newConnectionLine(*startX, startY, *startX, startY-RasterSize)}
+		newConnectionLine(*startX, startY, *startX, startY-types.RasterSize)}
 	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
@@ -738,7 +739,7 @@ func (doc *BoxesDocument) connectFromLeftBorderToBottomBorder(startElem, destEle
 	destY := destElem.Y + destElem.Height
 
 	variant := []ConnectionLine{
-		newConnectionLine(startX, *startY, startX-RasterSize, *startY)}
+		newConnectionLine(startX, *startY, startX-types.RasterSize, *startY)}
 	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)

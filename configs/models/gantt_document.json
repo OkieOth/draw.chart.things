@@ -9,7 +9,11 @@
             "type": "string",
             "description": "Title of the document"
         },
-
+        "groupNameWidth": {
+            "type": "integer",
+            "description": "Width of the group name column, used to calculate the x position of the boxes",
+            "default": 150
+        },
         "height": {
             "type": "integer",
             "description": "Height of the document"
@@ -62,7 +66,7 @@
             }
         }
     },
-    "required": ["title", "groups"],
+    "required": ["title", "groups", "globalPadding", "minBoxMargin"],
     "definitions": {
         "DocGanttEvent": {
             "type": "object",
@@ -73,8 +77,34 @@
         "DocGanttGroup": {
             "type": "object",
             "properties": {
-
-            }
+                "name": {
+                    "description": "Text to name the group",
+                    "type": "string"
+                },
+                "start": {
+                    "description": "Start date when the group is active",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "end": {
+                    "description": "Start date when the group is active",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "entries": {
+                    "description": "List of entries in the group",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DocGanttEntry"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["name"]
+        },
+        "DocGanttEntry": {
+            "type": "object",
+            "properties": {}
         },
         "DocGanttFormat": {
             "type": "object",

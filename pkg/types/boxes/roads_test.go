@@ -1,4 +1,4 @@
-package types_test
+package boxes_test
 
 import (
 	"testing"

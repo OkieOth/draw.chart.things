@@ -1,7 +1,11 @@
-package types
+package boxes
+
+import (
+	"github.com/okieoth/draw.chart.things/pkg/types"
+)
 
 type TextDimensionCalculator interface {
-	Dimensions(txt string, format *FontDef) (width, height int)
+	Dimensions(txt string, format *types.FontDef) (width, height int)
 }
 
 func (l *LayoutElement) incrementX(xOffset int) {
@@ -912,8 +916,8 @@ func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding
 
 func (l *LayoutElement) adjustToRaster(value int) int {
 	if value > 0 {
-		rasterRest := value % (RasterSize * 2)
-		return value + ((RasterSize * 2) - rasterRest)
+		rasterRest := value % (types.RasterSize * 2)
+		return value + ((types.RasterSize * 2) - rasterRest)
 	}
 	return value
 }

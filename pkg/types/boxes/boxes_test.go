@@ -1,11 +1,11 @@
-package types_test
+package boxes_test
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/stretchr/testify/assert"
 )
 
 type testFunc func(t *testing.T, b *types.Boxes)

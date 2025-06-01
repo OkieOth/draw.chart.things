@@ -199,27 +199,27 @@ func splitTxtDimensions(
 }
 
 // Drawing represents an SVG drawing
-type Drawing struct {
+type SvgDrawing struct {
 	canvas                 *svg.SVG
 	txtDimensionCalculator *SvgTextDimensionCalculator
 }
 
 // NewDrawing creates a new SVG drawing
-func NewDrawing(w io.Writer) *Drawing {
-	return &Drawing{
+func NewDrawing(w io.Writer) *SvgDrawing {
+	return &SvgDrawing{
 		canvas:                 svg.New(w),
 		txtDimensionCalculator: NewSvgTextDimensionCalculator(),
 	}
 }
 
 // Start initializes the SVG drawing
-func (d *Drawing) Start(title string, height, width int) error {
+func (d *SvgDrawing) Start(title string, height, width int) error {
 	args := fmt.Sprintf("viewBox=\"0,0,%d,%d\"", width, height)
 	d.canvas.Start(width, height, args)
 	return nil
 }
 
-func (d *Drawing) DrawRaster(width, height, rasterSize int) {
+func (d *SvgDrawing) DrawRaster(width, height, rasterSize int) {
 	for x := rasterSize; x < width; x += rasterSize {
 		for y := rasterSize; y < height; y += rasterSize {
 			// vertical lines
@@ -231,7 +231,7 @@ func (d *Drawing) DrawRaster(width, height, rasterSize int) {
 }
 
 // textFormat generates CSS formatting for text
-func (d *Drawing) textFormat(fontDef *types.FontDef) string {
+func (d *SvgDrawing) textFormat(fontDef *types.FontDef) string {
 	var font string
 
 	switch fontDef.Font {
@@ -264,7 +264,7 @@ func (d *Drawing) textFormat(fontDef *types.FontDef) string {
 }
 
 // drawText renders text with appropriate positioning and returns the updated y-position
-func (d *Drawing) DrawText(text string, x, currentY, width int, fontDef *types.FontDef) int {
+func (d *SvgDrawing) DrawText(text string, x, currentY, width int, fontDef *types.FontDef) int {
 	if text == "" {
 		return currentY
 	}
@@ -294,7 +294,7 @@ func (d *Drawing) DrawText(text string, x, currentY, width int, fontDef *types.F
 }
 
 // drawText renders text with appropriate positioning and returns the updated X-position
-func (d *Drawing) DrawVerticalText(text string, currentX, y, height int, fontDef *types.FontDef) int {
+func (d *SvgDrawing) DrawVerticalText(text string, currentX, y, height int, fontDef *types.FontDef) int {
 	if text == "" {
 		return currentX
 	}
@@ -322,7 +322,7 @@ func (d *Drawing) DrawVerticalText(text string, currentX, y, height int, fontDef
 }
 
 // Draw renders a box with text elements
-func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int, format types.BoxFormat) error {
+func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height int, format types.BoxFormat) error {
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
 
@@ -369,7 +369,7 @@ func (d *Drawing) Draw(id, caption, text1, text2 string, x, y, width, height int
 	return nil
 }
 
-func (d *Drawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
+func (d *SvgDrawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 	color := "black"
 	if (format.Color != nil) && (*format.Color != "") {
 		color = *format.Color
@@ -382,12 +382,12 @@ func (d *Drawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 	return nil
 }
 
-func (d *Drawing) DrawArrow(x, y, angle int, format types.LineDef) error {
+func (d *SvgDrawing) DrawArrow(x, y, angle int, format types.LineDef) error {
 	// TODO
 	return nil
 }
 
-func (d *Drawing) DrawSolidRect(x, y, width, height int, format types.LineDef) error {
+func (d *SvgDrawing) DrawSolidRect(x, y, width, height int, format types.LineDef) error {
 	attr := ""
 	if format.Color != nil {
 		attr = fmt.Sprintf("fill: %s", *format.Color)
@@ -400,7 +400,7 @@ func (d *Drawing) DrawSolidRect(x, y, width, height int, format types.LineDef) e
 }
 
 // Done finalizes the SVG document
-func (d *Drawing) Done() error {
+func (d *SvgDrawing) Done() error {
 	d.canvas.End()
 	return nil
 }

@@ -1,7 +1,8 @@
-package types
+package boxes
 
 import (
 	"fmt"
+	"github.com/okieoth/draw.chart.things/pkg/types"
 	"slices"
 	"sort"
 )
@@ -35,10 +36,10 @@ func (doc *BoxesDocument) roadUp(line *ConnectionLine, startElem *LayoutElement)
 	}
 	if doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil) {
 		// has collision
-		line.EndY += 2 * RasterSize
+		line.EndY += 2 * types.RasterSize
 		return
 	} else {
-		line.EndY -= RasterSize
+		line.EndY -= types.RasterSize
 		doc.roadUp(line, startElem)
 	}
 }
@@ -49,10 +50,10 @@ func (doc *BoxesDocument) roadDown(line *ConnectionLine, startElem *LayoutElemen
 	}
 	if doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil) {
 		// has collision
-		line.EndY -= 2 * RasterSize
+		line.EndY -= 2 * types.RasterSize
 		return
 	} else {
-		line.EndY += RasterSize
+		line.EndY += types.RasterSize
 		doc.roadDown(line, startElem)
 	}
 }
@@ -63,10 +64,10 @@ func (doc *BoxesDocument) roadLeft(line *ConnectionLine, startElem *LayoutElemen
 	}
 	if doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil) {
 		// has collision
-		line.EndX += 2 * RasterSize
+		line.EndX += 2 * types.RasterSize
 		return
 	} else {
-		line.EndX -= RasterSize
+		line.EndX -= types.RasterSize
 		doc.roadLeft(line, startElem)
 	}
 }
@@ -77,10 +78,10 @@ func (doc *BoxesDocument) roadRight(line *ConnectionLine, startElem *LayoutEleme
 	}
 	if doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil) {
 		// has collision
-		line.EndX -= 2 * RasterSize
+		line.EndX -= 2 * types.RasterSize
 		return
 	} else {
-		line.EndX += RasterSize
+		line.EndX += types.RasterSize
 		doc.roadRight(line, startElem)
 	}
 }
@@ -114,7 +115,7 @@ func (doc *BoxesDocument) elemHasParentWithText(elem *LayoutElement) bool {
 
 func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement) {
 	if doc.ShouldHandle(elem) {
-		stepSize := 2 * RasterSize
+		stepSize := 2 * types.RasterSize
 		// draw line from the top x start, till the first collision
 		// check that it has no parent that has a text
 		var upRoad ConnectionLine

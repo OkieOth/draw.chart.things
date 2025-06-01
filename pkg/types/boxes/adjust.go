@@ -1,4 +1,4 @@
-package types
+package boxes
 
 func isInDistance(v1, v2, distance int) (bool, bool, int) {
 	if v1 > v2 {

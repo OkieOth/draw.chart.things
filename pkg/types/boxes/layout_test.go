@@ -1,4 +1,4 @@
-package types_test
+package boxes_test
 
 import (
 	"testing"
@@ -103,7 +103,6 @@ func TestInitDimensions(t *testing.T) {
 	}
 
 	dc := NewDummyDimensionCalculator(100, 50)
-	emptyFormats := map[string]types.BoxFormat{}
 	for _, test := range tests {
 		le := types.ExpInitLayoutElement(&test.layout, emptyFormats)
 		le.InitDimensions(dc, 5, 10)
