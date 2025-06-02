@@ -5,11 +5,12 @@ import (
 
 	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
 	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
 func DrawBoxesFromFile(inputFile, outputFile string) error {
 
-	layout, err := types.LoadInputFromFile[types.Boxes](inputFile)
+	layout, err := types.LoadInputFromFile[boxes.Boxes](inputFile)
 	if err != nil {
 		return err
 	}
@@ -26,7 +27,7 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	return nil
 }
 
-func InitialLayoutBoxes(b *types.Boxes, c types.TextDimensionCalculator) (*types.BoxesDocument, error) {
+func InitialLayoutBoxes(b *boxes.Boxes, c types.TextDimensionCalculator) (*boxes.BoxesDocument, error) {
 	doc := DocumentFromBoxes(b)
 	doc.Boxes.X = doc.GlobalPadding
 	doc.Boxes.Y = doc.GlobalPadding

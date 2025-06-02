@@ -3,7 +3,7 @@ package boxesimpl
 import (
 	"fmt"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
 type Point struct {
@@ -16,15 +16,15 @@ type Line struct {
 	End   Point
 }
 
-func initPossibleVerticalConnectors(doc *types.BoxesDocument) []Line {
+func initPossibleVerticalConnectors(doc *boxes.BoxesDocument) []Line {
 	return nil // TODO
 }
 
-func initPossibleHorizontalConnectors(doc *types.BoxesDocument) []Line {
+func initPossibleHorizontalConnectors(doc *boxes.BoxesDocument) []Line {
 	return nil // TODO
 }
 
-func ConnectBoxex(doc *types.BoxesDocument) error {
+func ConnectBoxex(doc *boxes.BoxesDocument) error {
 	verticalConnectors := initPossibleVerticalConnectors(doc)
 	horizontalConnectors := initPossibleHorizontalConnectors(doc)
 	fmt.Println("verticalConnectors", verticalConnectors)     // Dummy

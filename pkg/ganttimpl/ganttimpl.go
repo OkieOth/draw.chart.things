@@ -6,10 +6,11 @@ import (
 
 	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
 	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/draw.chart.things/pkg/types/gantt"
 )
 
 func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Time) error {
-	input, err := types.LoadInputFromFile[types.Gantt](inputFile)
+	input, err := types.LoadInputFromFile[gantt.Gantt](inputFile)
 	if err != nil {
 		return err
 	}
@@ -26,8 +27,8 @@ func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Tim
 	return nil
 }
 
-func InitialLayoutGantt(b *types.Gantt, c types.TextDimensionCalculator, startDate, endDate time.Time) (*types.GanttDocument, error) {
-	doc := types.DocumentFromGantt(b, startDate, endDate)
+func InitialLayoutGantt(b *gantt.Gantt, c types.TextDimensionCalculator, startDate, endDate time.Time) (*gantt.GanttDocument, error) {
+	doc := gantt.DocumentFromGantt(b, startDate, endDate)
 	// doc.Boxes.X = doc.GlobalPadding
 	// doc.Boxes.Y = doc.GlobalPadding
 	// doc.Boxes.InitDimensions(c, doc.GlobalPadding, doc.MinBoxMargin)

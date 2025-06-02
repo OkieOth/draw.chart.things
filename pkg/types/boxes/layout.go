@@ -4,10 +4,6 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
-type TextDimensionCalculator interface {
-	Dimensions(txt string, format *types.FontDef) (width, height int)
-}
-
 func (l *LayoutElement) incrementX(xOffset int) {
 	l.X += xOffset
 	if l.Vertical != nil {
@@ -730,7 +726,7 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 	return []ConnectionLine{conn}
 }
 
-func (l *LayoutElement) initVertical(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
+func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
 		curX := l.X
 		l.Vertical.X = curX
@@ -789,7 +785,7 @@ func (l *LayoutElement) adjustDimensionsBasedOnNested(width, padding int) {
 	}
 }
 
-func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
+func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
 	if l.Horizontal != nil && len(l.Horizontal.Elems) > 0 {
 		curX := l.X
 		l.Horizontal.X = curX
@@ -836,7 +832,7 @@ func (l *LayoutElement) initHorizontal(c TextDimensionCalculator, yInnerOffset, 
 	}
 }
 
-func (l *LayoutElement) InitDimensions(c TextDimensionCalculator, defaultPadding, defaultBoxMargin int) {
+func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator, defaultPadding, defaultBoxMargin int) {
 	var cW, cH, t1W, t1H, t2W, t2H int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int

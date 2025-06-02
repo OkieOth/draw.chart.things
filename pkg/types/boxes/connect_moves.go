@@ -1,6 +1,9 @@
 package boxes
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/okieoth/draw.chart.things/pkg/types"
+)
 
 func (doc *BoxesDocument) goToLeft(
 	endX, endY int,
@@ -42,7 +45,7 @@ func (doc *BoxesDocument) goToLeft(
 		ret[0] = variant
 		return ret, nil
 	}
-	possibleEnd := x - 2*RasterSize
+	possibleEnd := x - 2*types.RasterSize
 	if (endX == possibleEnd) && (endY == startY) {
 		// reached the end
 		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, possibleEnd, currentLine.StartY)
@@ -57,14 +60,14 @@ func (doc *BoxesDocument) goToLeft(
 		// going straight ahead
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
-		newVariant[currentLineIndex].EndX = x - RasterSize
+		newVariant[currentLineIndex].EndX = x - types.RasterSize
 		newVariants, err := doc.goToLeft(endX, endY, newVariant, startElem, destElem)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
 	}
 	if upwards {
-		newLineEndX, newLineEndY := x, currentLine.EndY-(2*RasterSize)
+		newLineEndX, newLineEndY := x, currentLine.EndY-(2*types.RasterSize)
 		// not already visited this junction ... no circle
 		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
@@ -78,7 +81,7 @@ func (doc *BoxesDocument) goToLeft(
 		}
 	}
 	if downwards {
-		newLineEndX, newLineEndY := x, currentLine.EndY+(2*RasterSize)
+		newLineEndX, newLineEndY := x, currentLine.EndY+(2*types.RasterSize)
 		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
 			newVariant := make([]ConnectionLine, len(variant))
@@ -138,7 +141,7 @@ func (doc *BoxesDocument) goToRight(
 		ret[0] = variant
 		return ret, nil
 	}
-	possibleEnd := x + 2*RasterSize
+	possibleEnd := x + 2*types.RasterSize
 	if (endX == possibleEnd) && (endY == startY) {
 		// reached the end
 		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, possibleEnd, currentLine.StartY)
@@ -153,14 +156,14 @@ func (doc *BoxesDocument) goToRight(
 		// going straight ahead
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
-		newVariant[currentLineIndex].EndX = x + RasterSize
+		newVariant[currentLineIndex].EndX = x + types.RasterSize
 		newVariants, err := doc.goToRight(endX, endY, newVariant, startElem, destElem)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
 	}
 	if upwards {
-		newLineEndX, newLineEndY := x, currentLine.EndY-(2*RasterSize)
+		newLineEndX, newLineEndY := x, currentLine.EndY-(2*types.RasterSize)
 		// not already visited this junction ... no circle
 		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
@@ -174,7 +177,7 @@ func (doc *BoxesDocument) goToRight(
 		}
 	}
 	if downwards {
-		newLineEndX, newLineEndY := x, currentLine.EndY+(2*RasterSize)
+		newLineEndX, newLineEndY := x, currentLine.EndY+(2*types.RasterSize)
 		newLine := newConnectionLine(x, currentLine.EndY, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
 			newVariant := make([]ConnectionLine, len(variant))
@@ -234,7 +237,7 @@ func (doc *BoxesDocument) goToDown(
 		ret[0] = variant
 		return ret, nil
 	}
-	possibleEnd := y + 2*RasterSize
+	possibleEnd := y + 2*types.RasterSize
 	if (endY == possibleEnd) && (endX == startX) {
 		// reached the end
 		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, currentLine.StartX, possibleEnd)
@@ -249,14 +252,14 @@ func (doc *BoxesDocument) goToDown(
 		// going straight ahead
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
-		newVariant[currentLineIndex].EndY = y + RasterSize
+		newVariant[currentLineIndex].EndY = y + types.RasterSize
 		newVariants, err := doc.goToDown(endX, endY, newVariant, startElem, destElem)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
 	}
 	if leftwards {
-		newLineEndX, newLineEndY := currentLine.EndX-(2*RasterSize), y
+		newLineEndX, newLineEndY := currentLine.EndX-(2*types.RasterSize), y
 		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
 			newVariant := make([]ConnectionLine, len(variant))
@@ -269,7 +272,7 @@ func (doc *BoxesDocument) goToDown(
 		}
 	}
 	if rightwards {
-		newLineEndX, newLineEndY := currentLine.EndX+(2*RasterSize), y
+		newLineEndX, newLineEndY := currentLine.EndX+(2*types.RasterSize), y
 		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
 			newVariant := make([]ConnectionLine, len(variant))
@@ -330,7 +333,7 @@ func (doc *BoxesDocument) goToUp(
 		ret[0] = variant
 		return ret, nil
 	}
-	possibleEnd := y - 2*RasterSize
+	possibleEnd := y - 2*types.RasterSize
 	if (endY == possibleEnd) && (endX == startX) {
 		// reached the end
 		changedCurrentLine := newConnectionLine(currentLine.StartX, currentLine.StartY, currentLine.StartX, possibleEnd)
@@ -346,14 +349,14 @@ func (doc *BoxesDocument) goToUp(
 		// going straight ahead
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
-		newVariant[currentLineIndex].EndY = y - RasterSize
+		newVariant[currentLineIndex].EndY = y - types.RasterSize
 		newVariants, err := doc.goToUp(endX, endY, newVariant, startElem, destElem)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
 	}
 	if leftwards {
-		newLineEndX, newLineEndY := currentLine.EndX-(2*RasterSize), y
+		newLineEndX, newLineEndY := currentLine.EndX-(2*types.RasterSize), y
 		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
 			newVariant := make([]ConnectionLine, len(variant))
@@ -366,7 +369,7 @@ func (doc *BoxesDocument) goToUp(
 		}
 	}
 	if rightwards {
-		newLineEndX, newLineEndY := currentLine.EndX+(2*RasterSize), y
+		newLineEndX, newLineEndY := currentLine.EndX+(2*types.RasterSize), y
 		newLine := newConnectionLine(currentLine.EndX, y, newLineEndX, newLineEndY)
 		if !alreadyVisitedJunction(&newLine, variant) {
 			newVariant := make([]ConnectionLine, len(variant))

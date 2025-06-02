@@ -20,7 +20,7 @@ func TestSimpleCalendar(t *testing.T) {
 	require.Nil(t, err)
 	drawing := svgdrawing.NewDrawing(output)
 	drawing.Start("Test Calendar", 2000, 2000)
-	ganttimpl.DrawCalendar(startDate, endDate, drawing, 10, 10, 50)
+	ganttimpl.DrawCalendar(startDate, endDate, drawing, 10, 10, 500)
 	drawing.Done()
 	output.Close()
 

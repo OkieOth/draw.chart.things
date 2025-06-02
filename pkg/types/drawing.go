@@ -1,5 +1,9 @@
 package types
 
+type TextDimensionCalculator interface {
+	Dimensions(txt string, format *FontDef) (width, height int)
+}
+
 type RectWithTextFormat struct {
 
 	// Padding of the box

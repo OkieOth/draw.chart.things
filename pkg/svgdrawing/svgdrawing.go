@@ -322,7 +322,7 @@ func (d *SvgDrawing) DrawVerticalText(text string, currentX, y, height int, font
 }
 
 // Draw renders a box with text elements
-func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height int, format types.BoxFormat) error {
+func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height int, format types.RectWithTextFormat) error {
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
 
