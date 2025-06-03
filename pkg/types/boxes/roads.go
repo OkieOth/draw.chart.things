@@ -2,9 +2,9 @@ package boxes
 
 import (
 	"fmt"
-	"github.com/okieoth/draw.chart.things/pkg/types"
 	"slices"
-	"sort"
+
+	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
 // traces the document and finds all reasonable "roads" to connect
@@ -221,20 +221,12 @@ func (doc *BoxesDocument) remove_checkRoadsToTheLeft(startX, startY, minX int) (
 				}
 			}
 			// sort the junctions, so they are going to the left
-			SortDescending(upJunctions)
-			SortAscending(downJunctions)
+			types.SortDescending(upJunctions)
+			types.SortAscending(downJunctions)
 			return retX, upJunctions, downJunctions, nil
 		}
 	}
 	return 0, nil, nil, fmt.Errorf("no road found to move left for %d,%d", startX, startY)
-}
-
-func SortDescending(a []int) {
-	sort.Sort(sort.Reverse(sort.IntSlice(a)))
-}
-
-func SortAscending(a []int) {
-	sort.IntSlice(a).Sort()
 }
 
 // function goes over the horizontal roads, finds a related road and
@@ -271,8 +263,8 @@ func (doc *BoxesDocument) remove_checkRoadsToTheRight(startX, startY, maxX int) 
 				}
 			}
 			// sort the junctions, so they are going to the left
-			SortDescending(upJunctions)
-			SortAscending(downJunctions)
+			types.SortDescending(upJunctions)
+			types.SortAscending(downJunctions)
 			return retX, upJunctions, downJunctions, nil
 		}
 	}
@@ -314,8 +306,8 @@ func (doc *BoxesDocument) remove_checkRoadsToTheTop(startX, startY, minY int) (i
 				}
 			}
 			// sort the junctions, so they are going to the left
-			SortDescending(leftJunctions)
-			SortAscending(rightJunctions)
+			types.SortDescending(leftJunctions)
+			types.SortAscending(rightJunctions)
 			return retY, leftJunctions, rightJunctions, nil
 		}
 	}
@@ -352,8 +344,8 @@ func (doc *BoxesDocument) remove_checkRoadsToTheBottom(startX, startY, maxY int)
 				}
 			}
 			// sort the junctions, so they are going to the left
-			SortDescending(leftJunctions)
-			SortAscending(rightJunctions)
+			types.SortDescending(leftJunctions)
+			types.SortAscending(rightJunctions)
 			return retY, leftJunctions, rightJunctions, nil
 		}
 	}

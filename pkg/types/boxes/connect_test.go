@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
 func TestGetRelevantPoints(t *testing.T) {
@@ -26,7 +26,7 @@ func TestGetRelevantPoints(t *testing.T) {
 		{50, 20, 100, false, 6, 24, 100, 44, 100},
 	}
 	for _, d := range testData {
-		points := types.GetRelevantPoints(d.v1, d.v2, d.other, d.verticalBorder)
+		points := boxes.GetRelevantPoints(d.v1, d.v2, d.other, d.verticalBorder)
 		assert.Equal(t, d.expected1X, points[0].X)
 		assert.Equal(t, d.expected1Y, points[0].Y)
 		assert.False(t, points[0].HasCollision)

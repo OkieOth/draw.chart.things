@@ -7,6 +7,7 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/ganttimpl"
 	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
 	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/draw.chart.things/pkg/types/gantt"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,7 +30,7 @@ func TestInitialLayoutGantt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g, err := types.LoadInputFromFile[types.Gantt](tt.inputFile)
+			g, err := types.LoadInputFromFile[gantt.Gantt](tt.inputFile)
 
 			doc, err := ganttimpl.InitialLayoutGantt(g, textDimensionCalulator, tt.startDate, tt.endDate)
 			require.Nil(t, err)

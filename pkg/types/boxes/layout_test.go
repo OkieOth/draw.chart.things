@@ -5,7 +5,7 @@ import (
 
 	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
 	"github.com/okieoth/draw.chart.things/pkg/types"
-	"github.com/stretchr/testify/assert"
+	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,93 +25,7 @@ func NewDummyDimensionCalculator(width, height int) *DummyDimensionCalculator {
 	}
 }
 
-// func tested types.InitDimensions
-func TestInitDimensions(t *testing.T) {
-	tests := []struct {
-		layout         types.Layout
-		expectedHeight int
-		expectedWidth  int
-	}{
-		{
-			layout: types.Layout{
-				Caption: "test1",
-			},
-			expectedHeight: 72,
-			expectedWidth:  120,
-		},
-		{
-			// extends "test1" with an additional text1
-			layout: types.Layout{
-				Caption: "test2",
-				Text1:   "test2-text1",
-			},
-			expectedHeight: 128,
-			expectedWidth:  120,
-		},
-		{
-			// extends "test2" with an additional text2
-			layout: types.Layout{
-				Caption: "test3",
-				Text1:   "test3-text1",
-				Text2:   "test3-text2",
-			},
-			expectedHeight: 192,
-			expectedWidth:  120,
-		},
-		{
-			// basic vertical layout test
-			layout: types.Layout{
-				Caption: "test4",
-				Text1:   "test4-text1",
-				Text2:   "test4-text2",
-				Vertical: []types.Layout{
-					{
-						Caption: "test4-V1",
-					},
-					{
-						Caption: "test4-V2",
-					},
-					{
-						Caption: "test3-V3",
-					},
-				},
-			},
-			expectedHeight: 433,
-			expectedWidth:  120,
-		},
-		{
-			// basic horizontal layout test
-			layout: types.Layout{
-				Caption: "test5",
-				Text1:   "test5-text1",
-				Text2:   "test5-text2",
-				Horizontal: []types.Layout{
-					{
-						Caption: "test5-V1",
-					},
-					{
-						Caption: "test5-V2",
-					},
-					{
-						Caption: "test5-V3",
-					},
-				},
-			},
-			expectedHeight: 269,
-			expectedWidth:  390,
-		},
-	}
-
-	dc := NewDummyDimensionCalculator(100, 50)
-	for _, test := range tests {
-		le := types.ExpInitLayoutElement(&test.layout, emptyFormats)
-		le.InitDimensions(dc, 5, 10)
-		assert.Equal(t, test.expectedHeight, le.Height)
-		assert.Equal(t, test.expectedWidth, le.Width)
-	}
-}
-
-func checkLayoutElement(t *testing.T, le *types.LayoutElement, initX, initY int) {
+func checkLayoutElement(t *testing.T, le *boxes.LayoutElement, initX, initY int) {
 	require.GreaterOrEqual(t, le.X, initX)
 	require.GreaterOrEqual(t, le.Y, initY)
 	require.Greater(t, le.CenterX, 0)
@@ -139,21 +53,21 @@ func TestCenteredCoordinates(t *testing.T) {
 		inputFile string
 	}{
 		{
-			inputFile: "../../resources/examples_boxes/simple_diamond.yaml",
+			inputFile: "../../../resources/examples_boxes/simple_diamond.yaml",
 		},
 		{
-			inputFile: "../../resources/examples_boxes/horizontal_diamond.yaml",
+			inputFile: "../../../resources/examples_boxes/horizontal_diamond.yaml",
 		},
 		{
-			inputFile: "../../resources/examples_boxes/complex_vertical.yaml",
+			inputFile: "../../../resources/examples_boxes/complex_vertical.yaml",
 		},
 		{
-			inputFile: "../../resources/examples_boxes/complex_horizontal.yaml",
+			inputFile: "../../../resources/examples_boxes/complex_horizontal.yaml",
 		},
 	}
 	dc := NewDummyDimensionCalculator(100, 50)
 	for _, test := range tests {
-		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err)
 		doc, err := boxesimpl.InitialLayoutBoxes(b, dc)
 		require.Nil(t, err)
@@ -165,11 +79,11 @@ func TestCenteredCoordinates(t *testing.T) {
 func TestAreOnTheSameVerticalLevel(t *testing.T) {
 	tests := []struct {
 		inputFile string
-		checkFunc func(t *testing.T, doc *types.BoxesDocument)
+		checkFunc func(t *testing.T, doc *boxes.BoxesDocument)
 	}{
 		{
-			inputFile: "../../resources/examples_boxes/simple_diamond.yaml",
-			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+			inputFile: "../../../resources/examples_boxes/simple_diamond.yaml",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
 				require.NotNil(t, doc)
 				e1 := doc.Boxes.Vertical.Elems[0]
 				e2 := doc.Boxes.Vertical.Elems[1].Horizontal.Elems[0]
@@ -192,8 +106,8 @@ func TestAreOnTheSameVerticalLevel(t *testing.T) {
 			},
 		},
 		{
-			inputFile: "../../resources/examples_boxes/horizontal_diamond.yaml",
-			checkFunc: func(t *testing.T, doc *types.BoxesDocument) {
+			inputFile: "../../../resources/examples_boxes/horizontal_diamond.yaml",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
 				require.NotNil(t, doc)
 				e1 := doc.Boxes.Horizontal.Elems[0]
 				e2 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0]
@@ -211,7 +125,7 @@ func TestAreOnTheSameVerticalLevel(t *testing.T) {
 	}
 	dc := NewDummyDimensionCalculator(100, 50)
 	for _, test := range tests {
-		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err)
 		doc, err := boxesimpl.InitialLayoutBoxes(b, dc)
 		require.Nil(t, err)

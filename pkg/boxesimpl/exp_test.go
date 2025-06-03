@@ -12,4 +12,3 @@ var ExpFontDefWeightEnum_normal types.FontDefWeightEnum = types.FontDefWeightEnu
 var ExpFontDefWeightEnum_bold types.FontDefWeightEnum = types.FontDefWeightEnum_bold
 var ExpFontDefAlignedEnum_center types.FontDefAlignedEnum = types.FontDefAlignedEnum_center
 var ExpFontDefAlignedEnum_left types.FontDefAlignedEnum = types.FontDefAlignedEnum_left
-var GetRelevantPoints = getRelevantPoints

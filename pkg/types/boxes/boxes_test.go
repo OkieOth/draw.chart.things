@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type testFunc func(t *testing.T, b *types.Boxes)
+type testFunc func(t *testing.T, b *boxes.Boxes)
 
-func checkLayout(t *testing.T, l *types.Layout, id string, horizontalLen, verticalLen int) {
+func checkLayout(t *testing.T, l *boxes.Layout, id string, horizontalLen, verticalLen int) {
 	assert.Len(t, l.Horizontal, horizontalLen)
 	assert.Len(t, l.Vertical, verticalLen)
 	assert.Equal(t, id, l.Id)
@@ -21,8 +21,8 @@ func TestLoadBoxes(t *testing.T) {
 		fileName string
 		verify   testFunc
 	}{{
-		fileName: "../../resources/examples_boxes/simple_box.yaml",
-		verify: func(t *testing.T, b *types.Boxes) {
+		fileName: "../../../resources/examples_boxes/simple_box.yaml",
+		verify: func(t *testing.T, b *boxes.Boxes) {
 			assert.NotNil(t, b)
 			checkLayout(t, &b.Boxes, "main", 0, 0)
 
@@ -49,8 +49,8 @@ func TestLoadBoxes(t *testing.T) {
 		},
 	},
 		{
-			fileName: "../../resources/examples_boxes/simple_diamond.yaml",
-			verify: func(t *testing.T, b *types.Boxes) {
+			fileName: "../../../resources/examples_boxes/simple_diamond.yaml",
+			verify: func(t *testing.T, b *boxes.Boxes) {
 				assert.NotNil(t, b)
 				assert.Len(t, b.Boxes.Horizontal, 0)
 				assert.Len(t, b.Boxes.Vertical, 3)
@@ -66,7 +66,7 @@ func TestLoadBoxes(t *testing.T) {
 		}}
 
 	for _, test := range tests {
-		b, err := types.LoadInputFromFile[types.Boxes](test.fileName)
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.fileName)
 		assert.Nil(t, err)
 		test.verify(t, b)
 	}

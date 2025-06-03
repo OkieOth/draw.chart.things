@@ -3,77 +3,79 @@ package boxesimpl_test
 import (
 	"testing"
 
+	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
 	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 	"github.com/stretchr/testify/require"
 )
 
 func TestInitLayoutElement(t *testing.T) {
-	bf2 := types.BoxFormat{
+	bf2 := boxes.BoxFormat{
 		Padding: 0,
 		FontCaption: types.FontDef{
 			Size:       12,
-			Type:       &types.ExpFontDefTypeEnum_normal,
-			Weight:     &types.ExpFontDefWeightEnum_bold,
+			Type:       &boxesimpl.ExpFontDefTypeEnum_normal,
+			Weight:     &boxesimpl.ExpFontDefWeightEnum_bold,
 			LineHeight: 2.0,
 			Color:      "red",
-			Aligned:    &types.ExpFontDefAlignedEnum_center,
+			Aligned:    &boxesimpl.ExpFontDefAlignedEnum_center,
 		},
 		FontText1: types.FontDef{
 			Size:       10,
-			Type:       &types.ExpFontDefTypeEnum_normal,
-			Weight:     &types.ExpFontDefWeightEnum_normal,
+			Type:       &boxesimpl.ExpFontDefTypeEnum_normal,
+			Weight:     &boxesimpl.ExpFontDefWeightEnum_normal,
 			LineHeight: 1.5,
 			Color:      "black",
-			Aligned:    &types.ExpFontDefAlignedEnum_left,
+			Aligned:    &boxesimpl.ExpFontDefAlignedEnum_left,
 		},
 		FontText2: types.FontDef{
 			Size:       10,
-			Type:       &types.ExpFontDefTypeEnum_normal,
-			Weight:     &types.ExpFontDefWeightEnum_normal,
+			Type:       &boxesimpl.ExpFontDefTypeEnum_normal,
+			Weight:     &boxesimpl.ExpFontDefWeightEnum_normal,
 			LineHeight: 1.5,
 			Color:      "black",
-			Aligned:    &types.ExpFontDefAlignedEnum_left,
+			Aligned:    &boxesimpl.ExpFontDefAlignedEnum_left,
 		},
 	}
 	tests := []struct {
 		name         string
-		layout       types.Layout
-		inputFormats map[string]types.BoxFormat
-		expected     types.LayoutElement
+		layout       boxes.Layout
+		inputFormats map[string]boxes.BoxFormat
+		expected     boxes.LayoutElement
 	}{
 		{
 			name: "Test with empty layout and formats",
-			layout: types.Layout{
+			layout: boxes.Layout{
 				Id: "test1",
 			},
-			inputFormats: map[string]types.BoxFormat{},
-			expected: types.LayoutElement{
+			inputFormats: map[string]boxes.BoxFormat{},
+			expected: boxes.LayoutElement{
 				Id:     "test1",
 				Format: nil,
 			},
 		},
 		{
 			name: "Test with layout and formats",
-			layout: types.Layout{
+			layout: boxes.Layout{
 				Id:      "test2",
 				Caption: "Test Caption",
 				Text1:   "Test Text1",
 				Text2:   "Test Text2",
 				Tags:    []string{"tag1"},
 			},
-			inputFormats: map[string]types.BoxFormat{
+			inputFormats: map[string]boxes.BoxFormat{
 				"tag1": {
 					FontCaption: types.FontDef{
 						Size:       12,
-						Type:       &types.ExpFontDefTypeEnum_normal,
-						Weight:     &types.ExpFontDefWeightEnum_bold,
+						Type:       &boxesimpl.ExpFontDefTypeEnum_normal,
+						Weight:     &boxesimpl.ExpFontDefWeightEnum_bold,
 						LineHeight: 2.0,
 						Color:      "red",
-						Aligned:    &types.ExpFontDefAlignedEnum_center,
+						Aligned:    &boxesimpl.ExpFontDefAlignedEnum_center,
 					},
 				},
 			},
-			expected: types.LayoutElement{
+			expected: boxes.LayoutElement{
 				Id:      "test2",
 				Caption: "Test Caption",
 				Text1:   "Test Text1",
@@ -85,7 +87,7 @@ func TestInitLayoutElement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := types.ExpInitLayoutElement(&tt.layout, tt.inputFormats)
+			result := boxesimpl.ExpInitLayoutElement(&tt.layout, tt.inputFormats)
 			if result.Id != tt.expected.Id {
 				t.Errorf("expected Id %v, got %v", tt.expected.Id, result.Id)
 			}
@@ -139,7 +141,7 @@ func TestLoadFromFile(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		b, err := types.LoadInputFromFile[types.Boxes](test.inputFile)
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err)
 		require.NotNil(t, b)
 		require.Equal(t, 0, len(b.Boxes.Connections))
