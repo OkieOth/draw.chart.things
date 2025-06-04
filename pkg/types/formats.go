@@ -5,44 +5,50 @@ package types
 // created by yacg (template: golang_types.mako v1.1.0)
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
+    "encoding/json"
+    "errors"
+    "fmt"
 )
 
+
 /* Defines the font a text
- */
+*/
 type FontDef struct {
-	Size int `yaml:"size"`
 
-	Font string `yaml:"font"`
+    Size int  `yaml:"size"`
 
-	Type *FontDefTypeEnum `yaml:"type,omitempty"`
+    Font string  `yaml:"font"`
 
-	Weight *FontDefWeightEnum `yaml:"weight,omitempty"`
+    Type *FontDefTypeEnum  `yaml:"type,omitempty"`
 
-	// Line height of the box
-	LineHeight float32 `yaml:"lineHeight"`
+    Weight *FontDefWeightEnum  `yaml:"weight,omitempty"`
 
-	Color string `yaml:"color"`
+    // Line height of the box
+    LineHeight float32  `yaml:"lineHeight"`
 
-	Aligned *FontDefAlignedEnum `yaml:"aligned,omitempty"`
+    Color string  `yaml:"color"`
 
-	SpaceTop int `yaml:"spaceTop"`
+    Aligned *FontDefAlignedEnum  `yaml:"aligned,omitempty"`
 
-	SpaceBottom int `yaml:"spaceBottom"`
+    SpaceTop int  `yaml:"spaceTop"`
 
-	// Maximum length of the text before it breaks
-	MaxLenBeforeBreak int `yaml:"maxLenBeforeBreak"`
+    SpaceBottom int  `yaml:"spaceBottom"`
 
-	Anchor FontDefAnchorEnum `yaml:"anchor"`
+    // Maximum length of the text before it breaks
+    MaxLenBeforeBreak int  `yaml:"maxLenBeforeBreak"`
+
+    Anchor FontDefAnchorEnum  `yaml:"anchor"`
 }
+
+
+
+
 
 type FontDefTypeEnum int64
 
 const (
-	FontDefTypeEnum_normal FontDefTypeEnum = iota
-	FontDefTypeEnum_italic
+    FontDefTypeEnum_normal FontDefTypeEnum = iota
+        FontDefTypeEnum_italic
 )
 
 func (s FontDefTypeEnum) String() string {
@@ -51,38 +57,41 @@ func (s FontDefTypeEnum) String() string {
 		return "normal"
 	case FontDefTypeEnum_italic:
 		return "italic"
-	default:
-		return "???"
+    default:
+        return "???"
 	}
 }
 
 func (s FontDefTypeEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+    return json.Marshal(s.String())
 }
 
 func (s *FontDefTypeEnum) UnmarshalJSON(data []byte) error {
-	var value string
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
 
-	switch value {
-	case "normal":
-		*s = FontDefTypeEnum_normal
-	case "italic":
-		*s = FontDefTypeEnum_italic
-	default:
+    switch value {
+    case "normal":
+        *s = FontDefTypeEnum_normal 
+    case "italic":
+        *s = FontDefTypeEnum_italic 
+    default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
-	}
-	return nil
+    }
+    return nil
 }
+
+
+
 
 type FontDefWeightEnum int64
 
 const (
-	FontDefWeightEnum_normal FontDefWeightEnum = iota
-	FontDefWeightEnum_bold
+    FontDefWeightEnum_normal FontDefWeightEnum = iota
+        FontDefWeightEnum_bold
 )
 
 func (s FontDefWeightEnum) String() string {
@@ -91,39 +100,42 @@ func (s FontDefWeightEnum) String() string {
 		return "normal"
 	case FontDefWeightEnum_bold:
 		return "bold"
-	default:
-		return "???"
+    default:
+        return "???"
 	}
 }
 
 func (s FontDefWeightEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+    return json.Marshal(s.String())
 }
 
 func (s *FontDefWeightEnum) UnmarshalJSON(data []byte) error {
-	var value string
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
 
-	switch value {
-	case "normal":
-		*s = FontDefWeightEnum_normal
-	case "bold":
-		*s = FontDefWeightEnum_bold
-	default:
+    switch value {
+    case "normal":
+        *s = FontDefWeightEnum_normal 
+    case "bold":
+        *s = FontDefWeightEnum_bold 
+    default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
-	}
-	return nil
+    }
+    return nil
 }
+
+
+
 
 type FontDefAlignedEnum int64
 
 const (
-	FontDefAlignedEnum_left FontDefAlignedEnum = iota
-	FontDefAlignedEnum_center
-	FontDefAlignedEnum_right
+    FontDefAlignedEnum_left FontDefAlignedEnum = iota
+        FontDefAlignedEnum_center
+        FontDefAlignedEnum_right
 )
 
 func (s FontDefAlignedEnum) String() string {
@@ -134,41 +146,44 @@ func (s FontDefAlignedEnum) String() string {
 		return "center"
 	case FontDefAlignedEnum_right:
 		return "right"
-	default:
-		return "???"
+    default:
+        return "???"
 	}
 }
 
 func (s FontDefAlignedEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+    return json.Marshal(s.String())
 }
 
 func (s *FontDefAlignedEnum) UnmarshalJSON(data []byte) error {
-	var value string
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
 
-	switch value {
-	case "left":
-		*s = FontDefAlignedEnum_left
-	case "center":
-		*s = FontDefAlignedEnum_center
-	case "right":
-		*s = FontDefAlignedEnum_right
-	default:
+    switch value {
+    case "left":
+        *s = FontDefAlignedEnum_left 
+    case "center":
+        *s = FontDefAlignedEnum_center 
+    case "right":
+        *s = FontDefAlignedEnum_right 
+    default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
-	}
-	return nil
+    }
+    return nil
 }
+
+
+
 
 type FontDefAnchorEnum int64
 
 const (
-	FontDefAnchorEnum_middle FontDefAnchorEnum = iota
-	FontDefAnchorEnum_left
-	FontDefAnchorEnum_right
+    FontDefAnchorEnum_middle FontDefAnchorEnum = iota
+        FontDefAnchorEnum_left
+        FontDefAnchorEnum_right
 )
 
 func (s FontDefAnchorEnum) String() string {
@@ -179,53 +194,62 @@ func (s FontDefAnchorEnum) String() string {
 		return "left"
 	case FontDefAnchorEnum_right:
 		return "right"
-	default:
-		return "???"
+    default:
+        return "???"
 	}
 }
 
 func (s FontDefAnchorEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+    return json.Marshal(s.String())
 }
 
 func (s *FontDefAnchorEnum) UnmarshalJSON(data []byte) error {
-	var value string
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
 
-	switch value {
-	case "middle":
-		*s = FontDefAnchorEnum_middle
-	case "left":
-		*s = FontDefAnchorEnum_left
-	case "right":
-		*s = FontDefAnchorEnum_right
-	default:
+    switch value {
+    case "middle":
+        *s = FontDefAnchorEnum_middle 
+    case "left":
+        *s = FontDefAnchorEnum_left 
+    case "right":
+        *s = FontDefAnchorEnum_right 
+    default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
-	}
-	return nil
+    }
+    return nil
 }
+
+
+
+
 
 /* Defines how the border of the box looks like
- */
+*/
 type LineDef struct {
-	Width *int `yaml:"width,omitempty"`
 
-	Style *LineDefStyleEnum `yaml:"style,omitempty"`
+    Width *int  `yaml:"width,omitempty"`
 
-	Color *string `yaml:"color,omitempty"`
+    Style *LineDefStyleEnum  `yaml:"style,omitempty"`
 
-	Opacity *float64 `yaml:"opacity,omitempty"`
+    Color *string  `yaml:"color,omitempty"`
+
+    Opacity *float64  `yaml:"opacity,omitempty"`
 }
+
+
+
+
 
 type LineDefStyleEnum int64
 
 const (
-	LineDefStyleEnum_solid LineDefStyleEnum = iota
-	LineDefStyleEnum_dotted
-	LineDefStyleEnum_dashed
+    LineDefStyleEnum_solid LineDefStyleEnum = iota
+        LineDefStyleEnum_dotted
+        LineDefStyleEnum_dashed
 )
 
 func (s LineDefStyleEnum) String() string {
@@ -236,39 +260,49 @@ func (s LineDefStyleEnum) String() string {
 		return "dotted"
 	case LineDefStyleEnum_dashed:
 		return "dashed"
-	default:
-		return "???"
+    default:
+        return "???"
 	}
 }
 
 func (s LineDefStyleEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+    return json.Marshal(s.String())
 }
 
 func (s *LineDefStyleEnum) UnmarshalJSON(data []byte) error {
-	var value string
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
+    var value string
+    if err := json.Unmarshal(data, &value); err != nil {
+        return err
+    }
 
-	switch value {
-	case "solid":
-		*s = LineDefStyleEnum_solid
-	case "dotted":
-		*s = LineDefStyleEnum_dotted
-	case "dashed":
-		*s = LineDefStyleEnum_dashed
-	default:
+    switch value {
+    case "solid":
+        *s = LineDefStyleEnum_solid 
+    case "dotted":
+        *s = LineDefStyleEnum_dotted 
+    case "dashed":
+        *s = LineDefStyleEnum_dashed 
+    default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
-	}
-	return nil
+    }
+    return nil
 }
+
+
+
+
 
 /* Defines the fill of the box
- */
+*/
 type FillDef struct {
-	Color *string `yaml:"color,omitempty"`
 
-	Opacity *float64 `yaml:"opacity,omitempty"`
+    Color *string  `yaml:"color,omitempty"`
+
+    Opacity *float64  `yaml:"opacity,omitempty"`
 }
+
+
+
+
+

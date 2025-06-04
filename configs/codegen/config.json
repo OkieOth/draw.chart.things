@@ -47,7 +47,15 @@
             {
               "name": "modelPackage",
               "value": "boxes"
-            }
+            },
+            {
+              "name": "baseModelPackage",
+              "value": "types"
+            },
+            {
+              "name": "baseModelPackageImport",
+              "value": "github.com/okieoth/draw.chart.things/pkg/types"
+            }            
           ]
         }
       },
@@ -94,7 +102,15 @@
             {
               "name": "modelPackage",
               "value": "boxes"
-            }
+            },
+            {
+              "name": "baseModelPackage",
+              "value": "types"
+            },
+            {
+              "name": "baseModelPackageImport",
+              "value": "github.com/okieoth/draw.chart.things/pkg/types"
+            }            
           ]
         }
       },
@@ -141,7 +157,15 @@
             {
               "name": "modelPackage",
               "value": "gantt"
-            }
+            },
+            {
+              "name": "baseModelPackage",
+              "value": "types"
+            },
+            {
+              "name": "baseModelPackageImport",
+              "value": "github.com/okieoth/draw.chart.things/pkg/types"
+            }            
           ]
         }
       },
@@ -188,7 +212,15 @@
             {
               "name": "modelPackage",
               "value": "gantt"
-            }
+            },
+            {
+              "name": "baseModelPackage",
+              "value": "types"
+            },
+            {
+              "name": "baseModelPackageImport",
+              "value": "github.com/okieoth/draw.chart.things/pkg/types"
+            }            
           ]
         }
       },

@@ -9,6 +9,8 @@
     templateVersion = '1.1.0'
 
     packageName = templateParameters.get('modelPackage','<<PLEASE SET modelPackage TEMPLATE PARAM>>')
+    basePackageName = templateParameters.get('baseModelPackage','<<PLEASE SET baseModelPackage TEMPLATE PARAM>>')
+    basePackageImport = templateParameters.get('baseModelPackageImport','')
     jsonTypesPackage = templateParameters.get('jsonTypesPackage','<<PLEASE SET jsonTypesPackage TEMPLATE PARAM>>')
     jsonSerialization = templateParameters.get('jsonSerialization',False)
 
@@ -65,7 +67,10 @@
         elif isinstance(typeObj, model.DictionaryType):
             ret = 'map[string]{}'.format(printGolangType(typeObj.valueType, False, True, 0, False))
         elif isinstance(typeObj, model.ComplexType):
-            ret = typeObj.name
+            if typeObj.domain == "base":
+                ret = "{}.{}".format(basePackageName, typeObj.name)
+            else:
+                ret = typeObj.name
         else:
             ret = '???'
 
@@ -145,6 +150,9 @@ import (
     "encoding/json"
     "errors"
     "fmt"
+% endif
+% if basePackageImport != "":
+    "${basePackageImport}"
 % endif
 )
 
