@@ -42,11 +42,11 @@
         ],
         "singleFileTask": {
           "template": "/project/configs/codegen/templates/golang_types.mako",
-          "destFile": "/project/pkg/types/boxes.go",
+          "destFile": "/project/pkg/types/boxes/boxes.go",
           "templateParams": [
             {
               "name": "modelPackage",
-              "value": "types"
+              "value": "boxes"
             }
           ]
         }
@@ -89,11 +89,11 @@
         ],
         "singleFileTask": {
           "template": "/project/configs/codegen/templates/golang_types.mako",
-          "destFile": "/project/pkg/types/boxesdoc.go",
+          "destFile": "/project/pkg/types/boxes/boxesdoc.go",
           "templateParams": [
             {
               "name": "modelPackage",
-              "value": "types"
+              "value": "boxes"
             }
           ]
         }
@@ -136,11 +136,11 @@
         ],
         "singleFileTask": {
           "template": "/project/configs/codegen/templates/golang_types.mako",
-          "destFile": "/project/pkg/types/gantt.go",
+          "destFile": "/project/pkg/types/gantt/gantt.go",
           "templateParams": [
             {
               "name": "modelPackage",
-              "value": "types"
+              "value": "gantt"
             }
           ]
         }
@@ -183,11 +183,11 @@
         ],
         "singleFileTask": {
           "template": "/project/configs/codegen/templates/golang_types.mako",
-          "destFile": "/project/pkg/types/ganttdoc.go",
+          "destFile": "/project/pkg/types/gantt/ganttdoc.go",
           "templateParams": [
             {
               "name": "modelPackage",
-              "value": "types"
+              "value": "gantt"
             }
           ]
         }

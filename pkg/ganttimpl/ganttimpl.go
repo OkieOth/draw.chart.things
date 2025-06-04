@@ -2,6 +2,7 @@ package ganttimpl
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
@@ -20,11 +21,42 @@ func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Tim
 	if err != nil {
 		return err
 	}
-	fmt.Println(doc) // Dummy
-	// TODO: Implement this
+	output, err := os.Create(outputFile)
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %w", err)
+	}
+	defer output.Close()
+	drawing := svgdrawing.NewDrawing(output)
 
-	// TODO: Draw the boxes
+	groupCaptionWidth := 100 // TODO - calculate based on group names
+	defaultFormat := doc.Formats["default"]
+	groupHeight := calcGroupHeight(doc, textDimensionCalulator, defaultFormat.GroupFont)
+
+	drawing.Start(doc.Title, groupHeight+50, 2000)
+	DrawCalendar(startDate, endDate, drawing, groupCaptionWidth, 10, groupHeight)
+	drawGroupLines(&doc, drawing)
+	// TODO - draw group caption
+	// TODO - draw tasks
+	// TODO - draw events
+	drawing.Done()
+	output.Close()
+
 	return nil
+}
+
+func calcGroupHeight(doc *gantt.GanttDocument, c types.TextDimensionCalculator, format *types.FontDef) int {
+	if len(doc.Groups) == 0 {
+		return 0
+	}
+	height := 0
+	for i, group := range doc.Groups {
+		if group.Name != "" {
+			_, h := c.Dimensions(group.Name, format)
+			height += h + (2 * doc.GlobalPadding)
+			//doc.Groups[i].
+		}
+	}
+	return height // add padding for aesthetics
 }
 
 func InitialLayoutGantt(b *gantt.Gantt, c types.TextDimensionCalculator, startDate, endDate time.Time) (*gantt.GanttDocument, error) {
@@ -47,9 +79,9 @@ func InitialLayoutGantt(b *gantt.Gantt, c types.TextDimensionCalculator, startDa
 	return doc, nil
 }
 
-func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, xOffset, yOffset, length int) error {
+func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, xOffset, yOffset, length int) (int, int, error) {
 	if startDate.After(endDate) {
-		return fmt.Errorf("end date must be after start date")
+		return 0, 0, fmt.Errorf("end date must be after start date")
 	}
 	yStart := yOffset
 	currentX := xOffset
@@ -109,9 +141,12 @@ func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, 
 	}
 	drawing.DrawLine(currentX, yStart+monthStartOffset, currentX, yStart+monthStartOffset+length, lineFormat)
 	width := currentX - lastMonthX
+	height := yStart + monthStartOffset + length + 10
 	if width > 10 {
 		monthStr := endDate.Format("01-2006")
 		drawing.DrawText(monthStr, lastMonthX, yStart+monthStartOffset-20, width, &monthFormat)
+		drawing.DrawText(monthStr, lastMonthX, height, width, &monthFormat)
+		height += (monthFormat.Size + types.GlobalMinBoxMargin) // add space for month label
 	}
-	return nil
+	return width, height, nil
 }

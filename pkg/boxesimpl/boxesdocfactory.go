@@ -32,91 +32,6 @@ func initConnections(l []boxes.Connection) []boxes.LayoutElemConnection {
 	return ret
 }
 
-func InitFontDef(l *types.FontDef, defaultFont string, defaultSize int, defaultBold, defaultItalic bool, spaceTop int) types.FontDef {
-	var f types.FontDef
-	typeNormal := types.FontDefTypeEnum_normal
-	typeItalic := types.FontDefTypeEnum_italic
-	weightNormal := types.FontDefWeightEnum_normal
-	weightBold := types.FontDefWeightEnum_bold
-	alignedLeft := types.FontDefAlignedEnum_left
-
-	if l != nil {
-		if l.Font != "" {
-			f.Font = l.Font
-		} else {
-			f.Font = defaultFont
-		}
-		if l.Size != 0 {
-			f.Size = l.Size
-		} else {
-			f.Size = defaultSize
-		}
-		if l.Type != nil {
-			f.Type = l.Type
-		} else {
-			if defaultItalic {
-				f.Type = &typeItalic
-			} else {
-				f.Type = &typeNormal
-			}
-		}
-		if l.Weight != nil {
-			f.Weight = l.Weight
-		} else {
-			if defaultBold {
-				f.Weight = &weightBold
-			} else {
-				f.Weight = &weightNormal
-			}
-		}
-		if l.LineHeight != 0 {
-			f.LineHeight = l.LineHeight
-		} else {
-			f.LineHeight = 1.5
-		}
-		if l.Color != "" {
-			f.Color = l.Color
-		} else {
-			f.Color = "black"
-		}
-		if l.Aligned != nil {
-			f.Aligned = l.Aligned
-		} else {
-			f.Aligned = &alignedLeft
-		}
-		f.SpaceTop = l.SpaceTop
-		if f.SpaceTop == 0 {
-			f.SpaceTop = spaceTop
-		}
-		f.SpaceBottom = l.SpaceBottom
-		if l.MaxLenBeforeBreak != 0 {
-			f.MaxLenBeforeBreak = l.MaxLenBeforeBreak
-		} else {
-			f.MaxLenBeforeBreak = 90
-		}
-	} else {
-		f.Size = defaultSize
-		if defaultItalic {
-			f.Type = &typeItalic
-		} else {
-			f.Type = &typeNormal
-		}
-		f.Font = defaultFont
-		if defaultBold {
-			f.Weight = &weightBold
-		} else {
-			f.Weight = &weightNormal
-		}
-		f.LineHeight = 1.5
-		f.Color = "black"
-		f.Aligned = &alignedLeft
-		f.SpaceTop = spaceTop
-		f.SpaceBottom = 0
-		f.MaxLenBeforeBreak = 90
-	}
-	return f
-}
-
 func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	var border *types.LineDef
 	var fill *types.FillDef
@@ -147,9 +62,9 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	return boxes.BoxFormat{
 		Padding:      padding,
 		MinBoxMargin: boxMargin,
-		FontCaption:  InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
-		FontText1:    InitFontDef(fontText1, "serif", 8, false, false, 10),
-		FontText2:    InitFontDef(fontText2, "monospace", 8, false, true, 10),
+		FontCaption:  types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
+		FontText1:    types.InitFontDef(fontText1, "serif", 8, false, false, 10),
+		FontText2:    types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
 		Border:       border,
 		Fill:         fill,
 		VerticalTxt:  verticalTxt,
@@ -160,9 +75,9 @@ func getDefaultFormat() boxes.BoxFormat {
 	return boxes.BoxFormat{
 		Padding:      types.GlobalPadding,
 		MinBoxMargin: types.GlobalMinBoxMargin,
-		FontCaption:  InitFontDef(nil, "sans-serif", 10, true, false, 0),
-		FontText1:    InitFontDef(nil, "serif", 8, false, false, 10),
-		FontText2:    InitFontDef(nil, "monospace", 8, false, true, 10),
+		FontCaption:  types.InitFontDef(nil, "sans-serif", 10, true, false, 0),
+		FontText1:    types.InitFontDef(nil, "serif", 8, false, false, 10),
+		FontText2:    types.InitFontDef(nil, "monospace", 8, false, true, 10),
 	}
 }
 

@@ -17,11 +17,40 @@ func CreateDocGanttGroup(gg *Group, startDate, endDate time.Time) *DocGanttGroup
 	return g
 }
 
-func DocumentFromGantt(g *Gantt, startDate, endDate time.Time) *GanttDocument {
-	doc := NewGanttDocument()
-	doc.Title = g.Title
-	doc.GlobalPadding = types.GlobalPadding
-	for _, group := range g.Groups {
+func (d *GanttDocument) initFormats(formats map[string]GanttFormat) {
+	for name, format := range formats {
+		f := DocGanttFormat{
+			Font:      format.Font,
+			GroupFont: format.GroupFont,
+			EntryFont: format.EntryFont,
+			EventFont: format.EventFont,
+			EntryFill: format.EntryFill,
+		}
+		d.Formats[name] = f
+	}
+	if _, exists := d.Formats["default"]; !exists {
+		font := types.InitFontDef(nil, "sans-serif", 10, true, false, 0)
+		fg := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
+		fentry := types.InitFontDef(nil, "sans-serif", 8, false, false, 0)
+		fevent := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
+		defaultFill := "#f0f0f0"
+		fill := types.FillDef{
+			Color: &defaultFill,
+		}
+
+		f := DocGanttFormat{
+			Font:      &font,
+			GroupFont: &fg,
+			EntryFont: &fentry,
+			EventFont: &fevent,
+			EntryFill: &fill,
+		}
+		d.Formats["default"] = f
+	}
+}
+
+func (d *GanttDocument) initGroups(groups []Group, startDate, endDate time.Time) {
+	for _, group := range groups {
 		if group.Name == "" {
 			// groups without name are ignored
 			continue
@@ -29,21 +58,29 @@ func DocumentFromGantt(g *Gantt, startDate, endDate time.Time) *GanttDocument {
 		var dg *DocGanttGroup
 		if group.Start == nil && group.End == nil {
 			// group is always present
-			CreateDocGanttGroup(&group, startDate, endDate)
+			dg = CreateDocGanttGroup(&group, startDate, endDate)
 		} else if group.Start == nil && group.End != nil && group.End.After(startDate) {
 			// group ends after the start date
-			CreateDocGanttGroup(&group, startDate, endDate)
+			dg = CreateDocGanttGroup(&group, startDate, endDate)
 		} else if group.Start != nil && group.Start.Before(endDate) && group.End == nil {
 			// group ends after the start date
-			CreateDocGanttGroup(&group, startDate, endDate)
+			dg = CreateDocGanttGroup(&group, startDate, endDate)
 		} else if group.Start.Before(endDate) || group.End.After(startDate) {
 			// the group is in the range of the given times
-			CreateDocGanttGroup(&group, startDate, endDate)
+			dg = CreateDocGanttGroup(&group, startDate, endDate)
 		}
 		if dg != nil {
-			doc.Groups = append(doc.Groups, *dg)
+			d.Groups = append(d.Groups, *dg)
 		}
 	}
+}
+
+func DocumentFromGantt(g *Gantt, startDate, endDate time.Time) *GanttDocument {
+	doc := NewGanttDocument()
+	doc.Title = g.Title
+	doc.GlobalPadding = types.GlobalPadding
+	doc.initFormats(g.Formats)
+	doc.initGroups(g.Groups, startDate, endDate)
 	return doc
 }
 

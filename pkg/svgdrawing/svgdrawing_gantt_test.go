@@ -14,7 +14,6 @@ import (
 func TestSimpleCalendar(t *testing.T) {
 	startDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(2025, 3, 31, 0, 0, 0, 0, time.UTC)
-	// doc := gantttypes.NewGanttDocument()
 	outputFile := "../../temp/SimpleCalendar.svg"
 	output, err := os.Create(outputFile)
 	require.Nil(t, err)
