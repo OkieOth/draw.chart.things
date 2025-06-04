@@ -29,8 +29,9 @@ func (d *GanttDocument) initFormats(formats map[string]GanttFormat) {
 		d.Formats[name] = f
 	}
 	if _, exists := d.Formats["default"]; !exists {
-		font := types.InitFontDef(nil, "sans-serif", 10, true, false, 0)
+		font := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
 		fg := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
+		fg.Anchor = types.FontDefAnchorEnum_right
 		fentry := types.InitFontDef(nil, "sans-serif", 8, false, false, 0)
 		fevent := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
 		defaultFill := "#f0f0f0"

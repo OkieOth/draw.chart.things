@@ -29,13 +29,6 @@ const (
 // Function type for calculating text dimensions
 type calcDimensions func(runeCount int, fontSize int, bold bool) (width, height int)
 
-// textAndDimensions represents text and its calculated dimensions
-type textAndDimensions struct {
-	Text   string
-	Width  int
-	Height int
-}
-
 // SvgTextDimensionCalculator calculates text dimensions for SVG rendering
 type SvgTextDimensionCalculator struct {
 	dimensionCalculators map[string]calcDimensions
@@ -89,7 +82,7 @@ func monospaceDimensions(runeCount int, fontSize int, bold bool) (width, height 
 }
 
 // SplitTxt splits text and calculates dimensions based on font settings
-func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef) (width, height int, lines []textAndDimensions) {
+func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef) (width, height int, lines []types.TextAndDimensions) {
 	fontSize := format.Size
 	if fontSize == 0 {
 		fontSize = 10
@@ -116,7 +109,7 @@ func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef)
 	w, h := dimCalc(runeCount, fontSize, bold)
 
 	if w <= format.MaxLenBeforeBreak {
-		lines = []textAndDimensions{{Text: txt, Width: w, Height: h}}
+		lines = []types.TextAndDimensions{{Text: txt, Width: w, Height: h}}
 		return w, h, lines
 	}
 
@@ -134,10 +127,10 @@ func splitTxtDimensions(
 	bold bool, lineHeight float32,
 	txt string,
 	maxLenBeforeBreak int,
-	f calcDimensions) (width, height int, lines []textAndDimensions) {
+	f calcDimensions) (width, height int, lines []types.TextAndDimensions) {
 
 	words := strings.Fields(txt)
-	wordsWithWidth := make([]textAndDimensions, 0, len(words))
+	wordsWithWidth := make([]types.TextAndDimensions, 0, len(words))
 
 	// Calculate width for each word
 	for _, w := range words {
@@ -156,23 +149,23 @@ func splitTxtDimensions(
 			}
 		}
 
-		wordsWithWidth = append(wordsWithWidth, textAndDimensions{Text: w, Width: width})
+		wordsWithWidth = append(wordsWithWidth, types.TextAndDimensions{Text: w, Width: width})
 	}
 
 	// Build output lines
 	curWidth := 0
 	var line string
 	var maxWidth int
-	lines = make([]textAndDimensions, 0)
+	lines = make([]types.TextAndDimensions, 0)
 	lh := int(float32(fontSize) * lineHeight)
 	heightSum := 0
 
-	appendLineToOutput := func(txt string, height int) []textAndDimensions {
+	appendLineToOutput := func(txt string, height int) []types.TextAndDimensions {
 		lw, _ := f(utf8.RuneCount([]byte(txt)), fontSize, bold)
 		if lw > maxWidth {
 			maxWidth = lw
 		}
-		lines = append(lines, textAndDimensions{Text: txt, Width: lw, Height: height})
+		lines = append(lines, types.TextAndDimensions{Text: txt, Width: lw, Height: height})
 		heightSum += lh
 		return lines
 	}

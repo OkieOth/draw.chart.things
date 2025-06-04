@@ -73,6 +73,9 @@ type DocGanttGroup struct {
 
     // List of entries in the group
     Entries []DocGanttEntry  `yaml:"entries,omitempty"`
+
+    // Height of the group, used to calculate the y position of the boxes
+    Height int  `yaml:"height"`
 }
 
 func NewDocGanttGroup() *DocGanttGroup {

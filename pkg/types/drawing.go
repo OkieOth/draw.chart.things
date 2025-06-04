@@ -1,7 +1,15 @@
 package types
 
+// textAndDimensions represents text and its calculated dimensions
+type TextAndDimensions struct {
+	Text   string
+	Width  int
+	Height int
+}
+
 type TextDimensionCalculator interface {
 	Dimensions(txt string, format *FontDef) (width, height int)
+	SplitTxt(txt string, format *FontDef) (width, height int, lines []TextAndDimensions)
 }
 
 type RectWithTextFormat struct {
