@@ -21,6 +21,10 @@ func (d *DummyDimensionCalculator) Dimensions(txt string, format *types.FontDef)
 	return d.width, d.height
 }
 
+func (d *DummyDimensionCalculator) SplitTxt(txt string, format *types.FontDef) (width, height int, lines []types.TextAndDimensions) {
+	return 0, 0, make([]types.TextAndDimensions, 0)
+}
+
 func NewDummyDimensionCalculator(width, height int) *DummyDimensionCalculator {
 	return &DummyDimensionCalculator{
 		width:  width,

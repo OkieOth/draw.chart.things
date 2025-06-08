@@ -71,8 +71,28 @@
         "DocGanttEvent": {
             "type": "object",
             "properties": {
-
-            }
+                "date": {
+                    "description": "Date of the event",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "text": {
+                    "description": "Text to display for the event",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description of the event",
+                    "type": "string"
+                },
+                "entryRefs": {
+                    "description": "List of references to entries in groups that are affected by the event",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DocEntryRef"
+                    }
+                }
+            },
+            "required": ["date", "text"]
         },
         "DocGanttGroup": {
             "type": "object",
@@ -102,13 +122,59 @@
                 "height": {
                     "type": "integer",
                     "description": "Height of the group, used to calculate the y position of the boxes"
+                },
+                "format": {
+                    "$ref": "#/definitions/DocGanttFormat"
                 }
             },
             "required": ["name", "height"]
         },
         "DocGanttEntry": {
             "type": "object",
-            "properties": {}
+            "properties": {
+                "x": {
+                    "description": "X position of the entry, used to calculate the position in the gantt chart",
+                    "type": "integer"
+                },
+                "y": {
+                    "description": "Y position of the entry, used to calculate the position in the gantt chart",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Text to name the entry",
+                    "type": "string"
+                },
+                "start": {
+                    "description": "Start date when the entry is active",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "end": {
+                    "description": "End date when the entry is active",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "duration": {
+                    "description": "Duration of the entry in days",
+                    "type": "integer"
+                },
+                "description": {
+                    "description": "Description of the entry",
+                    "type": "string"
+                },
+                "resources": {
+                    "description": "List of resources assigned to the entry",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "format": {
+                    "$ref": "#/definitions/DocGanttFormat"
+                }
+            },
+            "required": ["x", "y", "name"]
+
         },
         "DocGanttFormat": {
             "type": "object",
@@ -129,6 +195,20 @@
                     "$ref": "./formats.json#/definitions/FillDef"
                 }
             }
+        },
+        "DocEntryRef": {
+            "type": "object",
+            "properties": {
+                "groupRef": {
+                    "description": "Name of the group where the start of the entry depends on",
+                    "type": "string"
+                },
+                "entryRef": {
+                    "description": "Name of the entry, that end defines the start of this entry",
+                    "type": "string"
+                }
+            },
+            "required": ["entryRef"]
         }
    }
 }

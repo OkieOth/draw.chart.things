@@ -19,6 +19,7 @@ class "**Group**" as Group {
         DateTimeType start
         DateTimeType end
         Entry[] entries
+        StringType format
 }
 
  
@@ -52,6 +53,7 @@ class "**Entry**" as Entry {
         IntegerType duration
         StringType description
         StringType[] resources
+        StringType format
 }
 
  
@@ -110,7 +112,7 @@ enum "FontDefAnchorEnum" as FontDefAnchorEnum {
 }
 
 class "**LineDef**" as LineDef {
-        IntegerType width
+        NumberType width
         LineDefStyleEnum style
         StringType color
         NumberType opacity
@@ -148,6 +150,7 @@ Gantt  *--  GanttFormat
 
 Group "0" *-- "n" Entry
 
+
     
 
 
@@ -170,6 +173,7 @@ GanttFormat  *--  FillDef
 
 
 Entry  *--  RelativeStart
+
 
 
 

@@ -30,13 +30,21 @@ func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Tim
 
 	defaultFormat := doc.Formats["default"]
 	groupHeight := calcGroupHeight(doc, textDimensionCalulator, defaultFormat.GroupFont)
+	yOffset := 0
+	if doc.Title != "" {
+		_, h := textDimensionCalulator.Dimensions(doc.Title, defaultFormat.Font)
+		yOffset = h + (2 * doc.GlobalPadding)
+	}
+
 	initDocWidth(doc, startDate, endDate)
-	drawing.Start(doc.Title, groupHeight+50, *doc.Width)
-	w, _, _ := DrawCalendar(startDate, endDate, drawing, *doc.GroupNameWidth, 10, groupHeight)
-	drawGroupLines(doc, drawing, 10+20, w, defaultFormat.GroupFont, textDimensionCalulator)
-	// TODO - draw group caption
-	// TODO - draw tasks
-	// TODO - draw events
+	drawing.Start(doc.Title, groupHeight+yOffset+100, *doc.Width)
+	drawing.DrawText(doc.Title, 0, doc.GlobalPadding, *doc.Width, defaultFormat.Font)
+	w, _, _ := DrawCalendar(startDate, endDate, drawing, *doc.GroupNameWidth, yOffset, groupHeight)
+	yOffset += 20
+	drawGroupLines(doc, drawing, yOffset, w, defaultFormat.GroupFont, textDimensionCalulator)
+	drawGroupEntries(doc, drawing, yOffset+2, defaultFormat.EntryFont, textDimensionCalulator)
+	drawEvents(doc, drawing, yOffset, w, defaultFormat.EventFont, textDimensionCalulator)
+
 	drawing.Done()
 	output.Close()
 
@@ -54,10 +62,53 @@ func initDocWidth(doc *gantt.GanttDocument, startDate, endDate time.Time) {
 	doc.Width = &w
 }
 
+func drawEvents(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset int, format *types.FontDef, c types.TextDimensionCalculator) {
+	for _, event := range doc.Events {
+		// TODO
+	}
+}
+
+func drawGroupEntries(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset int, format *types.FontDef, c types.TextDimensionCalculator) {
+	lineWidth := 0.5
+	borderColor := "black"
+	startDate := doc.StartDate
+	endDate := doc.EndDate.Add(time.Hour * 24) // extend end date by one day to include the last day
+	for _, group := range doc.Groups {
+		for _, entry := range group.Entries {
+			f := types.LineDef{
+				Color: &borderColor,
+				Width: &lineWidth,
+			}
+			// TODO - calc start x and width based on entry start and end dates
+			entryStart := startDate
+			entryEnd := endDate
+			if entry.Start != nil && entry.Start.After(*doc.StartDate) {
+				entryStart = entry.Start
+			}
+			if entry.End != nil && entry.End.Before(*doc.EndDate) {
+				entryEnd = *entry.End
+			}
+			daysDiff := int(entryEnd.Sub(*entryStart).Hours() / 24)
+			width := daysDiff * types.GlobalDayWidth // assuming each day is 10 units wide
+			xOffset := 0
+			if entryStart != startDate {
+				xOffset = int(entryStart.Sub(*doc.StartDate).Hours()/24) * types.GlobalDayWidth
+			}
+			rf := types.RectWithTextFormat{
+				Padding:     0,
+				FontCaption: *format,
+				Border:      &f,
+				Fill:        entry.Format.EntryFill,
+			}
+			drawing.DrawRectWithText("", entry.Name, "", "", *doc.GroupNameWidth+xOffset, entry.Y+yOffset, width, types.GlobalGanttEntryHeight, rf)
+		}
+	}
+}
+
 func drawGroupLines(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset, width int, format *types.FontDef, c types.TextDimensionCalculator) {
 	currentY := yOffset
 	lineColor := "lightgrey"
-	lineWidth := 2
+	lineWidth := 2.0
 	lineFormat := types.LineDef{
 		Color: &lineColor, // dark grey
 		Width: &lineWidth,
@@ -75,7 +126,6 @@ func drawGroupLines(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yO
 				y += l.Height
 			}
 			lastY = currentY
-			//drawing.DrawText(group.Name, x+5, y+height/2, width-10, &doc.Formats["default"].GroupFont)
 		}
 	}
 }
@@ -89,7 +139,18 @@ func calcGroupHeight(doc *gantt.GanttDocument, c types.TextDimensionCalculator, 
 	for i, group := range doc.Groups {
 		if group.Name != "" {
 			w, h := c.Dimensions(group.Name, format)
-			effectiveHeight := h + (2 * doc.GlobalPadding)
+			curTaskY := height + 1
+			entriesHeight := 1
+			for j, _ := range group.Entries {
+				doc.Groups[i].Entries[j].Y = curTaskY
+				curTaskY += types.GlobalGanttEntryHeight + 2
+				entriesHeight += types.GlobalGanttEntryHeight + 2
+			}
+			entriesHeight += 4 // add padding for aesthetics
+			effectiveHeight := h + (doc.GlobalPadding)
+			if entriesHeight > effectiveHeight {
+				effectiveHeight = entriesHeight
+			}
 			height += effectiveHeight
 			doc.Groups[i].Height = effectiveHeight
 			if w > maxWidth {
@@ -129,7 +190,7 @@ func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, 
 	yStart := yOffset
 	currentX := xOffset
 	lineStyle := types.LineDefStyleEnum_solid
-	lineWidth := 1
+	lineWidth := 1.0
 	lineColor := "lightgrey"
 	weekendColor := "#f0f0f0" // light grey for weekends
 	lineFormat := types.LineDef{
@@ -155,7 +216,7 @@ func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, 
 		Font:              "sans-serif",
 		MaxLenBeforeBreak: 100,
 	}
-	dayWidth := 10
+	dayWidth := types.GlobalDayWidth
 	monthStartOffset := 20
 	lastMonthX := currentX
 

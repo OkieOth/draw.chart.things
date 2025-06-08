@@ -6,13 +6,30 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
-func CreateDocGanttGroup(gg *Group, startDate, endDate time.Time) *DocGanttGroup {
+func (d *GanttDocument) CreateDocGanttGroup(gg *Group, startDate, endDate time.Time) *DocGanttGroup {
 	g := NewDocGanttGroup()
 	g.Name = gg.Name
 	g.Start = gg.Start
 	g.End = gg.End
 	if gg.Entries != nil {
-		// TODO
+		for _, entry := range gg.Entries {
+			dge := NewDocGanttEntry()
+			dge.Name = entry.Name
+			dge.Start = entry.Start
+			dge.End = entry.End
+			if entry.Format != nil {
+				if f, found := d.Formats[*entry.Format]; found {
+					dge.Format = &f
+				} else {
+					f = d.Formats["default"]
+					dge.Format = &f
+				}
+			} else {
+				f := d.Formats["default"]
+				dge.Format = &f
+			}
+			g.Entries = append(g.Entries, *dge)
+		}
 	}
 	return g
 }
@@ -30,9 +47,11 @@ func (d *GanttDocument) initFormats(formats map[string]GanttFormat) {
 	}
 	if _, exists := d.Formats["default"]; !exists {
 		font := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
+		font.MaxLenBeforeBreak = 1000
 		fg := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
 		fg.Anchor = types.FontDefAnchorEnum_right
-		fentry := types.InitFontDef(nil, "sans-serif", 8, false, false, 0)
+		fentry := types.InitFontDef(nil, "serif", 7, false, false, 0)
+		fentry.MaxLenBeforeBreak = 1000
 		fevent := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
 		defaultFill := "#f0f0f0"
 		fill := types.FillDef{
@@ -59,16 +78,16 @@ func (d *GanttDocument) initGroups(groups []Group, startDate, endDate time.Time)
 		var dg *DocGanttGroup
 		if group.Start == nil && group.End == nil {
 			// group is always present
-			dg = CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
 		} else if group.Start == nil && group.End != nil && group.End.After(startDate) {
 			// group ends after the start date
-			dg = CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
 		} else if group.Start != nil && group.Start.Before(endDate) && group.End == nil {
 			// group ends after the start date
-			dg = CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
 		} else if group.Start.Before(endDate) || group.End.After(startDate) {
 			// the group is in the range of the given times
-			dg = CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
 		}
 		if dg != nil {
 			d.Groups = append(d.Groups, *dg)
@@ -80,6 +99,8 @@ func DocumentFromGantt(g *Gantt, startDate, endDate time.Time) *GanttDocument {
 	doc := NewGanttDocument()
 	doc.Title = g.Title
 	doc.GlobalPadding = types.GlobalPadding
+	doc.StartDate = &startDate
+	doc.EndDate = &endDate
 	doc.initFormats(g.Formats)
 	doc.initGroups(g.Groups, startDate, endDate)
 	return doc

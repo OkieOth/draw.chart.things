@@ -44,7 +44,7 @@ enum "FontDefAnchorEnum" as FontDefAnchorEnum {
 }
 
 class "**LineDef**" as LineDef {
-        IntegerType width
+        NumberType width
         LineDefStyleEnum style
         StringType color
         NumberType opacity

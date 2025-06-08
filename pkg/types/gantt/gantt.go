@@ -52,6 +52,9 @@ type Group struct {
 
     // List of entries in the group
     Entries []Entry  `yaml:"entries,omitempty"`
+
+    // Optional reference to the format to be used for the group
+    Format *string  `yaml:"format,omitempty"`
 }
 
 func NewGroup() *Group {
@@ -135,6 +138,9 @@ type Entry struct {
 
     // List of resources assigned to the entry
     Resources []string  `yaml:"resources,omitempty"`
+
+    // Optional reference to the format to be used for the entry
+    Format *string  `yaml:"format,omitempty"`
 }
 
 func NewEntry() *Entry {

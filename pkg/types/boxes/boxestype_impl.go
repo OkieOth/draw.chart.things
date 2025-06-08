@@ -2,6 +2,7 @@ package boxes
 
 import (
 	"fmt"
+
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
@@ -39,7 +40,7 @@ func (d *BoxesDocument) ShouldHandle(elem *LayoutElement) bool {
 }
 
 func (d *BoxesDocument) DrawStartPositions(drawingImpl types.Drawing) {
-	w := 2
+	w := 2.0
 	b := "blue"
 	f := types.LineDef{
 		Width: &w,
@@ -50,7 +51,7 @@ func (d *BoxesDocument) DrawStartPositions(drawingImpl types.Drawing) {
 }
 
 func (d *BoxesDocument) DrawRoads(drawingImpl types.Drawing) {
-	w := 1
+	w := 1.0
 	b := "lightgray"
 	f := types.LineDef{
 		Width: &w,
@@ -66,7 +67,7 @@ func (d *BoxesDocument) DrawRoads(drawingImpl types.Drawing) {
 
 func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
 	b := "black"
-	w := 1
+	w := 1.0
 	format := types.LineDef{
 		Width: &w,
 		Color: &b,

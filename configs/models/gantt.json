@@ -59,6 +59,10 @@
                         "$ref": "#/definitions/Entry"
                     },
                     "minItems": 1
+                },
+                "format": {
+                    "description": "Optional reference to the format to be used for the group",
+                    "type": "string"
                 }
             },
             "required": ["name"]
@@ -98,6 +102,10 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "format": {
+                    "description": "Optional reference to the format to be used for the entry",
+                    "type": "string"
                 }
             },
             "required": ["name"]

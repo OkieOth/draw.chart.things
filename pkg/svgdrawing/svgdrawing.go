@@ -118,7 +118,10 @@ func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef)
 
 // Dimensions calculates text dimensions
 func (s *SvgTextDimensionCalculator) Dimensions(txt string, format *types.FontDef) (width, height int) {
-	w, h, _ := s.SplitTxt(txt, format)
+	w, h, lines := s.SplitTxt(txt, format)
+	if len(lines) == 1 {
+		return w, h + types.GlobalPadding
+	}
 	return w, h
 }
 
@@ -315,7 +318,7 @@ func (d *SvgDrawing) DrawVerticalText(text string, currentX, y, height int, font
 }
 
 // Draw renders a box with text elements
-func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height int, format types.RectWithTextFormat) error {
+func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int, width, height int, format types.RectWithTextFormat) error {
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
 
@@ -331,7 +334,7 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 				attr += ";"
 			}
 
-			w := 1
+			w := 1.0
 			if (*format.Border).Width != nil {
 				w = *(*format.Border).Width
 			}
@@ -341,10 +344,13 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 				c = *(*format.Border).Color
 			}
 
-			attr += fmt.Sprintf("stroke: %s;stroke-Width: %d", c, w)
+			attr += fmt.Sprintf("stroke: %s;stroke-Width: %f", c, w)
 		}
-
-		d.canvas.RectWithId(id, x, y, width, height, attr)
+		if id != "" {
+			d.canvas.RectWithId(id, x, y, width, height, attr)
+		} else {
+			d.canvas.Rect(x, y, width, height, attr)
+		}
 	}
 
 	if format.VerticalTxt {
@@ -367,11 +373,11 @@ func (d *SvgDrawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 	if (format.Color != nil) && (*format.Color != "") {
 		color = *format.Color
 	}
-	width := 1
+	width := 1.0
 	if (format.Width != nil) && (*format.Width != 0) {
 		width = *format.Width
 	}
-	d.canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:%d", color, width))
+	d.canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:%f", color, width))
 	return nil
 }
 

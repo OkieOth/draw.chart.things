@@ -54,7 +54,7 @@
             "description": "Defines how the border of the box looks like",
             "properties": {
                 "width": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "style": {
                     "enum": ["solid", "dotted", "dashed"]

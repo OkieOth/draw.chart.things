@@ -76,6 +76,8 @@ type DocGanttGroup struct {
 
     // Height of the group, used to calculate the y position of the boxes
     Height int  `yaml:"height"`
+
+    Format *DocGanttFormat  `yaml:"format,omitempty"`
 }
 
 func NewDocGanttGroup() *DocGanttGroup {
@@ -118,8 +120,39 @@ type DocGanttFormat struct {
 
 
 type DocGanttEntry struct {
+
+    // X position of the entry, used to calculate the position in the gantt chart
+    X int  `yaml:"x"`
+
+    // Y position of the entry, used to calculate the position in the gantt chart
+    Y int  `yaml:"y"`
+
+    // Text to name the entry
+    Name string  `yaml:"name"`
+
+    // Start date when the entry is active
+    Start *time.Time  `yaml:"start,omitempty"`
+
+    // End date when the entry is active
+    End *time.Time  `yaml:"end,omitempty"`
+
+    // Duration of the entry in days
+    Duration *int  `yaml:"duration,omitempty"`
+
+    // Description of the entry
+    Description *string  `yaml:"description,omitempty"`
+
+    // List of resources assigned to the entry
+    Resources []string  `yaml:"resources,omitempty"`
+
+    Format *DocGanttFormat  `yaml:"format,omitempty"`
 }
 
+func NewDocGanttEntry() *DocGanttEntry {
+        return &DocGanttEntry{
+            Resources: make([]string, 0),
+        }
+}
 
 
 

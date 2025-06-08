@@ -252,7 +252,7 @@ func TestSplitTxt(t *testing.T) {
 		fontDef        *types.FontDef
 		expectedWidth  int
 		expectedHeight int
-		expectedLines  []svgdrawing.TextAndDimensions
+		expectedLines  []types.TextAndDimensions
 	}{
 		{
 			name:      "Single line sans-serif",
@@ -264,7 +264,7 @@ func TestSplitTxt(t *testing.T) {
 			},
 			expectedWidth:  62,
 			expectedHeight: 12,
-			expectedLines: []svgdrawing.TextAndDimensions{
+			expectedLines: []types.TextAndDimensions{
 				{Text: "Hello World", Width: 62, Height: 12},
 			},
 		},
@@ -278,7 +278,7 @@ func TestSplitTxt(t *testing.T) {
 			},
 			expectedWidth:  96,
 			expectedHeight: 28,
-			expectedLines: []svgdrawing.TextAndDimensions{
+			expectedLines: []types.TextAndDimensions{
 				{Text: "Hello World Hello", Width: 96, Height: 14},
 				{Text: "World", Width: 28, Height: 14},
 			},
@@ -293,7 +293,7 @@ func TestSplitTxt(t *testing.T) {
 			},
 			expectedWidth:  51,
 			expectedHeight: 98,
-			expectedLines: []svgdrawing.TextAndDimensions{
+			expectedLines: []types.TextAndDimensions{
 				{Text: "This is a", Width: 51, Height: 14},
 				{Text: "long text", Width: 51, Height: 14},
 				{Text: "that", Width: 22, Height: 14},
@@ -313,7 +313,7 @@ func TestSplitTxt(t *testing.T) {
 			},
 			expectedWidth:  59,
 			expectedHeight: 10,
-			expectedLines: []svgdrawing.TextAndDimensions{
+			expectedLines: []types.TextAndDimensions{
 				{Text: "Monospace", Width: 59, Height: 10},
 			},
 		},
@@ -327,7 +327,7 @@ func TestSplitTxt(t *testing.T) {
 			},
 			expectedWidth:  94,
 			expectedHeight: 32,
-			expectedLines: []svgdrawing.TextAndDimensions{
+			expectedLines: []types.TextAndDimensions{
 				{Text: "Serif font with", Width: 94, Height: 16},
 				{Text: "multiple lines", Width: 88, Height: 16},
 			},

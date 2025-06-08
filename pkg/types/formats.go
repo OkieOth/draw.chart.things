@@ -231,7 +231,7 @@ func (s *FontDefAnchorEnum) UnmarshalJSON(data []byte) error {
 */
 type LineDef struct {
 
-    Width *int  `yaml:"width,omitempty"`
+    Width *float64  `yaml:"width,omitempty"`
 
     Style *LineDefStyleEnum  `yaml:"style,omitempty"`
 
