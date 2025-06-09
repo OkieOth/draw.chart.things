@@ -162,8 +162,7 @@
                     "description": "Name of the entry, that end defines the start of this entry",
                     "type": "string"
                 }
-            },
-            "required": ["entryRef"]
+            }
         },
         "GanttFormat": {
             "type": "object",

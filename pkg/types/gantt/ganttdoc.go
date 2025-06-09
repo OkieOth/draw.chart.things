@@ -91,8 +91,25 @@ func NewDocGanttGroup() *DocGanttGroup {
 
 
 type DocGanttEvent struct {
+
+    // Date of the event
+    Date time.Time  `yaml:"date"`
+
+    // Text to display for the event
+    Text string  `yaml:"text"`
+
+    // Description of the event
+    Description *string  `yaml:"description,omitempty"`
+
+    // List of references to entries in groups that are affected by the event
+    EntryRefs []DocEntryRef  `yaml:"entryRefs,omitempty"`
 }
 
+func NewDocGanttEvent() *DocGanttEvent {
+        return &DocGanttEvent{
+            EntryRefs: make([]DocEntryRef, 0),
+        }
+}
 
 
 
@@ -112,6 +129,20 @@ type DocGanttFormat struct {
     EventFont *types.FontDef  `yaml:"eventFont,omitempty"`
 
     EntryFill *types.FillDef  `yaml:"entryFill,omitempty"`
+}
+
+
+
+
+
+
+type DocEntryRef struct {
+
+    // Name of the group where the start of the entry depends on
+    GroupRef *string  `yaml:"groupRef,omitempty"`
+
+    // Name of the entry, that end defines the start of this entry
+    EntryRef *string  `yaml:"entryRef,omitempty"`
 }
 
 

@@ -69,6 +69,25 @@ func (d *GanttDocument) initFormats(formats map[string]GanttFormat) {
 	}
 }
 
+func (d *GanttDocument) initEvents(events []Event, startDate, endDate time.Time) {
+	for _, event := range events {
+		dg := NewDocGanttEvent()
+		dg.Date = event.Date
+		dg.Text = event.Text
+		dg.Description = event.Description
+		if event.EntryRefs != nil {
+			for _, ref := range event.EntryRefs {
+				de := DocEntryRef{
+					GroupRef: ref.GroupRef,
+					EntryRef: ref.EntryRef,
+				}
+				dg.EntryRefs = append(dg.EntryRefs, de)
+			}
+		}
+		d.Events = append(d.Events, *dg)
+	}
+}
+
 func (d *GanttDocument) initGroups(groups []Group, startDate, endDate time.Time) {
 	for _, group := range groups {
 		if group.Name == "" {
@@ -103,6 +122,7 @@ func DocumentFromGantt(g *Gantt, startDate, endDate time.Time) *GanttDocument {
 	doc.EndDate = &endDate
 	doc.initFormats(g.Formats)
 	doc.initGroups(g.Groups, startDate, endDate)
+	doc.initEvents(g.Events, startDate, endDate)
 	return doc
 }
 

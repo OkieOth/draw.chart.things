@@ -173,7 +173,7 @@ type EntryRef struct {
     GroupRef *string  `yaml:"groupRef,omitempty"`
 
     // Name of the entry, that end defines the start of this entry
-    EntryRef string  `yaml:"entryRef"`
+    EntryRef *string  `yaml:"entryRef,omitempty"`
 }
 
 

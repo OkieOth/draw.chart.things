@@ -398,6 +398,13 @@ func (d *SvgDrawing) DrawSolidRect(x, y, width, height int, format types.LineDef
 	return nil
 }
 
+func (d *SvgDrawing) DrawSolidCircle(x, y, radius int, color string) error {
+	// Draw a solid circle at (x, y) with the specified color and radius
+	attr := fmt.Sprintf("fill: %s", color)
+	d.canvas.Circle(x, y, radius, attr)
+	return nil
+}
+
 // Done finalizes the SVG document
 func (d *SvgDrawing) Done() error {
 	d.canvas.End()

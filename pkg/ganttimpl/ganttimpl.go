@@ -3,6 +3,7 @@ package ganttimpl
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
@@ -39,11 +40,11 @@ func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Tim
 	initDocWidth(doc, startDate, endDate)
 	drawing.Start(doc.Title, groupHeight+yOffset+100, *doc.Width)
 	drawing.DrawText(doc.Title, 0, doc.GlobalPadding, *doc.Width, defaultFormat.Font)
-	w, _, _ := DrawCalendar(startDate, endDate, drawing, *doc.GroupNameWidth, yOffset, groupHeight)
+	w, calendarHeight, _ := DrawCalendar(startDate, endDate, drawing, *doc.GroupNameWidth, yOffset, groupHeight)
 	yOffset += 20
 	drawGroupLines(doc, drawing, yOffset, w, defaultFormat.GroupFont, textDimensionCalulator)
 	drawGroupEntries(doc, drawing, yOffset+2, defaultFormat.EntryFont, textDimensionCalulator)
-	drawEvents(doc, drawing, yOffset, w, defaultFormat.EventFont, textDimensionCalulator)
+	drawEvents(doc, drawing, yOffset, calendarHeight, defaultFormat.EventFont, textDimensionCalulator)
 
 	drawing.Done()
 	output.Close()
@@ -62,9 +63,56 @@ func initDocWidth(doc *gantt.GanttDocument, startDate, endDate time.Time) {
 	doc.Width = &w
 }
 
-func drawEvents(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset int, format *types.FontDef, c types.TextDimensionCalculator) {
+func findEntry(doc *gantt.GanttDocument, ref *gantt.DocEntryRef) *gantt.DocGanttEntry {
+	if ref == nil || ref.GroupRef == nil || ref.EntryRef == nil {
+		return nil
+	}
+	for _, group := range doc.Groups {
+		lowerGroupName := strings.ToLower(group.Name)
+		lowerRefGroup := strings.ToLower(*ref.GroupRef)
+		if lowerGroupName == lowerRefGroup {
+			for _, entry := range group.Entries {
+				lowerEntryName := strings.ToLower(entry.Name)
+				lowerRefEntry := strings.ToLower(*ref.EntryRef)
+				if lowerEntryName == lowerRefEntry {
+					return &entry
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func drawEvents(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset, calendarHeight int, format *types.FontDef, c types.TextDimensionCalculator) {
+	startDate := doc.StartDate
+	endDate := doc.EndDate.Add(time.Hour * 24) // extend end date by one day to include the last day
+
 	for _, event := range doc.Events {
 		// TODO
+		if event.Date.Equal(*startDate) || event.Date.Equal(endDate) || (event.Date.After(*startDate) && event.Date.Before(endDate)) {
+			// Calculate x position based on event date
+			xOffset := int(event.Date.Sub(*startDate).Hours()/24)*types.GlobalDayWidth + (types.GlobalDayWidth / 2) // center the event on the day
+			// // Draw the event text
+			// drawing.DrawText(event.Text, doc.GlobalPadding+xOffset, yOffset, *doc.GroupNameWidth, format)
+			// // Draw a line for the event
+			lineColor := "red"
+			lineWidth := 1.0
+			lineFormat := types.LineDef{
+				Color: &lineColor,
+				Width: &lineWidth,
+			}
+			drawing.DrawLine(*doc.GroupNameWidth+xOffset, yOffset-20, *doc.GroupNameWidth+xOffset, calendarHeight, lineFormat)
+			// Draw small circles for the references
+			for _, ref := range event.EntryRefs {
+				foundEntry := findEntry(doc, &ref)
+				if foundEntry != nil {
+					circleColor := "red"
+					circleRadius := 2
+					drawing.DrawSolidCircle(*doc.GroupNameWidth+xOffset, foundEntry.Y+yOffset+types.GlobalGanttEntryHeight-3, circleRadius, circleColor)
+				}
+				// entry := doc.Groups[ref.GroupRef].Entries[ref.EntryRef]
+			}
+		}
 	}
 }
 
