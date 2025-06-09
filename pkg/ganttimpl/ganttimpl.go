@@ -31,20 +31,21 @@ func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Tim
 
 	defaultFormat := doc.Formats["default"]
 	groupHeight := calcGroupHeight(doc, textDimensionCalulator, defaultFormat.GroupFont)
-	yOffset := 0
+	eventTxtHeight := calcEventTextHeight(doc, textDimensionCalulator, defaultFormat.EventFont)
+	yOffset := eventTxtHeight
 	if doc.Title != "" {
 		_, h := textDimensionCalulator.Dimensions(doc.Title, defaultFormat.Font)
-		yOffset = h + (2 * doc.GlobalPadding)
+		yOffset += h + (2 * doc.GlobalPadding)
 	}
 
 	initDocWidth(doc, startDate, endDate)
-	drawing.Start(doc.Title, groupHeight+yOffset+100, *doc.Width)
+	drawing.Start(doc.Title, groupHeight+yOffset+groupHeight+eventTxtHeight, *doc.Width)
 	drawing.DrawText(doc.Title, 0, doc.GlobalPadding, *doc.Width, defaultFormat.Font)
 	w, calendarHeight, _ := DrawCalendar(startDate, endDate, drawing, *doc.GroupNameWidth, yOffset, groupHeight)
 	yOffset += 20
 	drawGroupLines(doc, drawing, yOffset, w, defaultFormat.GroupFont, textDimensionCalulator)
 	drawGroupEntries(doc, drawing, yOffset+2, defaultFormat.EntryFont, textDimensionCalulator)
-	drawEvents(doc, drawing, yOffset, calendarHeight, defaultFormat.EventFont, textDimensionCalulator)
+	drawEvents(doc, drawing, yOffset, calendarHeight, eventTxtHeight, defaultFormat.EventFont, textDimensionCalulator)
 
 	drawing.Done()
 	output.Close()
@@ -83,7 +84,7 @@ func findEntry(doc *gantt.GanttDocument, ref *gantt.DocEntryRef) *gantt.DocGantt
 	return nil
 }
 
-func drawEvents(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset, calendarHeight int, format *types.FontDef, c types.TextDimensionCalculator) {
+func drawEvents(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset, calendarHeight, eventTxtHeight int, format *types.FontDef, c types.TextDimensionCalculator) {
 	startDate := doc.StartDate
 	endDate := doc.EndDate.Add(time.Hour * 24) // extend end date by one day to include the last day
 
@@ -108,10 +109,16 @@ func drawEvents(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffse
 				if foundEntry != nil {
 					circleColor := "red"
 					circleRadius := 2
-					drawing.DrawSolidCircle(*doc.GroupNameWidth+xOffset, foundEntry.Y+yOffset+types.GlobalGanttEntryHeight-3, circleRadius, circleColor)
+					drawing.DrawSolidCircle(*doc.GroupNameWidth+xOffset, foundEntry.Y+yOffset+types.GlobalGanttEntryHeight-2, circleRadius, circleColor)
 				}
 				// entry := doc.Groups[ref.GroupRef].Entries[ref.EntryRef]
 			}
+			// Print top text
+			drawing.DrawVerticalText(event.Text, *doc.GroupNameWidth+xOffset-(format.Size/2)-2, yOffset-25, eventTxtHeight, format)
+			// Print bottom text
+			format.Anchor = types.FontDefAnchorEnum_right
+			drawing.DrawVerticalText(event.Text, *doc.GroupNameWidth+xOffset-(format.Size/2)-2, calendarHeight+3, eventTxtHeight, format)
+			format.Anchor = types.FontDefAnchorEnum_left
 		}
 	}
 }
@@ -176,6 +183,22 @@ func drawGroupLines(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yO
 			lastY = currentY
 		}
 	}
+}
+
+func calcEventTextHeight(doc *gantt.GanttDocument, c types.TextDimensionCalculator, format *types.FontDef) int {
+	if len(doc.Events) == 0 {
+		return 0
+	}
+	height := 0
+	for _, event := range doc.Events {
+		if event.Text != "" {
+			w, _ := c.Dimensions(event.Text, format)
+			if w > height {
+				height = w
+			}
+		}
+	}
+	return height
 }
 
 func calcGroupHeight(doc *gantt.GanttDocument, c types.TextDimensionCalculator, format *types.FontDef) int {

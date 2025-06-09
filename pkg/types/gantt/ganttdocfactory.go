@@ -52,7 +52,10 @@ func (d *GanttDocument) initFormats(formats map[string]GanttFormat) {
 		fg.Anchor = types.FontDefAnchorEnum_right
 		fentry := types.InitFontDef(nil, "serif", 7, false, false, 0)
 		fentry.MaxLenBeforeBreak = 1000
-		fevent := types.InitFontDef(nil, "sans-serif", 10, false, false, 0)
+		fevent := types.InitFontDef(nil, "sans-serif", 8, false, false, 0)
+		fevent.Color = "red"
+		fevent.MaxLenBeforeBreak = 200
+		fevent.Anchor = types.FontDefAnchorEnum_left
 		defaultFill := "#f0f0f0"
 		fill := types.FillDef{
 			Color: &defaultFill,

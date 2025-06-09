@@ -37,7 +37,7 @@ groups:
         end: 2025-10-07
 events:
   - date: 2025-01-01
-    name: Event 1
+    text: Event 1
     description: I am a description of an event 
     entryRefs:
       - groupRef: I am group 2
@@ -45,7 +45,7 @@ events:
       - groupRef: I am another group
         entryRef: G2 / T2
   - date: 2025-02-11
-    name: Just another event
+    text: Just another event
     description: Something is happening here 
     entryRefs:
       - groupRef: I am group 1
@@ -57,7 +57,7 @@ events:
       - groupRef: I am another group
         entryRef: G2 / T2
   - date: 2025-02-20
-    name: Just another event (2)
+    text: Just another event (2)
     description: Something is happening here 
     entryRefs:
       - groupRef: I am group 2
@@ -65,7 +65,7 @@ events:
       - groupRef: Don't ask me why I am here
         entryRef: Task Three
   - date: 2025-03-31
-    name: Just another event (3)
+    text: Just another event (3)
     description: Something is happening here 
     entryRefs:
       - groupRef: I am group 2

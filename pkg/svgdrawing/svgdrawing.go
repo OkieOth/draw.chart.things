@@ -245,8 +245,12 @@ func (d *SvgDrawing) textFormat(fontDef *types.FontDef) string {
 		}
 	}
 
+	anchor := fmt.Sprintf("%s", fontDef.Anchor)
+	if anchor == "right" {
+		anchor = "end"
+	}
 	txtFormat := fmt.Sprintf("text-anchor:%s;font-family:%s;font-size:%dpx;fill:%s",
-		fontDef.Anchor, font, fontDef.Size, fontDef.Color)
+		anchor, font, fontDef.Size, fontDef.Color)
 
 	if fontDef.Weight != nil && *fontDef.Weight == types.FontDefWeightEnum_bold {
 		txtFormat += ";font-weight:bold"
@@ -277,6 +281,8 @@ func (d *SvgDrawing) DrawText(text string, x, currentY, width int, fontDef *type
 		xTxt := x
 		if fontDef.Anchor == types.FontDefAnchorEnum_middle {
 			xTxt = x + (width / 2)
+		} else if fontDef.Anchor == types.FontDefAnchorEnum_right {
+			xTxt = x + width - types.GlobalPadding - 5
 		}
 		d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
 		currentY += l.Height
