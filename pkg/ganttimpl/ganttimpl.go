@@ -11,11 +11,25 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types/gantt"
 )
 
-func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Time) error {
+func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Time, groupFiles []string, title string) error {
 	input, err := types.LoadInputFromFile[gantt.Gantt](inputFile)
 	if err != nil {
 		return err
 	}
+
+	if title != "" {
+		input.Title = title
+	}
+
+	if groupFiles != nil && len(groupFiles) > 0 {
+		input, err = loadAdditionalGroupFilesAndMerge(input, groupFiles)
+		if err != nil {
+			return fmt.Errorf("failed to load additional group files: %w", err)
+		}
+	}
+
+	input = trimInputToDates(input, startDate, endDate)
+
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
 
 	doc, err := InitialLayoutGantt(input, textDimensionCalulator, startDate, endDate)
@@ -324,4 +338,49 @@ func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, 
 		height += (monthFormat.Size + types.GlobalMinBoxMargin) // add space for month label
 	}
 	return currentX - xOffset, height, nil
+}
+
+func loadAdditionalGroupFilesAndMerge(input *gantt.Gantt, groupFiles []string) (*gantt.Gantt, error) {
+	for _, groupFile := range groupFiles {
+		g, err := types.LoadInputFromFile[gantt.Group](groupFile)
+		if err != nil {
+			return input, err
+		}
+		input.Groups = append(input.Groups, *g)
+	}
+	return input, nil
+}
+
+func trimInputToDates(input *gantt.Gantt, startDate, endDate time.Time) *gantt.Gantt {
+	groups := make([]gantt.Group, 0)
+	for _, group := range input.Groups {
+		if (group.End == nil || group.End.Equal(endDate) || group.End.After(endDate)) &&
+			(group.Start == nil || group.Start.Equal(startDate) || group.Start.Before(startDate)) {
+			g := gantt.NewGroup()
+			g.End = group.End
+			g.Start = group.Start
+			g.Format = group.Format
+			g.Name = group.Name
+			g.Entries = filterEntriesByDates(group.Entries, startDate, endDate)
+			groups = append(groups, *g)
+		}
+	}
+	input.Groups = groups
+	return input
+}
+
+func filterEntriesByDates(entries []gantt.Entry, startDate time.Time, endDate time.Time) []gantt.Entry {
+	ret := make([]gantt.Entry, 0)
+	for _, entry := range entries {
+		if (entry.End == nil || entry.End.Equal(endDate) || entry.End.After(endDate)) &&
+			(entry.Start == nil || entry.Start.Equal(startDate) || entry.Start.Before(startDate)) {
+			var e gantt.Entry
+			e.End = entry.End
+			e.Start = entry.Start
+			e.Format = entry.Format
+			e.Name = entry.Name
+			ret = append(ret, e)
+		}
+	}
+	return ret
 }

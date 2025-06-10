@@ -44,6 +44,6 @@ func TestDrawGanttFromFile(t *testing.T) {
 	endDate := time.Date(2025, 3, 31, 0, 0, 0, 0, time.UTC)
 	outputFile := "../../temp/simple_gantt.svg"
 	inputFile := "../../resources/examples_gantt/simple.yaml"
-	err := ganttimpl.DrawGanttFromFile(inputFile, outputFile, startDate, endDate)
+	err := ganttimpl.DrawGanttFromFile(inputFile, outputFile, startDate, endDate, nil, "")
 	require.Nil(t, err)
 }
