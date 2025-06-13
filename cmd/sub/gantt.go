@@ -11,7 +11,8 @@ import (
 
 var startDate string
 var endDate string
-var groups []string
+var additionalGroups []string
+var additionalEvents string
 var title string
 
 var GanttCmd = &cobra.Command{
@@ -30,7 +31,7 @@ var GanttCmd = &cobra.Command{
 			fmt.Println("Invalid end date format. Please use YYYY-MM-DD.")
 			return
 		}
-		err = ganttimpl.DrawGanttFromFile(From, Output, start, end, groups, title)
+		err = ganttimpl.DrawGanttFromFile(From, Output, start, end, additionalGroups, additionalEvents, title)
 		if err != nil {
 			fmt.Println("Error while drawing gantt: ", err)
 		}
@@ -42,7 +43,8 @@ func init() {
 	GanttCmd.Flags().StringVarP(&startDate, "start", "s", "", "Start date for the gantt diagram (format: YYYY-MM-DD)")
 	GanttCmd.Flags().StringVarP(&endDate, "end", "e", "", "End date for the gantt diagram (format: YYYY-MM-DD)")
 	GanttCmd.Flags().StringVarP(&title, "title", "t", "", "Title for the diagram to create")
-	GanttCmd.Flags().StringSliceVarP(&groups, "group", "g", make([]string, 0), "file paths to group files that will be merged with the input file")
+	GanttCmd.Flags().StringSliceVarP(&additionalGroups, "groups", "g", make([]string, 0), "Optional multiple paths to group files that will be merged with the input file")
+	GanttCmd.Flags().StringVarP(&additionalEvents, "events", "v", "", "Optional path to a file  to load the events from. The loaded events will be merged with the input file")
 	if err := GanttCmd.MarkFlagRequired("start"); err != nil {
 		fmt.Println("Error marking start date flag as required:", err)
 	}

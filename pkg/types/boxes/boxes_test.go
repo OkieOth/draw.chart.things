@@ -38,7 +38,7 @@ func TestLoadBoxes(t *testing.T) {
 			assert.True(t, defFormatExist)
 			assert.NotNil(t, defaultFormat.Border)
 			assert.Equal(t, "black", *defaultFormat.Border.Color)
-			assert.Equal(t, 1, *defaultFormat.Border.Width)
+			assert.Equal(t, 1.0, *defaultFormat.Border.Width)
 			assert.NotNil(t, defaultFormat.Fill)
 			assert.Equal(t, "lightgreen", *defaultFormat.Fill.Color)
 			assert.Nil(t, defaultFormat.FontCaption)

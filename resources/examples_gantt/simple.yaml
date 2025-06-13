@@ -17,7 +17,7 @@ groups:
         start: 2025-02-03
         end: 2025-03-10
       - name: G2 / T2
-        start: 2025-03-01
+        start: 2025-03-02
         end: 2025-03-10
   - name: I am another group
     entries:
@@ -74,3 +74,5 @@ events:
         entryRef: Task Three
       - groupRef: I am group 1
         entryRef: I am a Task
+  - date: 2025-03-15
+    text: I needed another one

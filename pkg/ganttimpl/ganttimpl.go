@@ -11,7 +11,7 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types/gantt"
 )
 
-func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Time, groupFiles []string, title string) error {
+func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Time, additionalGroupFiles []string, additionalEventsFile string, title string) error {
 	input, err := types.LoadInputFromFile[gantt.Gantt](inputFile)
 	if err != nil {
 		return err
@@ -21,10 +21,17 @@ func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Tim
 		input.Title = title
 	}
 
-	if groupFiles != nil && len(groupFiles) > 0 {
-		input, err = loadAdditionalGroupFilesAndMerge(input, groupFiles)
+	if additionalGroupFiles != nil && len(additionalGroupFiles) > 0 {
+		input, err = loadAdditionalGroupFilesAndMerge(input, additionalGroupFiles)
 		if err != nil {
 			return fmt.Errorf("failed to load additional group files: %w", err)
+		}
+	}
+
+	if additionalEventsFile != "" {
+		input, err = loadAdditionalEventsFileAndMerge(input, additionalEventsFile)
+		if err != nil {
+			return fmt.Errorf("failed to load additional events file: %w", err)
 		}
 	}
 
@@ -340,6 +347,15 @@ func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, 
 	return currentX - xOffset, height, nil
 }
 
+func loadAdditionalEventsFileAndMerge(input *gantt.Gantt, eventFile string) (*gantt.Gantt, error) {
+	e, err := types.LoadInputFromFile[[]gantt.Event](eventFile)
+	if err != nil {
+		return input, err
+	}
+	input.Events = append(input.Events, *e...)
+	return input, nil
+}
+
 func loadAdditionalGroupFilesAndMerge(input *gantt.Gantt, groupFiles []string) (*gantt.Gantt, error) {
 	for _, groupFile := range groupFiles {
 		g, err := types.LoadInputFromFile[gantt.Group](groupFile)
@@ -354,8 +370,7 @@ func loadAdditionalGroupFilesAndMerge(input *gantt.Gantt, groupFiles []string) (
 func trimInputToDates(input *gantt.Gantt, startDate, endDate time.Time) *gantt.Gantt {
 	groups := make([]gantt.Group, 0)
 	for _, group := range input.Groups {
-		if (group.End == nil || group.End.Equal(endDate) || group.End.After(endDate)) &&
-			(group.Start == nil || group.Start.Equal(startDate) || group.Start.Before(startDate)) {
+		if isDateToBeConsidered(group.Start, group.End, startDate, endDate) {
 			g := gantt.NewGroup()
 			g.End = group.End
 			g.Start = group.Start
@@ -366,14 +381,21 @@ func trimInputToDates(input *gantt.Gantt, startDate, endDate time.Time) *gantt.G
 		}
 	}
 	input.Groups = groups
+	events := make([]gantt.Event, 0)
+	for _, event := range input.Events {
+		if event.Date.Equal(startDate) || event.Date.Equal(endDate) || (event.Date.After(startDate) && event.Date.Before(endDate)) {
+			// Only keep events that are within the date range
+			events = append(events, event)
+		}
+	}
+	input.Events = events
 	return input
 }
 
 func filterEntriesByDates(entries []gantt.Entry, startDate time.Time, endDate time.Time) []gantt.Entry {
 	ret := make([]gantt.Entry, 0)
 	for _, entry := range entries {
-		if (entry.End == nil || entry.End.Equal(endDate) || entry.End.After(endDate)) &&
-			(entry.Start == nil || entry.Start.Equal(startDate) || entry.Start.Before(startDate)) {
+		if isDateToBeConsidered(entry.Start, entry.End, startDate, endDate) {
 			var e gantt.Entry
 			e.End = entry.End
 			e.Start = entry.Start
@@ -383,4 +405,14 @@ func filterEntriesByDates(entries []gantt.Entry, startDate time.Time, endDate ti
 		}
 	}
 	return ret
+}
+
+func isDateToBeConsidered(minDate, maxDate *time.Time, startDate, endDate time.Time) bool {
+	if minDate != nil && minDate.After(endDate) {
+		return false
+	}
+	if maxDate != nil && maxDate.Before(startDate) {
+		return false
+	}
+	return true
 }
