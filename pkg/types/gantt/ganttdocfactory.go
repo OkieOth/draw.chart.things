@@ -6,7 +6,19 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
-func (d *GanttDocument) CreateDocGanttGroup(gg *Group, startDate, endDate time.Time) *DocGanttGroup {
+func (d *GanttDocument) initEntryReferences(dge *DocGanttEntry, entry *Entry) {
+	if entry.References != nil {
+		for _, ref := range entry.References {
+			de := DocEntryRef{
+				GroupRef: ref.GroupRef,
+				EntryRef: ref.EntryRef,
+			}
+			dge.References = append(dge.References, de)
+		}
+	}
+}
+
+func (d *GanttDocument) CreateDocGanttGroup(gg *Group) *DocGanttGroup {
 	g := NewDocGanttGroup()
 	g.Name = gg.Name
 	g.Start = gg.Start
@@ -17,6 +29,9 @@ func (d *GanttDocument) CreateDocGanttGroup(gg *Group, startDate, endDate time.T
 			dge.Name = entry.Name
 			dge.Start = entry.Start
 			dge.End = entry.End
+			dge.Duration = entry.Duration
+			dge.Description = entry.Description
+			d.initEntryReferences(dge, &entry)
 			if entry.Format != nil {
 				if f, found := d.Formats[*entry.Format]; found {
 					dge.Format = &f
@@ -100,16 +115,16 @@ func (d *GanttDocument) initGroups(groups []Group, startDate, endDate time.Time)
 		var dg *DocGanttGroup
 		if group.Start == nil && group.End == nil {
 			// group is always present
-			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group)
 		} else if group.Start == nil && group.End != nil && group.End.After(startDate) {
 			// group ends after the start date
-			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group)
 		} else if group.Start != nil && group.Start.Before(endDate) && group.End == nil {
 			// group ends after the start date
-			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group)
 		} else if group.Start.Before(endDate) || group.End.After(startDate) {
 			// the group is in the range of the given times
-			dg = d.CreateDocGanttGroup(&group, startDate, endDate)
+			dg = d.CreateDocGanttGroup(&group)
 		}
 		if dg != nil {
 			d.Groups = append(d.Groups, *dg)
