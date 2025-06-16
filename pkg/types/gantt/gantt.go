@@ -136,8 +136,8 @@ type Entry struct {
     // Description of the entry
     Description *string  `yaml:"description,omitempty"`
 
-    // List of resources assigned to the entry
-    Resources []string  `yaml:"resources,omitempty"`
+    // List of references to entries in other groups
+    References []EntryRef  `yaml:"references,omitempty"`
 
     // Optional reference to the format to be used for the entry
     Format *string  `yaml:"format,omitempty"`
@@ -145,7 +145,7 @@ type Entry struct {
 
 func NewEntry() *Entry {
         return &Entry{
-            Resources: make([]string, 0),
+            References: make([]EntryRef, 0),
         }
 }
 

@@ -52,7 +52,7 @@ class "**Entry**" as Entry {
         DateTimeType end
         IntegerType duration
         StringType description
-        StringType[] resources
+        EntryRef[] references
         StringType format
 }
 
@@ -177,6 +177,7 @@ Entry  *--  RelativeStart
 
 
 
+Entry "0" *-- "n" EntryRef
 
 
     

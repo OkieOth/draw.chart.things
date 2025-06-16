@@ -162,11 +162,11 @@
                     "description": "Description of the entry",
                     "type": "string"
                 },
-                "resources": {
-                    "description": "List of resources assigned to the entry",
+                "references": {
+                    "description": "List of references to entries in other groups",
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/DocEntryRef"
                     }
                 },
                 "format": {

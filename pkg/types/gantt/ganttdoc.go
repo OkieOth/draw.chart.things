@@ -173,15 +173,15 @@ type DocGanttEntry struct {
     // Description of the entry
     Description *string  `yaml:"description,omitempty"`
 
-    // List of resources assigned to the entry
-    Resources []string  `yaml:"resources,omitempty"`
+    // List of references to entries in other groups
+    References []DocEntryRef  `yaml:"references,omitempty"`
 
     Format *DocGanttFormat  `yaml:"format,omitempty"`
 }
 
 func NewDocGanttEntry() *DocGanttEntry {
         return &DocGanttEntry{
-            Resources: make([]string, 0),
+            References: make([]DocEntryRef, 0),
         }
 }
 
