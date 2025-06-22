@@ -85,6 +85,65 @@ func (d *GanttDocument) initFormats(formats map[string]GanttFormat) {
 		}
 		d.Formats["default"] = f
 	}
+	// add missing font format elements
+	defaultFormat := d.Formats["default"]
+	for name, format := range d.Formats {
+		addMissingFontFormatValues(name, format, defaultFormat, d.Formats)
+	}
+}
+
+func addMissingFontFormatValues(name string, format DocGanttFormat, defaultFormat DocGanttFormat, formats map[string]DocGanttFormat) {
+	entryFont := format.EntryFont
+	changed := false
+	if entryFont == nil {
+		entryFont = defaultFormat.EntryFont
+		changed = true
+	} else {
+		if entryFont.MaxLenBeforeBreak == 0 {
+			entryFont.MaxLenBeforeBreak = defaultFormat.EntryFont.MaxLenBeforeBreak
+			changed = true
+		}
+		if entryFont.LineHeight == 0 {
+			entryFont.LineHeight = defaultFormat.EntryFont.LineHeight
+			changed = true
+		}
+		if entryFont.Color == "" {
+			entryFont.Color = defaultFormat.EntryFont.Color
+			changed = true
+		}
+		if entryFont.Aligned == nil {
+			entryFont.Aligned = defaultFormat.EntryFont.Aligned
+			changed = true
+		}
+		if entryFont.SpaceTop == 0 {
+			entryFont.SpaceTop = defaultFormat.EntryFont.SpaceTop
+			changed = true
+		}
+		if entryFont.SpaceBottom == 0 {
+			entryFont.SpaceBottom = defaultFormat.EntryFont.SpaceBottom
+			changed = true
+		}
+		if entryFont.Size == 0 {
+			entryFont.Size = defaultFormat.EntryFont.Size
+			changed = true
+		}
+		if entryFont.Weight == nil {
+			entryFont.Weight = defaultFormat.EntryFont.Weight
+			changed = true
+		}
+		if entryFont.Type == nil {
+			entryFont.Type = defaultFormat.EntryFont.Type
+			changed = true
+		}
+		if entryFont.Font == "" {
+			entryFont.Font = defaultFormat.EntryFont.Font
+			changed = true
+		}
+	}
+
+	if changed {
+		formats[name] = format
+	}
 }
 
 func (d *GanttDocument) initEvents(events []Event, startDate, endDate time.Time) {

@@ -1,0 +1,22 @@
+title: Simple Diamond
+formats:
+  default:
+    border:
+      width: 2
+      color: blue
+    fill:
+      color: orange
+globalPadding: 10
+minBoxMargin: 20
+boxes:
+  horizontal:
+    - id: r1_1
+      caption: Left Element
+      text1: I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line
+      horizontal:
+        - id: r1_1_1
+          caption: 1
+    - extVertical: ext/ext_01.yaml
+    - id: r3_1
+      caption: Right Element
+      text1: I am in the first line

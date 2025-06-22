@@ -136,8 +136,45 @@ func TestInitDimensions(t *testing.T) {
 	emptyFormats := map[string]boxes.BoxFormat{}
 	for _, test := range tests {
 		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats)
-		le.InitDimensions(dc, 5, 10)
+		le.InitDimensions(dc)
 		assert.Equal(t, test.expectedHeight, le.Height)
 		assert.Equal(t, test.expectedWidth, le.Width)
+	}
+}
+
+func TestLoadBoxesFromFile(t *testing.T) {
+	tests := []struct {
+		testFile        string
+		shouldLoad      bool
+		fileToCompareTo string
+	}{
+		{
+			testFile:        "../../resources/examples_boxes/horizontal_nested_diamond_ext.yaml",
+			shouldLoad:      true,
+			fileToCompareTo: "../../resources/examples_boxes/horizontal_nested_diamond.yaml",
+		},
+		{
+			testFile:        "../../resources/examples_boxes/horizontal_nested_diamond_ext2.yaml",
+			shouldLoad:      true,
+			fileToCompareTo: "../../resources/examples_boxes/horizontal_nested_diamond.yaml",
+		},
+		{
+			testFile:        "../../resources/examples_boxes/horizontal_nested_diamond_ext2_fail.yaml",
+			shouldLoad:      false,
+			fileToCompareTo: "",
+		},
+	}
+	for _, test := range tests {
+		b, err := boxesimpl.LoadBoxesFromFile(test.testFile)
+		if test.shouldLoad {
+			require.Nil(t, err)
+			require.NotNil(t, b)
+			// Compare the loaded file with the original file
+			b2, err := types.LoadInputFromFile[boxes.Boxes](test.fileToCompareTo)
+			require.Nil(t, err)
+			assert.Equal(t, b, b2, "The loaded boxes should match the expected boxes from the file")
+		} else {
+			require.NotNil(t, err)
+		}
 	}
 }

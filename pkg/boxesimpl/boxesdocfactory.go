@@ -50,9 +50,13 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		fill = f.Fill
 		if f.Padding != nil {
 			padding = *f.Padding
+		} else {
+			f.Padding = &padding
 		}
 		if f.BoxMargin != nil {
 			boxMargin = *f.BoxMargin
+		} else {
+			f.BoxMargin = &boxMargin
 		}
 		if f.VerticalTxt != nil {
 			verticalTxt = *f.VerticalTxt

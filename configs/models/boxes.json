@@ -57,8 +57,18 @@
                     "description": "Second additional text",
                     "type": "string"
                 },
+                "extVertical": {
+                    "description": "If set, then the content for 'vertical' attrib is loaded from an external file",
+                    "$comment": "relative paths are possible",
+                    "type": "string"
+                },
                 "vertical": {
                     "$ref": "#/definitions/LayoutArray"
+                },
+                "extHorizontal": {
+                    "description": "If set, then the content for 'horizontal' attrib is loaded from an external file",
+                    "$comment": "relative paths are possible",
+                    "type": "string"
                 },
                 "horizontal": {
                     "$ref": "#/definitions/LayoutArray"

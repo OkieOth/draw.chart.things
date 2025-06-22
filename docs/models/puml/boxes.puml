@@ -21,7 +21,9 @@ class "**Layout**" as Layout {
         StringType caption
         StringType text1
         StringType text2
+        StringType extVertical
         Layout[] vertical
+        StringType extHorizontal
         Layout[] horizontal
         StringType[] tags
         Connection[] connections
@@ -134,7 +136,9 @@ Boxes  *--  Format
 
 
 
+
 Layout "0" *-- "n" Layout
+
 
 
 

@@ -2,28 +2,102 @@ package boxesimpl
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
 	"github.com/okieoth/draw.chart.things/pkg/types"
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
-func DrawBoxesFromFile(inputFile, outputFile string) error {
-
+func LoadBoxesFromFile(inputFile string) (*boxes.Boxes, error) {
 	layout, err := types.LoadInputFromFile[boxes.Boxes](inputFile)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("error while loading boxes from file: %w", err)
 	}
+	err = replaceAlternativePaths(&layout.Boxes, inputFile)
+	if err != nil {
+		return nil, fmt.Errorf("error while replacing relative paths: %w", err)
+	}
+	return layout, nil
+}
+
+func DrawBoxesFromFile(inputFile, outputFile string) error {
+	layout, err := LoadBoxesFromFile(inputFile)
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
 
 	doc, err := InitialLayoutBoxes(layout, textDimensionCalulator)
 	if err != nil {
 		return err
 	}
-	fmt.Println(doc) // Dummy
-	// TODO: Implement this
 
-	// TODO: Draw the boxes
+	// FIXME, TODO: this doesn't terminate!!!!
+	//doc.ConnectBoxes()
+	output, err := os.Create(outputFile)
+	svgdrawing := svgdrawing.NewDrawing(output)
+	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
+	doc.DrawBoxes(svgdrawing)
+	doc.DrawConnections(svgdrawing)
+	svgdrawing.Done()
+	output.Close()
+	return nil
+}
+
+func initContainerFromAlternativePath(extPathToLoad, origInputFile string) ([]boxes.Layout, error) {
+	var pathToLoad string
+	if path.IsAbs(extPathToLoad) {
+		pathToLoad = extPathToLoad
+	} else {
+		// relative path, so we need to resolve it against the original input file
+		origDir := filepath.Dir(origInputFile)
+		pathToLoad = filepath.Join(origDir, extPathToLoad)
+	}
+	layoutArray, err := types.LoadInputFromFile[[]boxes.Layout](pathToLoad)
+	if err != nil {
+		return make([]boxes.Layout, 0), err
+	}
+	return *layoutArray, nil
+}
+
+func replaceAlternativePaths(l *boxes.Layout, inputFile string) error {
+	if l == nil {
+		return nil
+	}
+	if l.ExtHorizontal != nil {
+		if cont, err := initContainerFromAlternativePath(*l.ExtHorizontal, inputFile); err != nil {
+			return fmt.Errorf("error while initialize horizontal container from relative path: %w", err)
+		} else {
+			l.ExtHorizontal = nil // clear the alternative path
+			l.Horizontal = cont
+		}
+	}
+	if l.ExtVertical != nil {
+		if cont, err := initContainerFromAlternativePath(*l.ExtVertical, inputFile); err != nil {
+			return fmt.Errorf("error while initialize vertical container from relative path: %w", err)
+		} else {
+			l.ExtVertical = nil // clear the alternative path
+			l.Vertical = cont
+		}
+	}
+	if err := replaceAlternativePathsForContainer(l.Horizontal, inputFile); err != nil {
+		return fmt.Errorf("error while replacing alternative paths for horizontal container: %w", err)
+	}
+	if err := replaceAlternativePathsForContainer(l.Vertical, inputFile); err != nil {
+		return fmt.Errorf("error while replacing alternative paths for vertical container: %w", err)
+	}
+	return nil
+}
+
+func replaceAlternativePathsForContainer(cont []boxes.Layout, inputFile string) error {
+	if cont == nil {
+		return nil
+	}
+	for i, _ := range cont {
+		if err := replaceAlternativePaths(&cont[i], inputFile); err != nil {
+			return fmt.Errorf("error while replacing alternative paths for container: %w", err)
+		}
+	}
 	return nil
 }
 
@@ -31,7 +105,7 @@ func InitialLayoutBoxes(b *boxes.Boxes, c types.TextDimensionCalculator) (*boxes
 	doc := DocumentFromBoxes(b)
 	doc.Boxes.X = doc.GlobalPadding
 	doc.Boxes.Y = doc.GlobalPadding
-	doc.Boxes.InitDimensions(c, doc.GlobalPadding, doc.MinBoxMargin)
+	doc.Boxes.InitDimensions(c)
 	doc.Width = doc.Boxes.Width + doc.GlobalPadding*2
 	doc.Height = doc.Boxes.Height + doc.GlobalPadding*2
 	if doc.Title != "" {

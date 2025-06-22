@@ -56,7 +56,13 @@ type Layout struct {
     // Second additional text
     Text2 string  `yaml:"text2"`
 
+    // If set, then the content for 'vertical' attrib is loaded from an external file
+    ExtVertical *string  `yaml:"extVertical,omitempty"`
+
     Vertical []Layout  `yaml:"vertical,omitempty"`
+
+    // If set, then the content for 'horizontal' attrib is loaded from an external file
+    ExtHorizontal *string  `yaml:"extHorizontal,omitempty"`
 
     Horizontal []Layout  `yaml:"horizontal,omitempty"`
 

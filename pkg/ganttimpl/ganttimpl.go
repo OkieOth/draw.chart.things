@@ -146,14 +146,19 @@ func drawEvents(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffse
 
 func drawGroupEntries(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, yOffset int, format *types.FontDef, c types.TextDimensionCalculator) {
 	lineWidth := 0.5
+	borderOpacity := 1.0
 	borderColor := "black"
 	startDate := doc.StartDate
 	endDate := doc.EndDate.Add(time.Hour * 24) // extend end date by one day to include the last day
 	for _, group := range doc.Groups {
 		for _, entry := range group.Entries {
 			f := types.LineDef{
-				Color: &borderColor,
-				Width: &lineWidth,
+				Color:   &borderColor,
+				Width:   &lineWidth,
+				Opacity: &borderOpacity,
+			}
+			if entry.Format.EntryFill != nil && entry.Format.EntryFill.Color != nil {
+				f.Color = entry.Format.EntryFill.Color
 			}
 			// TODO - calc start x and width based on entry start and end dates
 			entryStart := startDate
@@ -170,11 +175,25 @@ func drawGroupEntries(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, 
 			if entryStart != startDate {
 				xOffset = int(entryStart.Sub(*doc.StartDate).Hours()/24) * types.GlobalDayWidth
 			}
+			textFormat := format
+			if entry.Format != nil && entry.Format.EntryFont != nil {
+				textFormat = entry.Format.EntryFont
+			}
+
+			opacity := 0.9
+			if entry.Format != nil && entry.Format.EntryFill != nil && entry.Format.EntryFill.Opacity != nil {
+				opacity = *entry.Format.EntryFill.Opacity
+			}
+
+			fill := types.FillDef{
+				Color:   entry.Format.EntryFill.Color,
+				Opacity: &opacity}
+
 			rf := types.RectWithTextFormat{
 				Padding:     0,
-				FontCaption: *format,
+				FontCaption: *textFormat,
 				Border:      &f,
-				Fill:        entry.Format.EntryFill,
+				Fill:        &fill,
 			}
 			drawing.DrawRectWithText("", entry.Name, "", "", *doc.GroupNameWidth+xOffset, entry.Y+yOffset, width, types.GlobalGanttEntryHeight, rf)
 		}

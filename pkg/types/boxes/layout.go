@@ -726,7 +726,7 @@ func (l *LayoutElement) FixCollisionInCase(connectionLines []ConnectionLine, ind
 	return []ConnectionLine{conn}
 }
 
-func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
+func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffset int) {
 	if l.Vertical != nil && len(l.Vertical.Elems) > 0 {
 		curX := l.X
 		l.Vertical.X = curX
@@ -745,9 +745,13 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 			}
 			sub.X = curX
 			sub.Y = curY
-			sub.InitDimensions(c, defaultPadding, defaultBoxMargin)
+			sub.InitDimensions(c)
 			// eiko: creates issues?
-			curY += (sub.Height + defaultBoxMargin)
+			if l.Format != nil {
+				curY += (sub.Height + l.Format.MinBoxMargin)
+			} else {
+				curY += (sub.Height + types.GlobalPadding)
+			}
 			if sub.Width > w {
 				w = sub.Width
 			}
@@ -764,7 +768,11 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 
 		l.Vertical.Height = l.Vertical.Elems[lv-1].Y + l.Vertical.Elems[lv-1].Height - l.Vertical.Y
 		l.Height += l.Vertical.Height
-		l.adjustDimensionsBasedOnNested(w, defaultPadding)
+		padding := types.GlobalPadding
+		if l.Format != nil {
+			padding = l.Format.Padding
+		}
+		l.adjustDimensionsBasedOnNested(w, padding)
 		// TODO: remove later if it proves as working
 		// if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
 		// 	l.Height += defaultPadding
@@ -785,7 +793,7 @@ func (l *LayoutElement) adjustDimensionsBasedOnNested(width, padding int) {
 	}
 }
 
-func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOffset, defaultPadding, defaultBoxMargin int) {
+func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOffset int) {
 	if l.Horizontal != nil && len(l.Horizontal.Elems) > 0 {
 		curX := l.X
 		l.Horizontal.X = curX
@@ -799,12 +807,12 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 				hasChilds = true
 			}
 			if w > 0 {
-				w += defaultBoxMargin
+				w += l.Format.MinBoxMargin
 			}
 			sub.X = curX
 			sub.Y = curY
-			sub.InitDimensions(c, defaultPadding, defaultBoxMargin)
-			curX += (sub.Width + defaultBoxMargin)
+			sub.InitDimensions(c)
+			curX += (sub.Width + l.Format.MinBoxMargin)
 			w += sub.Width
 			if sub.Height > h {
 				h = sub.Height
@@ -824,7 +832,7 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		l.Horizontal.Width = w
 		l.Height += l.Horizontal.Height
 
-		l.adjustDimensionsBasedOnNested(w, defaultPadding)
+		l.adjustDimensionsBasedOnNested(w, l.Format.Padding)
 		// TODO: remove later if it proves as working
 		// if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
 		// 	l.Height += defaultPadding
@@ -832,7 +840,7 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 	}
 }
 
-func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator, defaultPadding, defaultBoxMargin int) {
+func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	var cW, cH, t1W, t1H, t2W, t2H int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
@@ -906,8 +914,8 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator, defaultP
 		}
 	}
 
-	l.initVertical(c, yInnerOffset, defaultPadding, defaultBoxMargin)
-	l.initHorizontal(c, yInnerOffset, defaultPadding, defaultBoxMargin)
+	l.initVertical(c, yInnerOffset)
+	l.initHorizontal(c, yInnerOffset)
 }
 
 func (l *LayoutElement) adjustToRaster(value int) int {
