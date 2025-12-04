@@ -801,18 +801,22 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		l.Horizontal.Y = curY
 		var h, w int
 		var hasChilds bool
+		margin := types.GlobalMinBoxMargin
+		if l.Format != nil {
+			margin = l.Format.MinBoxMargin
+		}
 		for i := 0; i < len(l.Horizontal.Elems); i++ {
 			sub := &l.Horizontal.Elems[i]
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
 			}
 			if w > 0 {
-				w += l.Format.MinBoxMargin
+				w += margin
 			}
 			sub.X = curX
 			sub.Y = curY
 			sub.InitDimensions(c)
-			curX += (sub.Width + l.Format.MinBoxMargin)
+			curX += (sub.Width + margin)
 			w += sub.Width
 			if sub.Height > h {
 				h = sub.Height
@@ -832,7 +836,7 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		l.Horizontal.Width = w
 		l.Height += l.Horizontal.Height
 
-		l.adjustDimensionsBasedOnNested(w, l.Format.Padding)
+		l.adjustDimensionsBasedOnNested(w, margin)
 		// TODO: remove later if it proves as working
 		// if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
 		// 	l.Height += defaultPadding
