@@ -25,6 +25,9 @@ func LoadBoxesFromFile(inputFile string) (*boxes.Boxes, error) {
 
 func DrawBoxesFromFile(inputFile, outputFile string) error {
 	layout, err := LoadBoxesFromFile(inputFile)
+	if err != nil {
+		return fmt.Errorf("error while loading input: %v", err)
+	}
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
 
 	doc, err := InitialLayoutBoxes(layout, textDimensionCalulator)
