@@ -120,7 +120,7 @@ func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef)
 func (s *SvgTextDimensionCalculator) Dimensions(txt string, format *types.FontDef) (width, height int) {
 	w, h, lines := s.SplitTxt(txt, format)
 	if len(lines) == 1 {
-		return w, h + types.GlobalPadding
+		return w, h //+ types.GlobalPadding // Eiko: removed for tighter layout
 	}
 	return w, h
 }
@@ -191,6 +191,8 @@ func splitTxtDimensions(
 		lines = appendLineToOutput(line, lh)
 	}
 
+	lines[len(lines)-1].Height = fontSize // Eiko: adjustment to remove the lineHeight from the last line of the text
+	heightSum = (heightSum - lh) + fontSize
 	return maxWidth, heightSum, lines
 }
 

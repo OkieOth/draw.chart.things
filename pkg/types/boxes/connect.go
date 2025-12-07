@@ -2,6 +2,7 @@ package boxes
 
 import (
 	"fmt"
+
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
@@ -944,18 +945,19 @@ func (doc *BoxesDocument) connectContainer(cont *LayoutElemContainer, full bool)
 	}
 }
 
-func (doc *BoxesDocument) ConnectBoxes() {
+func (doc *BoxesDocument) _ConnectBoxes() {
+	// TODO - Needs reimplementation
 	doc.InitStartPositions()
 	doc.InitRoads()
-	doc.connectLayoutElem(&doc.Boxes, false)
-	// doc.moveTooCloseVerticalConnectionLinesFromBorders()
-	// doc.moveTooCloseHorizontalConnectionLinesFromBorders()
-	// doc.moveTooCloseVerticalConnectionLines()
-	// doc.moveTooCloseHorizontalConnectionLines()
-	doc.truncateJoiningConnectionLines()
+	// doc.connectLayoutElem(&doc.Boxes, false)
+	// // doc.moveTooCloseVerticalConnectionLinesFromBorders()
+	// // doc.moveTooCloseHorizontalConnectionLinesFromBorders()
+	// // doc.moveTooCloseVerticalConnectionLines()
+	// // doc.moveTooCloseHorizontalConnectionLines()
+	// doc.truncateJoiningConnectionLines()
 }
 
-func (doc *BoxesDocument) ConnectBoxesFull() {
+func (doc *BoxesDocument) _ConnectBoxesFull() {
 	doc.InitStartPositions()
 	doc.InitRoads()
 	doc.connectLayoutElem(&doc.Boxes, true)

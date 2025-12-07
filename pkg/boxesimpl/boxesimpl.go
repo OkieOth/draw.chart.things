@@ -120,6 +120,6 @@ func InitialLayoutBoxes(b *boxes.Boxes, c types.TextDimensionCalculator) (*boxes
 		}
 	}
 	doc.Boxes.Center()
-	doc.Height = doc.AdjustDocHeight(&doc.Boxes, 0) + doc.GlobalPadding
+	doc.Height = doc.AdjustDocHeight(&doc.Boxes, 0) + (2 * doc.GlobalPadding)
 	return doc, nil
 }

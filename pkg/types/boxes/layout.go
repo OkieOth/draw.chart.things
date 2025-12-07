@@ -781,9 +781,10 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 }
 
 func (l *LayoutElement) adjustDimensionsBasedOnNested(width, padding int) {
-	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
-		l.Height += padding
-	}
+	// TODO: remove later if it proves as working
+	// if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+	// 	l.Height += padding
+	// }
 	if width > l.Width {
 		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
 			l.Width = width + (2 * padding)
@@ -858,9 +859,12 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
 			if !l.Format.VerticalTxt {
 				// normal horizontal text
-				l.Height += cH + p + l.Format.FontCaption.SpaceBottom
+				// Eiko ... TODO
+				l.Height += cH + p
 				if l.Text1 == "" && l.Text2 == "" {
 					l.Height += l.Format.Padding
+				} else {
+					l.Height += l.Format.FontCaption.SpaceBottom
 				}
 			} else {
 				// vertical text
@@ -878,9 +882,11 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			}
 			t1W, t1H = c.Dimensions(l.Text1, &l.Format.FontText1)
 			if !l.Format.VerticalTxt {
-				l.Height += t1H + p + l.Format.FontText1.SpaceBottom
+				l.Height += t1H + p
 				if l.Text2 == "" {
 					l.Height += l.Format.Padding
+				} else {
+					l.Height += l.Format.FontText1.SpaceBottom
 				}
 			} else {
 				t1W, t1H = t1H, t1W
@@ -897,7 +903,7 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			}
 			t2W, t2H = c.Dimensions(l.Text2, &l.Format.FontText2)
 			if !l.Format.VerticalTxt {
-				l.Height += t2H + p + l.Format.FontText2.SpaceBottom
+				l.Height += t2H + p
 				l.Height += l.Format.Padding
 			} else {
 				t2W, t2H = t2H, t2W
@@ -908,7 +914,7 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 		if !l.Format.VerticalTxt {
 			// normal horizontal text
 			l.Height = l.adjustToRaster(l.Height)
-			yInnerOffset = l.Height
+			yInnerOffset = l.Height - l.Format.Padding
 			l.Width = l.adjustToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
 		} else {
 			// vertical text
@@ -917,7 +923,6 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			l.Height = l.adjustToRaster(max(cH, max(t1H, t2H)) + (2 * l.Format.Padding))
 		}
 	}
-
 	l.initVertical(c, yInnerOffset)
 	l.initHorizontal(c, yInnerOffset)
 }

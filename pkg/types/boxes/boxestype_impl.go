@@ -89,6 +89,8 @@ func (doc *BoxesDocument) AdjustDocHeight(le *LayoutElement, currentMax int) int
 		if le.Y+le.Height > currentMax {
 			currentMax = le.Y + le.Height
 		}
+	} else {
+		currentMax = doc.Boxes.Height
 	}
 	if le.Vertical != nil {
 		for _, elem := range le.Vertical.Elems {
