@@ -31,3 +31,6 @@ tmp
 temp
 *\ copy.*
 *\ copy\ *.*
+
+external
+__debug_*
