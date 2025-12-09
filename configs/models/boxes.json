@@ -1,164 +1,172 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "Boxes",
-    "description": "Model to describe the input of block diagrams",
-    "x-domain": "input",
-    "type": "object",
-    "properties": {
-        "title": {
-            "type": "string",
-            "description": "Title of the document"
-        },
-        "boxes": {
-            "$ref": "#/definitions/Layout"
-        },
-        "formats": {
-            "$comment": "if the map contains an key 'default' it will be used as default format",
-            "description": "Map of formats available to be used in the boxes",
-            "type": "object",
-            "additionalProperties": {
-                "$ref": "#/definitions/Format"
-            }
-        },
-        "globalPadding": {
-            "type": "integer",
-            "description": "Padding used as default over the whole diagram",
-            "default": 5
-        },
-        "minBoxMargin": {
-            "type": "integer",
-            "description": "Minimum margin between boxes",
-            "default": 10
-        },
-        "minConnectorMargin": {
-            "type": "integer",
-            "description": "Minimum margin between connectors",
-            "default": 10
-        }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Boxes",
+  "description": "Model to describe the input of block diagrams",
+  "x-domain": "input",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the document"
     },
-    "required": ["title", "boxes"],
-    "definitions": {
-        "Layout": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "unique identifier of that entry",
-                    "type": "string"
-                },
-                "caption": {
-                    "description": "Some kind of the main text",
-                    "type": "string"
-                },
-                "text1": {
-                    "description": "First additional text",
-                    "type": "string"
-                },
-                "text2": {
-                    "description": "Second additional text",
-                    "type": "string"
-                },
-                "extVertical": {
-                    "description": "If set, then the content for 'vertical' attrib is loaded from an external file",
-                    "$comment": "relative paths are possible",
-                    "type": "string"
-                },
-                "vertical": {
-                    "$ref": "#/definitions/LayoutArray"
-                },
-                "extHorizontal": {
-                    "description": "If set, then the content for 'horizontal' attrib is loaded from an external file",
-                    "$comment": "relative paths are possible",
-                    "type": "string"
-                },
-                "horizontal": {
-                    "$ref": "#/definitions/LayoutArray"
-                },
-                "tags": {
-                    "description": "Tags to annotate the box, tags are used to format and filter",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "connections": {
-                    "description": "List of connections to other boxes",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Connection"
-                    }
-                },
-                "format": {
-                    "description": "reference to the format to use for this box",
-                    "type": "string"
-                }
-            },
-            "required": ["type", "id", "caption", "text1", "text2"]
-        },
-        "LayoutArray": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/Layout"
-            }
-        },
-        "Connection": {
-            "type": "object",
-            "properties": {
-                "destId": {
-                    "description": "box id of the destination",
-                    "type": "string"
-                },
-                "sourceArrow": {
-                    "description": "Arrow at the source box",
-                    "type": "boolean"
-                },
-                "destArrow": {
-                    "description": "Arrow at the destination box",
-                    "type": "boolean"
-                },
-                "tags": {
-                    "description": "Tags to annotate the connection, tags are used to format",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": ["destId", "sourceArrow", "destArrow", "tags"]
-        },
-        "Format": {
-            "type": "object",
-            "properties": {
-                "verticalTxt": {
-                    "type": "boolean",
-                    "description": "If true, the text will be displayed vertically",
-                    "default": false
-                },
-                "fontCaption": {
-                    "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "fontText1": {
-                    "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "fontText2": {
-                    "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "border": {
-                    "$ref": "./formats.json#/definitions/LineDef"
-                },
-                "fill": {
-                    "$ref": "./formats.json#/definitions/FillDef"
-                },
-                "padding": {
-                    "type": "integer",
-                    "description": "Padding used for this format",
-                    "default": 5
-                },
-                "boxMargin": {
-                    "type": "integer",
-                    "description": "Minimum margin between boxes",
-                    "default": 10
-                }
-            }
-        }
+    "boxes": {
+      "$ref": "#/definitions/Layout"
+    },
+    "formats": {
+      "$comment": "if the map contains an key 'default' it will be used as default format",
+      "description": "Map of formats available to be used in the boxes",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/Format"
+      }
+    },
+    "globalPadding": {
+      "type": "integer",
+      "description": "Padding used as default over the whole diagram",
+      "default": 5
+    },
+    "minBoxMargin": {
+      "type": "integer",
+      "description": "Minimum margin between boxes",
+      "default": 10
+    },
+    "minConnectorMargin": {
+      "type": "integer",
+      "description": "Minimum margin between connectors",
+      "default": 10
     }
+  },
+  "required": ["title", "boxes"],
+  "definitions": {
+    "Layout": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "unique identifier of that entry",
+          "type": "string"
+        },
+        "caption": {
+          "description": "Some kind of the main text",
+          "type": "string"
+        },
+        "text1": {
+          "description": "First additional text",
+          "type": "string"
+        },
+        "text2": {
+          "description": "Second additional text",
+          "type": "string"
+        },
+        "extVertical": {
+          "description": "If set, then the content for 'vertical' attrib is loaded from an external file",
+          "$comment": "relative paths are possible",
+          "type": "string"
+        },
+        "vertical": {
+          "$ref": "#/definitions/LayoutArray"
+        },
+        "extHorizontal": {
+          "description": "If set, then the content for 'horizontal' attrib is loaded from an external file",
+          "$comment": "relative paths are possible",
+          "type": "string"
+        },
+        "horizontal": {
+          "$ref": "#/definitions/LayoutArray"
+        },
+        "tags": {
+          "description": "Tags to annotate the box, tags are used to format and filter",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "connections": {
+          "description": "List of connections to other boxes",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Connection"
+          }
+        },
+        "format": {
+          "description": "reference to the format to use for this box",
+          "type": "string"
+        }
+      },
+      "required": ["type", "id", "caption", "text1", "text2"]
+    },
+    "LayoutArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Layout"
+      }
+    },
+    "Connection": {
+      "type": "object",
+      "properties": {
+        "destId": {
+          "description": "box id of the destination",
+          "type": "string"
+        },
+        "sourceArrow": {
+          "description": "Arrow at the source box",
+          "type": "boolean"
+        },
+        "destArrow": {
+          "description": "Arrow at the destination box",
+          "type": "boolean"
+        },
+        "tags": {
+          "description": "Tags to annotate the connection, tags are used to format",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["destId", "sourceArrow", "destArrow", "tags"]
+    },
+    "Format": {
+      "type": "object",
+      "properties": {
+        "fixedWidth": {
+          "type": "integer",
+          "description": "optional fixed width that will be applied on the box"
+        },
+        "fixedHeight": {
+          "type": "integer",
+          "description": "optional fixed height that will be applied on the box"
+        },
+        "verticalTxt": {
+          "type": "boolean",
+          "description": "If true, the text will be displayed vertically",
+          "default": false
+        },
+        "fontCaption": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontText1": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontText2": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "border": {
+          "$ref": "./formats.json#/definitions/LineDef"
+        },
+        "fill": {
+          "$ref": "./formats.json#/definitions/FillDef"
+        },
+        "padding": {
+          "type": "integer",
+          "description": "Padding used for this format",
+          "default": 5
+        },
+        "boxMargin": {
+          "type": "integer",
+          "description": "Minimum margin between boxes",
+          "default": 10
+        }
+      }
+    }
+  }
 }

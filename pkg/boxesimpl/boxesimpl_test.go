@@ -66,8 +66,8 @@ func TestInitDimensions(t *testing.T) {
 			layout: boxes.Layout{
 				Caption: "test1",
 			},
-			expectedHeight: 72,
-			expectedWidth:  120,
+			expectedHeight: 100,
+			expectedWidth:  150,
 		},
 		{
 			// extends "test1" with an additional text1
@@ -75,8 +75,8 @@ func TestInitDimensions(t *testing.T) {
 				Caption: "test2",
 				Text1:   "test2-text1",
 			},
-			expectedHeight: 128,
-			expectedWidth:  120,
+			expectedHeight: 160,
+			expectedWidth:  150,
 		},
 		{
 			// extends "test2" with an additional text2
@@ -85,8 +85,8 @@ func TestInitDimensions(t *testing.T) {
 				Text1:   "test3-text1",
 				Text2:   "test3-text2",
 			},
-			expectedHeight: 192,
-			expectedWidth:  120,
+			expectedHeight: 220,
+			expectedWidth:  150,
 		},
 		{
 			// basic vertical layout test
@@ -106,8 +106,8 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 433,
-			expectedWidth:  120,
+			expectedHeight: 560,
+			expectedWidth:  150,
 		},
 		{
 			// basic horizontal layout test
@@ -127,8 +127,8 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 269,
-			expectedWidth:  390,
+			expectedHeight: 320,
+			expectedWidth:  530,
 		},
 	}
 

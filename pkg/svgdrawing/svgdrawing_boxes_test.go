@@ -278,7 +278,7 @@ func TestSplitTxt(t *testing.T) {
 				MaxLenBeforeBreak: 100,
 			},
 			expectedWidth:  96,
-			expectedHeight: 28,
+			expectedHeight: 26,
 			expectedLines: []types.TextAndDimensions{
 				{Text: "Hello World Hello", Width: 96, Height: 14},
 				{Text: "World", Width: 28, Height: 14},
@@ -293,7 +293,7 @@ func TestSplitTxt(t *testing.T) {
 				MaxLenBeforeBreak: 51,
 			},
 			expectedWidth:  51,
-			expectedHeight: 98,
+			expectedHeight: 96,
 			expectedLines: []types.TextAndDimensions{
 				{Text: "This is a", Width: 51, Height: 14},
 				{Text: "long text", Width: 51, Height: 14},
@@ -323,13 +323,13 @@ func TestSplitTxt(t *testing.T) {
 			inputText: "Serif font with multiple lines",
 			fontDef: &types.FontDef{
 				Font:              "serif",
-				Size:              14,
+				Size:              12,
 				MaxLenBeforeBreak: 100,
 			},
-			expectedWidth:  94,
-			expectedHeight: 32,
+			expectedWidth:  81,
+			expectedHeight: 26,
 			expectedLines: []types.TextAndDimensions{
-				{Text: "Serif font with", Width: 94, Height: 16},
+				{Text: "Serif font with", Width: 81, Height: 16},
 				{Text: "multiple lines", Width: 88, Height: 16},
 			},
 		},

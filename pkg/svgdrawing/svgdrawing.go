@@ -312,7 +312,7 @@ func (d *SvgDrawing) DrawVerticalText(text string, currentX, y, height int, font
 
 	for _, l := range lines {
 		yTxt := y
-		xTxt := currentX + fontDef.Size
+		xTxt := currentX + fontDef.Size + 2
 		// fmt.Sprintf("%s;transform=\"rotate(-90, %d, %d)\"", txtFormat, xTxt, yTxt)
 		d.canvas.TextRotated(xTxt, yTxt, l.Text, -90, txtFormat)
 		currentX += l.Height

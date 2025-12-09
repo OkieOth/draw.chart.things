@@ -71,6 +71,8 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		FontText2:    types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
 		Border:       border,
 		Fill:         fill,
+		FixedWidth:   f.FixedWidth,
+		FixedHeight:  f.FixedHeight,
 		VerticalTxt:  verticalTxt,
 	}
 }

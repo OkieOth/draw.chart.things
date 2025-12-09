@@ -913,14 +913,34 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 		}
 		if !l.Format.VerticalTxt {
 			// normal horizontal text
-			l.Height = l.adjustToRaster(l.Height)
+			h := l.Height
+			if l.Format.FixedHeight != nil {
+				h = *l.Format.FixedHeight
+			}
+			l.Height = l.adjustToRaster(h)
 			yInnerOffset = l.Height - l.Format.Padding
-			l.Width = l.adjustToRaster(max(cW, max(t1W, t2W)) + (2 * l.Format.Padding))
+			var w int
+			if l.Format.FixedWidth != nil {
+				w = *l.Format.FixedWidth
+			} else {
+				w = max(cW, max(t1W, t2W))
+			}
+			l.Width = l.adjustToRaster(w + (2 * l.Format.Padding))
 		} else {
 			// vertical text
-			l.Width = l.adjustToRaster(l.Width)
+			w := l.Width
+			if l.Format.FixedWidth != nil {
+				w = *l.Format.FixedWidth
+			}
+			l.Width = l.adjustToRaster(w)
 			yInnerOffset = l.Width
-			l.Height = l.adjustToRaster(max(cH, max(t1H, t2H)) + (2 * l.Format.Padding))
+			var h int
+			if l.Format.FixedHeight != nil {
+				h = *l.Format.FixedHeight
+			} else {
+				h = max(cH, max(t1H, t2H)) + (2 * l.Format.Padding)
+			}
+			l.Height = l.adjustToRaster(h)
 		}
 	}
 	l.initVertical(c, yInnerOffset)

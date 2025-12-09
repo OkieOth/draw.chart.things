@@ -1,293 +1,328 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "BoxesDocument",
-    "description": "Internal model to describe the layout if the boxes chart",
-    "type": "object",
-    "x-domain": "implementation",
-    "properties": {
-        "title": {
-            "type": "string",
-            "description": "Title of the document"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "BoxesDocument",
+  "description": "Internal model to describe the layout if the boxes chart",
+  "type": "object",
+  "x-domain": "implementation",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the document"
+    },
+    "boxes": {
+      "$ref": "#/definitions/LayoutElement"
+    },
+    "height": {
+      "type": "integer",
+      "description": "Height of the document"
+    },
+    "width": {
+      "type": "integer",
+      "description": "Width of the document"
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ConnectionElem"
+      }
+    },
+    "globalPadding": {
+      "type": "integer",
+      "description": "Padding used as default over the whole diagram",
+      "default": 5
+    },
+    "minBoxMargin": {
+      "type": "integer",
+      "description": "Minimum margin between boxes",
+      "default": 10
+    },
+    "minConnectorMargin": {
+      "type": "integer",
+      "description": "Minimum margin between connectors",
+      "default": 10
+    },
+    "formats": {
+      "$comment": "if the map contains an key 'default' it will be used as default format",
+      "description": "Map of formats available to be used in the boxes",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/BoxFormat"
+      }
+    },
+    "verticalRoads": {
+      "description": "Vertical roads available to connect boxes in a vertical way",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ConnectionLine"
+      }
+    },
+    "horizontalRoads": {
+      "description": "Horizontal roads available to connect boxes in a horizontal way",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ConnectionLine"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "boxes",
+    "height",
+    "width",
+    "minBoxMargin",
+    "minConnectorMargin",
+    "globalPadding"
+  ],
+  "definitions": {
+    "LayoutElement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "unique identifier of that entry",
+          "type": "string"
         },
-        "boxes": {
-            "$ref": "#/definitions/LayoutElement"
+        "caption": {
+          "description": "Some kind of the main text",
+          "type": "string"
         },
-        "height": {
-            "type": "integer",
-            "description": "Height of the document"
+        "text1": {
+          "description": "First additional text",
+          "type": "string"
+        },
+        "text2": {
+          "description": "Second additional text",
+          "type": "string"
+        },
+        "vertical": {
+          "$ref": "#/definitions/LayoutElemContainer"
+        },
+        "horizontal": {
+          "$ref": "#/definitions/LayoutElemContainer"
+        },
+        "x": {
+          "type": "integer",
+          "description": "X position of the element"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y position of the element"
         },
         "width": {
-            "type": "integer",
-            "description": "Width of the document"
+          "type": "integer",
+          "description": "Width of the element"
+        },
+        "height": {
+          "type": "integer",
+          "description": "Height of the element"
+        },
+        "centerX": {
+          "type": "integer",
+          "description": "X position of the center of the element"
+        },
+        "centerY": {
+          "type": "integer",
+          "description": "X position of the center of the element"
+        },
+        "format": {
+          "$ref": "#/definitions/BoxFormat"
         },
         "connections": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/ConnectionElem"
-            }
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LayoutElemConnection"
+          }
         },
-        "globalPadding": {
-            "type": "integer",
-            "description": "Padding used as default over the whole diagram",
-            "default": 5
+        "leftYToStart": {
+          "type": "integer",
+          "description": "Y position of the left side of the element to start the connection"
+        },
+        "rightYToStart": {
+          "type": "integer",
+          "description": "Y position of the right side of the element to start the connection"
+        },
+        "topXToStart": {
+          "type": "integer",
+          "description": "X position of the top side of the element to start the connection"
+        },
+        "bottomXToStart": {
+          "type": "integer",
+          "description": "X position of the bottom side of the element to start the connection"
+        },
+        "tags": {
+          "description": "Tags to annotate the box, tags are used to format and filter",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "x",
+        "y",
+        "centerX",
+        "centerY",
+        "width",
+        "height",
+        "caption",
+        "text1",
+        "text2"
+      ]
+    },
+    "LayoutElemContainer": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X position of the element"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y position of the element"
+        },
+        "width": {
+          "type": "integer",
+          "description": "Width of the container"
+        },
+        "height": {
+          "type": "integer",
+          "description": "Height of the container"
+        },
+        "elems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LayoutElement"
+          }
+        }
+      },
+      "required": ["x", "y", "width", "height", "elems"]
+    },
+    "LayoutElemConnection": {
+      "type": "object",
+      "properties": {
+        "destId": {
+          "description": "box id of the destination",
+          "type": "string"
+        },
+        "sourceArrow": {
+          "description": "Arrow at the source box",
+          "type": "boolean"
+        },
+        "destArrow": {
+          "description": "Arrow at the destination box",
+          "type": "boolean"
+        },
+        "tags": {
+          "description": "Tags to annotate the connection, tags are used to format",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["destId", "sourceArrow", "destArrow", "tags"]
+    },
+    "ConnectionElem": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/definitions/LayoutElement",
+          "description": "Reference to the box where the connector starts"
+        },
+        "to": {
+          "$ref": "#/definitions/LayoutElement",
+          "description": "Reference to the box where the connector ends"
+        },
+        "sourceArrow": {
+          "description": "Arrow at the source box",
+          "type": "boolean"
+        },
+        "destArrow": {
+          "description": "Arrow at the destination box",
+          "type": "boolean"
+        },
+        "format": {
+          "$ref": "./formats.json#/definitions/LineDef"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ConnectionLine"
+          }
+        }
+      }
+    },
+    "ConnectionLine": {
+      "type": "object",
+      "properties": {
+        "startX": {
+          "type": "integer"
+        },
+        "startY": {
+          "type": "integer"
+        },
+        "endX": {
+          "type": "integer"
+        },
+        "endY": {
+          "type": "integer"
+        },
+        "movedOut": {
+          "type": "boolean",
+          "description": "If the line is moved out by a box with a collision"
+        }
+      },
+      "required": ["startX", "startY", "endX", "endY", "movedOut"]
+    },
+    "BoxFormat": {
+      "type": "object",
+      "properties": {
+        "padding": {
+          "type": "integer",
+          "description": "Padding of the box"
+        },
+        "fontCaption": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontText1": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontText2": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "border": {
+          "$ref": "./formats.json#/definitions/LineDef"
+        },
+        "fill": {
+          "$ref": "./formats.json#/definitions/FillDef"
         },
         "minBoxMargin": {
-            "type": "integer",
-            "description": "Minimum margin between boxes",
-            "default": 10
+          "type": "integer",
+          "description": "Minimum margin between boxes"
         },
-        "minConnectorMargin": {
-            "type": "integer",
-            "description": "Minimum margin between connectors",
-            "default": 10
+        "fixedWidth": {
+          "type": "integer",
+          "description": "optional fixed width that will be applied on the box"
         },
-        "formats": {
-            "$comment": "if the map contains an key 'default' it will be used as default format",
-            "description": "Map of formats available to be used in the boxes",
-            "type": "object",
-            "additionalProperties": {
-                "$ref": "#/definitions/BoxFormat"
-            }
+        "fixedHeight": {
+          "type": "integer",
+          "description": "optional fixed height that will be applied on the box"
         },
-        "verticalRoads": {
-            "description": "Vertical roads available to connect boxes in a vertical way",
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/ConnectionLine"
-            }
-        },
-        "horizontalRoads": {
-            "description": "Horizontal roads available to connect boxes in a horizontal way",
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/ConnectionLine"
-            }
+        "verticalTxt": {
+          "type": "boolean",
+          "description": "If true, the text will be displayed vertically",
+          "default": false
         }
-    },
-    "required": ["title", "boxes", "height", "width", "minBoxMargin", "minConnectorMargin", "globalPadding"],
-    "definitions": {
-        "LayoutElement": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "unique identifier of that entry",
-                    "type": "string"
-                },
-                "caption": {
-                    "description": "Some kind of the main text",
-                    "type": "string"
-                },
-                "text1": {
-                    "description": "First additional text",
-                    "type": "string"
-                },
-                "text2": {
-                    "description": "Second additional text",
-                    "type": "string"
-                },
-                "vertical": {
-                    "$ref": "#/definitions/LayoutElemContainer"
-                },
-                "horizontal": {
-                    "$ref": "#/definitions/LayoutElemContainer"
-                },
-                "x": {
-                    "type": "integer",
-                    "description": "X position of the element"
-                },
-                "y": {
-                    "type": "integer",
-                    "description": "Y position of the element"
-                },
-                "width": {
-                    "type": "integer",
-                    "description": "Width of the element"
-                },
-                "height": {
-                    "type": "integer",
-                    "description": "Height of the element"
-                },
-                "centerX": {
-                    "type": "integer",
-                    "description": "X position of the center of the element"
-                },
-                "centerY": {
-                    "type": "integer",
-                    "description": "X position of the center of the element"
-                },
-                "format": {
-                    "$ref": "#/definitions/BoxFormat"
-                },
-                "connections": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/LayoutElemConnection"
-                    }
-                },
-                "leftYToStart": {
-                    "type": "integer",
-                    "description": "Y position of the left side of the element to start the connection"
-                },
-                "rightYToStart": {
-                    "type": "integer",
-                    "description": "Y position of the right side of the element to start the connection"
-                },
-                "topXToStart": {
-                    "type": "integer",
-                    "description": "X position of the top side of the element to start the connection"
-                },
-                "bottomXToStart": {
-                    "type": "integer",
-                    "description": "X position of the bottom side of the element to start the connection"
-                },
-                "tags": {
-                    "description": "Tags to annotate the box, tags are used to format and filter",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": ["id", "x", "y", "centerX", "centerY", "width", "height", "caption", "text1", "text2"]
-        },
-        "LayoutElemContainer": {
-            "type": "object",
-            "properties": {
-                "x": {
-                    "type": "integer",
-                    "description": "X position of the element"
-                },
-                "y": {
-                    "type": "integer",
-                    "description": "Y position of the element"
-                },
-                "width": {
-                    "type": "integer",
-                    "description": "Width of the container"
-                },
-                "height": {
-                    "type": "integer",
-                    "description": "Height of the container"
-                },
-                "elems": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/LayoutElement"
-                    }
-                }
-            },
-            "required": ["x", "y", "width", "height", "elems"]
-        },
-        "LayoutElemConnection": {
-            "type": "object",
-            "properties": {
-                "destId": {
-                    "description": "box id of the destination",
-                    "type": "string"
-                },
-                "sourceArrow": {
-                    "description": "Arrow at the source box",
-                    "type": "boolean"
-                },
-                "destArrow": {
-                    "description": "Arrow at the destination box",
-                    "type": "boolean"
-                },
-                "tags": {
-                    "description": "Tags to annotate the connection, tags are used to format",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": ["destId", "sourceArrow", "destArrow", "tags"]
-        },
-        "ConnectionElem": {
-            "type": "object",
-            "properties": {
-                "from": {
-                    "$ref": "#/definitions/LayoutElement",
-                    "description": "Reference to the box where the connector starts"
-                },
-                "to": {
-                    "$ref": "#/definitions/LayoutElement",
-                    "description": "Reference to the box where the connector ends"
-                },
-                "sourceArrow": {
-                    "description": "Arrow at the source box",
-                    "type": "boolean"
-                },
-                "destArrow": {
-                    "description": "Arrow at the destination box",
-                    "type": "boolean"
-                },
-                "format": {
-                    "$ref": "./formats.json#/definitions/LineDef"
-                },
-                "parts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ConnectionLine"
-                    }
-                }
-            }
-        },
-        "ConnectionLine": {
-            "type": "object",
-            "properties": {
-                "startX": {
-                    "type": "integer"
-                },
-                "startY": {
-                    "type": "integer"
-                },
-                "endX": {
-                    "type": "integer"
-                },
-                "endY": {
-                    "type": "integer"
-                },
-                "movedOut": {
-                    "type": "boolean",
-                    "description": "If the line is moved out by a box with a collision"
-                }
-            },
-            "required": ["startX", "startY", "endX", "endY", "movedOut"]
-        },
-        "BoxFormat": {
-            "type": "object",
-            "properties": {
-                "padding": {
-                    "type": "integer",
-                    "description": "Padding of the box"
-                },
-                "fontCaption": {
-                    "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "fontText1": {
-                    "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "fontText2": {
-                    "$ref": "./formats.json#/definitions/FontDef"
-                },
-                "border": {
-                    "$ref": "./formats.json#/definitions/LineDef"
-                },
-                "fill": {
-                    "$ref": "./formats.json#/definitions/FillDef"
-                },
-                "minBoxMargin": {
-                    "type": "integer",
-                    "description": "Minimum margin between boxes"
-                },
-                "verticalTxt": {
-                    "type": "boolean",
-                    "description": "If true, the text will be displayed vertically",
-                    "default": false
-                }
-            },
-            "required": ["padding", "lineHeight", "fontCaption", "fontText1", "fontText2", "minBoxMargin", "verticalTxt"]
-        }
+      },
+      "required": [
+        "padding",
+        "lineHeight",
+        "fontCaption",
+        "fontText1",
+        "fontText2",
+        "minBoxMargin",
+        "verticalTxt"
+      ]
     }
+  }
 }

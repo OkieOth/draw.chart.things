@@ -34,6 +34,8 @@ class "**Layout**" as Layout {
 
 
 class "**Format**" as Format {
+        IntegerType fixedWidth
+        IntegerType fixedHeight
         BooleanType verticalTxt
         FontDef fontCaption
         FontDef fontText1
@@ -147,6 +149,8 @@ Layout "0" *-- "n" Connection
 
     
     
+
+
 
 Format  *--  FontDef
 
