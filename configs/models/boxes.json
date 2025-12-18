@@ -115,6 +115,10 @@
           "description": "Arrow at the destination box",
           "type": "boolean"
         },
+        "format": {
+          "description": "optional format to style the connection",
+          "type": "string"
+        },
         "tags": {
           "description": "Tags to annotate the connection, tags are used to format",
           "type": "array",

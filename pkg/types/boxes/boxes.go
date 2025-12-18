@@ -208,6 +208,9 @@ type Connection struct {
     // Arrow at the destination box
     DestArrow bool  `yaml:"destArrow"`
 
+    // optional format to style the connection
+    Format *string  `yaml:"format,omitempty"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -226,6 +229,7 @@ func CopyConnection(src *Connection) *Connection {
     ret.DestId = src.DestId
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
+    ret.Format = src.Format
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
