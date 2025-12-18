@@ -21,7 +21,7 @@ func DrawGanttFromFile(inputFile, outputFile string, startDate, endDate time.Tim
 		input.Title = title
 	}
 
-	if additionalGroupFiles != nil && len(additionalGroupFiles) > 0 {
+	if len(additionalGroupFiles) > 0 {
 		input, err = loadAdditionalGroupFilesAndMerge(input, additionalGroupFiles)
 		if err != nil {
 			return fmt.Errorf("failed to load additional group files: %w", err)

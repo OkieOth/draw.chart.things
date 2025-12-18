@@ -32,10 +32,28 @@ type Boxes struct {
 }
 
 func NewBoxes() *Boxes {
-        return &Boxes{
-            Boxes: *NewLayout(),
-            Formats: make(map[string]Format, 0),
-        }
+    return &Boxes{
+        Boxes: *NewLayout(),
+        Formats: make(map[string]Format, 0),
+    }
+}
+
+func CopyBoxes(src *Boxes) *Boxes {
+    if src == nil {
+        return nil
+    }
+    var ret Boxes
+    ret.Title = src.Title
+    ret.Boxes = *CopyLayout(&src.Boxes)
+    ret.Formats = make(map[string]Format, 0)
+    for k, v := range src.Formats {
+        ret.Formats[k] = v
+    }
+    ret.GlobalPadding = src.GlobalPadding
+    ret.MinBoxMargin = src.MinBoxMargin
+    ret.MinConnectorMargin = src.MinConnectorMargin
+
+    return &ret
 }
 
 
@@ -77,12 +95,44 @@ type Layout struct {
 }
 
 func NewLayout() *Layout {
-        return &Layout{
-            Vertical: make([]Layout, 0),
-            Horizontal: make([]Layout, 0),
-            Tags: make([]string, 0),
-            Connections: make([]Connection, 0),
-        }
+    return &Layout{
+        Vertical: make([]Layout, 0),
+        Horizontal: make([]Layout, 0),
+        Tags: make([]string, 0),
+        Connections: make([]Connection, 0),
+    }
+}
+
+func CopyLayout(src *Layout) *Layout {
+    if src == nil {
+        return nil
+    }
+    var ret Layout
+    ret.Id = src.Id
+    ret.Caption = src.Caption
+    ret.Text1 = src.Text1
+    ret.Text2 = src.Text2
+    ret.ExtVertical = src.ExtVertical
+    ret.Vertical = make([]Layout, 0)
+    for _, e := range src.Vertical {
+        ret.Vertical = append(ret.Vertical, e)
+    }
+    ret.ExtHorizontal = src.ExtHorizontal
+    ret.Horizontal = make([]Layout, 0)
+    for _, e := range src.Horizontal {
+        ret.Horizontal = append(ret.Horizontal, e)
+    }
+    ret.Tags = make([]string, 0)
+    for _, e := range src.Tags {
+        ret.Tags = append(ret.Tags, e)
+    }
+    ret.Connections = make([]Connection, 0)
+    for _, e := range src.Connections {
+        ret.Connections = append(ret.Connections, e)
+    }
+    ret.Format = src.Format
+
+    return &ret
 }
 
 
@@ -121,6 +171,25 @@ type Format struct {
 }
 
 
+func CopyFormat(src *Format) *Format {
+    if src == nil {
+        return nil
+    }
+    var ret Format
+    ret.FixedWidth = src.FixedWidth
+    ret.FixedHeight = src.FixedHeight
+    ret.VerticalTxt = src.VerticalTxt
+    ret.FontCaption = types.CopyFontDef(src.FontCaption)
+    ret.FontText1 = types.CopyFontDef(src.FontText1)
+    ret.FontText2 = types.CopyFontDef(src.FontText2)
+    ret.Border = types.CopyLineDef(src.Border)
+    ret.Fill = types.CopyFillDef(src.Fill)
+    ret.Padding = src.Padding
+    ret.BoxMargin = src.BoxMargin
+
+    return &ret
+}
+
 
 
 
@@ -144,9 +213,25 @@ type Connection struct {
 }
 
 func NewConnection() *Connection {
-        return &Connection{
-            Tags: make([]string, 0),
-        }
+    return &Connection{
+        Tags: make([]string, 0),
+    }
+}
+
+func CopyConnection(src *Connection) *Connection {
+    if src == nil {
+        return nil
+    }
+    var ret Connection
+    ret.DestId = src.DestId
+    ret.SourceArrow = src.SourceArrow
+    ret.DestArrow = src.DestArrow
+    ret.Tags = make([]string, 0)
+    for _, e := range src.Tags {
+        ret.Tags = append(ret.Tags, e)
+    }
+
+    return &ret
 }
 
 

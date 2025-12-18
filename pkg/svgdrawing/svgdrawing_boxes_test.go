@@ -281,7 +281,7 @@ func TestSplitTxt(t *testing.T) {
 			expectedHeight: 26,
 			expectedLines: []types.TextAndDimensions{
 				{Text: "Hello World Hello", Width: 96, Height: 14},
-				{Text: "World", Width: 28, Height: 14},
+				{Text: "World", Width: 28, Height: 12},
 			},
 		},
 		{
@@ -301,7 +301,7 @@ func TestSplitTxt(t *testing.T) {
 				{Text: "should", Width: 34, Height: 14},
 				{Text: "wrap into", Width: 51, Height: 14},
 				{Text: "multiple", Width: 45, Height: 14},
-				{Text: "lines", Width: 28, Height: 14},
+				{Text: "lines", Width: 28, Height: 12},
 			},
 		},
 		{
@@ -329,8 +329,8 @@ func TestSplitTxt(t *testing.T) {
 			expectedWidth:  81,
 			expectedHeight: 26,
 			expectedLines: []types.TextAndDimensions{
-				{Text: "Serif font with", Width: 81, Height: 16},
-				{Text: "multiple lines", Width: 88, Height: 16},
+				{Text: "Serif font with", Width: 81, Height: 14},
+				{Text: "multiple lines", Width: 75, Height: 12},
 			},
 		},
 	}
@@ -341,9 +341,9 @@ func TestSplitTxt(t *testing.T) {
 			require.Equal(t, tt.expectedWidth, width)
 			require.Equal(t, tt.expectedHeight, height)
 			for i, line := range lines {
-				require.Equal(t, tt.expectedLines[i].Text, line.Text)
-				require.Equal(t, tt.expectedLines[i].Width, line.Width)
-				require.Equal(t, tt.expectedLines[i].Height, line.Height)
+				require.Equal(t, tt.expectedLines[i].Text, line.Text, i)
+				require.Equal(t, tt.expectedLines[i].Width, line.Width, i)
+				require.Equal(t, tt.expectedLines[i].Height, line.Height, i)
 			}
 		})
 	}

@@ -267,6 +267,10 @@ func (d *SvgDrawing) textFormat(fontDef *types.FontDef) string {
 
 // drawText renders text with appropriate positioning and returns the updated y-position
 func (d *SvgDrawing) DrawText(text string, x, currentY, width int, fontDef *types.FontDef) int {
+	return d.DrawTextWithId(text, x, currentY, width, fontDef, "")
+}
+
+func (d *SvgDrawing) DrawTextWithId(text string, x, currentY, width int, fontDef *types.FontDef, id string) int {
 	if text == "" {
 		return currentY
 	}
@@ -278,6 +282,15 @@ func (d *SvgDrawing) DrawText(text string, x, currentY, width int, fontDef *type
 	txtFormat := d.textFormat(fontDef)
 	_, _, lines := d.txtDimensionCalculator.SplitTxt(text, fontDef)
 
+	var writeTxt func(int, int, string, ...string)
+	if id == "" {
+		writeTxt = d.canvas.Text
+	} else {
+		writeTxt = func(x int, y int, txt string, other ...string) {
+			d.canvas.TextWithId(id, x, y, txt, other...)
+		}
+	}
+
 	for _, l := range lines {
 		yTxt := currentY + fontDef.Size
 		xTxt := x
@@ -286,7 +299,8 @@ func (d *SvgDrawing) DrawText(text string, x, currentY, width int, fontDef *type
 		} else if fontDef.Anchor == types.FontDefAnchorEnum_right {
 			xTxt = x + width - types.GlobalPadding - 5
 		}
-		d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
+		//d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
+		writeTxt(xTxt, yTxt, l.Text, txtFormat)
 		currentY += l.Height
 	}
 
@@ -297,8 +311,12 @@ func (d *SvgDrawing) DrawText(text string, x, currentY, width int, fontDef *type
 	return currentY
 }
 
-// drawText renders text with appropriate positioning and returns the updated X-position
 func (d *SvgDrawing) DrawVerticalText(text string, currentX, y, height int, fontDef *types.FontDef) int {
+	return d.DrawVerticalTextWithId(text, currentX, y, height, fontDef, "")
+}
+
+// drawText renders text with appropriate positioning and returns the updated X-position
+func (d *SvgDrawing) DrawVerticalTextWithId(text string, currentX, y, height int, fontDef *types.FontDef, id string) int {
 	if text == "" {
 		return currentX
 	}
@@ -355,21 +373,26 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int
 			attr += fmt.Sprintf("stroke: %s;stroke-Width: %f", c, w)
 		}
 		if id != "" {
-			d.canvas.RectWithId(id, x, y, width, height, attr)
+			d.canvas.RectWithIdAndAdditional("onclick=\"window.shapeClick(event)\"", id, x, y, width, height, attr)
 		} else {
 			d.canvas.Rect(x, y, width, height, attr)
 		}
 	}
 
+	idStr := ""
+	if id != "" {
+		idStr = id + "_capt"
+	}
+
 	if format.VerticalTxt {
 		currentX := x + format.Padding
 		currentY := y + (height / 2)
-		currentX = d.DrawVerticalText(caption, currentX, currentY, width, &format.FontCaption)
+		currentX = d.DrawVerticalTextWithId(caption, currentX, currentY, width, &format.FontCaption, idStr)
 		currentX = d.DrawVerticalText(text1, currentX, currentY, width, &format.FontText1)
 		currentX = d.DrawVerticalText(text2, currentX, currentY, width, &format.FontText2)
 	} else {
 		currentY := y + format.Padding
-		currentY = d.DrawText(caption, x, currentY, width, &format.FontCaption)
+		currentY = d.DrawTextWithId(caption, x, currentY, width, &format.FontCaption, idStr)
 		currentY = d.DrawText(text1, x, currentY, width, &format.FontText1)
 		currentY = d.DrawText(text2, x, currentY, width, &format.FontText2)
 	}

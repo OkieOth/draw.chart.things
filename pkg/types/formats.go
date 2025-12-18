@@ -41,6 +41,26 @@ type FontDef struct {
 }
 
 
+func CopyFontDef(src *FontDef) *FontDef {
+    if src == nil {
+        return nil
+    }
+    var ret FontDef
+    ret.Size = src.Size
+    ret.Font = src.Font
+    ret.Type = src.Type
+    ret.Weight = src.Weight
+    ret.LineHeight = src.LineHeight
+    ret.Color = src.Color
+    ret.Aligned = src.Aligned
+    ret.SpaceTop = src.SpaceTop
+    ret.SpaceBottom = src.SpaceBottom
+    ret.MaxLenBeforeBreak = src.MaxLenBeforeBreak
+    ret.Anchor = src.Anchor
+
+    return &ret
+}
+
 
 
 
@@ -74,9 +94,9 @@ func (s *FontDefTypeEnum) UnmarshalJSON(data []byte) error {
 
     switch value {
     case "normal":
-        *s = FontDefTypeEnum_normal 
+        *s = FontDefTypeEnum_normal
     case "italic":
-        *s = FontDefTypeEnum_italic 
+        *s = FontDefTypeEnum_italic
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
@@ -117,9 +137,9 @@ func (s *FontDefWeightEnum) UnmarshalJSON(data []byte) error {
 
     switch value {
     case "normal":
-        *s = FontDefWeightEnum_normal 
+        *s = FontDefWeightEnum_normal
     case "bold":
-        *s = FontDefWeightEnum_bold 
+        *s = FontDefWeightEnum_bold
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
@@ -163,11 +183,11 @@ func (s *FontDefAlignedEnum) UnmarshalJSON(data []byte) error {
 
     switch value {
     case "left":
-        *s = FontDefAlignedEnum_left 
+        *s = FontDefAlignedEnum_left
     case "center":
-        *s = FontDefAlignedEnum_center 
+        *s = FontDefAlignedEnum_center
     case "right":
-        *s = FontDefAlignedEnum_right 
+        *s = FontDefAlignedEnum_right
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
@@ -211,11 +231,11 @@ func (s *FontDefAnchorEnum) UnmarshalJSON(data []byte) error {
 
     switch value {
     case "middle":
-        *s = FontDefAnchorEnum_middle 
+        *s = FontDefAnchorEnum_middle
     case "left":
-        *s = FontDefAnchorEnum_left 
+        *s = FontDefAnchorEnum_left
     case "right":
-        *s = FontDefAnchorEnum_right 
+        *s = FontDefAnchorEnum_right
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
@@ -240,6 +260,19 @@ type LineDef struct {
     Opacity *float64  `yaml:"opacity,omitempty"`
 }
 
+
+func CopyLineDef(src *LineDef) *LineDef {
+    if src == nil {
+        return nil
+    }
+    var ret LineDef
+    ret.Width = src.Width
+    ret.Style = src.Style
+    ret.Color = src.Color
+    ret.Opacity = src.Opacity
+
+    return &ret
+}
 
 
 
@@ -277,11 +310,11 @@ func (s *LineDefStyleEnum) UnmarshalJSON(data []byte) error {
 
     switch value {
     case "solid":
-        *s = LineDefStyleEnum_solid 
+        *s = LineDefStyleEnum_solid
     case "dotted":
-        *s = LineDefStyleEnum_dotted 
+        *s = LineDefStyleEnum_dotted
     case "dashed":
-        *s = LineDefStyleEnum_dashed 
+        *s = LineDefStyleEnum_dashed
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
 		return errors.New(msg)
@@ -302,6 +335,17 @@ type FillDef struct {
     Opacity *float64  `yaml:"opacity,omitempty"`
 }
 
+
+func CopyFillDef(src *FillDef) *FillDef {
+    if src == nil {
+        return nil
+    }
+    var ret FillDef
+    ret.Color = src.Color
+    ret.Opacity = src.Opacity
+
+    return &ret
+}
 
 
 

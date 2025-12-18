@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
 	"github.com/okieoth/draw.chart.things/pkg/types"
@@ -45,6 +47,68 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	svgdrawing.Done()
 	output.Close()
 	return nil
+}
+
+type UIReturn struct {
+	SVG      string
+	ErrorMsg string
+}
+
+func isRelatedToId(b boxes.Layout, filter []string) bool {
+	if slices.Contains(filter, b.Id) {
+		return true
+	}
+	for _, e := range b.Horizontal {
+		if isRelatedToId(e, filter) {
+			return true
+		}
+	}
+	for _, e := range b.Vertical {
+		if isRelatedToId(e, filter) {
+			return true
+		}
+	}
+	return false
+}
+
+func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, filter []string) boxes.Layout {
+	if (currentDepth >= maxDepth) && (!isRelatedToId(b, filter)) {
+		b.Horizontal = make([]boxes.Layout, 0)
+		b.Vertical = make([]boxes.Layout, 0)
+	} else {
+		for i := range len(b.Horizontal) {
+			b.Horizontal[i] = truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, filter)
+		}
+		for i := range len(b.Vertical) {
+			b.Vertical[i] = truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, filter)
+		}
+	}
+	return b
+}
+
+func filterBoxes(layout boxes.Boxes, defaultDepth int, filter []string) boxes.Boxes {
+	filteredBoxes := boxes.CopyBoxes(&layout)
+	filteredBoxes.Boxes = truncBoxes(layout.Boxes, 0, defaultDepth, filter)
+	return *filteredBoxes
+}
+
+func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, filter []string) UIReturn {
+	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
+	filteredLayout := filterBoxes(layout, defaultDepth, filter)
+	doc, err := InitialLayoutBoxes(&filteredLayout, textDimensionCalulator)
+	if err != nil {
+		return UIReturn{ErrorMsg: fmt.Sprintf("error while initialy layout: %v", err)}
+	}
+
+	// FIXME, TODO: this doesn't terminate!!!!
+	//doc.ConnectBoxes()
+	var svgBuilder strings.Builder
+	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)
+	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
+	doc.DrawBoxes(svgdrawing)
+	doc.DrawConnections(svgdrawing)
+	svgdrawing.Done()
+	return UIReturn{SVG: svgBuilder.String()}
 }
 
 func initContainerFromAlternativePath(extPathToLoad, origInputFile string) ([]boxes.Layout, error) {
@@ -105,6 +169,26 @@ func replaceAlternativePathsForContainer(cont []boxes.Layout, inputFile string) 
 }
 
 func InitialLayoutBoxes(b *boxes.Boxes, c types.TextDimensionCalculator) (*boxes.BoxesDocument, error) {
+	doc := DocumentFromBoxes(b)
+	doc.Boxes.X = doc.GlobalPadding
+	doc.Boxes.Y = doc.GlobalPadding
+	doc.Boxes.InitDimensions(c)
+	doc.Width = doc.Boxes.Width + doc.GlobalPadding*2
+	doc.Height = doc.Boxes.Height + doc.GlobalPadding*2
+	if doc.Title != "" {
+		defaultFormat := doc.Formats["default"] // risky doesn't check if default exists
+		w, h := c.Dimensions(doc.Title, &defaultFormat.FontCaption)
+		doc.Height += h + (2 * doc.GlobalPadding)
+		if w > doc.Width {
+			doc.Width = w + (2 * doc.GlobalPadding)
+		}
+	}
+	doc.Boxes.Center()
+	doc.Height = doc.AdjustDocHeight(&doc.Boxes, 0) + (2 * doc.GlobalPadding)
+	return doc, nil
+}
+
+func LayoutBoxesWithFilter(b *boxes.Boxes, c types.TextDimensionCalculator, defaultDepth int) (*boxes.BoxesDocument, error) {
 	doc := DocumentFromBoxes(b)
 	doc.Boxes.X = doc.GlobalPadding
 	doc.Boxes.Y = doc.GlobalPadding

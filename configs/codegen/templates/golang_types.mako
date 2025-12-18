@@ -20,8 +20,14 @@
     def printAsteriskIfNotRequired(property):
         return  "" if property.required else "*"
 
+    def printAsteriskIfRequired(property):
+        return  "*" if property.required else ""
+
     def printAndIfNotRequired(property):
         return  "" if property.required else "&"
+
+    def printAndIfRequired(property):
+        return  "&" if property.required else ""
 
     def hasDictOrArrayAttribs(type):
         for property in type.properties:
@@ -29,7 +35,15 @@
                 return True
         return False
 
-    
+    def copyFunctionName(property):
+        t = printGolangType(property.type, False, True, 0, False)
+        i = t.rfind('.')
+        if i != -1:
+            return t[:i] + ".Copy" + t[i+1:]
+        else:
+            return "Copy"+t
+
+
     def printGolangType(typeObj, isArray, isRequired, arrayDimensions, forJson):
         ret = ''
         if typeObj is None:
@@ -81,7 +95,7 @@
             ret = "*{}".format(ret)
 
         return ret
-    
+
 
     def printOmitemptyIfNeeded(property):
         if not property.required or property.isArray or isinstance(property.type, model.DictionaryType):
@@ -197,7 +211,7 @@ func (s *${type.name}) UnmarshalJSON(data []byte) error {
     switch value {
         % for value in type.values:
     case "${value}":
-        *s = ${secureEnumValues(value, type.name)} 
+        *s = ${secureEnumValues(value, type.name)}
         % endfor
     default:
 		msg := fmt.Sprintf("invalid value for DDDDomainType: %s", value)
@@ -225,17 +239,43 @@ type ${type.name} struct {
 
         % if needsBuilder(type):
 func New${type.name}() *${type.name} {
-        return &${type.name}{
+    return &${type.name}{
             % for property in type.properties:
                 % if property.isArray or isinstance(property.type, model.DictionaryType):
-            ${stringUtils.toUpperCamelCase(property.name)}: make(${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}, 0),
+        ${stringUtils.toUpperCamelCase(property.name)}: make(${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}, 0),
                 % elif isinstance(property.type, model.ComplexType) and needsBuilder(property.type):
-            ${stringUtils.toUpperCamelCase(property.name)}: ${printStarIfRequired(property)}New${property.type.name}(),
+        ${stringUtils.toUpperCamelCase(property.name)}: ${printStarIfRequired(property)}New${property.type.name}(),
                 % endif
             % endfor
-        }
+    }
 }
         % endif
+
+func Copy${type.name}(src *${type.name}) *${type.name} {
+    if src == nil {
+        return nil
+    }
+    var ret ${type.name}
+    % for property in type.properties:
+        % if property.isArray:
+    ret.${stringUtils.toUpperCamelCase(property.name)} = make(${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}, 0)
+    for _, e := range src.${stringUtils.toUpperCamelCase(property.name)} {
+        ret.${stringUtils.toUpperCamelCase(property.name)} = append(ret.${stringUtils.toUpperCamelCase(property.name)}, e)
+    }
+        % elif isinstance(property.type, model.DictionaryType):
+    ret.${stringUtils.toUpperCamelCase(property.name)} = make(${printGolangType(property.type, property.isArray, property.required, property.arrayDimensions, False)}, 0)
+    for k, v := range src.${stringUtils.toUpperCamelCase(property.name)} {
+        ret.${stringUtils.toUpperCamelCase(property.name)}[k] = v
+    }
+        % elif isinstance(property.type, model.ComplexType):
+    ret.${stringUtils.toUpperCamelCase(property.name)} = ${printAsteriskIfRequired(property)}${copyFunctionName(property)}(${printAndIfRequired(property)}src.${stringUtils.toUpperCamelCase(property.name)})
+        % else:
+    ret.${stringUtils.toUpperCamelCase(property.name)} = src.${stringUtils.toUpperCamelCase(property.name)}
+        % endif
+    % endfor
+
+    return &ret
+}
 
 
     % endif

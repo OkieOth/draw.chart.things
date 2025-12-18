@@ -371,7 +371,7 @@ func (doc *BoxesDocument) getNextJunctionLeft(startX, startY int) (int, bool, bo
 						minY, maxY := minMax(v.StartY, v.EndY)
 						if startY >= minY && startY <= maxY {
 							nextRoad = &v
-							straightAhead = leftX < *&nextRoad.StartX
+							straightAhead = leftX < nextRoad.StartX
 							upwards = minY < startY
 							downwards = maxY > startY
 						}
@@ -406,7 +406,7 @@ func (doc *BoxesDocument) getNextJunctionRight(startX, startY int) (int, bool, b
 						minY, maxY := minMax(v.StartY, v.EndY)
 						if startY >= minY && startY <= maxY {
 							nextRoad = &v
-							straightAhead = rightX > *&nextRoad.StartX
+							straightAhead = rightX > nextRoad.StartX
 							upwards = minY < startY
 							downwards = maxY > startY
 						}
@@ -442,7 +442,7 @@ func (doc *BoxesDocument) getNextJunctionUp(startX, startY int) (int, bool, bool
 						minX, maxX := minMax(h.StartX, h.EndX)
 						if startX >= minX && startX <= maxX {
 							nextRoad = &h
-							straightAhead = topY < *&nextRoad.StartY // what if the road is in the inverse direction?
+							straightAhead = topY < nextRoad.StartY // what if the road is in the inverse direction?
 							leftwards = minX < startX
 							rightwards = maxX > startX
 						}
@@ -478,7 +478,7 @@ func (doc *BoxesDocument) getNextJunctionDown(startX, startY int) (int, bool, bo
 						minX, maxX := minMax(h.StartX, h.EndX)
 						if startX >= minX && startX <= maxX {
 							nextRoad = &h
-							straightAhead = bottomY > *&nextRoad.StartY // what if the road is in the inverse direction?
+							straightAhead = bottomY > nextRoad.StartY // what if the road is in the inverse direction?
 							leftwards = minX < startX
 							rightwards = maxX > startX
 						}

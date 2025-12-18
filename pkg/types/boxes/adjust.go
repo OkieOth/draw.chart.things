@@ -64,10 +64,6 @@ func (doc *BoxesDocument) moveAllObjectsMoreRightRight(le *LayoutElement, x, dis
 
 func (doc *BoxesDocument) isConnectedToUpperOrLowerBoxBorder(le *LayoutElement, line *ConnectionLine) bool {
 	// check upper border
-	if le.Id == "r6_2" {
-		// Debug
-		le.Id = le.Id
-	}
 	if (le.Y == line.StartY || le.Y == line.EndY) && (line.StartX > le.X && line.StartX < le.X+le.Width) {
 		return true
 	}

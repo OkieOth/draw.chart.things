@@ -46,13 +46,45 @@ type BoxesDocument struct {
 }
 
 func NewBoxesDocument() *BoxesDocument {
-        return &BoxesDocument{
-            Boxes: *NewLayoutElement(),
-            Connections: make([]ConnectionElem, 0),
-            Formats: make(map[string]BoxFormat, 0),
-            VerticalRoads: make([]ConnectionLine, 0),
-            HorizontalRoads: make([]ConnectionLine, 0),
-        }
+    return &BoxesDocument{
+        Boxes: *NewLayoutElement(),
+        Connections: make([]ConnectionElem, 0),
+        Formats: make(map[string]BoxFormat, 0),
+        VerticalRoads: make([]ConnectionLine, 0),
+        HorizontalRoads: make([]ConnectionLine, 0),
+    }
+}
+
+func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
+    if src == nil {
+        return nil
+    }
+    var ret BoxesDocument
+    ret.Title = src.Title
+    ret.Boxes = *CopyLayoutElement(&src.Boxes)
+    ret.Height = src.Height
+    ret.Width = src.Width
+    ret.Connections = make([]ConnectionElem, 0)
+    for _, e := range src.Connections {
+        ret.Connections = append(ret.Connections, e)
+    }
+    ret.GlobalPadding = src.GlobalPadding
+    ret.MinBoxMargin = src.MinBoxMargin
+    ret.MinConnectorMargin = src.MinConnectorMargin
+    ret.Formats = make(map[string]BoxFormat, 0)
+    for k, v := range src.Formats {
+        ret.Formats[k] = v
+    }
+    ret.VerticalRoads = make([]ConnectionLine, 0)
+    for _, e := range src.VerticalRoads {
+        ret.VerticalRoads = append(ret.VerticalRoads, e)
+    }
+    ret.HorizontalRoads = make([]ConnectionLine, 0)
+    for _, e := range src.HorizontalRoads {
+        ret.HorizontalRoads = append(ret.HorizontalRoads, e)
+    }
+
+    return &ret
 }
 
 
@@ -116,12 +148,46 @@ type LayoutElement struct {
 }
 
 func NewLayoutElement() *LayoutElement {
-        return &LayoutElement{
-            Vertical: NewLayoutElemContainer(),
-            Horizontal: NewLayoutElemContainer(),
-            Connections: make([]LayoutElemConnection, 0),
-            Tags: make([]string, 0),
-        }
+    return &LayoutElement{
+        Vertical: NewLayoutElemContainer(),
+        Horizontal: NewLayoutElemContainer(),
+        Connections: make([]LayoutElemConnection, 0),
+        Tags: make([]string, 0),
+    }
+}
+
+func CopyLayoutElement(src *LayoutElement) *LayoutElement {
+    if src == nil {
+        return nil
+    }
+    var ret LayoutElement
+    ret.Id = src.Id
+    ret.Caption = src.Caption
+    ret.Text1 = src.Text1
+    ret.Text2 = src.Text2
+    ret.Vertical = CopyLayoutElemContainer(src.Vertical)
+    ret.Horizontal = CopyLayoutElemContainer(src.Horizontal)
+    ret.X = src.X
+    ret.Y = src.Y
+    ret.Width = src.Width
+    ret.Height = src.Height
+    ret.CenterX = src.CenterX
+    ret.CenterY = src.CenterY
+    ret.Format = CopyBoxFormat(src.Format)
+    ret.Connections = make([]LayoutElemConnection, 0)
+    for _, e := range src.Connections {
+        ret.Connections = append(ret.Connections, e)
+    }
+    ret.LeftYToStart = src.LeftYToStart
+    ret.RightYToStart = src.RightYToStart
+    ret.TopXToStart = src.TopXToStart
+    ret.BottomXToStart = src.BottomXToStart
+    ret.Tags = make([]string, 0)
+    for _, e := range src.Tags {
+        ret.Tags = append(ret.Tags, e)
+    }
+
+    return &ret
 }
 
 
@@ -148,11 +214,29 @@ type ConnectionElem struct {
 }
 
 func NewConnectionElem() *ConnectionElem {
-        return &ConnectionElem{
-            From: NewLayoutElement(),
-            To: NewLayoutElement(),
-            Parts: make([]ConnectionLine, 0),
-        }
+    return &ConnectionElem{
+        From: NewLayoutElement(),
+        To: NewLayoutElement(),
+        Parts: make([]ConnectionLine, 0),
+    }
+}
+
+func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
+    if src == nil {
+        return nil
+    }
+    var ret ConnectionElem
+    ret.From = CopyLayoutElement(src.From)
+    ret.To = CopyLayoutElement(src.To)
+    ret.SourceArrow = src.SourceArrow
+    ret.DestArrow = src.DestArrow
+    ret.Format = types.CopyLineDef(src.Format)
+    ret.Parts = make([]ConnectionLine, 0)
+    for _, e := range src.Parts {
+        ret.Parts = append(ret.Parts, e)
+    }
+
+    return &ret
 }
 
 
@@ -191,6 +275,25 @@ type BoxFormat struct {
 }
 
 
+func CopyBoxFormat(src *BoxFormat) *BoxFormat {
+    if src == nil {
+        return nil
+    }
+    var ret BoxFormat
+    ret.Padding = src.Padding
+    ret.FontCaption = *types.CopyFontDef(&src.FontCaption)
+    ret.FontText1 = *types.CopyFontDef(&src.FontText1)
+    ret.FontText2 = *types.CopyFontDef(&src.FontText2)
+    ret.Border = types.CopyLineDef(src.Border)
+    ret.Fill = types.CopyFillDef(src.Fill)
+    ret.MinBoxMargin = src.MinBoxMargin
+    ret.FixedWidth = src.FixedWidth
+    ret.FixedHeight = src.FixedHeight
+    ret.VerticalTxt = src.VerticalTxt
+
+    return &ret
+}
+
 
 
 
@@ -209,6 +312,20 @@ type ConnectionLine struct {
     MovedOut bool  `yaml:"movedOut"`
 }
 
+
+func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
+    if src == nil {
+        return nil
+    }
+    var ret ConnectionLine
+    ret.StartX = src.StartX
+    ret.StartY = src.StartY
+    ret.EndX = src.EndX
+    ret.EndY = src.EndY
+    ret.MovedOut = src.MovedOut
+
+    return &ret
+}
 
 
 
@@ -232,9 +349,26 @@ type LayoutElemContainer struct {
 }
 
 func NewLayoutElemContainer() *LayoutElemContainer {
-        return &LayoutElemContainer{
-            Elems: make([]LayoutElement, 0),
-        }
+    return &LayoutElemContainer{
+        Elems: make([]LayoutElement, 0),
+    }
+}
+
+func CopyLayoutElemContainer(src *LayoutElemContainer) *LayoutElemContainer {
+    if src == nil {
+        return nil
+    }
+    var ret LayoutElemContainer
+    ret.X = src.X
+    ret.Y = src.Y
+    ret.Width = src.Width
+    ret.Height = src.Height
+    ret.Elems = make([]LayoutElement, 0)
+    for _, e := range src.Elems {
+        ret.Elems = append(ret.Elems, e)
+    }
+
+    return &ret
 }
 
 
@@ -257,9 +391,25 @@ type LayoutElemConnection struct {
 }
 
 func NewLayoutElemConnection() *LayoutElemConnection {
-        return &LayoutElemConnection{
-            Tags: make([]string, 0),
-        }
+    return &LayoutElemConnection{
+        Tags: make([]string, 0),
+    }
+}
+
+func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
+    if src == nil {
+        return nil
+    }
+    var ret LayoutElemConnection
+    ret.DestId = src.DestId
+    ret.SourceArrow = src.SourceArrow
+    ret.DestArrow = src.DestArrow
+    ret.Tags = make([]string, 0)
+    for _, e := range src.Tags {
+        ret.Tags = append(ret.Tags, e)
+    }
+
+    return &ret
 }
 
 

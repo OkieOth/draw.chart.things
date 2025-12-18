@@ -28,11 +28,33 @@ type Gantt struct {
 }
 
 func NewGantt() *Gantt {
-        return &Gantt{
-            Groups: make([]Group, 0),
-            Events: make([]Event, 0),
-            Formats: make(map[string]GanttFormat, 0),
-        }
+    return &Gantt{
+        Groups: make([]Group, 0),
+        Events: make([]Event, 0),
+        Formats: make(map[string]GanttFormat, 0),
+    }
+}
+
+func CopyGantt(src *Gantt) *Gantt {
+    if src == nil {
+        return nil
+    }
+    var ret Gantt
+    ret.Title = src.Title
+    ret.Groups = make([]Group, 0)
+    for _, e := range src.Groups {
+        ret.Groups = append(ret.Groups, e)
+    }
+    ret.Events = make([]Event, 0)
+    for _, e := range src.Events {
+        ret.Events = append(ret.Events, e)
+    }
+    ret.Formats = make(map[string]GanttFormat, 0)
+    for k, v := range src.Formats {
+        ret.Formats[k] = v
+    }
+
+    return &ret
 }
 
 
@@ -58,9 +80,26 @@ type Group struct {
 }
 
 func NewGroup() *Group {
-        return &Group{
-            Entries: make([]Entry, 0),
-        }
+    return &Group{
+        Entries: make([]Entry, 0),
+    }
+}
+
+func CopyGroup(src *Group) *Group {
+    if src == nil {
+        return nil
+    }
+    var ret Group
+    ret.Name = src.Name
+    ret.Start = src.Start
+    ret.End = src.End
+    ret.Entries = make([]Entry, 0)
+    for _, e := range src.Entries {
+        ret.Entries = append(ret.Entries, e)
+    }
+    ret.Format = src.Format
+
+    return &ret
 }
 
 
@@ -86,9 +125,25 @@ type Event struct {
 }
 
 func NewEvent() *Event {
-        return &Event{
-            EntryRefs: make([]EntryRef, 0),
-        }
+    return &Event{
+        EntryRefs: make([]EntryRef, 0),
+    }
+}
+
+func CopyEvent(src *Event) *Event {
+    if src == nil {
+        return nil
+    }
+    var ret Event
+    ret.Date = src.Date
+    ret.Text = src.Text
+    ret.Description = src.Description
+    ret.EntryRefs = make([]EntryRef, 0)
+    for _, e := range src.EntryRefs {
+        ret.EntryRefs = append(ret.EntryRefs, e)
+    }
+
+    return &ret
 }
 
 
@@ -111,6 +166,20 @@ type GanttFormat struct {
     EntryFill *types.FillDef  `yaml:"entryFill,omitempty"`
 }
 
+
+func CopyGanttFormat(src *GanttFormat) *GanttFormat {
+    if src == nil {
+        return nil
+    }
+    var ret GanttFormat
+    ret.Font = types.CopyFontDef(src.Font)
+    ret.GroupFont = types.CopyFontDef(src.GroupFont)
+    ret.EntryFont = types.CopyFontDef(src.EntryFont)
+    ret.EventFont = types.CopyFontDef(src.EventFont)
+    ret.EntryFill = types.CopyFillDef(src.EntryFill)
+
+    return &ret
+}
 
 
 
@@ -144,9 +213,29 @@ type Entry struct {
 }
 
 func NewEntry() *Entry {
-        return &Entry{
-            References: make([]EntryRef, 0),
-        }
+    return &Entry{
+        References: make([]EntryRef, 0),
+    }
+}
+
+func CopyEntry(src *Entry) *Entry {
+    if src == nil {
+        return nil
+    }
+    var ret Entry
+    ret.Name = src.Name
+    ret.Start = src.Start
+    ret.StartsAfter = CopyRelativeStart(src.StartsAfter)
+    ret.End = src.End
+    ret.Duration = src.Duration
+    ret.Description = src.Description
+    ret.References = make([]EntryRef, 0)
+    for _, e := range src.References {
+        ret.References = append(ret.References, e)
+    }
+    ret.Format = src.Format
+
+    return &ret
 }
 
 
@@ -163,6 +252,17 @@ type RelativeStart struct {
 }
 
 
+func CopyRelativeStart(src *RelativeStart) *RelativeStart {
+    if src == nil {
+        return nil
+    }
+    var ret RelativeStart
+    ret.GroupRef = src.GroupRef
+    ret.EntryRef = src.EntryRef
+
+    return &ret
+}
+
 
 
 
@@ -176,6 +276,17 @@ type EntryRef struct {
     EntryRef *string  `yaml:"entryRef,omitempty"`
 }
 
+
+func CopyEntryRef(src *EntryRef) *EntryRef {
+    if src == nil {
+        return nil
+    }
+    var ret EntryRef
+    ret.GroupRef = src.GroupRef
+    ret.EntryRef = src.EntryRef
+
+    return &ret
+}
 
 
 

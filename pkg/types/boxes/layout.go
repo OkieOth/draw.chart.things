@@ -737,9 +737,6 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 		lv := len(l.Vertical.Elems)
 		for i := 0; i < lv; i++ {
 			sub := &l.Vertical.Elems[i]
-			if sub.Id == "r4_1" {
-				sub.Id = sub.Id
-			}
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
 			}
@@ -843,6 +840,12 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		// 	l.Height += defaultPadding
 		// }
 	}
+}
+
+type FilterFunc func(l *LayoutElement, currentDepth int) bool
+
+var dummyFilter = func(l *LayoutElement, currentDepth int) bool {
+	return true
 }
 
 func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
