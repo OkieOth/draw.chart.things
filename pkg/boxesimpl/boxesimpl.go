@@ -38,7 +38,7 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	}
 
 	// FIXME, TODO: this doesn't terminate!!!!
-	//doc.ConnectBoxes()
+	doc.ConnectBoxes()
 	output, err := os.Create(outputFile)
 	svgdrawing := svgdrawing.NewDrawing(output)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
@@ -108,6 +108,10 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, filter []string) UI
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
 	svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 	doc.DrawBoxes(svgdrawing)
+	// doc.InitStartPositions() // not needed to be called separately
+	// doc.InitRoads() // not needed to be called separately
+	doc.DrawRoads(svgdrawing)
+	doc.DrawStartPositions(svgdrawing)
 	doc.DrawConnections(svgdrawing)
 	svgdrawing.Done()
 	return UIReturn{SVG: svgBuilder.String()}

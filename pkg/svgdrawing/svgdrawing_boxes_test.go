@@ -112,6 +112,7 @@ func TestSvgWithConnections(t *testing.T) {
 			require.Nil(t, err)
 			// debug - can help to see all possible connections in the created file
 			//doc.ConnectBoxesFull()
+			doc.ConnectBoxes()
 			output, err := os.Create(test.outputFile)
 			require.Nil(t, err)
 			svgdrawing := svgdrawing.NewDrawing(output)

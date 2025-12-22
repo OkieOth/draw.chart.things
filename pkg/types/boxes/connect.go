@@ -35,7 +35,7 @@ func getRelevantPoints(p1, p2, other int, verticalBorder bool) []PointToTest {
 }
 
 type checkForCollFunc func(relevantPoints *[]PointToTest, currentElem, elemToHandle *LayoutElement)
-type checkForCollFunc2 func(x, y int, currentElem, startElem, endElem *LayoutElement) bool
+type checkForCollFunc2 func(x, y int, currentElem, startElem, endElem *LayoutElement) CollisionType
 
 func (doc *BoxesDocument) checkForCollInContainer(cont *LayoutElemContainer, f checkForCollFunc, relevantPoints *[]PointToTest, elemToHandle *LayoutElement) {
 	if cont != nil {
@@ -50,24 +50,32 @@ func (doc *BoxesDocument) checkForCollInContainer(cont *LayoutElemContainer, f c
 	}
 }
 
-func (doc *BoxesDocument) checkForCollInContainer2(cont *LayoutElemContainer, f checkForCollFunc2, x, y int, startElem, endElem *LayoutElement) bool {
+func (doc *BoxesDocument) checkForCollInContainer2(cont *LayoutElemContainer, f checkForCollFunc2, x, y int, startElem, endElem *LayoutElement) CollisionType {
 	if cont != nil {
 		l := len(cont.Elems)
-		for i := 0; i < l; i++ {
+		for i := range l {
 			e := &cont.Elems[i]
 			if e == startElem || e == endElem {
 				continue
 			}
-			if f(x, y, e, startElem, endElem) {
-				return true
+			if ct := f(x, y, e, startElem, endElem); ct != CollisionType_NoCollision {
+				return ct
 			}
 		}
 	}
-	return false
+	return CollisionType_NoCollision
 }
 
+type CollisionType int
+
+const (
+	CollisionType_NoCollision CollisionType = iota
+	CollisionType_WithElem
+	CollisionType_WithSurroundings
+)
+
 // checks if a point is inside a box, returns true if so
-func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *LayoutElement) bool {
+func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *LayoutElement) CollisionType {
 	if (currentElem != startElem) && (currentElem != endElem) &&
 		(doc.ShouldHandle(currentElem)) &&
 		((startElem == nil) || (!doc.isParent(currentElem, startElem))) &&
@@ -76,12 +84,17 @@ func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *L
 		curMaxX := currentElem.X + currentElem.Width
 		curMinY := currentElem.Y
 		curMaxY := currentElem.Y + currentElem.Height
-		if (x <= curMaxX) && (x >= curMinX) && (y >= curMinY) && (y <= curMaxY) {
-			return true
+		if (x <= curMaxX) && (x >= curMinX) &&
+			(y >= curMinY) && (y <= curMaxY) {
+			return CollisionType_WithElem
+		}
+		if (x <= (curMaxX + types.RasterSize)) && (x >= (curMinX - types.RasterSize)) &&
+			(y >= (curMinY - types.RasterSize)) && (y <= (curMaxY + types.RasterSize)) {
+			return CollisionType_WithSurroundings
 		}
 	}
-	if doc.checkForCollInContainer2(currentElem.Vertical, doc.checkColl, x, y, startElem, endElem) {
-		return true
+	if ct := doc.checkForCollInContainer2(currentElem.Vertical, doc.checkColl, x, y, startElem, endElem); ct != CollisionType_NoCollision {
+		return ct
 	}
 	return doc.checkForCollInContainer2(currentElem.Horizontal, doc.checkColl, x, y, startElem, endElem)
 }
@@ -881,15 +894,10 @@ func (doc *BoxesDocument) connectTwoElems(start, destElem *LayoutElement, lec *L
 			continue
 		}
 		lastLine := conn[l-1]
-		if l == 2 {
-			fmt.Println("DEBUG: updated connection: ", conn)
-		}
 		if !isConnectedToDest(&lastLine, destElem) {
 			continue
 		}
-		fmt.Println("DEBUG: updated connection: ", conn)
 		if connection == nil || (len(conn) < len(connection)) {
-			fmt.Println("DEBUG: updated connection: ", conn)
 			connection = conn
 		}
 	}
@@ -945,11 +953,12 @@ func (doc *BoxesDocument) connectContainer(cont *LayoutElemContainer, full bool)
 	}
 }
 
-func (doc *BoxesDocument) _ConnectBoxes() {
+func (doc *BoxesDocument) ConnectBoxes() {
 	// TODO - Needs reimplementation
 	doc.InitStartPositions()
 	doc.InitRoads()
-	// doc.connectLayoutElem(&doc.Boxes, false)
+	// TODO Christmas
+	doc.connectLayoutElem(&doc.Boxes, false)
 	// // doc.moveTooCloseVerticalConnectionLinesFromBorders()
 	// // doc.moveTooCloseHorizontalConnectionLinesFromBorders()
 	// // doc.moveTooCloseVerticalConnectionLines()
@@ -969,10 +978,14 @@ func (doc *BoxesDocument) InitStartPositions() {
 
 func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 	if doc.ShouldHandle(elem) {
-		doc.initBottomXToStart(elem)
-		doc.initLeftYToStart(elem)
-		doc.initRightYToStart(elem)
-		doc.initTopXToStart(elem)
+		elem.BottomXToStart = &elem.CenterX
+		elem.TopXToStart = &elem.CenterX
+		elem.LeftYToStart = &elem.CenterY
+		elem.RightYToStart = &elem.CenterY
+		// doc.initBottomXToStart(elem)
+		// doc.initLeftYToStart(elem)
+		// doc.initRightYToStart(elem)
+		// doc.initTopXToStart(elem)
 	}
 	if elem.Vertical != nil {
 		for i := 0; i < len(elem.Vertical.Elems); i++ {
