@@ -102,7 +102,7 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, filter []string, de
 	}
 
 	// FIXME, TODO: this doesn't terminate!!!!
-	//doc.ConnectBoxes()
+	doc.ConnectBoxes()
 	var svgBuilder strings.Builder
 	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
