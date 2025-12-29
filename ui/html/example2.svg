@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1200" viewBox="0 0 2000 1200">
+	<defs>
+		<style>
+			.label { font: 16px sans-serif; fill: #333; }
+		</style>
+	</defs>
+
+	<!-- Top Layer: Main box with caption, with three horizontal sub boxes -->
+	<g id="layer-top">
+		<rect id="top-main" onclick="window.shapeClick(event)" x="100" y="80" width="1800" height="300" fill="#c0e6ff" stroke="#1c7ed6" stroke-width="3" />
+		<text x="120" y="120" class="label">Top Layer: Main Box</text>
+
+		<g>
+			<rect id="top-sub-1" onclick="window.shapeClick(event)" x="140" y="160" width="540" height="180" fill="#ffd8a8" stroke="#e8590c" stroke-width="2" />
+			<text x="160" y="200" class="label">Top Sub 1</text>
+
+			<rect id="top-sub-2" onclick="window.shapeClick(event)" x="740" y="160" width="540" height="180" fill="#e6fcf5" stroke="#0ca678" stroke-width="2" />
+			<text x="760" y="200" class="label">Top Sub 2</text>
+
+			<rect id="top-sub-3" onclick="window.shapeClick(event)" x="1340" y="160" width="540" height="180" fill="#f3d9fa" stroke="#ae3ec9" stroke-width="2" />
+			<text x="1360" y="200" class="label">Top Sub 3</text>
+		</g>
+	</g>
+
+	<!-- Middle Layer: One box with 6 different sub boxes -->
+	<g id="layer-middle">
+		<rect id="mid-container" onclick="window.shapeClick(event)" x="100" y="440" width="1800" height="300" fill="#ffe8cc" stroke="#d9480f" stroke-width="3" />
+		<text x="120" y="480" class="label">Middle Layer: Container</text>
+
+		<g>
+			<rect id="mid-sub-a" onclick="window.shapeClick(event)" x="140" y="520" width="280" height="180" fill="#d0ebff" stroke="#1971c2" stroke-width="2" />
+			<text x="160" y="560" class="label">Mid Sub A</text>
+
+			<rect id="mid-sub-b" onclick="window.shapeClick(event)" x="460" y="520" width="280" height="180" fill="#ffe3e3" stroke="#c92a2a" stroke-width="2" />
+			<text x="480" y="560" class="label">Mid Sub B</text>
+
+			<rect id="mid-sub-c" onclick="window.shapeClick(event)" x="780" y="520" width="280" height="180" fill="#ebfbee" stroke="#2b8a3e" stroke-width="2" />
+			<text x="800" y="560" class="label">Mid Sub C</text>
+
+			<rect id="mid-sub-d" onclick="window.shapeClick(event)" x="1100" y="520" width="280" height="180" fill="#fff3bf" stroke="#f59f00" stroke-width="2" />
+			<text x="1120" y="560" class="label">Mid Sub D</text>
+
+			<rect id="mid-sub-e" onclick="window.shapeClick(event)" x="1420" y="520" width="280" height="180" fill="#e5dbff" stroke="#6741d9" stroke-width="2" />
+			<text x="1440" y="560" class="label">Mid Sub E</text>
+
+			<rect id="mid-sub-f" onclick="window.shapeClick(event)" x="1740" y="520" width="140" height="180" fill="#f8f0fc" stroke="#9c36b5" stroke-width="2" />
+			<text x="1760" y="560" class="label">Mid Sub F</text>
+		</g>
+	</g>
+
+	<!-- Bottom Layer: Two boxes (horizontal), one with three and one with two sub boxes -->
+	<g id="layer-bottom">
+		<rect id="bottom-container" onclick="window.shapeClick(event)" x="100" y="780" width="1800" height="340" fill="#e6fcf5" stroke="#087f5b" stroke-width="3" />
+		<text x="120" y="820" class="label">Bottom Layer: Container</text>
+
+		<g id="bottom-left">
+			<rect id="bottom-left-group" onclick="window.shapeClick(event)" x="140" y="860" width="860" height="220" fill="#d3f9d8" stroke="#2b8a3e" stroke-width="2" />
+			<text x="160" y="900" class="label">Bottom Left Group</text>
+
+			<rect id="bl-sub-1" onclick="window.shapeClick(event)" x="160" y="940" width="260" height="120" fill="#ffa8a8" stroke="#c92a2a" stroke-width="2" />
+			<text x="180" y="980" class="label">BL Sub 1</text>
+
+			<rect id="bl-sub-2" onclick="window.shapeClick(event)" x="440" y="940" width="260" height="120" fill="#99e9f2" stroke="#0c8599" stroke-width="2" />
+			<text x="460" y="980" class="label">BL Sub 2</text>
+
+			<rect id="bl-sub-3" onclick="window.shapeClick(event)" x="720" y="940" width="260" height="120" fill="#ffec99" stroke="#f08c00" stroke-width="2" />
+			<text x="740" y="980" class="label">BL Sub 3</text>
+		</g>
+
+		<g id="bottom-right">
+			<rect id="bottom-right-group" onclick="window.shapeClick(event)" x="1020" y="860" width="880" height="220" fill="#d0ebff" stroke="#1864ab" stroke-width="2" />
+			<text x="1040" y="900" class="label">Bottom Right Group</text>
+
+			<rect id="br-sub-1" onclick="window.shapeClick(event)" x="1040" y="940" width="400" height="120" fill="#c0eb75" stroke="#66a80f" stroke-width="2" />
+			<text x="1060" y="980" class="label">BR Sub 1</text>
+
+			<rect id="br-sub-2" onclick="window.shapeClick(event)" x="1460" y="940" width="420" height="120" fill="#e5dbff" stroke="#7950f2" stroke-width="2" />
+			<text x="1480" y="980" class="label">BR Sub 2</text>
+		</g>
+	</g>
+</svg>

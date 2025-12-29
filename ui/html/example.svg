@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1200" viewBox="0 0 2000 1200">
+	<!-- ...existing code... -->
+	<defs>
+		<style>
+			.grid { stroke: #ddd; stroke-width: 1; }
+			.axis { stroke: #aaa; stroke-width: 2; }
+			.label { font: 16px sans-serif; fill: #333; }
+		</style>
+	</defs>
+
+	<!-- a large grid to demonstrate panning -->
+	<g class="grid">
+		<!-- vertical lines -->
+		<!-- ...existing code... -->
+		<!-- generate a few lines manually for the prototype -->
+		<line x1="0" y1="0" x2="0" y2="1200" />
+		<line x1="200" y1="0" x2="200" y2="1200" />
+		<line x1="400" y1="0" x2="400" y2="1200" />
+		<line x1="600" y1="0" x2="600" y2="1200" />
+		<line x1="800" y1="0" x2="800" y2="1200" />
+		<line x1="1000" y1="0" x2="1000" y2="1200" />
+		<line x1="1200" y1="0" x2="1200" y2="1200" />
+		<line x1="1400" y1="0" x2="1400" y2="1200" />
+		<line x1="1600" y1="0" x2="1600" y2="1200" />
+		<line x1="1800" y1="0" x2="1800" y2="1200" />
+		<!-- horizontal lines -->
+		<line x1="0" y1="0" x2="2000" y2="0" />
+		<line x1="0" y1="200" x2="2000" y2="200" />
+		<line x1="0" y1="400" x2="2000" y2="400" />
+		<line x1="0" y1="600" x2="2000" y2="600" />
+		<line x1="0" y1="800" x2="2000" y2="800" />
+		<line x1="0" y1="1000" x2="2000" y2="1000" />
+		<line x1="0" y1="1200" x2="2000" y2="1200" />
+	</g>
+
+	<!-- axes -->
+	<g class="axis">
+		<line x1="0" y1="600" x2="2000" y2="600" />
+		<line x1="1000" y1="0" x2="1000" y2="1200" />
+	</g>
+
+	<!-- Wrap actual content in a viewport group for pan/zoom -->
+	<g id="viewport">
+		<!-- demo shapes -->
+		<circle id="demo-circle" onclick="window.shapeClick(event)" cx="1000" cy="600" r="120" fill="#4dabf7" stroke="#1c7ed6" stroke-width="3" />
+		<rect id="demo-rect" onclick="window.shapeClick(event)" x="300" y="300" width="200" height="140" fill="#ffe066" stroke="#fab005" stroke-width="3" />
+		<polygon id="demo-triangle" onclick="window.shapeClick(event)" points="1600,300 1700,500 1500,500" fill="#e599f7" stroke="#ae3ec9" stroke-width="3" />
+		<text x="1020" y="600" class="label">Center</text>
+		<text x="320" y="290" class="label">Rect</text>
+		<text x="1500" y="290" class="label">Triangle</text>
+	</g>
+	<!-- ...existing code... -->
+</svg>
