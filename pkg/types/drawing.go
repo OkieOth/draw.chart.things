@@ -32,6 +32,8 @@ type RectWithTextFormat struct {
 
 	// If true, the text will be displayed vertically
 	VerticalTxt bool `yaml:"verticalTxt"`
+
+	CornerRadius *int `yaml:"cornerRadius"`
 }
 
 type Drawing interface {

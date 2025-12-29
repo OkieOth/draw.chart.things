@@ -108,13 +108,14 @@ func (doc *BoxesDocument) AdjustDocHeight(le *LayoutElement, currentMax int) int
 func (b *LayoutElement) Draw(drawing types.Drawing) error {
 	if b.Format != nil {
 		f := types.RectWithTextFormat{
-			FontCaption: b.Format.FontCaption,
-			FontText1:   b.Format.FontText1,
-			FontText2:   b.Format.FontText2,
-			Padding:     b.Format.Padding,
-			Border:      b.Format.Border,
-			Fill:        b.Format.Fill,
-			VerticalTxt: b.Format.VerticalTxt,
+			FontCaption:  b.Format.FontCaption,
+			FontText1:    b.Format.FontText1,
+			FontText2:    b.Format.FontText2,
+			Padding:      b.Format.Padding,
+			Border:       b.Format.Border,
+			Fill:         b.Format.Fill,
+			VerticalTxt:  b.Format.VerticalTxt,
+			CornerRadius: b.Format.CornerRadius,
 		}
 		if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, f); err != nil {
 			return fmt.Errorf("Error drawing element %s: %w", b.Id, err)

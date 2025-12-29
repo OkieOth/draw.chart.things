@@ -373,9 +373,18 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int
 			attr += fmt.Sprintf("stroke: %s;stroke-Width: %f", c, w)
 		}
 		if id != "" {
-			d.canvas.RectWithIdAndAdditional("onclick=\"window.shapeClick(event)\"", id, x, y, width, height, attr)
+			if format.CornerRadius != nil {
+				d.canvas.RoundedRectWithIdAndAdditional("onclick=\"window.shapeClick(event)\"", id, x, y, width, height, *format.CornerRadius, attr)
+			} else {
+				d.canvas.RectWithIdAndAdditional("onclick=\"window.shapeClick(event)\"", id, x, y, width, height, attr)
+			}
 		} else {
-			d.canvas.Rect(x, y, width, height, attr)
+			if format.CornerRadius != nil {
+				d.canvas.Roundrect(x, y, width, height, *format.CornerRadius, *format.CornerRadius, attr)
+			} else {
+				d.canvas.Rect(x, y, width, height, attr)
+			}
+
 		}
 	}
 

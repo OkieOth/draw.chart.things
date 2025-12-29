@@ -168,6 +168,9 @@ type Format struct {
 
     // Minimum margin between boxes
     BoxMargin *int  `yaml:"boxMargin,omitempty"`
+
+    // radius of the box corners in pixel
+    CornerRadius *int  `yaml:"cornerRadius,omitempty"`
 }
 
 
@@ -186,6 +189,7 @@ func CopyFormat(src *Format) *Format {
     ret.Fill = types.CopyFillDef(src.Fill)
     ret.Padding = src.Padding
     ret.BoxMargin = src.BoxMargin
+    ret.CornerRadius = src.CornerRadius
 
     return &ret
 }

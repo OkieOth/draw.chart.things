@@ -42,6 +42,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	var verticalTxt bool
 	padding := types.GlobalPadding
 	boxMargin := types.GlobalMinBoxMargin
+	var fixedHeight, fixedWidth, cornerRadius *int
 	if f != nil {
 		fontCaption = f.FontCaption
 		fontText1 = f.FontText1
@@ -61,6 +62,9 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		if f.VerticalTxt != nil {
 			verticalTxt = *f.VerticalTxt
 		}
+		fixedHeight = f.FixedHeight
+		fixedWidth = f.FixedWidth
+		cornerRadius = f.CornerRadius
 	}
 
 	return boxes.BoxFormat{
@@ -71,9 +75,10 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		FontText2:    types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
 		Border:       border,
 		Fill:         fill,
-		FixedWidth:   f.FixedWidth,
-		FixedHeight:  f.FixedHeight,
+		FixedWidth:   fixedWidth,
+		FixedHeight:  fixedHeight,
 		VerticalTxt:  verticalTxt,
+		CornerRadius: cornerRadius,
 	}
 }
 

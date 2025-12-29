@@ -169,6 +169,10 @@
           "type": "integer",
           "description": "Minimum margin between boxes",
           "default": 10
+        },
+        "cornerRadius": {
+          "description": "radius of the box corners in pixel",
+          "type": "integer"
         }
       }
     }

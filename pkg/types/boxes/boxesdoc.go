@@ -259,6 +259,9 @@ type BoxFormat struct {
 
     Border *types.LineDef  `yaml:"border,omitempty"`
 
+    // radius of the box corners in pixel
+    CornerRadius *int  `yaml:"cornerRadius,omitempty"`
+
     Fill *types.FillDef  `yaml:"fill,omitempty"`
 
     // Minimum margin between boxes
@@ -285,6 +288,7 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.FontText1 = *types.CopyFontDef(&src.FontText1)
     ret.FontText2 = *types.CopyFontDef(&src.FontText2)
     ret.Border = types.CopyLineDef(src.Border)
+    ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
     ret.MinBoxMargin = src.MinBoxMargin
     ret.FixedWidth = src.FixedWidth

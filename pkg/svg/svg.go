@@ -343,6 +343,16 @@ func (svg *SVG) RectWithIdAndAdditional(additional, id string, x int, y int, w i
 	}
 }
 
+// Rect draws a rounded rectangle with upper left-hand corner at x,y, with width w, and height h, with optional style
+// Standard Reference: http://www.w3.org/TR/SVG11/shapes.html#RectElement
+func (svg *SVG) RoundedRectWithIdAndAdditional(additional, id string, x int, y int, w int, h, cornerRadius int, s ...string) {
+	if id == "" {
+		svg.Roundrect(x, y, w, h, cornerRadius, cornerRadius, s...)
+	} else {
+		svg.printf(`<rect %s id="%s" %s rx="%d" ry="%d" %s`, additional, id, dim(x, y, w, h), cornerRadius, cornerRadius, endstyle(s, emptyclose))
+	}
+}
+
 // CenterRect draws a rectangle with its center at x,y, with width w, and height h, with optional style
 func (svg *SVG) CenterRect(x int, y int, w int, h int, s ...string) {
 	svg.Rect(x-(w/2), y-(h/2), w, h, s...)

@@ -293,6 +293,10 @@
         "border": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
+        "cornerRadius": {
+          "description": "radius of the box corners in pixel",
+          "type": "integer"
+        },
         "fill": {
           "$ref": "./formats.json#/definitions/FillDef"
         },
