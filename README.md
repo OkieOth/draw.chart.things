@@ -4,3 +4,9 @@
 
 Utility and library to draw and autolayout some diagram types
 out of a YAML specification.
+
+
+# UI
+
+In Google Chrome the rendered SVG appeared blured after using the zoom tool.
+To fix this press CTRL + '+' followed CTRL + '-'

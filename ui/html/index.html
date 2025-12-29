@@ -68,6 +68,8 @@
                 position: relative; /* sized to content */
                 transform-origin: 0 0;
                 will-change: transform;
+                /* Simple hardware acceleration - universally supported */
+                transform: translate3d(0, 0, 0);
             }
             /* Cursor styles for pan */
             #svg-stage.pan-enabled {
@@ -80,10 +82,20 @@
             #svg-stage svg {
                 overflow: visible;
                 display: block;
+                /* Simple hardware acceleration for smooth transforms */
+                transform: translate3d(0, 0, 0);
+                /* Prevent subpixel rendering issues */
+                backface-visibility: hidden;
             }
-            /* NEW: show pointer cursor when hovering SVG elements that have an onclick handler */
-            #svg-stage svg [onclick] {
-                cursor: pointer;
+            /* Remove all problematic CSS properties - keep it simple */
+            #svg-stage svg * {
+                /* Let browser use default SVG rendering */
+            }
+            /* Minimal text optimization */
+            #svg-stage svg text,
+            #svg-stage svg tspan {
+                /* Only basic text improvements */
+                text-rendering: optimizeLegibility;
             }
             /* Minimap overlay */
             #minimap {
