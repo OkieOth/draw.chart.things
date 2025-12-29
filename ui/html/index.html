@@ -210,6 +210,14 @@
             >
                 Pan
             </button>
+            <!-- Debug tool toggle -->
+            <button
+                id="btn-debug"
+                class="tool-btn"
+                hx-on:click="window.svgControls.toggleDebug()"
+            >
+                Debug
+            </button>
         </div>
 
         <!-- Minimap -->
@@ -489,6 +497,7 @@
                     const btnMinimap = document.getElementById("btn-minimap");
                     const btnCollector =
                         document.getElementById("btn-collector");
+                    const btnDebug = document.getElementById("btn-debug");
                     if (btnPan)
                         btnPan.classList.toggle(
                             "active",
@@ -505,6 +514,8 @@
                             "active",
                             !!collectorVisible,
                         );
+                    if (btnDebug)
+                        btnDebug.classList.toggle("active", !!window.debug);
                 }
 
                 function ensureStageWrapped() {
@@ -1265,6 +1276,9 @@
                         const canvas = document.getElementById("canvas");
                         if (!canvas) return;
 
+                        // NEW: preserve current zoom/pan state before reload
+                        const preservedState = { ...state };
+
                         if (
                             window.inputLoaded &&
                             typeof window.inputLoaded.then === "function"
@@ -1301,6 +1315,10 @@
                             return;
 
                         canvas.innerHTML = svgStr;
+                        
+                        // NEW: restore zoom/pan state after DOM update but before event
+                        state = preservedState;
+                        
                         const evtSwap = new Event("htmx:afterSwap", {
                             bubbles: true,
                         });
@@ -1442,6 +1460,12 @@
                         applyTransform(); // updates cursor class
                         updateToolButtons();
                     },
+                    // Toggle debug mode and refresh SVG
+                    toggleDebug() {
+                        window.debug = !window.debug;
+                        updateToolButtons();
+                        reloadSvgFromBadges();
+                    },
                 };
 
                 // Drag to pan: start on mousedown if pan tool or space is active
@@ -1523,7 +1547,12 @@
                     function (evt) {
                         if (evt.target && evt.target.id === "canvas") {
                             ensureStageWrapped();
-                            state = { scale: 1, tx: 0, ty: 0 };
+                            // NEW: only reset state if it's not already preserved
+                            if (state.scale === 1 && state.tx === 0 && state.ty === 0) {
+                                // This is likely an initial load, keep the reset
+                                state = { scale: 1, tx: 0, ty: 0 };
+                            }
+                            // If state was preserved (non-default values), keep it as-is
                             computeBaseSize();
                             applyTransform();
                             initMinimap();
