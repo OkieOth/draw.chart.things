@@ -19,13 +19,13 @@ const unknownSvg string = `<svg xmlns="http://www.w3.org/2000/svg" width="800" h
 `
 
 // getSVG implements the requested signature
-func createSvg(boxesYaml string, defaultDepth int, filter []string) string {
+func createSvg(boxesYaml string, defaultDepth int, filter []string, debug bool) string {
 	var boxes boxes.Boxes
 	if err := y.Unmarshal([]byte(boxesYaml), &boxes); err != nil {
 		return unknownSvg
 	}
 
-	ret := boxesimpl.DrawBoxesFiltered(boxes, defaultDepth, filter)
+	ret := boxesimpl.DrawBoxesFiltered(boxes, defaultDepth, filter, debug)
 	if ret.ErrorMsg != "" {
 		return unknownSvg
 	}
@@ -34,11 +34,12 @@ func createSvg(boxesYaml string, defaultDepth int, filter []string) string {
 
 // JS wrapper: exposes getSvg to JavaScript
 func createSvgWrapper(this js.Value, args []js.Value) interface{} {
-	if len(args) < 3 {
-		return "error: expected (string, number, string[])"
+	if len(args) < 4 {
+		return "error: expected (string, number, string[], bool)"
 	}
 	input := args[0].String()
 	depth := args[1].Int()
+	debug := args[3].Bool()
 	jsArray := args[2]
 	if jsArray.Type() != js.TypeObject {
 		return "error: filter must be an array"
@@ -51,7 +52,7 @@ func createSvgWrapper(this js.Value, args []js.Value) interface{} {
 			filter = append(filter, val.String())
 		}
 	}
-	return createSvg(input, depth, filter)
+	return createSvg(input, depth, filter, debug)
 }
 
 func main() {

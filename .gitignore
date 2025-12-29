@@ -35,3 +35,4 @@ temp
 external
 __debug_*
 build
+*.wasm

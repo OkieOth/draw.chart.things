@@ -204,7 +204,7 @@ func TestDrawBoxesForUi(t *testing.T) {
 	for i, test := range tests {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err, "error while loading input file for test", i)
-		svgReturn := boxesimpl.DrawBoxesFiltered(*b, test.depth, test.filter)
+		svgReturn := boxesimpl.DrawBoxesFiltered(*b, test.depth, test.filter, true)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 

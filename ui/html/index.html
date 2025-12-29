@@ -918,6 +918,7 @@
                                     arg,
                                     window.defaultDepth,
                                     filterTexts,
+                                    window.debug
                                 );
                                 svgStr =
                                     svgStr && typeof svgStr.then === "function"
@@ -1209,6 +1210,7 @@
                                 arg,
                                 window.defaultDepth,
                                 filterTexts,
+                                window.debug
                             );
                             svgStr =
                                 svgStr && typeof svgStr.then === "function"
@@ -1274,6 +1276,7 @@
                             arg,
                             window.defaultDepth,
                             filterTexts,
+                            window.debug
                         );
                         svgStr =
                             svgStr && typeof svgStr.then === "function"
@@ -1652,14 +1655,27 @@
             (function handleInputQueryParam() {
                 try {
                     const params = new URLSearchParams(window.location.search);
-                    if (!params.has("input")) return;
-                    const raw = params.get("input") || "";
-                    // Treat '+' as space for convenience
-                    const content = raw.replace(/\+/g, " ");
-                    // Expose globally
-                    window.queryInput = content;
+                    // Store input (existing)
+                    if (params.has("input")) {
+                        const raw = params.get("input") || "";
+                        const content = raw.replace(/\+/g, " ");
+                        window.queryInput = content;
+                    }
+                    // NEW: parse 'debug' query param and store as global boolean
+                    const rawDebug = params.get("debug");
+                    const truthy = ["true", "1", "yes", "on"];
+                    const val =
+                        rawDebug != null
+                            ? truthy.includes(String(rawDebug).toLowerCase())
+                            : false;
+                    window.debug = val;
                 } catch (e) {
-                    console.error("Failed to read input query param:", e);
+                    console.error("Failed to read query params:", e);
+                    // Defaults when parsing fails
+                    if (typeof window.queryInput === "undefined") {
+                        window.queryInput = undefined;
+                    }
+                    window.debug = false;
                 }
             })();
         </script>
@@ -1689,7 +1705,7 @@
                 // Fetch boxes.wasm with streaming fallback
                 let resp;
                 try {
-                    resp = await fetch("./boxes.wasm", { cache: "no-cache" });
+                    resp = await fetch("/wasm/boxes.wasm", { cache: "no-cache" });
                     if (!resp.ok) throw new Error("HTTP " + resp.status);
                 } catch (e) {
                     console.error("Failed to fetch boxes.wasm:", e);
@@ -1758,7 +1774,7 @@
                             : "";
                     // UPDATED: pass third parameter (clicked texts array, none on initial load)
                     console.log("Refreshing SVG without filter:");
-                    const res = createSvg(initialArg, window.defaultDepth, []);
+                    const res = createSvg(initialArg, window.defaultDepth, [], window.debug);
                     svgStr =
                         res && typeof res.then === "function" ? await res : res;
                 } catch (e) {

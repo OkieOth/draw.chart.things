@@ -10,7 +10,7 @@ build-docker:
 	docker build -f Dockerfile.release -t ghcr.io/okieoth/draw.chart.things:$(VERSION) .
 
 build-wasm:
-	GOOS=js GOARCH=wasm go build -o build/boxes.wasm wasm/main.go
+	GOOS=js GOARCH=wasm go build -o ui/wasm/boxes.wasm wasm/main.go
 
 generate-all:
 	bash -c scripts/generateAll.sh

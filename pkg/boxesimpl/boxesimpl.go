@@ -93,7 +93,7 @@ func filterBoxes(layout boxes.Boxes, defaultDepth int, filter []string) boxes.Bo
 	return *filteredBoxes
 }
 
-func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, filter []string) UIReturn {
+func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, filter []string, debug bool) UIReturn {
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
 	filteredLayout := filterBoxes(layout, defaultDepth, filter)
 	doc, err := InitialLayoutBoxes(&filteredLayout, textDimensionCalulator)
@@ -106,12 +106,16 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, filter []string) UI
 	var svgBuilder strings.Builder
 	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
-	svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+	if debug {
+		svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+	}
 	doc.DrawBoxes(svgdrawing)
 	// doc.InitStartPositions() // not needed to be called separately
 	// doc.InitRoads() // not needed to be called separately
-	doc.DrawRoads(svgdrawing)
-	doc.DrawStartPositions(svgdrawing)
+	if debug {
+		doc.DrawRoads(svgdrawing)
+		doc.DrawStartPositions(svgdrawing)
+	}
 	doc.DrawConnections(svgdrawing)
 	svgdrawing.Done()
 	return UIReturn{SVG: svgBuilder.String()}

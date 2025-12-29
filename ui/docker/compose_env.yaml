@@ -11,4 +11,5 @@ services:
             # Custom nginx config to expose the app under /dynsvg
             - ./nginx:/etc/nginx/conf.d:ro
             - ../data:/data:ro
+            - ../wasm:/wasm:ro
         restart: unless-stopped
