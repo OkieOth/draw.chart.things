@@ -77,11 +77,27 @@ func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blackliste
 		b.Horizontal = make([]boxes.Layout, 0)
 		b.Vertical = make([]boxes.Layout, 0)
 	} else {
-		for i := range len(b.Horizontal) {
-			b.Horizontal[i] = truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, expanded, blacklisted)
+		if len(b.Horizontal) > 0 {
+			cont := make([]boxes.Layout, 0)
+			for i := range len(b.Horizontal) {
+				id := b.Horizontal[i].Id
+				if blacklisted != nil && id != "" && slices.Contains(blacklisted, id) {
+					continue
+				}
+				cont = append(cont, truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, expanded, blacklisted))
+			}
+			b.Horizontal = cont
 		}
-		for i := range len(b.Vertical) {
-			b.Vertical[i] = truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, expanded, blacklisted)
+		if len(b.Vertical) > 0 {
+			cont := make([]boxes.Layout, 0)
+			for i := range len(b.Vertical) {
+				id := b.Vertical[i].Id
+				if blacklisted != nil && id != "" && slices.Contains(blacklisted, id) {
+					continue
+				}
+				cont = append(cont, truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, expanded, blacklisted))
+			}
+			b.Vertical = cont
 		}
 	}
 	return b

@@ -51,8 +51,8 @@ func getArrayFromJsValue(args []js.Value, index int) ([]string, error) {
 
 // JS wrapper: exposes getSvg to JavaScript
 func createSvgWrapper(this js.Value, args []js.Value) interface{} {
-	if len(args) < 4 {
-		return "error: expected (string, number, string[], bool)"
+	if len(args) < 5 {
+		return "error: expected (string, number, string[], string[], bool)"
 	}
 	input := args[0].String()
 	depth := args[1].Int()

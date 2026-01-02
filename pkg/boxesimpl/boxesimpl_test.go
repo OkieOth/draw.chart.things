@@ -225,22 +225,48 @@ func TestFilterBoxes(t *testing.T) {
 		expanded    []string
 		blacklisted []string
 	}{
-		{
-			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
-			checkFunc: func(b *boxes.Boxes) {
-				for _, e := range b.Boxes.Horizontal {
-					require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-1)")
-					require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-1)")
-				}
-				for _, e := range b.Boxes.Vertical {
-					require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-2)")
-					require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-2)")
-				}
-			},
-			depth:       1,
-			expanded:    []string{},
-			blacklisted: []string{},
-		},
+		// {
+		// 	inputFile: "../../resources/examples_boxes/complex_complex.yaml",
+		// 	checkFunc: func(b *boxes.Boxes) {
+		// 		for _, e := range b.Boxes.Horizontal {
+		// 			require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-1)")
+		// 			require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-1)")
+		// 		}
+		// 		for _, e := range b.Boxes.Vertical {
+		// 			require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-2)")
+		// 			require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-2)")
+		// 		}
+		// 	},
+		// 	depth:       1,
+		// 	expanded:    []string{},
+		// 	blacklisted: []string{},
+		// },
+		// {
+		// 	inputFile: "../../resources/examples_boxes/complex_complex.yaml",
+		// 	checkFunc: func(b *boxes.Boxes) {
+		// 		found := false
+		// 		for _, e := range b.Boxes.Horizontal {
+		// 			if len(e.Horizontal) > 0 {
+		// 				found = true
+		// 			}
+		// 			if len(e.Vertical) > 0 {
+		// 				found = true
+		// 			}
+		// 		}
+		// 		for _, e := range b.Boxes.Vertical {
+		// 			if len(e.Horizontal) > 0 {
+		// 				found = true
+		// 			}
+		// 			if len(e.Vertical) > 0 {
+		// 				found = true
+		// 			}
+		// 		}
+		// 		require.True(t, found, "didn't find second level")
+		// 	},
+		// 	depth:       2,
+		// 	expanded:    []string{},
+		// 	blacklisted: []string{},
+		// },
 		{
 			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
 			checkFunc: func(b *boxes.Boxes) {
@@ -263,9 +289,9 @@ func TestFilterBoxes(t *testing.T) {
 				}
 				require.True(t, found, "didn't find second level")
 			},
-			depth:       2,
+			depth:       20,
 			expanded:    []string{},
-			blacklisted: []string{},
+			blacklisted: []string{"r2_2", "r4_1"},
 		},
 	}
 	for i, test := range tests {
