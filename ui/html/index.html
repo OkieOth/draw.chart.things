@@ -184,6 +184,54 @@
                 white-space: nowrap;
                 min-width: 0; /* allow flex child to shrink */
             }
+
+            /* Blacklist collector styles (mirroring collector) */
+            #blacklist-collector {
+                position: fixed;
+                top: 320px; /* below collector */
+                left: 12px;
+                width: 240px;
+                max-height: calc(100vh - 332px);
+                overflow: auto;
+                background: rgba(255, 240, 240, 0.95);
+                border: 1px solid #dcc;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                padding: 10px;
+                z-index: 997;
+                display: flex;
+                flex-direction: column;
+            }
+            #blacklist-collector.hidden {
+                display: none;
+            }
+            #blacklist-collector .title {
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 8px;
+                color: #733;
+            }
+            #blacklist-list {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .blacklist-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 4px 8px;
+                font-size: 12px;
+                line-height: 1;
+                border-radius: 999px;
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                background: #ffeeee;
+                color: #a03d3d;
+                white-space: nowrap;
+                gap: 6px;
+                cursor: pointer;
+                max-width: 100%;
+            }
         </style>
     </head>
     <body>
@@ -218,6 +266,15 @@
                 title="Toggle Expanded Box"
             >
                 <i class="fa-solid fa-arrows-up-down"></i>
+            </button>
+            <!-- Blacklist tool toggle -->
+            <button
+                id="btn-blacklist"
+                class="tool-btn"
+                hx-on:click="window.svgControls.toggleBlacklist()"
+                title="Blacklist Mode (Hide Objects)"
+            >
+                <i class="fa-solid fa-ban"></i>
             </button>
             <!-- Pan tool toggle -->
             <button
@@ -273,12 +330,23 @@
         <!-- Badge collector box (now left side) -->
         <div
             id="collector"
+	    class="hidden"
+	    aria-live="polite"
+	    aria-hidden="true"
+	>
+	    <div class="title">Expanded Items</div>
+	    <div id="badge-list"></div>
+        </div>
+
+        <!-- Blacklist collector box (left side, below expanded) -->
+        <div
+            id="blacklist-collector"
             class="hidden"
             aria-live="polite"
             aria-hidden="true"
         >
-            <div class="title">Expanded Items</div>
-            <div id="badge-list"></div>
+            <div class="title">Blacklisted Items</div>
+            <div id="blacklist-list"></div>
         </div>
 
         <div id="canvas">
@@ -511,30 +579,64 @@
                 }
 
                 // Update toolbar active states
+                let blacklistMode = false;
+                let blacklist = [];
+
                 function updateToolButtons() {
                     const btnPan = document.getElementById("btn-pan");
                     const btnMinimap = document.getElementById("btn-minimap");
-                    const btnCollector =
-                        document.getElementById("btn-collector");
+                    const btnCollector = document.getElementById("btn-collector");
+                    const btnBlacklist = document.getElementById("btn-blacklist");
                     const btnDebug = document.getElementById("btn-debug");
                     if (btnPan)
-                        btnPan.classList.toggle(
-                            "active",
-                            panToolActive || spacePressed,
-                        );
+                        btnPan.classList.toggle("active", panToolActive || spacePressed);
                     if (btnMinimap)
                         btnMinimap.classList.toggle("active", minimapVisible);
                     // Collector is active when visible (not hidden)
                     const collector = document.getElementById("collector");
-                    const collectorVisible =
-                        collector && !collector.classList.contains("hidden");
+                    const collectorVisible = collector && !collector.classList.contains("hidden");
                     if (btnCollector)
-                        btnCollector.classList.toggle(
-                            "active",
-                            !!collectorVisible,
-                        );
+                        btnCollector.classList.toggle("active", !!collectorVisible);
+                    // Blacklist is active when blacklistMode is true
+                    if (btnBlacklist)
+                        btnBlacklist.classList.toggle("active", blacklistMode);
                     if (btnDebug)
                         btnDebug.classList.toggle("active", !!window.debug);
+                }
+
+                // Blacklist tool toggle (moved to global svgControls below)
+
+                // Add to blacklist and update UI
+                function addToBlacklist(el) {
+                    if (!el || !el.id) return;
+                    const boxId = getBoxPrefix(el.id);
+                    if (blacklist.includes(boxId)) return;
+                    blacklist.push(boxId);
+                    updateBlacklistUI();
+                }
+
+                // Remove from blacklist
+                function removeFromBlacklist(boxId) {
+                    blacklist = blacklist.filter((id) => id !== boxId);
+                    updateBlacklistUI();
+                }
+
+                // Update blacklist collector UI
+                function updateBlacklistUI() {
+                    const list = document.getElementById("blacklist-list");
+                    if (!list) return;
+                    list.innerHTML = "";
+                    blacklist.forEach((boxId) => {
+                        const badge = document.createElement("div");
+                        badge.className = "badge blacklist-badge";
+                        badge.dataset.hid = boxId;
+                        badge.textContent = buildBreadcrumbForId(boxId);
+                        badge.title = boxId;
+                        badge.onclick = function () {
+                            removeFromBlacklist(boxId);
+                        };
+                        list.appendChild(badge);
+                    });
                 }
 
                 function ensureStageWrapped() {
@@ -1119,6 +1221,14 @@
                     const el = evt.target;
                     if (!el || !el.id) return;
 
+                    // Blacklist mode: collect to blacklist instead of expanded collector
+                    if (blacklistMode) {
+                        addToBlacklist(el);
+                        // Do not forcibly show the blacklist collector here; only toggleBlacklist controls it
+                        return;
+                    }
+
+                    // --- Existing expanded collector logic ---
                     // NEW: ignore click on a parent if a child is already in the collector
                     const clickedHid = getBoxPrefix(el.id);
                     if (anyBadgeIsChildOf(clickedHid)) {
@@ -1391,6 +1501,23 @@
                 })();
 
                 window.svgControls = {
+                    // Ensure toggleBlacklist is always available on window.svgControls
+                    toggleBlacklist() {
+                        blacklistMode = !blacklistMode;
+                        const blist = document.getElementById("blacklist-collector");
+                        if (blist) {
+                            if (blacklistMode) {
+                                blist.classList.remove("hidden");
+                                blist.setAttribute("aria-hidden", "false");
+                                blist.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                            } else {
+                                blist.classList.add("hidden");
+                                blist.setAttribute("aria-hidden", "true");
+                            }
+                        }
+                        updateBlacklistUI();
+                        updateToolButtons();
+                    },
                     zoom(factor) {
                         state.scale *= factor;
                         applyTransform();
