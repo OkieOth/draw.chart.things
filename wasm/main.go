@@ -4,6 +4,7 @@
 package main
 
 import (
+	"errors"
 	"syscall/js"
 
 	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
@@ -19,17 +20,33 @@ const unknownSvg string = `<svg xmlns="http://www.w3.org/2000/svg" width="800" h
 `
 
 // getSVG implements the requested signature
-func createSvg(boxesYaml string, defaultDepth int, filter []string, debug bool) string {
+func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []string, debug bool) string {
 	var boxes boxes.Boxes
 	if err := y.Unmarshal([]byte(boxesYaml), &boxes); err != nil {
 		return unknownSvg
 	}
 
-	ret := boxesimpl.DrawBoxesFiltered(boxes, defaultDepth, filter, debug)
+	ret := boxesimpl.DrawBoxesFiltered(boxes, defaultDepth, expanded, blacklisted, debug)
 	if ret.ErrorMsg != "" {
 		return unknownSvg
 	}
 	return ret.SVG
+}
+
+func getArrayFromJsValue(args []js.Value, index int) ([]string, error) {
+	jsArray := args[index]
+	if jsArray.Type() != js.TypeObject {
+		return []string{}, errors.New("")
+	}
+	length := jsArray.Length()
+	ret := make([]string, 0, length)
+	for i := 0; i < length; i++ {
+		val := jsArray.Index(i)
+		if val.Type() == js.TypeString {
+			ret = append(ret, val.String())
+		}
+	}
+	return ret, nil
 }
 
 // JS wrapper: exposes getSvg to JavaScript
@@ -39,20 +56,16 @@ func createSvgWrapper(this js.Value, args []js.Value) interface{} {
 	}
 	input := args[0].String()
 	depth := args[1].Int()
-	debug := args[3].Bool()
-	jsArray := args[2]
-	if jsArray.Type() != js.TypeObject {
-		return "error: filter must be an array"
+	debug := args[4].Bool()
+	expanded, err := getArrayFromJsValue(args, 2)
+	if err != nil {
+		return "error: expanded must be an array"
 	}
-	length := jsArray.Length()
-	filter := make([]string, 0, length)
-	for i := 0; i < length; i++ {
-		val := jsArray.Index(i)
-		if val.Type() == js.TypeString {
-			filter = append(filter, val.String())
-		}
+	blacklisted, err := getArrayFromJsValue(args, 3)
+	if err != nil {
+		return "error: blacklisted must be an array"
 	}
-	return createSvg(input, depth, filter, debug)
+	return createSvg(input, depth, expanded, blacklisted, debug)
 }
 
 func main() {

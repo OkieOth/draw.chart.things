@@ -72,30 +72,30 @@ func isRelatedToId(b boxes.Layout, filter []string) bool {
 	return false
 }
 
-func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, filter []string) boxes.Layout {
-	if (currentDepth >= maxDepth) && (!isRelatedToId(b, filter)) {
+func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blacklisted []string) boxes.Layout {
+	if (currentDepth >= maxDepth) && (!isRelatedToId(b, expanded)) {
 		b.Horizontal = make([]boxes.Layout, 0)
 		b.Vertical = make([]boxes.Layout, 0)
 	} else {
 		for i := range len(b.Horizontal) {
-			b.Horizontal[i] = truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, filter)
+			b.Horizontal[i] = truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, expanded, blacklisted)
 		}
 		for i := range len(b.Vertical) {
-			b.Vertical[i] = truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, filter)
+			b.Vertical[i] = truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, expanded, blacklisted)
 		}
 	}
 	return b
 }
 
-func filterBoxes(layout boxes.Boxes, defaultDepth int, filter []string) boxes.Boxes {
+func filterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string) boxes.Boxes {
 	filteredBoxes := boxes.CopyBoxes(&layout)
-	filteredBoxes.Boxes = truncBoxes(layout.Boxes, 0, defaultDepth, filter)
+	filteredBoxes.Boxes = truncBoxes(layout.Boxes, 0, defaultDepth, expanded, blacklisted)
 	return *filteredBoxes
 }
 
-func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, filter []string, debug bool) UIReturn {
+func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, debug bool) UIReturn {
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
-	filteredLayout := filterBoxes(layout, defaultDepth, filter)
+	filteredLayout := filterBoxes(layout, defaultDepth, expanded, blacklisted)
 	doc, err := InitialLayoutBoxes(&filteredLayout, textDimensionCalulator)
 	if err != nil {
 		return UIReturn{ErrorMsg: fmt.Sprintf("error while initialy layout: %v", err)}

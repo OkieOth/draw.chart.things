@@ -183,28 +183,31 @@ func TestLoadBoxesFromFile(t *testing.T) {
 
 func TestDrawBoxesForUi(t *testing.T) {
 	tests := []struct {
-		inputFile  string
-		outputFile string
-		depth      int
-		filter     []string
+		inputFile   string
+		outputFile  string
+		depth       int
+		expanded    []string
+		blacklisted []string
 	}{
 		{
-			inputFile:  "../../resources/examples_boxes/complex_complex.yaml",
-			outputFile: "../../temp/complex_complex_filtered_1.svg",
-			depth:      1,
-			filter:     []string{},
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			outputFile:  "../../temp/complex_complex_filtered_1.svg",
+			depth:       1,
+			expanded:    []string{},
+			blacklisted: []string{},
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/complex_complex.yaml",
-			outputFile: "../../temp/complex_complex_filtered_2.svg",
-			depth:      2,
-			filter:     []string{},
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			outputFile:  "../../temp/complex_complex_filtered_2.svg",
+			depth:       2,
+			expanded:    []string{},
+			blacklisted: []string{},
 		},
 	}
 	for i, test := range tests {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err, "error while loading input file for test", i)
-		svgReturn := boxesimpl.DrawBoxesFiltered(*b, test.depth, test.filter, true)
+		svgReturn := boxesimpl.DrawBoxesFiltered(*b, test.depth, test.expanded, test.blacklisted, true)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
@@ -216,10 +219,11 @@ func TestDrawBoxesForUi(t *testing.T) {
 
 func TestFilterBoxes(t *testing.T) {
 	tests := []struct {
-		inputFile string
-		checkFunc func(b *boxes.Boxes)
-		depth     int
-		filter    []string
+		inputFile   string
+		checkFunc   func(b *boxes.Boxes)
+		depth       int
+		expanded    []string
+		blacklisted []string
 	}{
 		{
 			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
@@ -233,8 +237,9 @@ func TestFilterBoxes(t *testing.T) {
 					require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-2)")
 				}
 			},
-			depth:  1,
-			filter: []string{},
+			depth:       1,
+			expanded:    []string{},
+			blacklisted: []string{},
 		},
 		{
 			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
@@ -258,14 +263,15 @@ func TestFilterBoxes(t *testing.T) {
 				}
 				require.True(t, found, "didn't find second level")
 			},
-			depth:  2,
-			filter: []string{},
+			depth:       2,
+			expanded:    []string{},
+			blacklisted: []string{},
 		},
 	}
 	for i, test := range tests {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err, "error while loading input file for test", i)
-		filtered := boxesimpl.FilterBoxes(*b, test.depth, test.filter)
+		filtered := boxesimpl.FilterBoxes(*b, test.depth, test.expanded, test.blacklisted)
 		test.checkFunc(&filtered)
 	}
 }
