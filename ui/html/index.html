@@ -135,17 +135,17 @@
             #collector {
                 position: fixed;
                 top: 56px; /* below menu */
-                left: 12px; /* moved to left side */
+                left: 12px;
                 width: 240px;
-                max-height: calc(100vh - 68px);
+                max-height: calc(50vh - 68px);
                 overflow: auto;
                 background: rgba(255, 255, 255, 0.95);
                 border: 1px solid #ccc;
                 border-radius: 8px;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 padding: 10px;
-                z-index: 998; /* below minimap (999) and menu (1000) */
-                display: flex; /* ensure layout even when empty */
+                z-index: 998;
+                display: flex;
                 flex-direction: column;
             }
             #collector.hidden {
@@ -188,13 +188,14 @@
             /* Blacklist collector styles (mirroring collector) */
             #blacklist-collector {
                 position: fixed;
-                top: 320px; /* below collector */
                 left: 12px;
                 width: 240px;
-                max-height: calc(100vh - 332px);
-                overflow: auto;
-                background: rgba(255, 240, 240, 0.95);
-                border: 1px solid #dcc;
+                top: auto;
+                /* Place directly below collector with minimal gap */
+                margin-top: 6px;
+                /* Use JS to dynamically set top based on collector's height if needed */
+                background: rgba(255, 255, 255, 0.95);
+                border: 1px solid #ccc;
                 border-radius: 8px;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 padding: 10px;
@@ -209,7 +210,7 @@
                 font-weight: 600;
                 font-size: 14px;
                 margin-bottom: 8px;
-                color: #733;
+                color: #333;
             }
             #blacklist-list {
                 display: flex;
@@ -217,6 +218,8 @@
                 gap: 6px;
             }
             .blacklist-badge {
+                            /* Strikethrough for blacklisted badge label */
+                            text-decoration: line-through;
                 display: inline-flex;
                 align-items: center;
                 justify-content: flex-start;
@@ -225,8 +228,8 @@
                 line-height: 1;
                 border-radius: 999px;
                 border: 1px solid rgba(0, 0, 0, 0.08);
-                background: #ffeeee;
-                color: #a03d3d;
+                background: #eef6ff;
+                color: #0a3d62;
                 white-space: nowrap;
                 gap: 6px;
                 cursor: pointer;
@@ -357,6 +360,20 @@
 
         <script>
             // Pan/zoom via CSS transform on an HTML wrapper (#svg-stage) to avoid SVG viewport clipping.
+            // Ensure blacklist-collector always sits just below collector, never overlapping
+            function positionBlacklistCollector() {
+                const collector = document.getElementById('collector');
+                const blacklist = document.getElementById('blacklist-collector');
+                if (collector && blacklist) {
+                    const rect = collector.getBoundingClientRect();
+                    blacklist.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+                }
+            }
+            window.addEventListener('resize', positionBlacklistCollector);
+            window.addEventListener('DOMContentLoaded', positionBlacklistCollector);
+            // Also reposition after collector content changes
+            const observer = new MutationObserver(positionBlacklistCollector);
+            observer.observe(document.getElementById('collector'), { childList: true, subtree: true });
             (function () {
                 let state = { scale: 1, tx: 0, ty: 0 };
                 let baseSize = { width: 0, height: 0 };
@@ -627,11 +644,26 @@
                     if (!list) return;
                     list.innerHTML = "";
                     blacklist.forEach((boxId) => {
-                        const badge = document.createElement("div");
+                        // Try to find the SVG element for color extraction
+                        const el = document.getElementById(boxId) || document.querySelector(`[data-hid='${boxId}']`);
+                        const breadcrumb = buildBreadcrumbForId(boxId);
+                        const badge = document.createElement("span");
                         badge.className = "badge blacklist-badge";
                         badge.dataset.hid = boxId;
-                        badge.textContent = buildBreadcrumbForId(boxId);
-                        badge.title = boxId;
+                        // Label span for truncation, etc.
+                        const label = document.createElement("span");
+                        label.textContent = breadcrumb;
+                        badge.appendChild(label);
+                        badge.title = breadcrumb;
+                        // Color from shape if possible
+                        if (el) {
+                            const fillColor = getEffectiveFill(el);
+                            if (fillColor) {
+                                badge.dataset.fill = fillColor;
+                                badge.style.background = fillColor;
+                                badge.style.color = pickTextColor(fillColor);
+                            }
+                        }
                         badge.onclick = function () {
                             removeFromBlacklist(boxId);
                         };
@@ -1221,8 +1253,10 @@
                     const el = evt.target;
                     if (!el || !el.id) return;
 
-                    // Blacklist mode: collect to blacklist instead of expanded collector
-                    if (blacklistMode) {
+                    // If blacklist collector is visible, collect to blacklist; otherwise, collect to expanded collector
+                    const blacklistBox = document.getElementById("blacklist-collector");
+                    const blacklistVisible = blacklistBox && !blacklistBox.classList.contains("hidden");
+                    if (blacklistVisible) {
                         addToBlacklist(el);
                         // Do not forcibly show the blacklist collector here; only toggleBlacklist controls it
                         return;
