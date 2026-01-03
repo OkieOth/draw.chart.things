@@ -20,6 +20,13 @@
         "$ref": "#/definitions/Format"
       }
     },
+    "images": {
+      "description": "optional list of images used in the generated graphic",
+      "type": "array",
+      "items": {
+        "$ref": "./formats.json#/definitions/ImageDef"
+      }
+    },
     "globalPadding": {
       "type": "integer",
       "description": "Padding used as default over the whole diagram",
@@ -173,6 +180,11 @@
         "cornerRadius": {
           "description": "radius of the box corners in pixel",
           "type": "integer"
+        },
+        "imgage": {
+          "$comment": "the used images needs to be declared before in the images section",
+          "description": "ID of an image to use",
+          "type": "string"
         }
       }
     }

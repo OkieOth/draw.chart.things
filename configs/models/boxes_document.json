@@ -49,6 +49,13 @@
         "$ref": "#/definitions/BoxFormat"
       }
     },
+    "images": {
+      "description": "optional list of images used in the generated graphic",
+      "type": "array",
+      "items": {
+        "$ref": "./formats.json#/definitions/ImageDef"
+      }
+    },
     "verticalRoads": {
       "description": "Vertical roads available to connect boxes in a vertical way",
       "type": "array",
@@ -299,6 +306,11 @@
         },
         "fill": {
           "$ref": "./formats.json#/definitions/FillDef"
+        },
+        "imgage": {
+          "$comment": "the used images needs to be declared before in the images section",
+          "description": "ID of an image to use",
+          "type": "string"
         },
         "minBoxMargin": {
           "type": "integer",
