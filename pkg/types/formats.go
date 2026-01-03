@@ -350,3 +350,42 @@ func CopyFillDef(src *FillDef) *FillDef {
 
 
 
+
+/* parameters of an image to be displayed in the SVG
+*/
+type ImageDef struct {
+
+    // unique identifier to reference this image later in the document
+    Id *string  `yaml:"id,omitempty"`
+
+    // some words to explain what this image is about
+    Description *string  `yaml:"description,omitempty"`
+
+    // with of the displayed image
+    Width *int  `yaml:"width,omitempty"`
+
+    // height of the displayed image
+    Height *int  `yaml:"height,omitempty"`
+
+    // base64 string of the image to use
+    Base64 *string  `yaml:"base64,omitempty"`
+}
+
+
+func CopyImageDef(src *ImageDef) *ImageDef {
+    if src == nil {
+        return nil
+    }
+    var ret ImageDef
+    ret.Id = src.Id
+    ret.Description = src.Description
+    ret.Width = src.Width
+    ret.Height = src.Height
+    ret.Base64 = src.Base64
+
+    return &ret
+}
+
+
+
+

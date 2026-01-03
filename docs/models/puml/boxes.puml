@@ -8,6 +8,7 @@ class "**Boxes**" as Boxes {
         StringType title
         Layout boxes
         Map<Format> formats
+        ImageDef[] images
         IntegerType globalPadding
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
@@ -45,6 +46,7 @@ class "**Format**" as Format {
         IntegerType padding
         IntegerType boxMargin
         IntegerType cornerRadius
+        StringType imgage
 }
 
  
@@ -125,12 +127,25 @@ note top: Defines the fill of the\nbox
 
  
 
+class "**ImageDef**" as ImageDef {
+        StringType id
+        StringType description
+        IntegerType width
+        IntegerType height
+        StringType base64
+}
+note top: parameters of an image to\nbe displayed in the SVG
+
+ 
+
 
     
 
 Boxes  *--  Layout
 
 Boxes  *--  Format
+
+Boxes "0" *-- "n" ImageDef
 
 
 
@@ -167,26 +182,27 @@ Format  *--  FillDef
 
 
 
-    
-    
-
-
-
-
 
     
-
-
-
-
-
-
+    
 
 
 
 
 
     
+
+
+
+
+
+
+
+
+
+
+
+    
     
     
     
@@ -197,6 +213,12 @@ Format  *--  FillDef
 
     
     
+
+
+    
+
+
+
 
 
 

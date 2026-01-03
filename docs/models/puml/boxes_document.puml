@@ -14,6 +14,7 @@ class "**BoxesDocument**" as BoxesDocument {
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
         Map<BoxFormat> formats
+        ImageDef[] images
         ConnectionLine[] verticalRoads
         ConnectionLine[] horizontalRoads
 }
@@ -65,6 +66,7 @@ class "**BoxFormat**" as BoxFormat {
         LineDef border
         IntegerType cornerRadius
         FillDef fill
+        StringType imgage
         IntegerType minBoxMargin
         IntegerType fixedWidth
         IntegerType fixedHeight
@@ -165,6 +167,17 @@ note top: Defines the fill of the\nbox
 
  
 
+class "**ImageDef**" as ImageDef {
+        StringType id
+        StringType description
+        IntegerType width
+        IntegerType height
+        StringType base64
+}
+note top: parameters of an image to\nbe displayed in the SVG
+
+ 
+
 
     
 
@@ -178,6 +191,8 @@ BoxesDocument "0" *-- "n" ConnectionElem
 
 
 BoxesDocument  *--  BoxFormat
+
+BoxesDocument "0" *-- "n" ImageDef
 
 BoxesDocument "0" *-- "n" ConnectionLine
 
@@ -236,6 +251,7 @@ BoxFormat  *--  FillDef
 
 
 
+
     
 
 
@@ -277,6 +293,12 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
     
     
+
+
+    
+
+
+
 
 
 

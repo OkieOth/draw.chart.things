@@ -96,6 +96,10 @@
           "description": "unique identifier to reference this image later in the document",
           "type": "string"
         },
+        "description": {
+          "description": "some words to explain what this image is about",
+          "type": "string"
+        },
         "width": {
           "description": "with of the displayed image",
           "type": "integer"

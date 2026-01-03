@@ -38,6 +38,9 @@ type BoxesDocument struct {
     // Map of formats available to be used in the boxes
     Formats map[string]BoxFormat  `yaml:"formats,omitempty"`
 
+    // optional list of images used in the generated graphic
+    Images []types.ImageDef  `yaml:"images,omitempty"`
+
     // Vertical roads available to connect boxes in a vertical way
     VerticalRoads []ConnectionLine  `yaml:"verticalRoads,omitempty"`
 
@@ -50,6 +53,7 @@ func NewBoxesDocument() *BoxesDocument {
         Boxes: *NewLayoutElement(),
         Connections: make([]ConnectionElem, 0),
         Formats: make(map[string]BoxFormat, 0),
+        Images: make([]types.ImageDef, 0),
         VerticalRoads: make([]ConnectionLine, 0),
         HorizontalRoads: make([]ConnectionLine, 0),
     }
@@ -74,6 +78,10 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     ret.Formats = make(map[string]BoxFormat, 0)
     for k, v := range src.Formats {
         ret.Formats[k] = v
+    }
+    ret.Images = make([]types.ImageDef, 0)
+    for _, e := range src.Images {
+        ret.Images = append(ret.Images, e)
     }
     ret.VerticalRoads = make([]ConnectionLine, 0)
     for _, e := range src.VerticalRoads {
@@ -264,6 +272,9 @@ type BoxFormat struct {
 
     Fill *types.FillDef  `yaml:"fill,omitempty"`
 
+    // ID of an image to use
+    Imgage *string  `yaml:"imgage,omitempty"`
+
     // Minimum margin between boxes
     MinBoxMargin int  `yaml:"minBoxMargin"`
 
@@ -290,6 +301,7 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.Border = types.CopyLineDef(src.Border)
     ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
+    ret.Imgage = src.Imgage
     ret.MinBoxMargin = src.MinBoxMargin
     ret.FixedWidth = src.FixedWidth
     ret.FixedHeight = src.FixedHeight

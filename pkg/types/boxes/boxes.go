@@ -21,6 +21,9 @@ type Boxes struct {
     // Map of formats available to be used in the boxes
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
+    // optional list of images used in the generated graphic
+    Images []types.ImageDef  `yaml:"images,omitempty"`
+
     // Padding used as default over the whole diagram
     GlobalPadding *int  `yaml:"globalPadding,omitempty"`
 
@@ -35,6 +38,7 @@ func NewBoxes() *Boxes {
     return &Boxes{
         Boxes: *NewLayout(),
         Formats: make(map[string]Format, 0),
+        Images: make([]types.ImageDef, 0),
     }
 }
 
@@ -48,6 +52,10 @@ func CopyBoxes(src *Boxes) *Boxes {
     ret.Formats = make(map[string]Format, 0)
     for k, v := range src.Formats {
         ret.Formats[k] = v
+    }
+    ret.Images = make([]types.ImageDef, 0)
+    for _, e := range src.Images {
+        ret.Images = append(ret.Images, e)
     }
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin
@@ -171,6 +179,9 @@ type Format struct {
 
     // radius of the box corners in pixel
     CornerRadius *int  `yaml:"cornerRadius,omitempty"`
+
+    // ID of an image to use
+    Imgage *string  `yaml:"imgage,omitempty"`
 }
 
 
@@ -190,6 +201,7 @@ func CopyFormat(src *Format) *Format {
     ret.Padding = src.Padding
     ret.BoxMargin = src.BoxMargin
     ret.CornerRadius = src.CornerRadius
+    ret.Imgage = src.Imgage
 
     return &ret
 }
