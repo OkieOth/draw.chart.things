@@ -183,7 +183,8 @@ func TestBuildFromFile(t *testing.T) {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err)
 		require.NotNil(t, b)
-		doc := boxesimpl.DocumentFromBoxes(b)
+		doc, err := boxesimpl.DocumentFromBoxes(b)
+		require.Nil(t, err)
 		require.NotNil(t, doc)
 		assert.Len(t, doc.Images, 3)
 		// TODO

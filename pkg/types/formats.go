@@ -356,16 +356,16 @@ func CopyFillDef(src *FillDef) *FillDef {
 type ImageDef struct {
 
     // unique identifier to reference this image later in the document
-    Id *string  `yaml:"id,omitempty"`
+    Id string  `yaml:"id"`
 
     // some words to explain what this image is about
     Description *string  `yaml:"description,omitempty"`
 
     // with of the displayed image
-    Width *int  `yaml:"width,omitempty"`
+    Width int  `yaml:"width"`
 
     // height of the displayed image
-    Height *int  `yaml:"height,omitempty"`
+    Height int  `yaml:"height"`
 
     // base64 string of the image to use
     Base64 *string  `yaml:"base64,omitempty"`

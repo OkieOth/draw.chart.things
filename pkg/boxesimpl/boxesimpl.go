@@ -195,7 +195,10 @@ func replaceAlternativePathsForContainer(cont []boxes.Layout, inputFile string) 
 }
 
 func InitialLayoutBoxes(b *boxes.Boxes, c types.TextDimensionCalculator) (*boxes.BoxesDocument, error) {
-	doc := DocumentFromBoxes(b)
+	doc, err := DocumentFromBoxes(b)
+	if err != nil {
+		return nil, err
+	}
 	doc.Boxes.X = doc.GlobalPadding
 	doc.Boxes.Y = doc.GlobalPadding
 	doc.Boxes.InitDimensions(c)
@@ -215,7 +218,10 @@ func InitialLayoutBoxes(b *boxes.Boxes, c types.TextDimensionCalculator) (*boxes
 }
 
 func LayoutBoxesWithFilter(b *boxes.Boxes, c types.TextDimensionCalculator, defaultDepth int) (*boxes.BoxesDocument, error) {
-	doc := DocumentFromBoxes(b)
+	doc, err := DocumentFromBoxes(b)
+	if err != nil {
+		return nil, err
+	}
 	doc.Boxes.X = doc.GlobalPadding
 	doc.Boxes.Y = doc.GlobalPadding
 	doc.Boxes.InitDimensions(c)

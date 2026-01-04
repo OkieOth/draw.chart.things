@@ -118,7 +118,8 @@
           "description": "file path to a text file that contains the base64 of the png",
           "type": "string"
         }
-      }
+      },
+      "required": ["id", "height", "width"]
     }
   }
 }

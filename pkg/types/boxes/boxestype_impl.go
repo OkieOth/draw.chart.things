@@ -117,8 +117,14 @@ func (b *LayoutElement) Draw(drawing types.Drawing) error {
 			VerticalTxt:  b.Format.VerticalTxt,
 			CornerRadius: b.Format.CornerRadius,
 		}
-		if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, f); err != nil {
-			return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+		if b.Format.Imgage == nil {
+			if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, f); err != nil {
+				return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+			}
+		} else {
+			if err := drawing.DrawPng(b.X, b.Y, *b.Format.Imgage); err != nil {
+				return fmt.Errorf("Error drawing image %s: %w", b.Id, err)
+			}
 		}
 	}
 	if b.Vertical != nil {

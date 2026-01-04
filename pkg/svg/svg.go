@@ -436,6 +436,13 @@ func (svg *SVG) Image(x int, y int, w int, h int, link string, s ...string) {
 	svg.printf(`<image %s %s %s`, dim(x, y, w, h), href(link), endstyle(s, emptyclose))
 }
 
+// PNG places at x,y (upper left hand corner), the image with
+// width w, and height h. The image needs a unique ID to get referenced in use-elements.
+// The content of the PNG is given as base64 string
+func (svg *SVG) PngWithIdBase64(x int, y int, w int, h int, id, base64 string) {
+	svg.printf(`<image id="%s" %s href="data:image/png;base64,%s"`, id, dim(x, y, w, h), base64)
+}
+
 // Text places the specified text, t at x,y according to the style specified in s
 // Standard Reference: http://www.w3.org/TR/SVG11/text.html#TextElement
 func (svg *SVG) Text(x int, y int, t string, s ...string) {

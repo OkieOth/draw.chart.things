@@ -217,6 +217,27 @@ func (d *SvgDrawing) Start(title string, height, width int) error {
 	return nil
 }
 
+func (d *SvgDrawing) InitImages(imageDefs []types.ImageDef) error {
+	if len(imageDefs) == 0 {
+		return nil
+	}
+	// Example:
+	// <defs>
+	//   <image
+	//     id="iconA"
+	//     width="100"
+	//     height="100"
+	//     href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+	//   />
+	// </defs>
+	d.canvas.Def()
+	for _, imgDef := range imageDefs {
+		d.canvas.PngWithIdBase64(0, 0, imgDef.Width, imgDef.Height, imgDef.Id, *imgDef.Base64)
+	}
+	defer d.canvas.DefEnd()
+	return nil
+}
+
 func (d *SvgDrawing) DrawRaster(width, height, rasterSize int) {
 	for x := rasterSize; x < width; x += rasterSize {
 		for y := rasterSize; y < height; y += rasterSize {
@@ -341,6 +362,10 @@ func (d *SvgDrawing) DrawVerticalTextWithId(text string, currentX, y, height int
 	}
 
 	return currentX
+}
+
+func (d *SvgDrawing) DrawPng(x, y int, pngId string) error {
+	return nil // TODO
 }
 
 // Draw renders a box with text elements

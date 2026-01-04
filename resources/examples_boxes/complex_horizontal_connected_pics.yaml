@@ -20,11 +20,11 @@ images:
     - id: smilie_02_80
       width: 80
       height: 80
-      base64Src: resources/pngs/smilie_02_80x80_base64.txt
+      base64Src: ../../resources/pngs/smilie_02_80x80_base64.txt
     - id: smilie_03_80
       width: 80
       height: 80
-      base64Src: resources/pngs/smilie_03_80x80_base64.txt
+      base64Src: ../../resources/pngs/smilie_03_80x80_base64.txt
 boxes:
     horizontal:
         - vertical:

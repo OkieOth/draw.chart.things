@@ -1,6 +1,8 @@
 package boxesimpl
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
@@ -147,11 +149,32 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat)
 	}
 }
 
-func DocumentFromBoxes(b *boxes.Boxes) *boxes.BoxesDocument {
+func initExternalImages(doc *boxes.BoxesDocument) error {
+	for i := range len(doc.Images) {
+		if doc.Images[i].Base64 == nil && doc.Images[i].Base64Src == nil {
+			return fmt.Errorf("Missing 'base64' or 'base64Src' attribute for imageDef id=%s", doc.Images[i].Id)
+		}
+		if doc.Images[i].Base64Src != nil {
+			// load the base64 string from the file given by the attrib
+			bytes, err := os.ReadFile(*doc.Images[i].Base64Src)
+			if err != nil {
+				return fmt.Errorf("Error while reading content of 'base64Src' (%s) for imageDef id=%s", *doc.Images[i].Base64Src, doc.Images[i].Id)
+			}
+			base64Str := string(bytes)
+			doc.Images[i].Base64 = &base64Str
+		}
+	}
+	return nil
+}
+
+func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 	doc := boxes.NewBoxesDocument()
 	doc.Title = b.Title
 	doc.Formats = initFormats(b.Formats)
 	doc.Images = b.Images
+	if err := initExternalImages(doc); err != nil {
+		return nil, err
+	}
 	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin
@@ -162,5 +185,5 @@ func DocumentFromBoxes(b *boxes.Boxes) *boxes.BoxesDocument {
 	if doc.GlobalPadding == 0 {
 		doc.GlobalPadding = types.GlobalPadding
 	}
-	return doc
+	return doc, nil
 }
