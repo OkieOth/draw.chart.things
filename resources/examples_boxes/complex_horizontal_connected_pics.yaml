@@ -6,6 +6,12 @@ formats:
             color: black
         fill:
             color: white
+    img1:
+        image: smilie_01_43
+    img2:
+        image: smilie_02_80
+    img3:
+        image: smilie_03_80
 images:
     - id: smilie_01_43
       width: 43
@@ -29,6 +35,9 @@ boxes:
                 connections:
                     - destId: r6_4
                     - destId: r6_5
+                horizontal:
+                    - format: img2
+                    - format: img3
         - vertical:
               - id: r5_1
                 caption: Most Left Element, Das ist für Matthias mal sehen was passiert
@@ -41,6 +50,8 @@ boxes:
                 text1: I am in the second line
                 connections:
                     - destId: r4_1
+                horizontal:
+                    - format: img1
         - vertical:
               - id: r6_1
                 caption: Most Left Element

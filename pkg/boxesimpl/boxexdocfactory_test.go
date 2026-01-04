@@ -6,6 +6,7 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
 	"github.com/okieoth/draw.chart.things/pkg/types"
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -166,5 +167,25 @@ func TestLoadFromFile(t *testing.T) {
 		require.Equal(t, "r6_5", b.Boxes.Horizontal[2].Vertical[4].Id)
 		require.Equal(t, 1, len(b.Boxes.Horizontal[2].Vertical[4].Connections))
 
+	}
+}
+
+func TestBuildFromFile(t *testing.T) {
+	tests := []struct {
+		inputFile string
+	}{
+		{
+			inputFile: "../../resources/examples_boxes/complex_horizontal_connected_pics.yaml",
+		},
+	}
+
+	for _, test := range tests {
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
+		require.Nil(t, err)
+		require.NotNil(t, b)
+		doc := boxesimpl.DocumentFromBoxes(b)
+		require.NotNil(t, doc)
+		assert.Len(t, doc.Images, 3)
+		// TODO
 	}
 }

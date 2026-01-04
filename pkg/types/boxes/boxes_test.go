@@ -52,6 +52,7 @@ func TestLoadBoxes(t *testing.T) {
 			fileName: "../../../resources/examples_boxes/simple_diamond.yaml",
 			verify: func(t *testing.T, b *boxes.Boxes) {
 				assert.NotNil(t, b)
+				assert.Len(t, b.Images, 0)
 				assert.Len(t, b.Boxes.Horizontal, 0)
 				assert.Len(t, b.Boxes.Vertical, 3)
 				checkLayout(t, &b.Boxes.Vertical[0], "r1_1", 0, 0)
@@ -63,7 +64,26 @@ func TestLoadBoxes(t *testing.T) {
 
 				checkLayout(t, &b.Boxes.Vertical[2], "r3_1", 0, 0)
 			},
-		}}
+		},
+		{
+			fileName: "../../../resources/examples_boxes/complex_horizontal_connected_pics.yaml",
+			verify: func(t *testing.T, b *boxes.Boxes) {
+				assert.NotNil(t, b)
+				assert.Len(t, b.Images, 3)
+				assert.NotNil(t, b.Images[0].Id)
+				assert.NotNil(t, b.Images[0].Base64)
+				assert.Nil(t, b.Images[0].Base64Src)
+
+				assert.NotNil(t, b.Images[1].Id)
+				assert.Nil(t, b.Images[1].Base64)
+				assert.NotNil(t, b.Images[1].Base64Src)
+
+				assert.NotNil(t, b.Images[2].Id)
+				assert.Nil(t, b.Images[2].Base64)
+				assert.NotNil(t, b.Images[2].Base64Src)
+			},
+		},
+	}
 
 	for _, test := range tests {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.fileName)
