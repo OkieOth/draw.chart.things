@@ -141,6 +141,7 @@ class "**ImageDef**" as ImageDef {
         IntegerType width
         IntegerType height
         StringType base64
+        StringType base64Src
 }
 note top: parameters of an image to\nbe displayed in the SVG
 
@@ -223,6 +224,7 @@ Entry "0" *-- "n" EntryRef
 
 
     
+
 
 
 

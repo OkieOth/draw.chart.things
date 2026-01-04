@@ -10,3 +10,7 @@ out of a YAML specification.
 
 In Google Chrome the rendered SVG appeared blured after using the zoom tool.
 To fix this press CTRL + '+' followed CTRL + '-'
+
+# Additional usage
+
+* generate base64 string: `base64 -w 0 smilie_01_43x43.png`

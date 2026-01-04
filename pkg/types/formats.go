@@ -369,6 +369,9 @@ type ImageDef struct {
 
     // base64 string of the image to use
     Base64 *string  `yaml:"base64,omitempty"`
+
+    // file path to a text file that contains the base64 of the png
+    Base64Src *string  `yaml:"base64Src,omitempty"`
 }
 
 
@@ -382,6 +385,7 @@ func CopyImageDef(src *ImageDef) *ImageDef {
     ret.Width = src.Width
     ret.Height = src.Height
     ret.Base64 = src.Base64
+    ret.Base64Src = src.Base64Src
 
     return &ret
 }

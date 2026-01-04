@@ -112,6 +112,11 @@
           "$comment": "attention, PNGs are expected",
           "description": "base64 string of the image to use",
           "type": "string"
+        },
+        "base64Src": {
+          "$comment": "attention, single line base64 txt files are expected",
+          "description": "file path to a text file that contains the base64 of the png",
+          "type": "string"
         }
       }
     }
