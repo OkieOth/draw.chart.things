@@ -46,7 +46,7 @@ class "**Format**" as Format {
         IntegerType padding
         IntegerType boxMargin
         IntegerType cornerRadius
-        StringType imgage
+        StringType image
 }
 
  

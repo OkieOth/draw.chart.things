@@ -307,7 +307,7 @@
         "fill": {
           "$ref": "./formats.json#/definitions/FillDef"
         },
-        "imgage": {
+        "image": {
           "$comment": "the used images needs to be declared before in the images section",
           "description": "ID of an image to use",
           "type": "string"

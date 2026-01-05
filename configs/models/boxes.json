@@ -181,7 +181,7 @@
           "description": "radius of the box corners in pixel",
           "type": "integer"
         },
-        "imgage": {
+        "image": {
           "$comment": "the used images needs to be declared before in the images section",
           "description": "ID of an image to use",
           "type": "string"

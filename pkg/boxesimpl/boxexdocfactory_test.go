@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var TAG1 string = "tag1"
+
 func TestInitLayoutElement(t *testing.T) {
 	bf2 := boxes.BoxFormat{
 		Padding: 0,
@@ -62,7 +64,7 @@ func TestInitLayoutElement(t *testing.T) {
 				Caption: "Test Caption",
 				Text1:   "Test Text1",
 				Text2:   "Test Text2",
-				Tags:    []string{"tag1"},
+				Format:  &TAG1,
 			},
 			inputFormats: map[string]boxes.BoxFormat{
 				"tag1": {

@@ -440,7 +440,7 @@ func (svg *SVG) Image(x int, y int, w int, h int, link string, s ...string) {
 // width w, and height h. The image needs a unique ID to get referenced in use-elements.
 // The content of the PNG is given as base64 string
 func (svg *SVG) PngWithIdBase64(x int, y int, w int, h int, id, base64 string) {
-	svg.printf(`<image id="%s" %s href="data:image/png;base64,%s"`, id, dim(x, y, w, h), base64)
+	svg.printf(`<image id="%s" %s href="data:image/png;base64,%s"/>`, id, dim(x, y, w, h), base64)
 }
 
 // Text places the specified text, t at x,y according to the style specified in s

@@ -181,7 +181,7 @@ type Format struct {
     CornerRadius *int  `yaml:"cornerRadius,omitempty"`
 
     // ID of an image to use
-    Imgage *string  `yaml:"imgage,omitempty"`
+    Image *string  `yaml:"image,omitempty"`
 }
 
 
@@ -201,7 +201,7 @@ func CopyFormat(src *Format) *Format {
     ret.Padding = src.Padding
     ret.BoxMargin = src.BoxMargin
     ret.CornerRadius = src.CornerRadius
-    ret.Imgage = src.Imgage
+    ret.Image = src.Image
 
     return &ret
 }

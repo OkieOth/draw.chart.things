@@ -68,7 +68,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		fixedHeight = f.FixedHeight
 		fixedWidth = f.FixedWidth
 		cornerRadius = f.CornerRadius
-		image = f.Imgage
+		image = f.Image
 	}
 
 	return boxes.BoxFormat{
@@ -83,7 +83,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		FixedHeight:  fixedHeight,
 		VerticalTxt:  verticalTxt,
 		CornerRadius: cornerRadius,
-		Imgage:       image,
+		Image:        image,
 	}
 }
 
@@ -110,12 +110,18 @@ func initFormats(inputFormat map[string]boxes.Format) map[string]boxes.BoxFormat
 
 func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat) boxes.LayoutElement {
 	var f *boxes.BoxFormat
-	for _, tag := range l.Tags {
-		if val, ok := inputFormats[tag]; ok {
+	// for _, tag := range l.Tags {
+	// 	if val, ok := inputFormats[tag]; ok {
+	// 		f = &val
+	// 		break
+	// 	}
+	// }
+	if l.Format != nil {
+		if val, ok := inputFormats[*l.Format]; ok {
 			f = &val
-			break
 		}
 	}
+
 	if (f == nil) && (l.Caption != "" || l.Text1 != "" || l.Text2 != "") {
 		formatKey := "default"
 		if l.Format != nil {

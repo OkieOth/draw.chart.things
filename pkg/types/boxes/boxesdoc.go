@@ -273,7 +273,7 @@ type BoxFormat struct {
     Fill *types.FillDef  `yaml:"fill,omitempty"`
 
     // ID of an image to use
-    Imgage *string  `yaml:"imgage,omitempty"`
+    Image *string  `yaml:"image,omitempty"`
 
     // Minimum margin between boxes
     MinBoxMargin int  `yaml:"minBoxMargin"`
@@ -301,7 +301,7 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.Border = types.CopyLineDef(src.Border)
     ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
-    ret.Imgage = src.Imgage
+    ret.Image = src.Image
     ret.MinBoxMargin = src.MinBoxMargin
     ret.FixedWidth = src.FixedWidth
     ret.FixedHeight = src.FixedHeight

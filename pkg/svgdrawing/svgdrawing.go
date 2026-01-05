@@ -365,7 +365,8 @@ func (d *SvgDrawing) DrawVerticalTextWithId(text string, currentX, y, height int
 }
 
 func (d *SvgDrawing) DrawPng(x, y int, pngId string) error {
-	return nil // TODO
+	d.canvas.Use(x, y, "#"+pngId)
+	return nil
 }
 
 // Draw renders a box with text elements

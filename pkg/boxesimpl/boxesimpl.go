@@ -37,7 +37,6 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 		return err
 	}
 
-	// FIXME, TODO: this doesn't terminate!!!!
 	doc.ConnectBoxes()
 	output, err := os.Create(outputFile)
 	svgdrawing := svgdrawing.NewDrawing(output)
@@ -117,7 +116,6 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 		return UIReturn{ErrorMsg: fmt.Sprintf("error while initialy layout: %v", err)}
 	}
 
-	// FIXME, TODO: this doesn't terminate!!!!
 	doc.ConnectBoxes()
 	var svgBuilder strings.Builder
 	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)

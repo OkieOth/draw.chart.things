@@ -66,7 +66,7 @@ class "**BoxFormat**" as BoxFormat {
         LineDef border
         IntegerType cornerRadius
         FillDef fill
-        StringType imgage
+        StringType image
         IntegerType minBoxMargin
         IntegerType fixedWidth
         IntegerType fixedHeight
