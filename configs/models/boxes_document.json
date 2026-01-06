@@ -155,6 +155,22 @@
           "type": "integer",
           "description": "X position of the bottom side of the element to start the connection"
         },
+        "xTextBox": {
+          "type": "integer",
+          "description": "X position where the text would start"
+        },
+        "yTextBox": {
+          "type": "integer",
+          "description": "Y position where the text would start"
+        },
+        "widthTextBox": {
+          "type": "integer",
+          "description": "Width of the text area"
+        },
+        "heightTextBox": {
+          "type": "integer",
+          "description": "Height of the text area"
+        },
         "tags": {
           "description": "Tags to annotate the box, tags are used to format and filter",
           "type": "array",

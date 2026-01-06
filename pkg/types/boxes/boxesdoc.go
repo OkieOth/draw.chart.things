@@ -151,6 +151,18 @@ type LayoutElement struct {
     // X position of the bottom side of the element to start the connection
     BottomXToStart *int  `yaml:"bottomXToStart,omitempty"`
 
+    // X position where the text would start
+    XTextBox *int  `yaml:"xTextBox,omitempty"`
+
+    // Y position where the text would start
+    YTextBox *int  `yaml:"yTextBox,omitempty"`
+
+    // Width of the text area
+    WidthTextBox *int  `yaml:"widthTextBox,omitempty"`
+
+    // Height of the text area
+    HeightTextBox *int  `yaml:"heightTextBox,omitempty"`
+
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -190,6 +202,10 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     ret.RightYToStart = src.RightYToStart
     ret.TopXToStart = src.TopXToStart
     ret.BottomXToStart = src.BottomXToStart
+    ret.XTextBox = src.XTextBox
+    ret.YTextBox = src.YTextBox
+    ret.WidthTextBox = src.WidthTextBox
+    ret.HeightTextBox = src.HeightTextBox
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)

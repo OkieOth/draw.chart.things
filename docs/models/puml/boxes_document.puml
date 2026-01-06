@@ -41,6 +41,10 @@ class "**LayoutElement**" as LayoutElement {
         IntegerType rightYToStart
         IntegerType topXToStart
         IntegerType bottomXToStart
+        IntegerType xTextBox
+        IntegerType yTextBox
+        IntegerType widthTextBox
+        IntegerType heightTextBox
         StringType[] tags
 }
 
@@ -217,6 +221,10 @@ LayoutElement  *--  LayoutElemContainer
 LayoutElement  *--  BoxFormat
 
 LayoutElement "0" *-- "n" LayoutElemConnection
+
+
+
+
 
 
 
