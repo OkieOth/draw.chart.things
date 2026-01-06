@@ -40,7 +40,7 @@ func getArrayFromJsValue(args []js.Value, index int) ([]string, error) {
 	}
 	length := jsArray.Length()
 	ret := make([]string, 0, length)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		val := jsArray.Index(i)
 		if val.Type() == js.TypeString {
 			ret = append(ret, val.String())

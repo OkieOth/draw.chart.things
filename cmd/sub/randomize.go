@@ -26,32 +26,10 @@ var RandomizeBoxesCmd = &cobra.Command{
 	Short: "Randomize the texts in boxes input files",
 	Long:  `Randomize the texts in boxes input files`,
 	Run: func(cmd *cobra.Command, args []string) {
-		boxes, err := boxesimpl.LoadBoxesFromFile(From)
+		err := RandomizeBoxes(From, Output)
 		if err != nil {
-			fmt.Println("Error while loading input:", err)
+			fmt.Println(err)
 			os.Exit(1)
-		}
-		faker := gofakeit.NewFaker(source.NewJSF(11), true)
-		randomizeBoxesLayout(&boxes.Boxes, faker)
-		bytes, err := yaml.Marshal(boxes)
-		if err != nil {
-			fmt.Println("Error while serialize to yaml:", err)
-			os.Exit(1)
-		}
-		if Output == "" {
-			fmt.Println(string(bytes))
-		} else {
-			output, err := os.Create(Output)
-			if err != nil {
-				fmt.Println("Error while creating output file:", err)
-				os.Exit(1)
-			}
-			defer output.Close()
-			_, err = output.Write(bytes)
-			if err != nil {
-				fmt.Println("Error while writing output file:", err)
-				os.Exit(1)
-			}
 		}
 	},
 }
@@ -59,6 +37,33 @@ var RandomizeBoxesCmd = &cobra.Command{
 func init() {
 	initDefaultFlags(RandomizeCmd)
 	RandomizeCmd.AddCommand(RandomizeBoxesCmd)
+}
+
+func RandomizeBoxes(input, output string) error {
+	boxes, err := boxesimpl.LoadBoxesFromFile(input)
+	if err != nil {
+		return fmt.Errorf("Error while loading input: %v", err)
+	}
+	faker := gofakeit.NewFaker(source.NewJSF(11), true)
+	randomizeBoxesLayout(&boxes.Boxes, faker)
+	bytes, err := yaml.Marshal(boxes)
+	if err != nil {
+		return fmt.Errorf("Error while serialize to yaml: %v", err)
+	}
+	if output == "" {
+		fmt.Println(string(bytes))
+	} else {
+		outputFile, err := os.Create(output)
+		if err != nil {
+			return fmt.Errorf("Error while creating output file: %v", err)
+		}
+		defer outputFile.Close()
+		_, err = outputFile.Write(bytes)
+		if err != nil {
+			return fmt.Errorf("Error while writing output file: %v", err)
+		}
+	}
+	return nil
 }
 
 func randomizeText(txt string, faker *gofakeit.Faker) string {
@@ -74,9 +79,7 @@ func randomizeBoxesLayoutContainer(cont []boxes.Layout, faker *gofakeit.Faker) [
 	}
 	ret := make([]boxes.Layout, 0)
 	for _, c := range cont {
-		c.Caption = randomizeText(c.Caption, faker)
-		c.Text1 = randomizeText(c.Text1, faker)
-		c.Text2 = randomizeText(c.Text2, faker)
+		randomizeBoxesLayout(&c, faker)
 		ret = append(ret, c)
 	}
 	return ret

@@ -971,8 +971,12 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			l.Width = l.adjustToRaster(*l.Format.FixedWidth)
 		}
 	}
-	l.initVertical(c, yInnerOffset)
-	l.initHorizontal(c, yInnerOffset)
+	if l.Vertical != nil {
+		l.initVertical(c, yInnerOffset)
+	}
+	if l.Horizontal != nil {
+		l.initHorizontal(c, yInnerOffset)
+	}
 }
 
 func (l *LayoutElement) adjustToRaster(value int) int {
