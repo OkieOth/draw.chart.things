@@ -870,8 +870,15 @@ var dummyFilter = func(l *LayoutElement, currentDepth int) bool {
 	return true
 }
 
+func getMax(v1, v2 int) int {
+	if v2 > v1 {
+		return v2
+	}
+	return v1
+}
+
 func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
-	var cW, cH, t1W, t1H, t2W, t2H int
+	var cW, cH, t1W, t1H, t2W, t2H, textWidth, textHeight int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
 	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
@@ -883,10 +890,9 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			}
 			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
 			if !l.Format.VerticalTxt {
-				// normal horizontal text
-				// Eiko ... TODO
 				l.Height += cH + p
 				l.Height += l.Format.FontCaption.SpaceBottom
+
 			} else {
 				// vertical text
 				cW, cH = cH, cW
@@ -895,6 +901,8 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 					l.Width += l.Format.Padding
 				}
 			}
+			textWidth = cW
+			textHeight = cH
 		}
 		if l.Text1 != "" {
 			p := l.Format.Padding
@@ -909,12 +917,16 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 				} else {
 					l.Height += l.Format.FontText1.SpaceBottom
 				}
+				textWidth = getMax(textWidth, t1W)
+				textHeight += t1H
 			} else {
 				t1W, t1H = t1H, t1W
 				l.Width += t1W + p + l.Format.FontText1.SpaceBottom
 				if l.Text2 == "" {
 					l.Width += l.Format.Padding
 				}
+				textWidth += t1W
+				textHeight = getMax(textHeight, t1H)
 			}
 		}
 		if l.Text2 != "" {
@@ -926,10 +938,14 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			if !l.Format.VerticalTxt {
 				l.Height += t2H
 				l.Height += l.Format.Padding
+				textWidth = getMax(textWidth, t2W)
+				textHeight += t2H
 			} else {
 				t2W, t2H = t2H, t2W
 				l.Width += t2W + p + l.Format.FontText2.SpaceBottom
 				l.Width += l.Format.Padding
+				textWidth += t2W
+				textHeight = getMax(textHeight, t2H)
 			}
 		}
 		if !l.Format.VerticalTxt {
@@ -963,6 +979,8 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			}
 			l.Height = l.adjustToRaster(h)
 		}
+		l.WidthTextBox = &textWidth
+		l.HeightTextBox = &textHeight
 	} else if l.Format != nil {
 		if l.Format.FixedHeight != nil {
 			l.Height = l.adjustToRaster(*l.Format.FixedHeight)
@@ -977,6 +995,14 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	if l.Horizontal != nil {
 		l.initHorizontal(c, yInnerOffset)
 	}
+	xTextBox := l.X + (l.Width-textWidth)/2
+	l.XTextBox = &xTextBox
+	padding := types.GlobalPadding
+	if l.Format != nil && l.Format.Padding > 0 {
+		padding = l.Format.Padding
+	}
+	yTextBox := l.Y + padding
+	l.YTextBox = &yTextBox
 }
 
 func (l *LayoutElement) adjustToRaster(value int) int {
