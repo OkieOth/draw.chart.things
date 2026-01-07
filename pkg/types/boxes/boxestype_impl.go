@@ -11,7 +11,7 @@ func (d *BoxesDocument) DrawBoxes(drawingImpl types.Drawing) error {
 }
 
 func (doc *BoxesDocument) drawStartPositionsImpl(drawingImpl *types.Drawing, elem *LayoutElement, f *types.LineDef) {
-	if doc.ShouldHandle(elem) {
+	if elem.TopXToStart != nil && elem.BottomXToStart != nil && elem.LeftYToStart != nil && elem.RightYToStart != nil {
 		(*drawingImpl).DrawLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y-types.RasterSize, *f)
 		(*drawingImpl).DrawLine(*elem.BottomXToStart, elem.Y+elem.Height, *elem.BottomXToStart, elem.Y+elem.Height+types.RasterSize, *f)
 		(*drawingImpl).DrawLine(elem.X, *elem.LeftYToStart, elem.X-types.RasterSize, *elem.LeftYToStart, *f)

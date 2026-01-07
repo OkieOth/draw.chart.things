@@ -2,6 +2,7 @@ package boxes
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
@@ -956,7 +957,7 @@ func (doc *BoxesDocument) connectContainer(cont *LayoutElemContainer, full bool)
 func (doc *BoxesDocument) ConnectBoxes() {
 	// TODO - Needs reimplementation
 	doc.InitStartPositions()
-	doc.InitRoads()
+	// doc.InitRoads()
 	// TODO Christmas
 	doc.connectLayoutElem(&doc.Boxes, false)
 	// // doc.moveTooCloseVerticalConnectionLinesFromBorders()
@@ -978,14 +979,12 @@ func (doc *BoxesDocument) InitStartPositions() {
 
 func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 	if doc.ShouldHandle(elem) {
-		elem.BottomXToStart = &elem.CenterX
-		elem.TopXToStart = &elem.CenterX
-		elem.LeftYToStart = &elem.CenterY
-		elem.RightYToStart = &elem.CenterY
-		// doc.initBottomXToStart(elem)
-		// doc.initLeftYToStart(elem)
-		// doc.initRightYToStart(elem)
-		// doc.initTopXToStart(elem)
+		if slices.Contains(doc.ConnectedElems, elem.Id) {
+			elem.BottomXToStart = &elem.CenterX
+			elem.TopXToStart = &elem.CenterX
+			elem.LeftYToStart = &elem.CenterY
+			elem.RightYToStart = &elem.CenterY
+		}
 	}
 	if elem.Vertical != nil {
 		for i := 0; i < len(elem.Vertical.Elems); i++ {

@@ -9,16 +9,16 @@ import (
 
 // traces the document and finds all reasonable "roads" to connect
 func (doc *BoxesDocument) InitRoads() {
-	doc.initRoadsImpl(&doc.Boxes)
+	doc.initRoadsImpl(&doc.Boxes, false)
 }
 
-func (doc *BoxesDocument) addRoad(line ConnectionLine, roads *[]ConnectionLine) {
+func (doc *BoxesDocument) addVerticalRoad(line ConnectionLine) {
 	l := line
 	if line.StartX > line.EndX || line.StartY > line.EndY {
 		l = newConnectionLine(line.EndX, line.EndY, line.StartX, line.StartY)
 	}
-	for i := 0; i < len(*roads); i++ {
-		cl := (*roads)[i]
+	for i := range len(doc.VerticalRoads) {
+		cl := &doc.VerticalRoads[i]
 		if (cl.StartX == l.StartX) &&
 			(cl.EndX == l.EndX) &&
 			(cl.StartY == l.StartY) &&
@@ -26,8 +26,59 @@ func (doc *BoxesDocument) addRoad(line ConnectionLine, roads *[]ConnectionLine) 
 			// already exists
 			return
 		}
+		if cl.StartX == l.StartX {
+			if (l.StartY < cl.StartY) && (l.EndY >= cl.StartY) {
+				// extend the existing line to the top
+				cl.StartY = l.StartY
+				return
+			} else if (l.EndY > cl.EndY) && (l.StartY <= cl.EndY) {
+				// extend the existing line to the bottom
+				cl.EndY = l.EndY
+				return
+			}
+		}
 	}
-	*roads = append(*roads, l)
+	doc.VerticalRoads = append(doc.VerticalRoads, l)
+}
+
+func (doc *BoxesDocument) addHorizontalRoad(line ConnectionLine) {
+	l := line
+	if line.StartX > line.EndX || line.StartY > line.EndY {
+		l = newConnectionLine(line.EndX, line.EndY, line.StartX, line.StartY)
+	}
+	for i := range len(doc.HorizontalRoads) {
+		cl := &doc.HorizontalRoads[i]
+		if (cl.StartX == l.StartX) &&
+			(cl.EndX == l.EndX) &&
+			(cl.StartY == l.StartY) &&
+			(cl.EndY == l.EndY) {
+			// already exists
+			return
+		}
+		if cl.StartY == l.StartY {
+			if (l.StartX < cl.StartX) && (l.EndX >= cl.StartX) {
+				// extend the existing line to the left
+				cl.StartX = l.StartX
+				return
+			} else if (l.EndX > cl.EndX) && (l.StartX <= cl.EndX) {
+				// extend the existing line to the right
+				cl.EndX = l.EndX
+				return
+			}
+		}
+	}
+	doc.HorizontalRoads = append(doc.HorizontalRoads, l)
+}
+
+func (doc *BoxesDocument) pointHasCollision(x, y int, startElem *LayoutElement) bool {
+	switch doc.checkColl(x, y, &doc.Boxes, startElem, nil) {
+	case CollisionType_WithElem:
+		return true
+	case CollisionType_WithSurroundings:
+		return false
+	default:
+		return false
+	}
 }
 
 func (doc *BoxesDocument) roadUp(line *ConnectionLine, startElem *LayoutElement) {
@@ -113,9 +164,16 @@ func (doc *BoxesDocument) roadRight(line *ConnectionLine, startElem *LayoutEleme
 
 func (doc *BoxesDocument) elemHasParentWithTextImpl(elemToCheck, currentElem *LayoutElement, parentTxt bool) bool {
 	if currentElem.Id != "" && currentElem.Id == elemToCheck.Id {
+		// reached end of recursion
 		return parentTxt
 	}
-	myParentTxt := currentElem.Caption != "" || currentElem.Text1 != "" || currentElem.Text2 != "" || parentTxt
+
+	var textOverlaps bool
+	if currentElem.XTextBox != nil && currentElem.WidthTextBox != nil {
+		textOverlaps = elemToCheck.CenterX >= *currentElem.XTextBox && elemToCheck.CenterX <= (*currentElem.XTextBox+*currentElem.WidthTextBox)
+	}
+
+	myParentTxt := textOverlaps || parentTxt
 	if doc.elemHasParentWithTextCont(elemToCheck, myParentTxt, currentElem.Horizontal) {
 		return true
 	}
@@ -138,77 +196,89 @@ func (doc *BoxesDocument) elemHasParentWithText(elem *LayoutElement) bool {
 	return doc.elemHasParentWithTextImpl(elem, &doc.Boxes, false)
 }
 
-func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement) {
-	if doc.ShouldHandle(elem) {
-		stepSize := 2 * types.RasterSize
+func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, handled bool) {
+	fmt.Println("DEBUG:", elem.Id)
+	stepSize := 2 * types.RasterSize
+	handle := doc.ShouldHandle(elem)
+	if elem.TopXToStart != nil {
 		// draw line from the top x start, till the first collision
-		// check that it has no parent that has a text
-		var upRoad ConnectionLine
-		// var hasParentWithTxt bool
-		hasParentWithTxt := doc.elemHasParentWithText(elem)
-		if !hasParentWithTxt {
-			upRoad = newConnectionLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y+stepSize)
+		if !doc.pointHasCollision(*elem.TopXToStart, elem.Y+stepSize, elem) {
+			upRoad := newConnectionLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y+stepSize)
 			doc.roadUp(&upRoad, elem)
-			doc.addRoad(upRoad, &doc.VerticalRoads)
+			doc.addVerticalRoad(upRoad)
 		}
 		// draw line from the bottom x start, till the first collision
-		downRoad := newConnectionLine(*elem.BottomXToStart, elem.Y+elem.Height,
-			*elem.BottomXToStart, elem.Y+elem.Height+stepSize)
-		doc.roadDown(&downRoad, elem)
-		doc.addRoad(downRoad, &doc.VerticalRoads)
+		if !doc.pointHasCollision(*elem.BottomXToStart, elem.Y+elem.Height+stepSize, elem) {
+			downRoad := newConnectionLine(*elem.BottomXToStart, elem.Y+elem.Height,
+				*elem.BottomXToStart, elem.Y+elem.Height+stepSize)
+			doc.roadDown(&downRoad, elem)
+			doc.addVerticalRoad(downRoad)
+		}
 
 		// draw line from the left y start, till the first collision
-		leftRoad := newConnectionLine(elem.X, *elem.LeftYToStart, elem.X-stepSize, *elem.LeftYToStart)
-		doc.roadLeft(&leftRoad, elem)
-		doc.addRoad(leftRoad, &doc.HorizontalRoads)
-
+		if !doc.pointHasCollision(elem.X-stepSize, *elem.LeftYToStart, elem) {
+			leftRoad := newConnectionLine(elem.X, *elem.LeftYToStart, elem.X-stepSize, *elem.LeftYToStart)
+			doc.roadLeft(&leftRoad, elem)
+			doc.addHorizontalRoad(leftRoad)
+		}
 		// draw line from the right y start, till the first collision
-		rightRoad := newConnectionLine(elem.X+elem.Width, *elem.RightYToStart, elem.X+elem.Width+stepSize, *elem.RightYToStart)
-		doc.roadRight(&rightRoad, elem)
-		doc.addRoad(rightRoad, &doc.HorizontalRoads)
-
-		if !hasParentWithTxt {
-			// draw the line parallel to the left border, till the first collision, up and down
-			upRoad = newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y-stepSize)
+		if !doc.pointHasCollision(elem.X+elem.Width+stepSize, *elem.RightYToStart, elem) {
+			rightRoad := newConnectionLine(elem.X+elem.Width, *elem.RightYToStart, elem.X+elem.Width+stepSize, *elem.RightYToStart)
+			doc.roadRight(&rightRoad, elem)
+			doc.addHorizontalRoad(rightRoad)
+		}
+	}
+	if (handle && !handled) || elem.TopXToStart != nil {
+		if handle && !handled {
+			handled = true
+		}
+		// check that it has no parent that has a text
+		// draw the line parallel to the left border, till the first collision, up and down
+		if !doc.pointHasCollision(elem.X-stepSize, elem.CenterY, elem) {
+			upRoad := newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y-stepSize)
 			doc.roadUp(&upRoad, elem)
-			downRoad = newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y+elem.Height+stepSize)
+			downRoad := newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y+elem.Height+stepSize)
 			doc.roadDown(&downRoad, elem)
 			l := newConnectionLine(upRoad.EndX, upRoad.EndY, downRoad.EndX, downRoad.EndY)
-			doc.addRoad(l, &doc.VerticalRoads)
+			doc.addVerticalRoad(l)
+		}
 
-			// draw the line parallel to the right border, till the first collision, up and down
-			upRoad = newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y-stepSize)
+		// draw the line parallel to the right border, till the first collision, up and down
+		if !doc.pointHasCollision(elem.X+elem.Width+stepSize, elem.CenterY, elem) {
+			upRoad := newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y-stepSize)
 			doc.roadUp(&upRoad, elem)
-			downRoad = newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
+			downRoad := newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
 			doc.roadDown(&downRoad, elem)
-			l = newConnectionLine(upRoad.EndX, upRoad.EndY, downRoad.EndX, downRoad.EndY)
-			doc.addRoad(l, &doc.VerticalRoads)
-
-			// draw the line parallel to the top border, till the first collision, left and right
-			leftRoad = newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X-stepSize, elem.Y-stepSize)
+			l := newConnectionLine(upRoad.EndX, upRoad.EndY, downRoad.EndX, downRoad.EndY)
+			doc.addVerticalRoad(l)
+		}
+		// draw the line parallel to the top border, till the first collision, left and right
+		if !doc.pointHasCollision(elem.CenterX, elem.Y-stepSize, elem) {
+			leftRoad := newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X-stepSize, elem.Y-stepSize)
 			doc.roadLeft(&leftRoad, elem)
-			rightRoad = newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X+elem.Width+stepSize, elem.Y-stepSize)
+			rightRoad := newConnectionLine(elem.CenterX, elem.Y-stepSize, elem.X+elem.Width+stepSize, elem.Y-stepSize)
 			doc.roadRight(&rightRoad, elem)
-			l = newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
-			doc.addRoad(l, &doc.HorizontalRoads)
-
-			// draw the line parallel to the bottom border, till the first collision, left and right
-			leftRoad = newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X-stepSize, elem.Y+elem.Height+stepSize)
+			l := newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
+			doc.addHorizontalRoad(l)
+		}
+		// draw the line parallel to the bottom border, till the first collision, left and right
+		if !doc.pointHasCollision(elem.CenterX, elem.Y+elem.Height+stepSize, elem) {
+			leftRoad := newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X-stepSize, elem.Y+elem.Height+stepSize)
 			doc.roadLeft(&leftRoad, elem)
-			rightRoad = newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
+			rightRoad := newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X+elem.Width+stepSize, elem.Y+elem.Height+stepSize)
 			doc.roadRight(&rightRoad, elem)
-			l = newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
-			doc.addRoad(l, &doc.HorizontalRoads)
+			l := newConnectionLine(leftRoad.EndX, leftRoad.EndY, rightRoad.EndX, rightRoad.EndY)
+			doc.addHorizontalRoad(l)
 		}
 	}
 	if elem.Vertical != nil {
 		for i := 0; i < len(elem.Vertical.Elems); i++ {
-			doc.initRoadsImpl(&elem.Vertical.Elems[i])
+			doc.initRoadsImpl(&elem.Vertical.Elems[i], handled)
 		}
 	}
 	if elem.Horizontal != nil {
 		for i := 0; i < len(elem.Horizontal.Elems); i++ {
-			doc.initRoadsImpl(&elem.Horizontal.Elems[i])
+			doc.initRoadsImpl(&elem.Horizontal.Elems[i], handled)
 		}
 	}
 }

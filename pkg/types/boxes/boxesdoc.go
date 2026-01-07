@@ -26,6 +26,8 @@ type BoxesDocument struct {
 
     Connections []ConnectionElem  `yaml:"connections,omitempty"`
 
+    ConnectedElems []string  `yaml:"connectedElems,omitempty"`
+
     // Padding used as default over the whole diagram
     GlobalPadding int  `yaml:"globalPadding"`
 
@@ -52,6 +54,7 @@ func NewBoxesDocument() *BoxesDocument {
     return &BoxesDocument{
         Boxes: *NewLayoutElement(),
         Connections: make([]ConnectionElem, 0),
+        ConnectedElems: make([]string, 0),
         Formats: make(map[string]BoxFormat, 0),
         Images: make([]types.ImageDef, 0),
         VerticalRoads: make([]ConnectionLine, 0),
@@ -71,6 +74,10 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     ret.Connections = make([]ConnectionElem, 0)
     for _, e := range src.Connections {
         ret.Connections = append(ret.Connections, e)
+    }
+    ret.ConnectedElems = make([]string, 0)
+    for _, e := range src.ConnectedElems {
+        ret.ConnectedElems = append(ret.ConnectedElems, e)
     }
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin

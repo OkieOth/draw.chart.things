@@ -26,6 +26,12 @@
         "$ref": "#/definitions/ConnectionElem"
       }
     },
+    "connectedElems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "globalPadding": {
       "type": "integer",
       "description": "Padding used as default over the whole diagram",

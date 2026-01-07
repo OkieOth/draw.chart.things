@@ -10,6 +10,7 @@ class "**BoxesDocument**" as BoxesDocument {
         IntegerType height
         IntegerType width
         ConnectionElem[] connections
+        StringType[] connectedElems
         IntegerType globalPadding
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
@@ -191,6 +192,7 @@ BoxesDocument  *--  LayoutElement
 
 
 BoxesDocument "0" *-- "n" ConnectionElem
+
 
 
 

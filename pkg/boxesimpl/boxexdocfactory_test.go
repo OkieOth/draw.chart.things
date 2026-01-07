@@ -90,7 +90,8 @@ func TestInitLayoutElement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := boxesimpl.ExpInitLayoutElement(&tt.layout, tt.inputFormats)
+			dummy := make([]string, 0)
+			result := boxesimpl.ExpInitLayoutElement(&tt.layout, tt.inputFormats, &dummy)
 			if result.Id != tt.expected.Id {
 				t.Errorf("expected Id %v, got %v", tt.expected.Id, result.Id)
 			}
