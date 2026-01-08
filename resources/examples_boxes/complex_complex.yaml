@@ -9,49 +9,54 @@ formats:
 boxes:
   vertical:
     - horizontal:
-      - id: r1_1
-        caption: Left Element
-        text1: I am in the first line
-      - vertical:
-        - id: r2_1
-          caption: Most Top Element
-          text1: I am in the second line
-        - id: r2_2
-          caption: Center Element
-          text1: I am in the second line
-        - id: r2_3
-          caption: Bottom Element
-          text1: I am in the second line
-      - id: r3_1
-        caption: Right Element
-        text1: I am in the first line
+        - id: r1_1
+          caption: Left Element
+          text1: I am in the first line
+        - vertical:
+            - id: r2_1
+              caption: Most Top Element
+              text1: I am in the second line
+            - id: r2_2
+              caption: Center Element
+              text1: I am in the second line
+            - id: r2_3
+              caption: Bottom Element
+              text1: I am in the second line
+        - id: r3_1
+          caption: Right Element
+          text1: I am in the first line
+          connections:
+            - destId: r5_1
+            - destId: r6_5
     - id: r4_1
       caption: Top Element
       text1: I am in the first line
     - horizontal:
-      - id: r5_1
-        caption: Most Left Element
-        text1: I am in the second line
-      - id: r5_2
-        caption: Center Element
-        text1: I am in the second line
-      - id: r5_3
-        caption: Right Element
-        text1: I am in the second line
+        - id: r5_1
+          caption: Most Left Element
+          text1: I am in the second line
+        - id: r5_2
+          caption: Center Element
+          text1: I am in the second line
+        - id: r5_3
+          caption: Right Element
+          text1: I am in the second line
     - horizontal:
-      - id: r6_1
-        caption: Most Left Element
-        text1: I am in the second line
-      - id: r6_2
-        caption: Center Element
-        text1: I am in the second line
-      - id: r6_3
-        caption: Right Element
-        text1: I am in the second line
-        text2: Let me see what will happen here
-      - id: r6_4
-        caption: Right Element
-        text1: I am in the second line
-      - id: r6_5
-        caption: Right Element
-        text1: I am in the second line
+        - id: r6_1
+          caption: Most Left Element
+          text1: I am in the second line
+        - id: r6_2
+          caption: Center Element
+          text1: I am in the second line
+        - id: r6_3
+          caption: Right Element
+          text1: I am in the second line
+          text2: Let me see what will happen here
+        - id: r6_4
+          caption: Right Element
+          text1: I am in the second line
+          connections:
+            - destId: r3_1
+        - id: r6_5
+          caption: Right Element
+          text1: I am in the second line

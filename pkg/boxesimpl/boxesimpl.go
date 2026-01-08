@@ -13,6 +13,9 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
+// used in filter situations in cases where no ID are provided
+var globalId int
+
 func LoadBoxesFromFile(inputFile string) (*boxes.Boxes, error) {
 	layout, err := types.LoadInputFromFile[boxes.Boxes](inputFile)
 	if err != nil {
@@ -71,8 +74,48 @@ func isRelatedToId(b boxes.Layout, filter []string) bool {
 	return false
 }
 
-func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blacklisted []string) boxes.Layout {
+func collectTruncatedFromCont(b []boxes.Layout, newId string, truncated *map[string]TruncatedInfo) {
+	for _, l := range b {
+		collectTruncated(l, newId, truncated)
+	}
+}
+
+func collectTruncated(b boxes.Layout, newId string, truncated *map[string]TruncatedInfo) {
+	if b.Id != "" {
+		(*truncated)[b.Id] = TruncatedInfo{
+			truncated: b,
+			newId:     newId,
+		}
+	}
+	collectTruncatedFromCont(b.Horizontal, newId, truncated)
+	collectTruncatedFromCont(b.Vertical, newId, truncated)
+}
+
+type TruncatedInfo struct {
+	truncated boxes.Layout
+	newId     string
+}
+
+func addTruncated(src map[string]TruncatedInfo, dest *map[string]TruncatedInfo) {
+	for k, v := range src {
+		(*dest)[k] = v
+	}
+}
+
+func getNewId() string {
+	globalId++
+	return fmt.Sprintf("xxx_%d", globalId)
+}
+
+func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blacklisted []string) (boxes.Layout, map[string]TruncatedInfo) {
+	truncatedBoxes := make(map[string]TruncatedInfo, 0)
 	if (currentDepth >= maxDepth) && (!isRelatedToId(b, expanded)) {
+		// possible removed connections to this object
+		if b.Id == "" {
+			b.Id = getNewId()
+		}
+		collectTruncatedFromCont(b.Horizontal, b.Id, &truncatedBoxes)
+		collectTruncatedFromCont(b.Vertical, b.Id, &truncatedBoxes)
 		b.Horizontal = make([]boxes.Layout, 0)
 		b.Vertical = make([]boxes.Layout, 0)
 	} else {
@@ -81,9 +124,16 @@ func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blackliste
 			for i := range len(b.Horizontal) {
 				id := b.Horizontal[i].Id
 				if blacklisted != nil && id != "" && slices.Contains(blacklisted, id) {
+					// possible removed connections to this object
+					if b.Id == "" {
+						b.Id = getNewId()
+					}
+					collectTruncated(b.Horizontal[i], b.Id, &truncatedBoxes)
 					continue
 				}
-				cont = append(cont, truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, expanded, blacklisted))
+				l, trunc := truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, expanded, blacklisted)
+				addTruncated(trunc, &truncatedBoxes)
+				cont = append(cont, l)
 			}
 			b.Horizontal = cont
 		}
@@ -92,19 +142,85 @@ func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blackliste
 			for i := range len(b.Vertical) {
 				id := b.Vertical[i].Id
 				if blacklisted != nil && id != "" && slices.Contains(blacklisted, id) {
+					// possible removed connections to this object
+					if b.Id == "" {
+						b.Id = getNewId()
+					}
+					collectTruncated(b.Vertical[i], b.Id, &truncatedBoxes)
 					continue
 				}
-				cont = append(cont, truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, expanded, blacklisted))
+				l, trunc := truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, expanded, blacklisted)
+				addTruncated(trunc, &truncatedBoxes)
+				cont = append(cont, l)
 			}
 			b.Vertical = cont
 		}
 	}
-	return b
+	return b, truncatedBoxes
+}
+
+func connectionExistsByDestId(connections []boxes.Connection, destId string) bool {
+	return slices.ContainsFunc(connections, func(c boxes.Connection) bool {
+		return c.DestId == destId
+	})
+}
+
+func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+	// copy all needed connections from truncated objects to the current object
+	for _, v := range truncatedObjects {
+		if v.newId == layout.Id {
+			// copy all truncated connections
+			for _, c := range v.truncated.Connections {
+				if c.DestId == layout.Id {
+					continue
+				}
+				// destId is also replaced
+				destIdToUse := c.DestId
+				if obj, ok := truncatedObjects[c.DestId]; ok {
+					destIdToUse = obj.newId
+				}
+				if !connectionExistsByDestId(layout.Connections, destIdToUse) {
+					c.DestId = destIdToUse
+					(*layout).Connections = append(layout.Connections, c)
+				}
+			}
+		}
+	}
+}
+
+func adjustDestIdInRespectOfTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+	for i := range layout.Connections {
+		c := &layout.Connections[i]
+		if trunc, found := truncatedObjects[c.DestId]; found {
+			c.DestId = trunc.newId
+		}
+	}
+}
+
+func adjustTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+	copyTruncatedConnections(layout, truncatedObjects)
+	adjustDestIdInRespectOfTruncated(layout, truncatedObjects)
+	if len(layout.Horizontal) > 0 {
+		adjustTruncatedForCont(&layout.Horizontal, truncatedObjects)
+	}
+	if len(layout.Vertical) > 0 {
+		adjustTruncatedForCont(&layout.Vertical, truncatedObjects)
+	}
+}
+
+func adjustTruncatedForCont(cont *[]boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+	if cont != nil {
+		for i := range len(*cont) {
+			adjustTruncated(&(*cont)[i], truncatedObjects)
+		}
+	}
 }
 
 func filterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string) boxes.Boxes {
 	filteredBoxes := boxes.CopyBoxes(&layout)
-	filteredBoxes.Boxes = truncBoxes(layout.Boxes, 0, defaultDepth, expanded, blacklisted)
+	b, truncatedObjects := truncBoxes(layout.Boxes, 0, defaultDepth, expanded, blacklisted)
+	adjustTruncated(&b, truncatedObjects)
+	filteredBoxes.Boxes = b
 	return *filteredBoxes
 }
 
@@ -124,9 +240,9 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 		svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 	}
 	doc.DrawBoxes(svgdrawing)
-	// doc.InitStartPositions() // not needed to be called separately
-	// doc.InitRoads() // not needed to be called separately
 	if debug {
+		doc.InitStartPositions() // not needed to be called separately
+		doc.InitRoads()          // not needed to be called separately
 		doc.DrawRoads(svgdrawing)
 		doc.DrawStartPositions(svgdrawing)
 	}

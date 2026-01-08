@@ -957,7 +957,7 @@ func (doc *BoxesDocument) connectContainer(cont *LayoutElemContainer, full bool)
 func (doc *BoxesDocument) ConnectBoxes() {
 	// TODO - Needs reimplementation
 	doc.InitStartPositions()
-	// doc.InitRoads()
+	doc.InitRoads()
 	// TODO Christmas
 	doc.connectLayoutElem(&doc.Boxes, false)
 	// // doc.moveTooCloseVerticalConnectionLinesFromBorders()
