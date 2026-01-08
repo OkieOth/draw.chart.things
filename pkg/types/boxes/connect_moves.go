@@ -2,6 +2,7 @@ package boxes
 
 import (
 	"fmt"
+
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
@@ -11,7 +12,6 @@ func (doc *BoxesDocument) goToLeft(
 	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
-	fmt.Println("goToLeft", startX, startY, endX, endY)
 	if startX < 0 {
 		// moved too far left
 		return nil, fmt.Errorf("goToLeft - too far left %d %d %d %d", startX, startY, endX, endY)
@@ -105,7 +105,6 @@ func (doc *BoxesDocument) goToRight(
 	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
-	fmt.Println("goToRight", startX, startY, endX, endY)
 	if startX > endX {
 		// wrong direction
 		return nil, fmt.Errorf("goToRight - wrong direction %d %d %d %d", startX, startY, endX, endY)
@@ -201,7 +200,6 @@ func (doc *BoxesDocument) goToDown(
 	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
-	fmt.Println("goToDown", startX, startY, endX, endY)
 	if startY > endY {
 		// wrong direction
 		return nil, fmt.Errorf("goToDown - wrong direction %d %d %d %d", startX, startY, endX, endY)
@@ -296,7 +294,6 @@ func (doc *BoxesDocument) goToUp(
 	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
-	fmt.Println("goToUp", startX, startY, endX, endY)
 	if startY < endY {
 		// wrong direction
 		return nil, fmt.Errorf("goToUp - wrong direction %d %d %d %d", startX, startY, endX, endY)

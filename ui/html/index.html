@@ -1116,19 +1116,31 @@
                                     window.input.length > 0
                                         ? window.input
                                         : "";
-                                // UPDATED: pass all badge captions available in the collector
+
                                 const filterTexts =
                                     getAllBadgeCaptions("badge-list");
+                                // Extract ids from blacklisted badges (elements in blacklist)
+                                const blacklistIds = blacklist
+                                    .map((boxId) => {
+                                        // Try to get the element and its id
+                                        const el = document.getElementById(boxId);
+                                        return el ? el.id : boxId;
+                                    })
+                                    .filter(Boolean);
                                 console.log(
-                                    "Refreshing SVG with filter (badges):",
+                                    "Refreshing SVG: ",
                                     filterTexts,
+                                    "blacklist ids: ",
+                                    blacklistIds,
                                 );
                                 let svgStr = createSvg(
                                     arg,
                                     window.defaultDepth,
                                     filterTexts,
+                                    blacklistIds,
                                     window.debug,
                                 );
+
                                 svgStr =
                                     svgStr && typeof svgStr.then === "function"
                                         ? await svgStr
@@ -1436,9 +1448,9 @@
                                 })
                                 .filter(Boolean);
                             console.log(
-                                "Refreshing SVG with filter (badges):",
+                                "Refreshing SVG: ",
                                 filterTexts,
-                                "blacklist ids:",
+                                "blacklist ids: ",
                                 blacklistIds,
                             );
                             let svgStr = createSvg(
@@ -1514,6 +1526,12 @@
                         // Extract ids from blacklisted badges (elements in blacklist)
                         const blacklistIds =
                             getAllBadgeCaptions("blacklist-list");
+                        console.log(
+                            "Refreshing SVG: ",
+                            filterTexts,
+                            "blacklist ids: ",
+                            blacklistIds,
+                        );
                         let svgStr = createSvg(
                             arg,
                             window.defaultDepth,
@@ -2058,8 +2076,10 @@
                         window.input.length > 0
                             ? window.input
                             : "";
-                    // UPDATED: pass third parameter (clicked texts array, none on initial load)
-                    console.log("Refreshing SVG without filter:");
+                    console.log(
+                        "Refreshing SVG: []",
+                        "blacklist ids: []"
+                    );
                     const res = createSvg(
                         initialArg,
                         window.defaultDepth,
