@@ -2,24 +2,72 @@ package boxes
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
+type CircleTrace struct {
+	StartX int
+	StartY int
+	EndX   int
+	EndY   int
+}
+
+// func connectionExistsByDestId(connections []boxes.Connection, destId string) bool {
+// 	return slices.ContainsFunc(connections, func(c boxes.Connection) bool {
+// 		return c.DestId == destId
+// 	})
+// }
+
+func foundXBasedCircle(circleTrace *[]CircleTrace, start, end int) bool {
+	if ret := slices.ContainsFunc(*circleTrace, func(ct CircleTrace) bool {
+		return ct.StartX == start && ct.EndX == end
+	}); ret {
+		return true
+	}
+	addXToCircleTrace(circleTrace, start, end)
+	return false
+}
+
+func foundYBasedCircle(circleTrace *[]CircleTrace, start, end int) bool {
+	if ret := slices.ContainsFunc(*circleTrace, func(ct CircleTrace) bool {
+		return ct.StartY == start && ct.EndY == end
+	}); ret {
+		return true
+	}
+	addYToCircleTrace(circleTrace, start, end)
+	return false
+}
+
+func addXToCircleTrace(circleTrace *[]CircleTrace, start, end int) {
+	*circleTrace = append(*circleTrace, CircleTrace{
+		StartX: start,
+		EndX:   end,
+	})
+}
+
+func addYToCircleTrace(circleTrace *[]CircleTrace, start, end int) {
+	*circleTrace = append(*circleTrace, CircleTrace{
+		StartY: start,
+		EndY:   end,
+	})
+}
+
 func (doc *BoxesDocument) goToLeft(
 	endX, endY int,
 	variant []ConnectionLine,
-	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
+	startElem, destElem *LayoutElement, circleTrace *[]CircleTrace) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
+	if foundXBasedCircle(circleTrace, startX, endX) {
+		return nil, fmt.Errorf("goToLeft - reached circle %d %d %d %d", startX, startY, endX, endY)
+	}
 	if startX < 0 {
 		// moved too far left
 		return nil, fmt.Errorf("goToLeft - too far left %d %d %d %d", startX, startY, endX, endY)
 	}
-	if startX < endX {
-		// wrong direction
-		return nil, fmt.Errorf("goToLeft - wrong direction %d %d %d %d", startX, startY, endX, endY)
-	}
+
 	if (startX == endX) && (startY == endY) {
 		ret := make([][]ConnectionLine, 1)
 		ret[0] = variant
@@ -61,7 +109,7 @@ func (doc *BoxesDocument) goToLeft(
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
 		newVariant[currentLineIndex].EndX = x - types.RasterSize
-		newVariants, err := doc.goToLeft(endX, endY, newVariant, startElem, destElem)
+		newVariants, err := doc.goToLeft(endX, endY, newVariant, startElem, destElem, circleTrace)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
@@ -74,7 +122,7 @@ func (doc *BoxesDocument) goToLeft(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToUp(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToUp(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}
@@ -87,7 +135,7 @@ func (doc *BoxesDocument) goToLeft(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToDown(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToDown(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}
@@ -102,15 +150,15 @@ func (doc *BoxesDocument) goToLeft(
 func (doc *BoxesDocument) goToRight(
 	endX, endY int,
 	variant []ConnectionLine,
-	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
+	startElem, destElem *LayoutElement, circleTrace *[]CircleTrace) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
-	if startX > endX {
-		// wrong direction
-		return nil, fmt.Errorf("goToRight - wrong direction %d %d %d %d", startX, startY, endX, endY)
+
+	if foundXBasedCircle(circleTrace, startX, endX) {
+		return nil, fmt.Errorf("goToRight - reached circle %d %d %d %d", startX, startY, endX, endY)
 	}
 
-	if startX > doc.Width {
+	if startX >= doc.Width {
 		// moved too far right
 		return nil, fmt.Errorf("goToRight - too far right %d %d %d %d", startX, startY, endX, endY)
 	}
@@ -156,7 +204,7 @@ func (doc *BoxesDocument) goToRight(
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
 		newVariant[currentLineIndex].EndX = x + types.RasterSize
-		newVariants, err := doc.goToRight(endX, endY, newVariant, startElem, destElem)
+		newVariants, err := doc.goToRight(endX, endY, newVariant, startElem, destElem, circleTrace)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
@@ -169,7 +217,7 @@ func (doc *BoxesDocument) goToRight(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToUp(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToUp(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}
@@ -182,7 +230,7 @@ func (doc *BoxesDocument) goToRight(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToDown(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToDown(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}
@@ -197,14 +245,15 @@ func (doc *BoxesDocument) goToRight(
 func (doc *BoxesDocument) goToDown(
 	endX, endY int,
 	variant []ConnectionLine,
-	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
+	startElem, destElem *LayoutElement, circleTrace *[]CircleTrace) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
-	if startY > endY {
-		// wrong direction
-		return nil, fmt.Errorf("goToDown - wrong direction %d %d %d %d", startX, startY, endX, endY)
+
+	if foundYBasedCircle(circleTrace, startY, endY) {
+		return nil, fmt.Errorf("goToDown - reached circle %d %d %d %d", startX, startY, endX, endY)
 	}
-	if startY > doc.Height {
+
+	if startY >= doc.Height {
 		// moved too far down
 		return nil, fmt.Errorf("goToDown - too far down %d %d %d %d", startX, startY, endX, endY)
 	}
@@ -251,7 +300,7 @@ func (doc *BoxesDocument) goToDown(
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
 		newVariant[currentLineIndex].EndY = y + types.RasterSize
-		newVariants, err := doc.goToDown(endX, endY, newVariant, startElem, destElem)
+		newVariants, err := doc.goToDown(endX, endY, newVariant, startElem, destElem, circleTrace)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
@@ -263,7 +312,7 @@ func (doc *BoxesDocument) goToDown(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToLeft(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToLeft(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}
@@ -276,7 +325,7 @@ func (doc *BoxesDocument) goToDown(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToRight(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToRight(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}
@@ -291,12 +340,12 @@ func (doc *BoxesDocument) goToDown(
 func (doc *BoxesDocument) goToUp(
 	endX, endY int,
 	variant []ConnectionLine,
-	startElem, destElem *LayoutElement) ([][]ConnectionLine, error) {
+	startElem, destElem *LayoutElement, circleTrace *[]CircleTrace) ([][]ConnectionLine, error) {
 	startX := variant[len(variant)-1].EndX
 	startY := variant[len(variant)-1].EndY
-	if startY < endY {
-		// wrong direction
-		return nil, fmt.Errorf("goToUp - wrong direction %d %d %d %d", startX, startY, endX, endY)
+
+	if foundYBasedCircle(circleTrace, startY, endY) {
+		return nil, fmt.Errorf("goToUp - reached circle %d %d %d %d", startX, startY, endX, endY)
 	}
 
 	if startY < 0 {
@@ -347,7 +396,7 @@ func (doc *BoxesDocument) goToUp(
 		newVariant := make([]ConnectionLine, len(variant))
 		copy(newVariant, variant)
 		newVariant[currentLineIndex].EndY = y - types.RasterSize
-		newVariants, err := doc.goToUp(endX, endY, newVariant, startElem, destElem)
+		newVariants, err := doc.goToUp(endX, endY, newVariant, startElem, destElem, circleTrace)
 		if err == nil && len(newVariants) > 0 {
 			ret = append(ret, newVariants...)
 		}
@@ -359,7 +408,7 @@ func (doc *BoxesDocument) goToUp(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToLeft(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToLeft(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}
@@ -372,7 +421,7 @@ func (doc *BoxesDocument) goToUp(
 			newVariant := make([]ConnectionLine, len(variant))
 			copy(newVariant, variant)
 			newVariant = append(newVariant, newLine)
-			newVariants, err := doc.goToRight(endX, endY, newVariant, startElem, destElem)
+			newVariants, err := doc.goToRight(endX, endY, newVariant, startElem, destElem, circleTrace)
 			if err == nil && len(newVariants) > 0 {
 				ret = append(ret, newVariants...)
 			}

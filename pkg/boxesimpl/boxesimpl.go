@@ -231,8 +231,7 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 	if err != nil {
 		return UIReturn{ErrorMsg: fmt.Sprintf("error while initialy layout: %v", err)}
 	}
-
-	doc.ConnectBoxes()
+	doc.ConnectBoxesFull()
 	var svgBuilder strings.Builder
 	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)

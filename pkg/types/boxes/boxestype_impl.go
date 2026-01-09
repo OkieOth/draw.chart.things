@@ -12,10 +12,10 @@ func (d *BoxesDocument) DrawBoxes(drawingImpl types.Drawing) error {
 
 func (doc *BoxesDocument) drawStartPositionsImpl(drawingImpl *types.Drawing, elem *LayoutElement, f *types.LineDef) {
 	if elem.TopXToStart != nil && elem.BottomXToStart != nil && elem.LeftYToStart != nil && elem.RightYToStart != nil {
-		(*drawingImpl).DrawLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y-types.RasterSize, *f)
-		(*drawingImpl).DrawLine(*elem.BottomXToStart, elem.Y+elem.Height, *elem.BottomXToStart, elem.Y+elem.Height+types.RasterSize, *f)
-		(*drawingImpl).DrawLine(elem.X, *elem.LeftYToStart, elem.X-types.RasterSize, *elem.LeftYToStart, *f)
-		(*drawingImpl).DrawLine(elem.X+elem.Width, *elem.RightYToStart, elem.X+elem.Width+types.RasterSize, *elem.RightYToStart, *f)
+		(*drawingImpl).DrawLine(*elem.TopXToStart, elem.Y, *elem.TopXToStart, elem.Y-2, *f)
+		(*drawingImpl).DrawLine(*elem.BottomXToStart, elem.Y+elem.Height, *elem.BottomXToStart, elem.Y+elem.Height+2, *f)
+		(*drawingImpl).DrawLine(elem.X, *elem.LeftYToStart, elem.X-2, *elem.LeftYToStart, *f)
+		(*drawingImpl).DrawLine(elem.X+elem.Width, *elem.RightYToStart, elem.X+elem.Width+2, *elem.RightYToStart, *f)
 	}
 	if elem.Vertical != nil {
 		for i := 0; i < len(elem.Vertical.Elems); i++ {

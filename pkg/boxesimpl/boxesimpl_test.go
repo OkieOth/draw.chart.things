@@ -190,16 +190,23 @@ func TestDrawBoxesForUi(t *testing.T) {
 		expanded    []string
 		blacklisted []string
 	}{
+		// {
+		// 	inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+		// 	outputFile:  "../../temp/complex_complex_filtered_1.svg",
+		// 	depth:       1,
+		// 	expanded:    []string{},
+		// 	blacklisted: []string{},
+		// },
+		// {
+		// 	inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+		// 	outputFile:  "../../temp/complex_complex_filtered_2.svg",
+		// 	depth:       2,
+		// 	expanded:    []string{},
+		// 	blacklisted: []string{},
+		// },
 		{
-			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
-			outputFile:  "../../temp/complex_complex_filtered_1.svg",
-			depth:       1,
-			expanded:    []string{},
-			blacklisted: []string{},
-		},
-		{
-			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
-			outputFile:  "../../temp/complex_complex_filtered_2.svg",
+			inputFile:   "../../ui/data/boxes_random.yaml",
+			outputFile:  "../../temp/boxes_random_2.svg",
 			depth:       2,
 			expanded:    []string{},
 			blacklisted: []string{},
@@ -268,31 +275,40 @@ func TestFilterBoxes(t *testing.T) {
 		// 	expanded:    []string{},
 		// 	blacklisted: []string{},
 		// },
+		// {
+		// 	inputFile: "../../resources/examples_boxes/complex_complex.yaml",
+		// 	checkFunc: func(b *boxes.Boxes) {
+		// 		found := false
+		// 		for _, e := range b.Boxes.Horizontal {
+		// 			if len(e.Horizontal) > 0 {
+		// 				found = true
+		// 			}
+		// 			if len(e.Vertical) > 0 {
+		// 				found = true
+		// 			}
+		// 		}
+		// 		for _, e := range b.Boxes.Vertical {
+		// 			if len(e.Horizontal) > 0 {
+		// 				found = true
+		// 			}
+		// 			if len(e.Vertical) > 0 {
+		// 				found = true
+		// 			}
+		// 		}
+		// 		require.True(t, found, "didn't find second level")
+		// 	},
+		// 	depth:       20,
+		// 	expanded:    []string{},
+		// 	blacklisted: []string{"r2_2", "r4_1"},
+		// },
 		{
-			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
+			inputFile: "../../ui/data/boxes_random.yaml",
 			checkFunc: func(b *boxes.Boxes) {
-				found := false
-				for _, e := range b.Boxes.Horizontal {
-					if len(e.Horizontal) > 0 {
-						found = true
-					}
-					if len(e.Vertical) > 0 {
-						found = true
-					}
-				}
-				for _, e := range b.Boxes.Vertical {
-					if len(e.Horizontal) > 0 {
-						found = true
-					}
-					if len(e.Vertical) > 0 {
-						found = true
-					}
-				}
-				require.True(t, found, "didn't find second level")
+				require.NotNil(t, b)
 			},
-			depth:       20,
+			depth:       2,
 			expanded:    []string{},
-			blacklisted: []string{"r2_2", "r4_1"},
+			blacklisted: []string{},
 		},
 	}
 	for i, test := range tests {

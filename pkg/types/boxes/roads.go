@@ -3,6 +3,7 @@ package boxes
 import (
 	"fmt"
 	"slices"
+	"sort"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
@@ -10,6 +11,13 @@ import (
 // traces the document and finds all reasonable "roads" to connect
 func (doc *BoxesDocument) InitRoads() {
 	doc.initRoadsImpl(&doc.Boxes, DefRoadType_All)
+	// sort roads
+	sort.Slice(doc.VerticalRoads, func(i, j int) bool {
+		return doc.VerticalRoads[i].StartX < doc.VerticalRoads[j].StartX
+	})
+	sort.Slice(doc.HorizontalRoads, func(i, j int) bool {
+		return doc.HorizontalRoads[i].StartY < doc.HorizontalRoads[j].StartY
+	})
 }
 
 func (doc *BoxesDocument) addVerticalRoad(line ConnectionLine) {
@@ -133,15 +141,6 @@ func (doc *BoxesDocument) roadLeft(line *ConnectionLine, startElem *LayoutElemen
 		line.EndX -= types.RasterSize
 		doc.roadLeft(line, startElem)
 	}
-
-	if ct := doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil); ct != CollisionType_NoCollision {
-		// has collision
-		line.EndX += 2 * types.RasterSize
-		return
-	} else {
-		line.EndX -= types.RasterSize
-		doc.roadLeft(line, startElem)
-	}
 }
 
 func (doc *BoxesDocument) roadRight(line *ConnectionLine, startElem *LayoutElement) {
@@ -249,7 +248,7 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 			doc.addVerticalRoad(l)
 		}
 	}
-	if defRoadType == DefRoadType_Horizontal {
+	if defRoadType == DefRoadType_Horizontal || defRoadType == DefRoadType_All {
 		// draw the line parallel to the left border, till the first collision, up and down
 		if !doc.pointHasCollision(elem.X-stepSize, elem.CenterY, elem) {
 			upRoad := newConnectionLine(elem.X-stepSize, elem.CenterY, elem.X-stepSize, elem.Y-stepSize)
@@ -271,7 +270,7 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 			doc.addHorizontalRoad(l)
 		}
 	}
-	if defRoadType == DefRoadType_Vertical {
+	if defRoadType == DefRoadType_Vertical || defRoadType == DefRoadType_All {
 		// draw the line parallel to the bottom border, till the first collision, left and right
 		if !doc.pointHasCollision(elem.CenterX, elem.Y+elem.Height+stepSize, elem) {
 			leftRoad := newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X-stepSize, elem.Y+elem.Height+stepSize)
@@ -494,6 +493,11 @@ func (doc *BoxesDocument) getNextJunctionLeft(startX, startY int) (int, bool, bo
 				}
 			}
 			if nextRoad != nil {
+				// DEBUG
+				// DEBUG
+				straightAhead = true
+				upwards = true
+				downwards = true
 				return nextRoad.StartX, upwards, downwards, straightAhead, leftX, nil
 			} else {
 				return leftX, false, false, false, leftX, nil
@@ -529,6 +533,10 @@ func (doc *BoxesDocument) getNextJunctionRight(startX, startY int) (int, bool, b
 				}
 			}
 			if nextRoad != nil {
+				// DEBUG
+				straightAhead = true
+				upwards = true
+				downwards = true
 				return nextRoad.StartX, upwards, downwards, straightAhead, rightX, nil
 			} else {
 				return rightX, false, false, false, rightX, nil
@@ -565,6 +573,10 @@ func (doc *BoxesDocument) getNextJunctionUp(startX, startY int) (int, bool, bool
 				}
 			}
 			if nextRoad != nil {
+				// DEBUG
+				straightAhead = true
+				leftwards = true
+				rightwards = true
 				return nextRoad.StartY, leftwards, rightwards, straightAhead, topY, nil
 			} else {
 				return topY, false, false, false, topY, nil
@@ -601,6 +613,10 @@ func (doc *BoxesDocument) getNextJunctionDown(startX, startY int) (int, bool, bo
 				}
 			}
 			if nextRoad != nil {
+				// DEBUG
+				straightAhead = true
+				leftwards = true
+				rightwards = true
 				return nextRoad.StartY, leftwards, rightwards, straightAhead, bottomY, nil
 			} else {
 				return bottomY, false, false, false, bottomY, nil

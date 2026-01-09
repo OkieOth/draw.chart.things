@@ -6,6 +6,9 @@ import (
 
 func (l *LayoutElement) incrementX(xOffset int) {
 	l.X += xOffset
+	if l.XTextBox != nil {
+		*l.XTextBox += xOffset
+	}
 	if l.Vertical != nil {
 		l.Vertical.X += xOffset
 		for i := 0; i < len(l.Vertical.Elems); i++ {
@@ -24,6 +27,9 @@ func (l *LayoutElement) incrementX(xOffset int) {
 
 func (l *LayoutElement) incrementY(yOffset int) {
 	l.Y += yOffset
+	if l.YTextBox != nil {
+		*l.YTextBox += yOffset
+	}
 	if l.Vertical != nil {
 		l.Vertical.Y += yOffset
 		for i := 0; i < len(l.Vertical.Elems); i++ {

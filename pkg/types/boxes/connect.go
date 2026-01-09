@@ -76,22 +76,41 @@ const (
 )
 
 // checks if a point is inside a box, returns true if so
+// sooo inefficient!!!
 func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *LayoutElement) CollisionType {
 	if (currentElem != startElem) && (currentElem != endElem) &&
-		(doc.ShouldHandle(currentElem)) &&
-		((startElem == nil) || (!doc.isParent(currentElem, startElem))) &&
-		((endElem == nil) || (!doc.isParent(currentElem, endElem))) {
-		curMinX := currentElem.X
-		curMaxX := currentElem.X + currentElem.Width
-		curMinY := currentElem.Y
-		curMaxY := currentElem.Y + currentElem.Height
-		if (x <= curMaxX) && (x >= curMinX) &&
-			(y >= curMinY) && (y <= curMaxY) {
-			return CollisionType_WithElem
+		(doc.ShouldHandle(currentElem)) {
+		currentElemIsParentToStart := false
+		if startElem != nil {
+			currentElemIsParentToStart = doc.isParent(currentElem, startElem)
 		}
-		if (x <= (curMaxX + types.RasterSize)) && (x >= (curMinX - types.RasterSize)) &&
-			(y >= (curMinY - types.RasterSize)) && (y <= (curMaxY + types.RasterSize)) {
-			return CollisionType_WithSurroundings
+		currentElemIsParentToEnd := false
+		if endElem != nil {
+			currentElemIsParentToEnd = doc.isParent(currentElem, endElem)
+		}
+		if !currentElemIsParentToStart && !currentElemIsParentToEnd {
+			curMinX := currentElem.X
+			curMaxX := currentElem.X + currentElem.Width
+			curMinY := currentElem.Y
+			curMaxY := currentElem.Y + currentElem.Height
+			if (x <= curMaxX) && (x >= curMinX) &&
+				(y >= curMinY) && (y <= curMaxY) {
+				return CollisionType_WithElem
+			}
+			if (x <= (curMaxX + types.RasterSize)) && (x >= (curMinX - types.RasterSize)) &&
+				(y >= (curMinY - types.RasterSize)) && (y <= (curMaxY + types.RasterSize)) {
+				return CollisionType_WithSurroundings
+			}
+		}
+
+		if currentElemIsParentToStart {
+			// check if there is a collision with the text
+			if currentElem.WidthTextBox != nil {
+				if (x <= (*currentElem.XTextBox + *currentElem.WidthTextBox)) && (x >= *currentElem.XTextBox) &&
+					(y >= *currentElem.YTextBox) && (y <= (*currentElem.YTextBox + *currentElem.HeightTextBox)) {
+					return CollisionType_WithElem
+				}
+			}
 		}
 	}
 	if ct := doc.checkForCollInContainer2(currentElem.Vertical, doc.checkColl, x, y, startElem, endElem); ct != CollisionType_NoCollision {
@@ -320,10 +339,11 @@ func (doc *BoxesDocument) connectFromRightBorderToLeftBorder(startElem, destElem
 	startY := *startElem.RightYToStart
 	endX := destElem.X
 	destY := destElem.LeftYToStart
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, startY, startX+types.RasterSize, startY)}
 
-	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -343,9 +363,10 @@ func (doc *BoxesDocument) connectFromLeftBorderToRightBorder(startElem, destElem
 	startY := startElem.LeftYToStart
 	endX := destElem.X + destElem.Width
 	destY := destElem.RightYToStart
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX-types.RasterSize, *startY)}
-	ret, err := doc.goToLeft(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToLeft(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -367,9 +388,10 @@ func (doc *BoxesDocument) connectFromTopBorderToRight(startElem, destElem *Layou
 	endX := destElem.X + destElem.Width
 	destY := destElem.RightYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX+types.RasterSize, startY)}
-	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToRight(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -391,9 +413,10 @@ func (doc *BoxesDocument) connectFromBottomBorderToRight(startElem, destElem *La
 	endX := destElem.BottomXToStart
 	destY := destElem.Y + destElem.Height
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX+types.RasterSize, startY)}
-	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -415,9 +438,10 @@ func (doc *BoxesDocument) connectFromTopBorderToLeft(startElem, destElem *Layout
 	endX := destElem.TopXToStart
 	destY := destElem.Y
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX-types.RasterSize, startY)}
-	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -439,10 +463,11 @@ func (doc *BoxesDocument) connectFromBottomBorderLeft(startElem, destElem *Layou
 	endX := destElem.BottomXToStart
 	destY := destElem.Y + destElem.Height
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX-types.RasterSize, startY)}
 
-	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -462,9 +487,10 @@ func (doc *BoxesDocument) connectFromBottomBorderToTopBorder(startElem, destElem
 	endX := destElem.TopXToStart
 	destY := destElem.Y
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX, startY+types.RasterSize)}
-	ret, err := doc.goToDown(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToDown(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -485,9 +511,10 @@ func (doc *BoxesDocument) connectFromLeftBorderDown(startElem, destElem *LayoutE
 	endX := destElem.X
 	destY := destElem.LeftYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX, *startY+types.RasterSize)}
-	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -508,9 +535,10 @@ func (doc *BoxesDocument) connectFromRightBorderDown(startElem, destElem *Layout
 	endX := destElem.X + destElem.Width
 	destY := destElem.RightYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX, *startY+types.RasterSize)}
-	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -533,7 +561,8 @@ func (doc *BoxesDocument) connectFromTopBorderToBottomBorder(startElem, destElem
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX, startY-types.RasterSize)}
 
-	ret, err := doc.goToUp(*endX, destY, variant, startElem, destElem)
+	circleTrace := make([]CircleTrace, 0)
+	ret, err := doc.goToUp(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -554,9 +583,10 @@ func (doc *BoxesDocument) connectFromLeftBorderUp(startElem, destElem *LayoutEle
 	endX := destElem.X
 	destY := destElem.LeftYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX, *startY-types.RasterSize)}
-	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -577,9 +607,10 @@ func (doc *BoxesDocument) connectFromRightBorderUp(startElem, destElem *LayoutEl
 	endX := destElem.X + destElem.Width
 	destY := destElem.RightYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX, *startY-types.RasterSize)}
-	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -599,9 +630,10 @@ func (doc *BoxesDocument) connectFromBottomBorderToLeftBorder(startElem, destEle
 	endX := destElem.X
 	destY := destElem.LeftYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX, startY+types.RasterSize)}
-	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -621,9 +653,10 @@ func (doc *BoxesDocument) connectFromRightBorderToTopBorder(startElem, destElem 
 	endX := destElem.TopXToStart
 	destY := destElem.Y
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX+types.RasterSize, *startY)}
-	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -643,9 +676,10 @@ func (doc *BoxesDocument) connectFromBottomBorderToRightBorder(startElem, destEl
 	endX := destElem.X
 	destY := destElem.RightYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX, startY+types.RasterSize)}
-	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToDown(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -665,9 +699,10 @@ func (doc *BoxesDocument) connectFromLeftBorderToTopBorder(startElem, destElem *
 	endX := destElem.TopXToStart
 	destY := destElem.Y
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX-types.RasterSize, *startY)}
-	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -687,9 +722,10 @@ func (doc *BoxesDocument) connectFromTopBorderToLeftBorder(startElem, destElem *
 	endX := destElem.X
 	destY := destElem.LeftYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX, startY-types.RasterSize)}
-	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -709,9 +745,10 @@ func (doc *BoxesDocument) connectFromRightBorderToBottomBorder(startElem, destEl
 	endX := destElem.BottomXToStart
 	destY := destElem.Y + destElem.Height
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX+types.RasterSize, *startY)}
-	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToRight(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -731,9 +768,10 @@ func (doc *BoxesDocument) connectFromTopBorderToRightBorder(startElem, destElem 
 	endX := destElem.X
 	destY := destElem.RightYToStart
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(*startX, startY, *startX, startY-types.RasterSize)}
-	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem)
+	ret, err := doc.goToUp(endX, *destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -753,9 +791,10 @@ func (doc *BoxesDocument) connectFromLeftBorderToBottomBorder(startElem, destEle
 	endX := destElem.BottomXToStart
 	destY := destElem.Y + destElem.Height
 
+	circleTrace := make([]CircleTrace, 0)
 	variant := []ConnectionLine{
 		newConnectionLine(startX, *startY, startX-types.RasterSize, *startY)}
-	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem)
+	ret, err := doc.goToLeft(*endX, destY, variant, startElem, destElem, &circleTrace)
 	if err != nil {
 		ret = make([][]ConnectionLine, 0)
 	}
@@ -764,6 +803,68 @@ func (doc *BoxesDocument) connectFromLeftBorderToBottomBorder(startElem, destEle
 
 func (doc *BoxesDocument) getConnectionVariants(startElem, destElem *LayoutElement) [][]ConnectionLine {
 	connectionVariants := make([][]ConnectionLine, 0)
+
+	// // connect from left to right
+	// // start from the right border - connect from right side to the left side
+	// v := doc.connectFromRightBorderToLeftBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // start from the top - connect from top to top, left ro right
+	// v = doc.connectFromTopBorderToRight(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // start from the bottom - connect from bottom to bottom, left ro right
+	// v = doc.connectFromBottomBorderToRight(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
+	// // connect from right to left
+	// // start from the right border - connect from left side to the right side
+	// v = doc.connectFromLeftBorderToRightBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // start from the top - connect from top to top, right to left
+	// v = doc.connectFromTopBorderToLeft(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // start from the bottom - connect from bottom to bottom, right to left
+	// v = doc.connectFromBottomBorderLeft(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
+	// // connect from with straight line: bottom to top
+	// v = doc.connectFromBottomBorderToTopBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // connect from left to left
+	// v = doc.connectFromLeftBorderDown(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // connect from right to right
+	// v = doc.connectFromRightBorderDown(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
+	// // connect from with straight line: top to bottom
+	// v = doc.connectFromTopBorderToBottomBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // connect from left to left
+	// v = doc.connectFromLeftBorderUp(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // connect from right to right
+	// v = doc.connectFromRightBorderUp(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
+	// // connect from bottom to left side
+	// v = doc.connectFromBottomBorderToLeftBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+	// // connect from right to top side
+	// v = doc.connectFromRightBorderToTopBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
+	// // connect from left to top side
+	// v = doc.connectFromLeftBorderToTopBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
+	// // connect from right to bottom side
+	// v = doc.connectFromRightBorderToBottomBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
+	// //connect from left to bottom side
+	// v = doc.connectFromLeftBorderToBottomBorder(startElem, destElem)
+	// connectionVariants = append(connectionVariants, v...)
+
 	if startElem.CenterY == destElem.CenterY {
 		// horizontal connection
 		if startElem.CenterX < destElem.CenterX {
@@ -967,7 +1068,7 @@ func (doc *BoxesDocument) ConnectBoxes() {
 	// doc.truncateJoiningConnectionLines()
 }
 
-func (doc *BoxesDocument) _ConnectBoxesFull() {
+func (doc *BoxesDocument) ConnectBoxesFull() {
 	doc.InitStartPositions()
 	doc.InitRoads()
 	doc.connectLayoutElem(&doc.Boxes, true)
