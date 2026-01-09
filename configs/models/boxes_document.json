@@ -75,6 +75,13 @@
       "items": {
         "$ref": "#/definitions/ConnectionLine"
       }
+    },
+    "connectionNodes": {
+      "description": "helper structure to take the node points for the possible connection graph",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ConnectionNode"
+      }
     }
   },
   "required": [
@@ -361,6 +368,21 @@
         "minBoxMargin",
         "verticalTxt"
       ]
+    },
+    "ConnectionNode": {
+      "description": "helper type for calculating the connections between elements",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X position of the element"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y position of the element"
+        }
+      },
+      "required": ["x", "y"]
     }
   }
 }

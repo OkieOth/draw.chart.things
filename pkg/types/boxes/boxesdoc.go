@@ -48,6 +48,9 @@ type BoxesDocument struct {
 
     // Horizontal roads available to connect boxes in a horizontal way
     HorizontalRoads []ConnectionLine  `yaml:"horizontalRoads,omitempty"`
+
+    // helper structure to take the node points for the possible connection graph
+    ConnectionNodes []ConnectionNode  `yaml:"connectionNodes,omitempty"`
 }
 
 func NewBoxesDocument() *BoxesDocument {
@@ -59,6 +62,7 @@ func NewBoxesDocument() *BoxesDocument {
         Images: make([]types.ImageDef, 0),
         VerticalRoads: make([]ConnectionLine, 0),
         HorizontalRoads: make([]ConnectionLine, 0),
+        ConnectionNodes: make([]ConnectionNode, 0),
     }
 }
 
@@ -97,6 +101,10 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     ret.HorizontalRoads = make([]ConnectionLine, 0)
     for _, e := range src.HorizontalRoads {
         ret.HorizontalRoads = append(ret.HorizontalRoads, e)
+    }
+    ret.ConnectionNodes = make([]ConnectionNode, 0)
+    for _, e := range src.ConnectionNodes {
+        ret.ConnectionNodes = append(ret.ConnectionNodes, e)
     }
 
     return &ret
@@ -362,6 +370,33 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.EndX = src.EndX
     ret.EndY = src.EndY
     ret.MovedOut = src.MovedOut
+
+    return &ret
+}
+
+
+
+
+
+/* helper type for calculating the connections between elements
+*/
+type ConnectionNode struct {
+
+    // X position of the element
+    X int  `yaml:"x"`
+
+    // Y position of the element
+    Y int  `yaml:"y"`
+}
+
+
+func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
+    if src == nil {
+        return nil
+    }
+    var ret ConnectionNode
+    ret.X = src.X
+    ret.Y = src.Y
 
     return &ret
 }
