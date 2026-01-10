@@ -93,11 +93,35 @@ func newConnectionLine(x1, y1, x2, y2 int) ConnectionLine {
 func (doc *BoxesDocument) ConnectBoxes() {
 	doc.InitStartPositions()
 	doc.InitRoads()
+	doc.Roads2ConnectionNodes()
 	// TODO - Needs reimplementation
+}
+
+func (doc *BoxesDocument) Roads2ConnectionNodes() {
+	// TODO
+	for _, h := range doc.HorizontalRoads {
+		// horizontal line
+		minHX, maxHX := minMax(h.StartX, h.EndX)
+		for _, v := range doc.VerticalRoads {
+			// verticalLine
+			minVY, maxVY := minMax(v.StartY, v.EndY)
+			if (minVY <= h.StartY) && (maxVY >= h.StartY) && // the vertical road covers the y-range of the horizontal line
+				(minHX <= v.StartX) && (v.StartX <= maxHX) {
+				doc.ConnectionNodes = append(doc.ConnectionNodes, *CreateConnectionNode(v.StartX, h.StartY))
+			}
+		}
+	}
 }
 
 func (doc *BoxesDocument) InitStartPositions() {
 	doc.initStartPositionsImpl(&doc.Boxes)
+}
+
+func CreateConnectionNode(x, y int) *ConnectionNode {
+	node := NewConnectionNode()
+	node.X = x
+	node.Y = y
+	return node
 }
 
 func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
@@ -107,6 +131,14 @@ func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 			elem.TopXToStart = &elem.CenterX
 			elem.LeftYToStart = &elem.CenterY
 			elem.RightYToStart = &elem.CenterY
+			// add topX
+			doc.ConnectionNodes = append(doc.ConnectionNodes, *CreateConnectionNode(*elem.BottomXToStart, elem.Y))
+			// add bottomX
+			doc.ConnectionNodes = append(doc.ConnectionNodes, *CreateConnectionNode(*elem.BottomXToStart, elem.Y+elem.Height))
+			// add leftY
+			doc.ConnectionNodes = append(doc.ConnectionNodes, *CreateConnectionNode(elem.X, *elem.LeftYToStart))
+			// add rightY
+			doc.ConnectionNodes = append(doc.ConnectionNodes, *CreateConnectionNode(elem.X+elem.Width, *elem.RightYToStart))
 		}
 	}
 	if elem.Vertical != nil {

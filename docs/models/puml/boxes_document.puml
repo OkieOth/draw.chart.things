@@ -94,6 +94,8 @@ class "**ConnectionLine**" as ConnectionLine {
 class "**ConnectionNode**" as ConnectionNode {
         IntegerType x
         IntegerType y
+        StringType layoutElementId
+        ConnectionEdge[] edges
 }
 note top: helper type for calculating the\nconnections between elements
 
@@ -115,6 +117,15 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         BooleanType destArrow
         StringType[] tags
 }
+
+ 
+
+class "**ConnectionEdge**" as ConnectionEdge {
+        IntegerType x
+        IntegerType y
+        IntegerType nodeIndex
+}
+note top: edge type to store edges\non a connection node
 
  
 
@@ -283,6 +294,9 @@ BoxFormat  *--  FillDef
     
 
 
+
+ConnectionNode "0" *-- "n" ConnectionEdge
+
     
 
 
@@ -292,6 +306,10 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
     
 
+
+
+
+    
 
 
 

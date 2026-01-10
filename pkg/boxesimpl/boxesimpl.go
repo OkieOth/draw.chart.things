@@ -244,6 +244,7 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 		doc.InitRoads()          // not needed to be called separately
 		doc.DrawRoads(svgdrawing)
 		doc.DrawStartPositions(svgdrawing)
+		doc.DrawConnectionNodes(svgdrawing)
 	}
 	doc.DrawConnections(svgdrawing)
 	svgdrawing.Done()

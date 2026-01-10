@@ -380,9 +380,37 @@
         "y": {
           "type": "integer",
           "description": "Y position of the element"
+        },
+        "layoutElementId": {
+          "description": "in case the edge ends in a layout element, it takes the ID",
+          "type": "string"
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ConnectionEdge"
+          }
         }
       },
       "required": ["x", "y"]
+    },
+    "ConnectionEdge": {
+      "description": "edge type to store edges on a connection node",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X position of the element"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y position of the element"
+        },
+        "nodeIndex": {
+          "description": "index of the connected node in the document connection nodes array",
+          "type": "integer"
+        }
+      }
     }
   }
 }

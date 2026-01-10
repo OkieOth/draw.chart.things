@@ -123,10 +123,11 @@ func TestSvgWithConnections(t *testing.T) {
 			// called in ConnectBoxes
 			// doc.InitStartPositions()
 			// doc.InitRoads() // TODO ... doesn't terminate
+			svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 			doc.DrawRoads(svgdrawing)
 			doc.DrawConnections(svgdrawing)
 			doc.DrawStartPositions(svgdrawing)
-			//svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+			doc.DrawConnectionNodes(svgdrawing)
 
 			svgdrawing.Done()
 			output.Close()

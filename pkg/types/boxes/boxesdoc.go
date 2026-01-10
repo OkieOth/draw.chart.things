@@ -387,8 +387,18 @@ type ConnectionNode struct {
 
     // Y position of the element
     Y int  `yaml:"y"`
+
+    // in case the edge ends in a layout element, it takes the ID
+    LayoutElementId *string  `yaml:"layoutElementId,omitempty"`
+
+    Edges []ConnectionEdge  `yaml:"edges,omitempty"`
 }
 
+func NewConnectionNode() *ConnectionNode {
+    return &ConnectionNode{
+        Edges: make([]ConnectionEdge, 0),
+    }
+}
 
 func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
     if src == nil {
@@ -397,6 +407,11 @@ func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
     var ret ConnectionNode
     ret.X = src.X
     ret.Y = src.Y
+    ret.LayoutElementId = src.LayoutElementId
+    ret.Edges = make([]ConnectionEdge, 0)
+    for _, e := range src.Edges {
+        ret.Edges = append(ret.Edges, e)
+    }
 
     return &ret
 }
@@ -482,6 +497,37 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
     }
+
+    return &ret
+}
+
+
+
+
+
+/* edge type to store edges on a connection node
+*/
+type ConnectionEdge struct {
+
+    // X position of the element
+    X *int  `yaml:"x,omitempty"`
+
+    // Y position of the element
+    Y *int  `yaml:"y,omitempty"`
+
+    // index of the connected node in the document connection nodes array
+    NodeIndex *int  `yaml:"nodeIndex,omitempty"`
+}
+
+
+func CopyConnectionEdge(src *ConnectionEdge) *ConnectionEdge {
+    if src == nil {
+        return nil
+    }
+    var ret ConnectionEdge
+    ret.X = src.X
+    ret.Y = src.Y
+    ret.NodeIndex = src.NodeIndex
 
     return &ret
 }

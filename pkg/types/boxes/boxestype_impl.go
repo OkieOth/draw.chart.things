@@ -46,8 +46,20 @@ func (d *BoxesDocument) DrawStartPositions(drawingImpl types.Drawing) {
 		Width: &w,
 		Color: &b,
 	}
-	d.InitStartPositions()
 	d.drawStartPositionsImpl(&drawingImpl, &d.Boxes, &f)
+}
+
+func (d *BoxesDocument) DrawConnectionNodes(drawingImpl types.Drawing) {
+	w := 4.0
+	b := "purple"
+	f := types.LineDef{
+		Width: &w,
+		Color: &b,
+	}
+	for _, n := range d.ConnectionNodes {
+		drawingImpl.DrawLine(n.X, n.Y-2, n.X, n.Y+2, f)
+		drawingImpl.DrawLine(n.X-2, n.Y, n.X+2, n.Y, f)
+	}
 }
 
 func (d *BoxesDocument) DrawRoads(drawingImpl types.Drawing) {
