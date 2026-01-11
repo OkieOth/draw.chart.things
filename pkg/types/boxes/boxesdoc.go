@@ -510,10 +510,10 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
 type ConnectionEdge struct {
 
     // X position of the element
-    X *int  `yaml:"x,omitempty"`
+    X int  `yaml:"x"`
 
     // Y position of the element
-    Y *int  `yaml:"y,omitempty"`
+    Y int  `yaml:"y"`
 
     // index of the connected node in the document connection nodes array
     NodeIndex *int  `yaml:"nodeIndex,omitempty"`

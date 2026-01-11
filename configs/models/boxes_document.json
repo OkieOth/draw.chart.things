@@ -410,7 +410,8 @@
           "description": "index of the connected node in the document connection nodes array",
           "type": "integer"
         }
-      }
+      },
+      "required": ["x", "y"]
     }
   }
 }
