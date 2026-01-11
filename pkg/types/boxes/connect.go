@@ -1,6 +1,7 @@
 package boxes
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
@@ -97,7 +98,7 @@ func (doc *BoxesDocument) ConnectBoxes() {
 	// TODO - Needs reimplementation
 }
 
-func (doc *BoxesDocument) Roads2ConnectionNodes() {
+func (doc *BoxesDocument) horizontalRoads2ConnectionNodes() {
 	for _, h := range doc.HorizontalRoads {
 		// horizontal line
 		newH := true
@@ -108,19 +109,28 @@ func (doc *BoxesDocument) Roads2ConnectionNodes() {
 			if (minVY <= h.StartY) && (maxVY >= h.StartY) && // the vertical road covers the y-range of the horizontal line
 				(minHX <= v.StartX) && (v.StartX <= maxHX) {
 				newNode := CreateConnectionNode(v.StartX, h.StartY)
+				id := fmt.Sprintf("__n_%d", len(doc.ConnectionNodes))
+				newNode.NodeId = &id
 				if j > 0 && !newH {
-					newEdge := ConnectionEdge{
-						X: v.StartX,
-						Y: h.StartY,
-					}
+					newEdge := CreateConnectionEdge(v.StartX, h.StartY)
+					newEdge.DestNodeId = &id
 					doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Edges = append(doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Edges, newEdge)
+					newEdge2 := CreateConnectionEdge(doc.ConnectionNodes[len(doc.ConnectionNodes)-1].X, doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Y)
+					newEdge2.DestNodeId = doc.ConnectionNodes[len(doc.ConnectionNodes)-1].NodeId
+					newNode.Edges = append(newNode.Edges, newEdge2)
 				}
 				doc.ConnectionNodes = append(doc.ConnectionNodes, *newNode)
 				newH = false
 			}
+			if v.StartX > maxHX {
+				// the other vertical lines are more right then the current horizontal line
+				break
+			}
 		}
 	}
+}
 
+func (doc *BoxesDocument) verticalEdges() {
 	// adding vertical edges
 	for _, v := range doc.VerticalRoads {
 		// vertical line
@@ -134,20 +144,50 @@ func (doc *BoxesDocument) Roads2ConnectionNodes() {
 				(minVY <= h.StartY) && (h.StartY <= maxVY) {
 				nodeX, nodeY := v.StartX, h.StartY
 				if j > 0 && !newV {
-					if nodeIndex := doc.getMatchingNodeIndexes(nodeX, nodeY); nodeIndex > 0 {
-						newEdge := ConnectionEdge{
-							X: v.StartX,
-							Y: lastY,
-						}
-						doc.ConnectionNodes[nodeIndex].Edges = append(doc.ConnectionNodes[nodeIndex].Edges, newEdge)
+					nodeIndex := doc.getMatchingNodeIndexes(nodeX, nodeY)
+					lastNodeIndex := doc.getMatchingNodeIndexes(nodeX, lastY)
+					if nodeIndex > -1 && lastNodeIndex > -1 {
+						newEdgeUp := CreateConnectionEdge(v.StartX, lastY)
+						newEdgeUp.DestNodeId = doc.ConnectionNodes[lastNodeIndex].NodeId
+						doc.ConnectionNodes[nodeIndex].Edges = append(doc.ConnectionNodes[nodeIndex].Edges, newEdgeUp)
+
+						newEdgeDown := CreateConnectionEdge(nodeX, nodeY)
+						newEdgeDown.DestNodeId = doc.ConnectionNodes[nodeIndex].NodeId
+						doc.ConnectionNodes[lastNodeIndex].Edges = append(doc.ConnectionNodes[lastNodeIndex].Edges, newEdgeDown)
 					}
 				}
+				j++
 				lastY = h.StartY
 				newV = false
 			}
+			if h.StartY > maxVY {
+				// the other horizontal lines are more below the length of the current vertical line
+				break
+			}
 		}
 	}
+}
 
+func (doc *BoxesDocument) initEdgesForBoxConnections() {
+	for i := range len(doc.ConnectionNodes) {
+		if doc.ConnectionNodes[i].BoxId != nil {
+			// node on a potential start point of a connected box found
+			// ... should currently have only one outbound edge!!!
+			nodeIndex := doc.getMatchingNodeIndexes(doc.ConnectionNodes[i].Edges[0].X, doc.ConnectionNodes[i].Edges[0].Y)
+			if nodeIndex > -1 {
+				doc.ConnectionNodes[i].Edges[0].DestNodeId = doc.ConnectionNodes[nodeIndex].NodeId
+				newEdge := CreateConnectionEdge(doc.ConnectionNodes[i].X, doc.ConnectionNodes[i].Y)
+				newEdge.DestNodeId = doc.ConnectionNodes[i].NodeId
+				doc.ConnectionNodes[nodeIndex].Edges = append(doc.ConnectionNodes[nodeIndex].Edges, newEdge)
+			}
+		}
+	}
+}
+
+func (doc *BoxesDocument) Roads2ConnectionNodes() {
+	doc.horizontalRoads2ConnectionNodes()
+	doc.verticalEdges()
+	doc.initEdgesForBoxConnections()
 }
 
 func (doc *BoxesDocument) getMatchingNodeIndexes(x, y int) int {
@@ -170,6 +210,33 @@ func CreateConnectionNode(x, y int) *ConnectionNode {
 	return node
 }
 
+func CreateConnectionEdge(x, y int) ConnectionEdge {
+	return ConnectionEdge{
+		X: x,
+		Y: y,
+	}
+}
+
+func CreateConnectionEdge2(x, y int, id string) ConnectionEdge {
+	return ConnectionEdge{
+		X:          x,
+		Y:          y,
+		DestNodeId: &id,
+	}
+}
+
+func (doc *BoxesDocument) newConnectionNodeFromStartPos(boxId string, x, y int, edges []ConnectionEdge) {
+	n := CreateConnectionNode(x, y)
+	index := len(doc.ConnectionNodes)
+	nodeId := fmt.Sprintf("__n_%d", index)
+	n.NodeId = &nodeId
+	n.BoxId = &boxId
+	for _, e := range edges {
+		n.Edges = append(n.Edges, e)
+	}
+	doc.ConnectionNodes = append(doc.ConnectionNodes, *n)
+}
+
 func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 	if doc.ShouldHandle(elem) {
 		if slices.Contains(doc.ConnectedElems, elem.Id) {
@@ -178,34 +245,25 @@ func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 			elem.LeftYToStart = &elem.CenterY
 			elem.RightYToStart = &elem.CenterY
 			// add topX
-			n := CreateConnectionNode(*elem.BottomXToStart, elem.Y)
-			n.Edges = append(n.Edges, ConnectionEdge{
-				X: *elem.BottomXToStart,
-				Y: elem.Y - (2 * types.RasterSize),
-			})
-			doc.ConnectionNodes = append(doc.ConnectionNodes, *n)
-
+			doc.newConnectionNodeFromStartPos(elem.Id, *elem.TopXToStart, elem.Y,
+				[]ConnectionEdge{
+					CreateConnectionEdge(*elem.TopXToStart, elem.Y-(2*types.RasterSize)),
+				})
 			// add bottomX
-			n = CreateConnectionNode(*elem.BottomXToStart, elem.Y+elem.Height)
-			n.Edges = append(n.Edges, ConnectionEdge{
-				X: *elem.BottomXToStart,
-				Y: elem.Y + elem.Height + (2 * types.RasterSize),
-			})
-			doc.ConnectionNodes = append(doc.ConnectionNodes, *n)
+			doc.newConnectionNodeFromStartPos(elem.Id, *elem.BottomXToStart, elem.Y+elem.Height,
+				[]ConnectionEdge{
+					CreateConnectionEdge(*elem.BottomXToStart, elem.Y+elem.Height+(2*types.RasterSize)),
+				})
 			// add leftY
-			n = CreateConnectionNode(elem.X, *elem.LeftYToStart)
-			n.Edges = append(n.Edges, ConnectionEdge{
-				X: elem.X - (2 * types.RasterSize),
-				Y: *elem.LeftYToStart,
-			})
-			doc.ConnectionNodes = append(doc.ConnectionNodes, *n)
+			doc.newConnectionNodeFromStartPos(elem.Id, elem.X, *elem.LeftYToStart,
+				[]ConnectionEdge{
+					CreateConnectionEdge(elem.X-(2*types.RasterSize), *elem.LeftYToStart),
+				})
 			// add rightY
-			n = CreateConnectionNode(elem.X+elem.Width, *elem.RightYToStart)
-			n.Edges = append(n.Edges, ConnectionEdge{
-				X: elem.X + elem.Width + (2 * types.RasterSize),
-				Y: *elem.LeftYToStart,
-			})
-			doc.ConnectionNodes = append(doc.ConnectionNodes, *n)
+			doc.newConnectionNodeFromStartPos(elem.Id, elem.X+elem.Width, *elem.RightYToStart,
+				[]ConnectionEdge{
+					CreateConnectionEdge(elem.X+elem.Width+(2*types.RasterSize), *elem.LeftYToStart),
+				})
 		}
 	}
 	if elem.Vertical != nil {

@@ -381,8 +381,12 @@
           "type": "integer",
           "description": "Y position of the element"
         },
-        "layoutElementId": {
+        "nodeId": {
           "description": "in case the edge ends in a layout element, it takes the ID",
+          "type": "string"
+        },
+        "boxId": {
+          "description": "optional box id, only on connection nodes that are the entry points to real box connections",
           "type": "string"
         },
         "edges": {
@@ -409,6 +413,10 @@
         "nodeIndex": {
           "description": "index of the connected node in the document connection nodes array",
           "type": "integer"
+        },
+        "destNodeId": {
+          "description": "either the box ID where the edge ends or the ID connection node",
+          "type": "string"
         }
       },
       "required": ["x", "y"]

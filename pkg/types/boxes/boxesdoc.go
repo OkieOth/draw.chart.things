@@ -389,7 +389,10 @@ type ConnectionNode struct {
     Y int  `yaml:"y"`
 
     // in case the edge ends in a layout element, it takes the ID
-    LayoutElementId *string  `yaml:"layoutElementId,omitempty"`
+    NodeId *string  `yaml:"nodeId,omitempty"`
+
+    // optional box id, only on connection nodes that are the entry points to real box connections
+    BoxId *string  `yaml:"boxId,omitempty"`
 
     Edges []ConnectionEdge  `yaml:"edges,omitempty"`
 }
@@ -407,7 +410,8 @@ func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
     var ret ConnectionNode
     ret.X = src.X
     ret.Y = src.Y
-    ret.LayoutElementId = src.LayoutElementId
+    ret.NodeId = src.NodeId
+    ret.BoxId = src.BoxId
     ret.Edges = make([]ConnectionEdge, 0)
     for _, e := range src.Edges {
         ret.Edges = append(ret.Edges, e)
@@ -517,6 +521,9 @@ type ConnectionEdge struct {
 
     // index of the connected node in the document connection nodes array
     NodeIndex *int  `yaml:"nodeIndex,omitempty"`
+
+    // either the box ID where the edge ends or the ID connection node
+    DestNodeId *string  `yaml:"destNodeId,omitempty"`
 }
 
 
@@ -528,6 +535,7 @@ func CopyConnectionEdge(src *ConnectionEdge) *ConnectionEdge {
     ret.X = src.X
     ret.Y = src.Y
     ret.NodeIndex = src.NodeIndex
+    ret.DestNodeId = src.DestNodeId
 
     return &ret
 }

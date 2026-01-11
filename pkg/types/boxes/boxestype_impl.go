@@ -50,23 +50,67 @@ func (d *BoxesDocument) DrawStartPositions(drawingImpl types.Drawing) {
 }
 
 func (d *BoxesDocument) DrawConnectionNodes(drawingImpl types.Drawing) {
-	w := 4.0
-	w2 := 1.0
-	b := "purple"
-	b2 := "pink"
-	f := types.LineDef{
-		Width: &w,
-		Color: &b,
+	w1 := 4.0
+	b1 := "grey"
+	w2 := 4.0
+	b2 := "purple"
+	w3 := 1.0
+	b3 := "pink"
+	w4 := 0.5
+	f1 := types.LineDef{
+		Width: &w1,
+		Color: &b1,
 	}
-	fEdge := types.LineDef{
+	f2 := types.LineDef{
 		Width: &w2,
 		Color: &b2,
 	}
+	f3 := types.LineDef{
+		Width: &w3,
+		Color: &b3,
+	}
+	f4 := types.LineDef{
+		Width: &w4,
+		Color: &b1,
+	}
+	_ = f3
 	for _, n := range d.ConnectionNodes {
-		drawingImpl.DrawLine(n.X, n.Y-2, n.X, n.Y+2, f)
-		drawingImpl.DrawLine(n.X-2, n.Y, n.X+2, n.Y, f)
+		if n.NodeId != nil && *n.NodeId != "" {
+			drawingImpl.DrawLine(n.X, n.Y-2, n.X, n.Y+2, f2)
+			drawingImpl.DrawLine(n.X-2, n.Y, n.X+2, n.Y, f2)
+		} else {
+			drawingImpl.DrawLine(n.X, n.Y-2, n.X, n.Y+2, f1)
+			drawingImpl.DrawLine(n.X-2, n.Y, n.X+2, n.Y, f1)
+		}
 		for _, e := range n.Edges {
-			drawingImpl.DrawLine(n.X, n.Y, e.X, e.Y, fEdge)
+			nx, ny, ex, ey := n.X, n.Y, e.X, e.Y
+			if n.X == e.X {
+				// vertical line
+				if n.Y > e.Y {
+					// line up
+					nx = nx - 2
+				} else {
+					// line down
+					nx = nx + 2
+				}
+				ex = nx
+			} else {
+				// horizontal line
+				if n.X > e.X {
+					// line to left
+					ny = ny - 2
+				} else {
+					// line to right
+					ny = ny + 2
+				}
+				ey = ny
+			}
+
+			if e.DestNodeId != nil {
+				drawingImpl.DrawLine(nx, ny, ex, ey, f3)
+			} else {
+				drawingImpl.DrawLine(nx, ny, ex, ey, f4)
+			}
 		}
 	}
 }
