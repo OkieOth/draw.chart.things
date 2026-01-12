@@ -410,16 +410,20 @@
           "type": "integer",
           "description": "Y position of the element"
         },
-        "nodeIndex": {
+        "destNodeIndex": {
           "description": "index of the connected node in the document connection nodes array",
           "type": "integer"
         },
         "destNodeId": {
           "description": "either the box ID where the edge ends or the ID connection node",
           "type": "string"
+        },
+        "weight": {
+          "description": "weight of the connection, based on the distance",
+          "type": "integer"
         }
       },
-      "required": ["x", "y"]
+      "required": ["x", "y", "weight"]
     }
   }
 }

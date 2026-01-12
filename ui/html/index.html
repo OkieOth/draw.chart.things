@@ -1123,7 +1123,8 @@
                                 const blacklistIds = blacklist
                                     .map((boxId) => {
                                         // Try to get the element and its id
-                                        const el = document.getElementById(boxId);
+                                        const el =
+                                            document.getElementById(boxId);
                                         return el ? el.id : boxId;
                                     })
                                     .filter(Boolean);
@@ -2076,10 +2077,7 @@
                         window.input.length > 0
                             ? window.input
                             : "";
-                    console.log(
-                        "Refreshing SVG: []",
-                        "blacklist ids: []"
-                    );
+                    console.log("Refreshing SVG: []", "blacklist ids: []");
                     const res = createSvg(
                         initialArg,
                         window.defaultDepth,

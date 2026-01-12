@@ -54,7 +54,7 @@ func (d *BoxesDocument) DrawConnectionNodes(drawingImpl types.Drawing) {
 	b1 := "grey"
 	w2 := 4.0
 	b2 := "purple"
-	w3 := 1.0
+	w3 := 2.0
 	b3 := "pink"
 	w4 := 0.5
 	f1 := types.LineDef{
@@ -106,9 +106,10 @@ func (d *BoxesDocument) DrawConnectionNodes(drawingImpl types.Drawing) {
 				ey = ny
 			}
 
-			if e.DestNodeId != nil {
+			if e.DestNodeId != nil && e.Weight != 0 && e.DestNodeIndex != nil {
 				drawingImpl.DrawLine(nx, ny, ex, ey, f3)
 			} else {
+				//fmt.Println("DEBUG: boxId=", *n.BoxId, ", id=", *n.NodeId, "edgeCount=", len(n.Edges), ", destNodeId=", e.DestNodeId)
 				drawingImpl.DrawLine(nx, ny, ex, ey, f4)
 			}
 		}

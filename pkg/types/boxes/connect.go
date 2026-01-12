@@ -109,14 +109,19 @@ func (doc *BoxesDocument) horizontalRoads2ConnectionNodes() {
 			if (minVY <= h.StartY) && (maxVY >= h.StartY) && // the vertical road covers the y-range of the horizontal line
 				(minHX <= v.StartX) && (v.StartX <= maxHX) {
 				newNode := CreateConnectionNode(v.StartX, h.StartY)
-				id := fmt.Sprintf("__n_%d", len(doc.ConnectionNodes))
+				newNodeIndex := len(doc.ConnectionNodes)
+				id := fmt.Sprintf("__n_%d", newNodeIndex)
 				newNode.NodeId = &id
 				if j > 0 && !newH {
-					newEdge := CreateConnectionEdge(v.StartX, h.StartY)
+					weight := v.StartX - doc.ConnectionNodes[len(doc.ConnectionNodes)-1].X
+					newEdge := CreateConnectionEdge(v.StartX, h.StartY, weight)
 					newEdge.DestNodeId = &id
+					newEdge.DestNodeIndex = &newNodeIndex
 					doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Edges = append(doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Edges, newEdge)
-					newEdge2 := CreateConnectionEdge(doc.ConnectionNodes[len(doc.ConnectionNodes)-1].X, doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Y)
+					newEdge2 := CreateConnectionEdge(doc.ConnectionNodes[len(doc.ConnectionNodes)-1].X, doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Y, weight)
 					newEdge2.DestNodeId = doc.ConnectionNodes[len(doc.ConnectionNodes)-1].NodeId
+					lastNodeIndex := newNodeIndex - 1
+					newEdge2.DestNodeIndex = &lastNodeIndex
 					newNode.Edges = append(newNode.Edges, newEdge2)
 				}
 				doc.ConnectionNodes = append(doc.ConnectionNodes, *newNode)
@@ -147,12 +152,15 @@ func (doc *BoxesDocument) verticalEdges() {
 					nodeIndex := doc.getMatchingNodeIndexes(nodeX, nodeY)
 					lastNodeIndex := doc.getMatchingNodeIndexes(nodeX, lastY)
 					if nodeIndex > -1 && lastNodeIndex > -1 {
-						newEdgeUp := CreateConnectionEdge(v.StartX, lastY)
+						weight := nodeY - lastY
+						newEdgeUp := CreateConnectionEdge(v.StartX, lastY, weight)
 						newEdgeUp.DestNodeId = doc.ConnectionNodes[lastNodeIndex].NodeId
+						newEdgeUp.DestNodeIndex = &lastNodeIndex
 						doc.ConnectionNodes[nodeIndex].Edges = append(doc.ConnectionNodes[nodeIndex].Edges, newEdgeUp)
 
-						newEdgeDown := CreateConnectionEdge(nodeX, nodeY)
+						newEdgeDown := CreateConnectionEdge(nodeX, nodeY, weight)
 						newEdgeDown.DestNodeId = doc.ConnectionNodes[nodeIndex].NodeId
+						newEdgeDown.DestNodeIndex = &nodeIndex
 						doc.ConnectionNodes[lastNodeIndex].Edges = append(doc.ConnectionNodes[lastNodeIndex].Edges, newEdgeDown)
 					}
 				}
@@ -175,9 +183,12 @@ func (doc *BoxesDocument) initEdgesForBoxConnections() {
 			// ... should currently have only one outbound edge!!!
 			nodeIndex := doc.getMatchingNodeIndexes(doc.ConnectionNodes[i].Edges[0].X, doc.ConnectionNodes[i].Edges[0].Y)
 			if nodeIndex > -1 {
+				weight := doc.ConnectionNodes[i].Edges[0].Weight
 				doc.ConnectionNodes[i].Edges[0].DestNodeId = doc.ConnectionNodes[nodeIndex].NodeId
-				newEdge := CreateConnectionEdge(doc.ConnectionNodes[i].X, doc.ConnectionNodes[i].Y)
+				doc.ConnectionNodes[i].Edges[0].DestNodeIndex = &nodeIndex
+				newEdge := CreateConnectionEdge(doc.ConnectionNodes[i].X, doc.ConnectionNodes[i].Y, weight)
 				newEdge.DestNodeId = doc.ConnectionNodes[i].NodeId
+				newEdge.DestNodeIndex = &i
 				doc.ConnectionNodes[nodeIndex].Edges = append(doc.ConnectionNodes[nodeIndex].Edges, newEdge)
 			}
 		}
@@ -210,14 +221,15 @@ func CreateConnectionNode(x, y int) *ConnectionNode {
 	return node
 }
 
-func CreateConnectionEdge(x, y int) ConnectionEdge {
+func CreateConnectionEdge(x, y, weight int) ConnectionEdge {
 	return ConnectionEdge{
-		X: x,
-		Y: y,
+		X:      x,
+		Y:      y,
+		Weight: weight,
 	}
 }
 
-func CreateConnectionEdge2(x, y int, id string) ConnectionEdge {
+func CreateConnectionEdge2(x, y int, id string, index int) ConnectionEdge {
 	return ConnectionEdge{
 		X:          x,
 		Y:          y,
@@ -245,24 +257,25 @@ func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 			elem.LeftYToStart = &elem.CenterY
 			elem.RightYToStart = &elem.CenterY
 			// add topX
+			weight := 2 * types.RasterSize
 			doc.newConnectionNodeFromStartPos(elem.Id, *elem.TopXToStart, elem.Y,
 				[]ConnectionEdge{
-					CreateConnectionEdge(*elem.TopXToStart, elem.Y-(2*types.RasterSize)),
+					CreateConnectionEdge(*elem.TopXToStart, elem.Y-weight, weight),
 				})
 			// add bottomX
 			doc.newConnectionNodeFromStartPos(elem.Id, *elem.BottomXToStart, elem.Y+elem.Height,
 				[]ConnectionEdge{
-					CreateConnectionEdge(*elem.BottomXToStart, elem.Y+elem.Height+(2*types.RasterSize)),
+					CreateConnectionEdge(*elem.BottomXToStart, elem.Y+elem.Height+weight, weight),
 				})
 			// add leftY
 			doc.newConnectionNodeFromStartPos(elem.Id, elem.X, *elem.LeftYToStart,
 				[]ConnectionEdge{
-					CreateConnectionEdge(elem.X-(2*types.RasterSize), *elem.LeftYToStart),
+					CreateConnectionEdge(elem.X-weight, *elem.LeftYToStart, weight),
 				})
 			// add rightY
 			doc.newConnectionNodeFromStartPos(elem.Id, elem.X+elem.Width, *elem.RightYToStart,
 				[]ConnectionEdge{
-					CreateConnectionEdge(elem.X+elem.Width+(2*types.RasterSize), *elem.LeftYToStart),
+					CreateConnectionEdge(elem.X+elem.Width+weight, *elem.LeftYToStart, weight),
 				})
 		}
 	}

@@ -520,10 +520,13 @@ type ConnectionEdge struct {
     Y int  `yaml:"y"`
 
     // index of the connected node in the document connection nodes array
-    NodeIndex *int  `yaml:"nodeIndex,omitempty"`
+    DestNodeIndex *int  `yaml:"destNodeIndex,omitempty"`
 
     // either the box ID where the edge ends or the ID connection node
     DestNodeId *string  `yaml:"destNodeId,omitempty"`
+
+    // weight of the connection, based on the distance
+    Weight int  `yaml:"weight"`
 }
 
 
@@ -534,8 +537,9 @@ func CopyConnectionEdge(src *ConnectionEdge) *ConnectionEdge {
     var ret ConnectionEdge
     ret.X = src.X
     ret.Y = src.Y
-    ret.NodeIndex = src.NodeIndex
+    ret.DestNodeIndex = src.DestNodeIndex
     ret.DestNodeId = src.DestNodeId
+    ret.Weight = src.Weight
 
     return &ret
 }
