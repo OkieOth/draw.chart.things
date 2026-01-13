@@ -132,7 +132,7 @@ func (d *BoxesDocument) DrawRoads(drawingImpl types.Drawing) {
 }
 
 func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
-	b := "black"
+	b := "blue"
 	w := 2.0
 	format := types.LineDef{
 		Width: &w,
@@ -143,7 +143,11 @@ func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
 		// iterate over the connections of the document
 		for _, l := range elem.Parts {
 			// drawing the connection lines
-			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
+			lineFormat := format
+			if elem.Format != nil {
+				lineFormat = *elem.Format
+			}
+			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat)
 		}
 
 	}
@@ -178,7 +182,7 @@ func (b *LayoutElement) Draw(drawing types.Drawing) error {
 			FontText1:    b.Format.FontText1,
 			FontText2:    b.Format.FontText2,
 			Padding:      b.Format.Padding,
-			Border:       b.Format.Border,
+			Border:       b.Format.Line,
 			Fill:         b.Format.Fill,
 			VerticalTxt:  b.Format.VerticalTxt,
 			CornerRadius: b.Format.CornerRadius,

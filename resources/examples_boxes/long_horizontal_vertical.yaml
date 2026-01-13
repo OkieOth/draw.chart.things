@@ -1,12 +1,12 @@
 formats:
   default:
-    border:
+    line:
       width: 1
       color: black
     fill:
       color: lightgreen
   vertical:
-    border:
+    line:
       width: 2
       color: black
     fill:
@@ -15,25 +15,24 @@ formats:
 boxes:
   vertical:
     - horizontal:
-      - id: h1_1
-        caption: Ich bin H1
+        - id: h1_1
+          caption: Ich bin H1
     - horizontal:
-      - id: h1_2
-        caption: Ich bin H1 öfa fadföadsf a
-        text1: I am a text1, don't know what this should tell you :D        
-        format: vertical
-      - id: h1_3
-        caption: Ich bin H1 asf
-      - id: h1_4
-        caption: Ich bin asf dföas 
-        text1: "<<Dummy Text>>" 
-        text2: I am a text2, and guess whath, don't know what this should tell you :D        
-        format: vertical
-      - id: h1_5
-        caption: Ich bin H1 asöfadf
-      - id: h1_6
-        caption: Ich bin H1 df
-        format: vertical
-      - id: h1_7
-        caption: Ich bin H1 af
-
+        - id: h1_2
+          caption: Ich bin H1 öfa fadföadsf a
+          text1: I am a text1, don't know what this should tell you :D
+          format: vertical
+        - id: h1_3
+          caption: Ich bin H1 asf
+        - id: h1_4
+          caption: Ich bin asf dföas
+          text1: "<<Dummy Text>>"
+          text2: I am a text2, and guess whath, don't know what this should tell you :D
+          format: vertical
+        - id: h1_5
+          caption: Ich bin H1 asöfadf
+        - id: h1_6
+          caption: Ich bin H1 df
+          format: vertical
+        - id: h1_7
+          caption: Ich bin H1 af

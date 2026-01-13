@@ -1,7 +1,7 @@
 title: Simple Diamond
 formats:
   default:
-    border:
+    line:
       width: 5
       color: purple
     fill:
@@ -12,15 +12,15 @@ boxes:
       caption: Top Element
       text1: I am in the first line
     - horizontal:
-      - id: r2_1
-        caption: Most Left Element
-        text1: I am in the second line
-      - id: r2_2
-        caption: Center Element
-        text1: I am in the second line
-      - id: r2_3
-        caption: Right Element
-        text1: I am in the second line
+        - id: r2_1
+          caption: Most Left Element
+          text1: I am in the second line
+        - id: r2_2
+          caption: Center Element
+          text1: I am in the second line
+        - id: r2_3
+          caption: Right Element
+          text1: I am in the second line
     - id: r3_1
       caption: Bottom Element
       text1: I am in the third line

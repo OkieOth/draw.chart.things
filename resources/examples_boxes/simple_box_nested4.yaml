@@ -1,6 +1,6 @@
 formats:
   default:
-    border:
+    line:
       width: 1
       color: black
     fill:

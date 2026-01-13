@@ -22,14 +22,22 @@ func initLayoutElemContainer(l []boxes.Layout, inputFormats map[string]boxes.Box
 	return &ret
 }
 
-func initConnections(l []boxes.Connection) []boxes.LayoutElemConnection {
+func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxFormat) []boxes.LayoutElemConnection {
 	ret := make([]boxes.LayoutElemConnection, 0)
+	defaultConnectionFormat, ok := inputFormats["defaultConnection"]
 	for _, elem := range l {
 		var conn boxes.LayoutElemConnection
 		conn.DestId = elem.DestId
 		conn.SourceArrow = elem.SourceArrow
 		conn.DestArrow = elem.DestArrow
 		conn.Tags = elem.Tags
+		if elem.Format != nil {
+			if formatInst, ok := inputFormats[*elem.Format]; ok {
+				conn.Format = formatInst.Line
+			}
+		} else if ok {
+			conn.Format = defaultConnectionFormat.Line
+		}
 		ret = append(ret, conn)
 	}
 	return ret
@@ -51,7 +59,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		fontCaption = f.FontCaption
 		fontText1 = f.FontText1
 		fontText2 = f.FontText2
-		border = f.Border
+		border = f.Line
 		fill = f.Fill
 		if f.Padding != nil {
 			padding = *f.Padding
@@ -78,7 +86,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		FontCaption:  types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
 		FontText1:    types.InitFontDef(fontText1, "serif", 8, false, false, 10),
 		FontText2:    types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
-		Border:       border,
+		Line:         border,
 		Fill:         fill,
 		FixedWidth:   fixedWidth,
 		FixedHeight:  fixedHeight,
@@ -95,6 +103,8 @@ func getDefaultFormat() boxes.BoxFormat {
 		FontCaption:  types.InitFontDef(nil, "sans-serif", 10, true, false, 0),
 		FontText1:    types.InitFontDef(nil, "serif", 8, false, false, 10),
 		FontText2:    types.InitFontDef(nil, "monospace", 8, false, true, 10),
+		Line:         types.InitLineDef(nil),
+		Fill:         nil,
 	}
 }
 
@@ -105,6 +115,9 @@ func initFormats(inputFormat map[string]boxes.Format) map[string]boxes.BoxFormat
 	}
 	if _, hasDefault := res["default"]; !hasDefault {
 		res["default"] = getDefaultFormat()
+	}
+	if _, hasDefault := res["defaultConnection"]; !hasDefault {
+		res["defaultConnection"] = getDefaultFormat()
 	}
 	return res
 }
@@ -161,7 +174,7 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats, connectedIds),
 		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds),
 		Format:      f,
-		Connections: initConnections(l.Connections),
+		Connections: initConnections(l.Connections, inputFormats),
 	}
 }
 

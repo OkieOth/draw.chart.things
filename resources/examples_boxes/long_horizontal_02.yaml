@@ -1,6 +1,6 @@
 formats:
   default:
-    border:
+    line:
       width: 1
       color: black
     fill:
@@ -8,25 +8,25 @@ formats:
 boxes:
   vertical:
     - horizontal:
-      - id: h1_1
-        caption: Ich bin H1
-        connections:
-          - destId: h1_2
-          - destId: h1_3
-          - destId: h1_4
-          - destId: h1_5
-          - destId: h1_6
-          - destId: h1_7
+        - id: h1_1
+          caption: Ich bin H1
+          connections:
+            - destId: h1_2
+            - destId: h1_3
+            - destId: h1_4
+            - destId: h1_5
+            - destId: h1_6
+            - destId: h1_7
     - horizontal:
-      - id: h1_2
-        caption: Ich bin H1 öfa fadföadsf a
-      - id: h1_3
-        caption: Ich bin H1 asf
-      - id: h1_4
-        caption: Ich bin asf dföas 
-      - id: h1_5
-        caption: Ich bin H1 asöfadf
-      - id: h1_6
-        caption: Ich bin H1 df
-      - id: h1_7
-        caption: Ich bin H1 af
+        - id: h1_2
+          caption: Ich bin H1 öfa fadföadsf a
+        - id: h1_3
+          caption: Ich bin H1 asf
+        - id: h1_4
+          caption: Ich bin asf dföas
+        - id: h1_5
+          caption: Ich bin H1 asöfadf
+        - id: h1_6
+          caption: Ich bin H1 df
+        - id: h1_7
+          caption: Ich bin H1 af

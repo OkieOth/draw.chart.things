@@ -294,7 +294,7 @@ type BoxFormat struct {
 
     FontText2 types.FontDef  `yaml:"fontText2"`
 
-    Border *types.LineDef  `yaml:"border,omitempty"`
+    Line *types.LineDef  `yaml:"line,omitempty"`
 
     // radius of the box corners in pixel
     CornerRadius *int  `yaml:"cornerRadius,omitempty"`
@@ -327,7 +327,7 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.FontCaption = *types.CopyFontDef(&src.FontCaption)
     ret.FontText1 = *types.CopyFontDef(&src.FontText1)
     ret.FontText2 = *types.CopyFontDef(&src.FontText2)
-    ret.Border = types.CopyLineDef(src.Border)
+    ret.Line = types.CopyLineDef(src.Line)
     ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
     ret.Image = src.Image
@@ -477,6 +477,8 @@ type LayoutElemConnection struct {
     // Arrow at the destination box
     DestArrow bool  `yaml:"destArrow"`
 
+    Format *types.LineDef  `yaml:"format,omitempty"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -495,6 +497,7 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     ret.DestId = src.DestId
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
+    ret.Format = types.CopyLineDef(src.Format)
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)

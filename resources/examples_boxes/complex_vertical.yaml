@@ -1,7 +1,7 @@
 title: Simple Diamond
 formats:
   default:
-    border:
+    line:
       width: 5
       color: purple
     fill:
@@ -9,28 +9,28 @@ formats:
 boxes:
   vertical:
     - horizontal:
-      - id: r5_1
-        caption: Most Left Element
-        text1: I am in the second line
-      - id: r5_2
-        caption: Center Element
-        text1: I am in the second line
-      - id: r5_3
-        caption: Right Element Für Erik und den ganzen Rest der Familie!!!
-        text1: I am in the second line
+        - id: r5_1
+          caption: Most Left Element
+          text1: I am in the second line
+        - id: r5_2
+          caption: Center Element
+          text1: I am in the second line
+        - id: r5_3
+          caption: Right Element Für Erik und den ganzen Rest der Familie!!!
+          text1: I am in the second line
     - horizontal:
-      - id: r6_1
-        caption: Most Left Element Most Left Element Most Left Element
-        text1: I am in the second line
-      - id: r6_2
-        caption: Center Element
-        text1: I am in the second line I am in the second line
-      - id: r6_3
-        caption: Right Element
-        text1: I am in the second line I am in the second line I am in the second line
-      - id: r6_4
-        caption: Right Element
-        text1: I am in the second line
-      - id: r6_5
-        caption: Right Element Right Element
-        text1: I am in the second line
+        - id: r6_1
+          caption: Most Left Element Most Left Element Most Left Element
+          text1: I am in the second line
+        - id: r6_2
+          caption: Center Element
+          text1: I am in the second line I am in the second line
+        - id: r6_3
+          caption: Right Element
+          text1: I am in the second line I am in the second line I am in the second line
+        - id: r6_4
+          caption: Right Element
+          text1: I am in the second line
+        - id: r6_5
+          caption: Right Element Right Element
+          text1: I am in the second line

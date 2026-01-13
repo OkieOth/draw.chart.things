@@ -41,7 +41,7 @@ class "**Format**" as Format {
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
-        LineDef border
+        LineDef line
         FillDef fill
         IntegerType padding
         IntegerType boxMargin

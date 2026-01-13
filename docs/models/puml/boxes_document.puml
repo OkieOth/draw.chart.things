@@ -69,7 +69,7 @@ class "**BoxFormat**" as BoxFormat {
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
-        LineDef border
+        LineDef line
         IntegerType cornerRadius
         FillDef fill
         StringType image
@@ -116,6 +116,7 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         StringType destId
         BooleanType sourceArrow
         BooleanType destArrow
+        LineDef format
         StringType[] tags
 }
 
@@ -308,6 +309,8 @@ LayoutElemContainer "0" *-- "n" LayoutElement
     
 
 
+
+LayoutElemConnection  *--  LineDef
 
 
     

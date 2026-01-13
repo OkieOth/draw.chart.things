@@ -97,7 +97,7 @@ func (doc *BoxesDocument) connectContImpl(layoutCont []LayoutElement) {
 	}
 }
 
-func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode) {
+func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *types.LineDef) {
 	if len(path) < 2 {
 		return
 	}
@@ -105,6 +105,10 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode) {
 	connElem := NewConnectionElem()
 	connElem.From = path[0].NodeId
 	connElem.To = path[0].NodeId
+	if format != nil {
+		connElem.Format = format
+	}
+
 	var lastX, lastY int
 	for i, p := range pathToDraw {
 		if i > 0 {
@@ -128,7 +132,7 @@ func (doc *BoxesDocument) connectImpl(layout *LayoutElement) {
 			srcId, destId := layout.Id, c.DestId
 			if path, dist, ok := doc.DijkstraPath(srcId, destId); ok {
 				fmt.Printf("Found path: src=%s, dest=%s, dist=%d\n", srcId, destId, dist)
-				doc.createAConnectionPath(path)
+				doc.createAConnectionPath(path, c.Format)
 			} else {
 				fmt.Printf("Couldn't calculate path: src=%s, dest=%s\n", srcId, destId)
 			}

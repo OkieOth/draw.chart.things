@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type testFunc func(t *testing.T, b *boxes.Boxes)
+type testFunc func(t *testing.T, b *boxes.Boxes, testNr int)
 
 func checkLayout(t *testing.T, l *boxes.Layout, id string, horizontalLen, verticalLen int) {
 	assert.Len(t, l.Horizontal, horizontalLen)
@@ -22,7 +22,7 @@ func TestLoadBoxes(t *testing.T) {
 		verify   testFunc
 	}{{
 		fileName: "../../../resources/examples_boxes/simple_box.yaml",
-		verify: func(t *testing.T, b *boxes.Boxes) {
+		verify: func(t *testing.T, b *boxes.Boxes, testNr int) {
 			assert.NotNil(t, b)
 			checkLayout(t, &b.Boxes, "main", 0, 0)
 
@@ -36,9 +36,9 @@ func TestLoadBoxes(t *testing.T) {
 			defaultFormat, defFormatExist := b.Formats["default"]
 
 			assert.True(t, defFormatExist)
-			assert.NotNil(t, defaultFormat.Border)
-			assert.Equal(t, "black", *defaultFormat.Border.Color)
-			assert.Equal(t, 1.0, *defaultFormat.Border.Width)
+			assert.NotNil(t, defaultFormat.Line)
+			assert.Equal(t, "black", *defaultFormat.Line.Color)
+			assert.Equal(t, 1.0, *defaultFormat.Line.Width)
 			assert.NotNil(t, defaultFormat.Fill)
 			assert.Equal(t, "lightgreen", *defaultFormat.Fill.Color)
 			assert.Nil(t, defaultFormat.FontCaption)
@@ -50,7 +50,7 @@ func TestLoadBoxes(t *testing.T) {
 	},
 		{
 			fileName: "../../../resources/examples_boxes/simple_diamond.yaml",
-			verify: func(t *testing.T, b *boxes.Boxes) {
+			verify: func(t *testing.T, b *boxes.Boxes, testNr int) {
 				assert.NotNil(t, b)
 				assert.Len(t, b.Images, 0)
 				assert.Len(t, b.Boxes.Horizontal, 0)
@@ -67,7 +67,7 @@ func TestLoadBoxes(t *testing.T) {
 		},
 		{
 			fileName: "../../../resources/examples_boxes/complex_horizontal_connected_pics.yaml",
-			verify: func(t *testing.T, b *boxes.Boxes) {
+			verify: func(t *testing.T, b *boxes.Boxes, testNr int) {
 				assert.NotNil(t, b)
 				assert.Len(t, b.Images, 3)
 				assert.NotNil(t, b.Images[0].Id)
@@ -85,9 +85,9 @@ func TestLoadBoxes(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
+	for i, test := range tests {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.fileName)
 		assert.Nil(t, err)
-		test.verify(t, b)
+		test.verify(t, b, i)
 	}
 }

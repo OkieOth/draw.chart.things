@@ -161,7 +161,7 @@
         "fontText2": {
           "$ref": "./formats.json#/definitions/FontDef"
         },
-        "border": {
+        "line": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
         "fill": {

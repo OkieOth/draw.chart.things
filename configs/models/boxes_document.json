@@ -248,6 +248,9 @@
           "description": "Arrow at the destination box",
           "type": "boolean"
         },
+        "format": {
+          "$ref": "./formats.json#/definitions/LineDef"
+        },
         "tags": {
           "description": "Tags to annotate the connection, tags are used to format",
           "type": "array",
@@ -326,7 +329,7 @@
         "fontText2": {
           "$ref": "./formats.json#/definitions/FontDef"
         },
-        "border": {
+        "line": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
         "cornerRadius": {
