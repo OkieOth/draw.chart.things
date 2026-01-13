@@ -124,7 +124,6 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
 class "**ConnectionEdge**" as ConnectionEdge {
         IntegerType x
         IntegerType y
-        IntegerType destNodeIndex
         StringType destNodeId
         IntegerType weight
 }
@@ -312,7 +311,6 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
 
     
-
 
 
 

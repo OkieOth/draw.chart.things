@@ -167,12 +167,9 @@ func (doc *BoxesDocument) horizontalRoads2ConnectionNodes() {
 					weight := v.StartX - doc.ConnectionNodes[len(doc.ConnectionNodes)-1].X
 					newEdge := CreateConnectionEdge(v.StartX, h.StartY, weight)
 					newEdge.DestNodeId = &id
-					newEdge.DestNodeIndex = &newNodeIndex
 					doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Edges = append(doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Edges, newEdge)
 					newEdge2 := CreateConnectionEdge(doc.ConnectionNodes[len(doc.ConnectionNodes)-1].X, doc.ConnectionNodes[len(doc.ConnectionNodes)-1].Y, weight)
 					newEdge2.DestNodeId = doc.ConnectionNodes[len(doc.ConnectionNodes)-1].NodeId
-					lastNodeIndex := newNodeIndex - 1
-					newEdge2.DestNodeIndex = &lastNodeIndex
 					newNode.Edges = append(newNode.Edges, newEdge2)
 				}
 				doc.ConnectionNodes = append(doc.ConnectionNodes, *newNode)
@@ -206,12 +203,10 @@ func (doc *BoxesDocument) verticalEdges() {
 						weight := nodeY - lastY
 						newEdgeUp := CreateConnectionEdge(v.StartX, lastY, weight)
 						newEdgeUp.DestNodeId = doc.ConnectionNodes[lastNodeIndex].NodeId
-						newEdgeUp.DestNodeIndex = &lastNodeIndex
 						doc.ConnectionNodes[nodeIndex].Edges = append(doc.ConnectionNodes[nodeIndex].Edges, newEdgeUp)
 
 						newEdgeDown := CreateConnectionEdge(nodeX, nodeY, weight)
 						newEdgeDown.DestNodeId = doc.ConnectionNodes[nodeIndex].NodeId
-						newEdgeDown.DestNodeIndex = &nodeIndex
 						doc.ConnectionNodes[lastNodeIndex].Edges = append(doc.ConnectionNodes[lastNodeIndex].Edges, newEdgeDown)
 					}
 				}
@@ -236,10 +231,8 @@ func (doc *BoxesDocument) initEdgesForBoxConnections() {
 			if nodeIndex > -1 {
 				weight := doc.ConnectionNodes[i].Edges[0].Weight
 				doc.ConnectionNodes[i].Edges[0].DestNodeId = doc.ConnectionNodes[nodeIndex].NodeId
-				doc.ConnectionNodes[i].Edges[0].DestNodeIndex = &nodeIndex
 				newEdge := CreateConnectionEdge(doc.ConnectionNodes[i].X, doc.ConnectionNodes[i].Y, weight)
 				newEdge.DestNodeId = doc.ConnectionNodes[i].NodeId
-				newEdge.DestNodeIndex = &i
 				doc.ConnectionNodes[nodeIndex].Edges = append(doc.ConnectionNodes[nodeIndex].Edges, newEdge)
 			}
 		}
