@@ -262,12 +262,12 @@
       "type": "object",
       "properties": {
         "from": {
-          "$ref": "#/definitions/LayoutElement",
-          "description": "Reference to the box where the connector starts"
+          "type": "string",
+          "description": "ID of the box where the connector starts"
         },
         "to": {
-          "$ref": "#/definitions/LayoutElement",
-          "description": "Reference to the box where the connector ends"
+          "type": "string",
+          "description": "ID of the box where the connector ends"
         },
         "sourceArrow": {
           "description": "Arrow at the source box",

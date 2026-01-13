@@ -235,11 +235,11 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
 
 type ConnectionElem struct {
 
-    // Reference to the box where the connector starts
-    From *LayoutElement  `yaml:"from,omitempty"`
+    // ID of the box where the connector starts
+    From *string  `yaml:"from,omitempty"`
 
-    // Reference to the box where the connector ends
-    To *LayoutElement  `yaml:"to,omitempty"`
+    // ID of the box where the connector ends
+    To *string  `yaml:"to,omitempty"`
 
     // Arrow at the source box
     SourceArrow *bool  `yaml:"sourceArrow,omitempty"`
@@ -254,8 +254,6 @@ type ConnectionElem struct {
 
 func NewConnectionElem() *ConnectionElem {
     return &ConnectionElem{
-        From: NewLayoutElement(),
-        To: NewLayoutElement(),
         Parts: make([]ConnectionLine, 0),
     }
 }
@@ -265,8 +263,8 @@ func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
         return nil
     }
     var ret ConnectionElem
-    ret.From = CopyLayoutElement(src.From)
-    ret.To = CopyLayoutElement(src.To)
+    ret.From = src.From
+    ret.To = src.To
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = types.CopyLineDef(src.Format)

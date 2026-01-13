@@ -91,11 +91,62 @@ func newConnectionLine(x1, y1, x2, y2 int) ConnectionLine {
 	}
 }
 
+func (doc *BoxesDocument) connectContImpl(layoutCont []LayoutElement) {
+	for i := range len(layoutCont) {
+		doc.connectImpl(&layoutCont[i])
+	}
+}
+
+func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode) {
+	if len(path) < 2 {
+		return
+	}
+	pathToDraw := path[:len(path)-1]
+	connElem := NewConnectionElem()
+	connElem.From = path[0].NodeId
+	connElem.To = path[0].NodeId
+	var lastX, lastY int
+	for i, p := range pathToDraw {
+		if i > 0 {
+			line := ConnectionLine{
+				StartX: lastX,
+				StartY: lastY,
+				EndX:   p.X,
+				EndY:   p.Y,
+			}
+			connElem.Parts = append(connElem.Parts, line)
+		}
+		lastX = p.X
+		lastY = p.Y
+	}
+	doc.Connections = append(doc.Connections, *connElem)
+}
+
+func (doc *BoxesDocument) connectImpl(layout *LayoutElement) {
+	if len(layout.Connections) > 0 {
+		for _, c := range layout.Connections {
+			srcId, destId := layout.Id, c.DestId
+			if path, dist, ok := doc.DijkstraPath(srcId, destId); ok {
+				fmt.Printf("Found path: src=%s, dest=%s, dist=%d\n", srcId, destId, dist)
+				doc.createAConnectionPath(path)
+			} else {
+				fmt.Printf("Couldn't calculate path: src=%s, dest=%s\n", srcId, destId)
+			}
+		}
+	}
+	if layout.Horizontal != nil {
+		doc.connectContImpl(layout.Horizontal.Elems)
+	}
+	if layout.Vertical != nil {
+		doc.connectContImpl(layout.Vertical.Elems)
+	}
+}
+
 func (doc *BoxesDocument) ConnectBoxes() {
 	doc.InitStartPositions()
 	doc.InitRoads()
 	doc.Roads2ConnectionNodes()
-	// TODO - Needs reimplementation
+	doc.connectImpl(&doc.Boxes)
 }
 
 func (doc *BoxesDocument) horizontalRoads2ConnectionNodes() {

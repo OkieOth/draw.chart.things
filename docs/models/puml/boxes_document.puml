@@ -53,8 +53,8 @@ class "**LayoutElement**" as LayoutElement {
  
 
 class "**ConnectionElem**" as ConnectionElem {
-        LayoutElement from
-        LayoutElement to
+        StringType from
+        StringType to
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
@@ -259,9 +259,7 @@ LayoutElement "0" *-- "n" LayoutElemConnection
 
 
     
-ConnectionElem  *--  LayoutElement
 
-ConnectionElem  *--  LayoutElement
 
 
 

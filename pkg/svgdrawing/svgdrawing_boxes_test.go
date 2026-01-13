@@ -125,9 +125,9 @@ func TestSvgWithConnections(t *testing.T) {
 			// doc.InitRoads() // TODO ... doesn't terminate
 			svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 			doc.DrawRoads(svgdrawing)
-			doc.DrawConnections(svgdrawing)
 			doc.DrawStartPositions(svgdrawing)
 			doc.DrawConnectionNodes(svgdrawing)
+			doc.DrawConnections(svgdrawing)
 
 			svgdrawing.Done()
 			output.Close()
@@ -243,13 +243,13 @@ func TestSvgWithConnections(t *testing.T) {
 		// 		// }
 		// 	},
 		// },
-		{
-			inputFile:  "../../ui/data/boxes_random.yaml",
-			outputFile: "../../temp/boxes_random.svg",
-			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-				// require.NotNil(t, doc.Connections)
-			},
-		},
+		// {
+		// 	inputFile:  "../../ui/data/boxes_random.yaml",
+		// 	outputFile: "../../temp/boxes_random.svg",
+		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+		// 		// require.NotNil(t, doc.Connections)
+		// 	},
+		// },
 		// {
 		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics.yaml",
 		// 	outputFile: "../../temp/complex_horizontal_connected_pics.svg",
@@ -261,17 +261,17 @@ func TestSvgWithConnections(t *testing.T) {
 		// 		// }
 		// 	},
 		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/simple_diamond_connected.yaml",
-		// 	outputFile: "../../temp/simple_diamond_connected.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		// require.NotNil(t, doc.Connections)
-		// 		// require.Len(t, doc.Images, 3)
-		// 		// for _, i := range doc.Images {
-		// 		// 	require.NotNil(t, i.Base64)
-		// 		// }
-		// 	},
-		// },
+		{
+			inputFile:  "../../resources/examples_boxes/simple_diamond_connected.yaml",
+			outputFile: "../../temp/simple_diamond_connected.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				// require.NotNil(t, doc.Connections)
+				// require.Len(t, doc.Images, 3)
+				// for _, i := range doc.Images {
+				// 	require.NotNil(t, i.Base64)
+				// }
+			},
+		},
 	}
 	runTests(tests)
 }
