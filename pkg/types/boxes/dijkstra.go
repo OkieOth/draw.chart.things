@@ -99,13 +99,15 @@ func (doc *BoxesDocument) createGraph(sourceId, destId string) Graph {
 }
 
 func (doc *BoxesDocument) DijkstraPath(source, target string) ([]ConnectionNode, int, bool) {
+
 	dist := make(map[string]int)
-	path := make([]ConnectionNode, 0)
+	prev := make(map[string]*string) // predecessor map
 
 	graph := doc.createGraph(source, target)
 
 	for node := range graph {
 		dist[node] = math.MaxInt
+		prev[node] = nil
 	}
 	dist[source] = 0
 
@@ -134,7 +136,7 @@ func (doc *BoxesDocument) DijkstraPath(source, target string) ([]ConnectionNode,
 			alt := dist[u] + edge.Weight
 			if alt < dist[*v] {
 				dist[*v] = alt
-				path = append(path, graph[u])
+				prev[*v] = &u
 				destNode := graph[*v]
 				heap.Push(pq, Item{node: *destNode.NodeId, distance: alt})
 			}
@@ -144,6 +146,24 @@ func (doc *BoxesDocument) DijkstraPath(source, target string) ([]ConnectionNode,
 	// No path found
 	if _, ok := dist[target]; !ok || dist[target] == math.MaxInt {
 		return nil, 0, false
+	}
+
+	// Reconstruct path from target to source
+	var path []ConnectionNode
+	for at := &target; at != nil; at = prev[*at] {
+		node, exists := graph[*at]
+		if !exists {
+			break
+		}
+		path = append(path, node)
+		if prev[*at] == nil {
+			break
+		}
+	}
+
+	// Reverse path to get source to target
+	for i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {
+		path[i], path[j] = path[j], path[i]
 	}
 
 	return path, dist[target], true

@@ -132,8 +132,8 @@ func (d *BoxesDocument) DrawRoads(drawingImpl types.Drawing) {
 }
 
 func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
-	b := "green"
-	w := 4.0
+	b := "black"
+	w := 2.0
 	format := types.LineDef{
 		Width: &w,
 		Color: &b,

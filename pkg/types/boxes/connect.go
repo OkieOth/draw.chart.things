@@ -101,7 +101,7 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode) {
 	if len(path) < 2 {
 		return
 	}
-	pathToDraw := path[:len(path)-1]
+	pathToDraw := path[1 : len(path)-1]
 	connElem := NewConnectionElem()
 	connElem.From = path[0].NodeId
 	connElem.To = path[0].NodeId
