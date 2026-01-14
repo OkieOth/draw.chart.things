@@ -98,6 +98,10 @@
             #svg-stage svg * {
                 /* Let browser use default SVG rendering */
             }
+            /* Show pointer cursor for SVG elements with click handlers */
+            #svg-stage svg .svg-clickable {
+                cursor: pointer;
+            }
             /* Minimal text optimization */
             #svg-stage svg text,
             #svg-stage svg tspan {
@@ -957,6 +961,10 @@
                     badge.appendChild(label);
 
                     // Take color from the clicked object's effective fill
+                    el =
+                        document.getElementById(boxId) ||
+                        document.querySelector(`[data-hid='${boxId}']`);
+
                     const fillColor = getEffectiveFill(el);
                     if (fillColor) {
                         badge.dataset.fill = fillColor;
@@ -1298,6 +1306,10 @@
                 window.shapeClick = function (evt) {
                     const el = evt.target;
                     if (!el || !el.id) return;
+                    // Add pointer cursor class on click (if not already present)
+                    if (!el.classList.contains('svg-clickable')) {
+                        el.classList.add('svg-clickable');
+                    }
 
                     // If blacklist collector is visible, collect to blacklist; otherwise, collect to expanded collector
                     const blacklistBox = document.getElementById(
@@ -1832,6 +1844,14 @@
                             updateToolButtons();
                             // NEW: refit badges in case layout changed
                             requestAnimationFrame(refitAllBadges);
+
+                            // Add pointer cursor to SVG elements with click handlers
+                            const svg = getSvg();
+                            if (svg) {
+                                svg.querySelectorAll('[onclick], [data-onclick], .has-onclick').forEach(el => {
+                                    el.classList.add('svg-clickable');
+                                });
+                            }
                         }
                     },
                 );

@@ -457,6 +457,12 @@ func (svg *SVG) TextWithId(id string, x int, y int, t string, s ...string) {
 	svg.println(`</text>`)
 }
 
+func (svg *SVG) TextWithIdAndAdditional(id string, x int, y int, t, additional string, s ...string) {
+	svg.printf(`<text id="%s" %s %s %s`, id, loc(x, y), additional, endstyle(s, ">"))
+	xml.Escape(svg.Writer, []byte(t))
+	svg.println(`</text>`)
+}
+
 func (svg *SVG) TextRotated(x int, y int, t string, rotation int, s ...string) {
 	svg.printf(`<text %s transform="rotate(%d, %d, %d)"  %s`, loc(x, y), rotation, x, y, endstyle(s, ">"))
 	xml.Escape(svg.Writer, []byte(t))
