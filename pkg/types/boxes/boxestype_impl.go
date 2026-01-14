@@ -145,10 +145,10 @@ func (d *BoxesDocument) adjustLineToWidth(startX, startY, endX, endY, offset int
 		} else {
 			//botton/up
 			if !firstLine {
-				endY += offset
+				endY += -offset
 			}
 			if !lastLine {
-				startY += -offset
+				startY += offset
 			}
 		}
 	} else {
@@ -189,10 +189,10 @@ func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
 			lineFormat = *elem.Format
 		}
 		offset := int(*lineFormat.Width / 2)
-		partCount := len(elem.Parts)
+		lastPos := len(elem.Parts) - 1
 		for i, l := range elem.Parts {
 			// drawing the connection lines
-			x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, i == 0, i != partCount)
+			x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, i == 0, i == lastPos)
 			drawingImpl.DrawLine(x1, y1, x2, y2, lineFormat)
 		}
 
