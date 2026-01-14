@@ -94,7 +94,7 @@
         "name": "input",
         "whiteListed": [
           {
-            "name": "input",
+            "name": "external",
             "type": "domain"
           }
         ],

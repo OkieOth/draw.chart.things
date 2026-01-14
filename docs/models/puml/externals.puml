@@ -1,0 +1,202 @@
+
+@startuml
+hide empty methods
+hide empty fields
+
+
+class "**Layout**" as Layout {
+        StringType id
+        StringType caption
+        StringType text1
+        StringType text2
+        StringType extVertical
+        Layout[] vertical
+        StringType extHorizontal
+        Layout[] horizontal
+        StringType[] tags
+        Connection[] connections
+        StringType format
+}
+
+ 
+
+class "**LayoutArray**" as LayoutArray extends List {
+}
+
+class "**Connection**" as Connection {
+        StringType destId
+        BooleanType sourceArrow
+        BooleanType destArrow
+        StringType format
+        StringType[] tags
+}
+
+ 
+
+class "**Format**" as Format {
+        IntegerType fixedWidth
+        IntegerType fixedHeight
+        BooleanType verticalTxt
+        FontDef fontCaption
+        FontDef fontText1
+        FontDef fontText2
+        LineDef line
+        FillDef fill
+        IntegerType padding
+        IntegerType boxMargin
+        IntegerType cornerRadius
+        StringType image
+}
+
+ 
+
+class "**FontDef**" as FontDef {
+        IntegerType size
+        StringType font
+        FontDefTypeEnum type
+        FontDefWeightEnum weight
+        NumberType lineHeight
+        StringType color
+        FontDefAlignedEnum aligned
+        IntegerType spaceTop
+        IntegerType spaceBottom
+        IntegerType maxLenBeforeBreak
+        FontDefAnchorEnum anchor
+}
+note top: Defines the font a text
+
+ 
+
+enum "FontDefTypeEnum" as FontDefTypeEnum {
+    NORMAL
+    ITALIC
+}
+
+enum "FontDefWeightEnum" as FontDefWeightEnum {
+    NORMAL
+    BOLD
+}
+
+enum "FontDefAlignedEnum" as FontDefAlignedEnum {
+    LEFT
+    CENTER
+    RIGHT
+}
+
+enum "FontDefAnchorEnum" as FontDefAnchorEnum {
+    MIDDLE
+    LEFT
+    RIGHT
+}
+
+class "**LineDef**" as LineDef {
+        NumberType width
+        LineDefStyleEnum style
+        StringType color
+        NumberType opacity
+}
+note top: Defines how the border of\nthe box looks like
+
+ 
+
+enum "LineDefStyleEnum" as LineDefStyleEnum {
+    SOLID
+    DOTTED
+    DASHED
+}
+
+class "**FillDef**" as FillDef {
+        StringType color
+        NumberType opacity
+}
+note top: Defines the fill of the\nbox
+
+ 
+
+class "**ImageDef**" as ImageDef {
+        StringType id
+        StringType description
+        IntegerType width
+        IntegerType height
+        StringType base64
+        StringType base64Src
+}
+note top: parameters of an image to\nbe displayed in the SVG
+
+ 
+
+
+    
+
+
+
+
+
+Layout "0" *-- "n" Layout
+
+
+
+
+Layout "0" *-- "n" Connection
+
+
+    
+    
+
+
+
+
+
+    
+
+
+
+Format  *--  FontDef
+
+Format  *--  FontDef
+
+Format  *--  FontDef
+
+Format  *--  LineDef
+
+Format  *--  FillDef
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+    
+
+
+
+
+    
+    
+
+
+    
+
+
+
+
+
+
+
+footer \ngenerated with yacg (https://github.com/OkieOth/yacg),\n(template: plantUml.mako v1.1.0)\npowered by plantuml (https://plantuml.com/)
+@enduml

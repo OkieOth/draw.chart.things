@@ -4,6 +4,7 @@
   "description": "Model to inject additional connections in a boxes layout definition",
   "version": "0.1.0",
   "type": "object",
+  "x-domain": "external",
   "$comment": "the IDs of the boxes to connect are the keys of the dictionary",
   "additionalProperties": {
     "$ref": "#/definitions/ConnectionCont"
