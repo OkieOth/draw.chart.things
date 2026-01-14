@@ -55,7 +55,7 @@
             {
               "name": "baseModelPackageImport",
               "value": "github.com/okieoth/draw.chart.things/pkg/types"
-            }            
+            }
           ]
         }
       },
@@ -74,6 +74,64 @@
         "singleFileTask": {
           "template": "plantUml",
           "destFile": "/project/docs/models/puml/boxes.puml"
+        }
+      }
+    ]
+  },
+  {
+    "name": "ext_boxes",
+    "description": "code gen types for external injection of things",
+    "models": [
+      {
+        "schema": "/project/configs/models/boxes_external_connections.json"
+      },
+      {
+        "schema": "/project/configs/models/boxes_external_formats.json"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "input",
+        "whiteListed": [
+          {
+            "name": "input",
+            "type": "domain"
+          }
+        ],
+        "singleFileTask": {
+          "template": "/project/configs/codegen/templates/golang_types.mako",
+          "destFile": "/project/pkg/types/boxes/externals.go",
+          "templateParams": [
+            {
+              "name": "modelPackage",
+              "value": "boxes"
+            },
+            {
+              "name": "baseModelPackage",
+              "value": "types"
+            },
+            {
+              "name": "baseModelPackageImport",
+              "value": "github.com/okieoth/draw.chart.things/pkg/types"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Plantuml",
+        "whiteListed": [
+          {
+            "name": "input",
+            "type": "domain"
+          },
+          {
+            "name": "base",
+            "type": "domain"
+          }
+        ],
+        "singleFileTask": {
+          "template": "plantUml",
+          "destFile": "/project/docs/models/puml/externals.puml"
         }
       }
     ]
@@ -110,7 +168,7 @@
             {
               "name": "baseModelPackageImport",
               "value": "github.com/okieoth/draw.chart.things/pkg/types"
-            }            
+            }
           ]
         }
       },
@@ -165,7 +223,7 @@
             {
               "name": "baseModelPackageImport",
               "value": "github.com/okieoth/draw.chart.things/pkg/types"
-            }            
+            }
           ]
         }
       },
@@ -220,7 +278,7 @@
             {
               "name": "baseModelPackageImport",
               "value": "github.com/okieoth/draw.chart.things/pkg/types"
-            }            
+            }
           ]
         }
       },

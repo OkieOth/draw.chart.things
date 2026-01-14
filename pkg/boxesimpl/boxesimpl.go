@@ -224,6 +224,16 @@ func filterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []s
 	return *filteredBoxes
 }
 
+func DrawBoxesFilteredExt(
+	layout boxes.Boxes,
+	additionalFormats map[string]boxes.BoxFormat,
+	additionalConnections map[string]boxes.Connection,
+	defaultDepth int,
+	expanded, blacklisted []string,
+	debug bool) UIReturn {
+	return UIReturn{} // TODO
+}
+
 func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, debug bool) UIReturn {
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
 	filteredLayout := filterBoxes(layout, defaultDepth, expanded, blacklisted)
