@@ -131,6 +131,49 @@ func (d *BoxesDocument) DrawRoads(drawingImpl types.Drawing) {
 	}
 }
 
+func (d *BoxesDocument) adjustLineToWidth(startX, startY, endX, endY, offset int, firstLine, lastLine bool) (int, int, int, int) {
+	if startX == endX {
+		// vertical line
+		if startY < endY {
+			// top/down
+			if !firstLine {
+				startY += -offset
+			}
+			if !lastLine {
+				endY += offset
+			}
+		} else {
+			//botton/up
+			if !firstLine {
+				endY += offset
+			}
+			if !lastLine {
+				startY += -offset
+			}
+		}
+	} else {
+		// horizontal line
+		if startX < endX {
+			// left/right
+			if !firstLine {
+				startX += -offset
+			}
+			if !lastLine {
+				endX += offset
+			}
+		} else {
+			// right/left
+			if !firstLine {
+				startX += offset
+			}
+			if !lastLine {
+				endX += -offset
+			}
+		}
+	}
+	return startX, startY, endX, endY
+}
+
 func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
 	b := "blue"
 	w := 2.0
@@ -141,13 +184,16 @@ func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
 
 	for _, elem := range d.Connections {
 		// iterate over the connections of the document
-		for _, l := range elem.Parts {
+		lineFormat := format
+		if elem.Format != nil {
+			lineFormat = *elem.Format
+		}
+		offset := int(*lineFormat.Width / 2)
+		partCount := len(elem.Parts)
+		for i, l := range elem.Parts {
 			// drawing the connection lines
-			lineFormat := format
-			if elem.Format != nil {
-				lineFormat = *elem.Format
-			}
-			drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat)
+			x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, i == 0, i != partCount)
+			drawingImpl.DrawLine(x1, y1, x2, y2, lineFormat)
 		}
 
 	}
