@@ -1306,10 +1306,6 @@
                 window.shapeClick = function (evt) {
                     const el = evt.target;
                     if (!el || !el.id) return;
-                    // Add pointer cursor class on click (if not already present)
-                    if (!el.classList.contains('svg-clickable')) {
-                        el.classList.add('svg-clickable');
-                    }
 
                     // If blacklist collector is visible, collect to blacklist; otherwise, collect to expanded collector
                     const blacklistBox = document.getElementById(
@@ -1848,8 +1844,17 @@
                             // Add pointer cursor to SVG elements with click handlers
                             const svg = getSvg();
                             if (svg) {
-                                svg.querySelectorAll('[onclick], [data-onclick], .has-onclick').forEach(el => {
-                                    el.classList.add('svg-clickable');
+                                // Remove svg-clickable from elements that have an onclick handler
+                                svg.querySelectorAll('.svg-clickable').forEach(el => {
+                                    if (el.hasAttribute('onclick')) {
+                                        el.classList.remove('svg-clickable');
+                                    }
+                                });
+                                // Add onclick handler to all elements with svg-clickable class
+                                svg.querySelectorAll('.svg-clickable').forEach(el => {
+                                    if (!el.hasAttribute('onclick')) {
+                                        el.setAttribute('onclick', 'window.shapeClick(event)');
+                                    }
                                 });
                             }
                         }

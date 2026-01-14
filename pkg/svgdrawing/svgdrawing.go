@@ -380,7 +380,7 @@ func (d *SvgDrawing) DrawPng(x, y int, pngId string) error {
 
 // Draw renders a box with text elements
 func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int, width, height int, format types.RectWithTextFormat) error {
-	const onclickClass = "class=\"'svg-clickable'\"" // "onclick=\"window.shapeClick(event)\""
+	const onclickClass = "svg-clickable" // "onclick=\"window.shapeClick(event)\""
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
 
