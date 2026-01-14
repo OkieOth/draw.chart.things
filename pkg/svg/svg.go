@@ -335,21 +335,21 @@ func (svg *SVG) RectWithId(id string, x int, y int, w int, h int, s ...string) {
 
 // Rect draws a rectangle with upper left-hand corner at x,y, with width w, and height h, with optional style
 // Standard Reference: http://www.w3.org/TR/SVG11/shapes.html#RectElement
-func (svg *SVG) RectWithIdAndAdditional(additional, id string, x int, y int, w int, h int, s ...string) {
+func (svg *SVG) RectWithIdAndClass(class, id string, x int, y int, w int, h int, s ...string) {
 	if id == "" {
 		svg.Rect(x, y, w, h, s...)
 	} else {
-		svg.printf(`<rect %s id="%s" %s %s`, additional, id, dim(x, y, w, h), endstyle(s, emptyclose))
+		svg.printf(`<rect class="%s" id="%s" %s %s`, class, id, dim(x, y, w, h), endstyle(s, emptyclose))
 	}
 }
 
 // Rect draws a rounded rectangle with upper left-hand corner at x,y, with width w, and height h, with optional style
 // Standard Reference: http://www.w3.org/TR/SVG11/shapes.html#RectElement
-func (svg *SVG) RoundedRectWithIdAndAdditional(additional, id string, x int, y int, w int, h, cornerRadius int, s ...string) {
+func (svg *SVG) RoundedRectWithIdAndClass(class, id string, x int, y int, w int, h, cornerRadius int, s ...string) {
 	if id == "" {
 		svg.Roundrect(x, y, w, h, cornerRadius, cornerRadius, s...)
 	} else {
-		svg.printf(`<rect %s id="%s" %s rx="%d" ry="%d" %s`, additional, id, dim(x, y, w, h), cornerRadius, cornerRadius, endstyle(s, emptyclose))
+		svg.printf(`<rect class="%s" id="%s" %s rx="%d" ry="%d" %s`, class, id, dim(x, y, w, h), cornerRadius, cornerRadius, endstyle(s, emptyclose))
 	}
 }
 
@@ -457,8 +457,8 @@ func (svg *SVG) TextWithId(id string, x int, y int, t string, s ...string) {
 	svg.println(`</text>`)
 }
 
-func (svg *SVG) TextWithIdAndAdditional(id string, x int, y int, t, additional string, s ...string) {
-	svg.printf(`<text id="%s" %s %s %s`, id, loc(x, y), additional, endstyle(s, ">"))
+func (svg *SVG) TextWithIdAndClass(id string, x int, y int, t, class string, s ...string) {
+	svg.printf(`<text id="%s" %s class="%s" %s`, id, loc(x, y), class, endstyle(s, ">"))
 	xml.Escape(svg.Writer, []byte(t))
 	svg.println(`</text>`)
 }

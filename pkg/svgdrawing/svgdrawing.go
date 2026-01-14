@@ -291,7 +291,7 @@ func (d *SvgDrawing) DrawText(text string, x, currentY, width int, fontDef *type
 	return d.DrawTextWithId(text, x, currentY, width, fontDef, "")
 }
 
-func (d *SvgDrawing) DrawTextWithIdAndAdditional(text string, x, currentY, width int, fontDef *types.FontDef, id, additional string) int {
+func (d *SvgDrawing) DrawTextWithIdAndClass(text string, x, currentY, width int, fontDef *types.FontDef, id, class string) int {
 	if text == "" {
 		return currentY
 	}
@@ -308,8 +308,8 @@ func (d *SvgDrawing) DrawTextWithIdAndAdditional(text string, x, currentY, width
 		writeTxt = d.canvas.Text
 	} else {
 		writeTxt = func(x int, y int, txt string, other ...string) {
-			if additional != "" {
-				d.canvas.TextWithIdAndAdditional(id, x, y, txt, additional, other...)
+			if class != "" {
+				d.canvas.TextWithIdAndClass(id, x, y, txt, class, other...)
 			} else {
 				d.canvas.TextWithId(id, x, y, txt, other...)
 			}
@@ -338,7 +338,7 @@ func (d *SvgDrawing) DrawTextWithIdAndAdditional(text string, x, currentY, width
 }
 
 func (d *SvgDrawing) DrawTextWithId(text string, x, currentY, width int, fontDef *types.FontDef, id string) int {
-	return d.DrawTextWithIdAndAdditional(text, x, currentY, width, fontDef, id, "")
+	return d.DrawTextWithIdAndClass(text, x, currentY, width, fontDef, id, "")
 }
 
 func (d *SvgDrawing) DrawVerticalText(text string, currentX, y, height int, fontDef *types.FontDef) int {
@@ -380,7 +380,7 @@ func (d *SvgDrawing) DrawPng(x, y int, pngId string) error {
 
 // Draw renders a box with text elements
 func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int, width, height int, format types.RectWithTextFormat) error {
-	const onclickCode = "onclick=\"window.shapeClick(event)\""
+	const onclickClass = "class=\"'svg-clickable'\"" // "onclick=\"window.shapeClick(event)\""
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
 
@@ -410,9 +410,9 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int
 		}
 		if id != "" {
 			if format.CornerRadius != nil {
-				d.canvas.RoundedRectWithIdAndAdditional(onclickCode, id, x, y, width, height, *format.CornerRadius, attr)
+				d.canvas.RoundedRectWithIdAndClass(onclickClass, id, x, y, width, height, *format.CornerRadius, attr)
 			} else {
-				d.canvas.RectWithIdAndAdditional(onclickCode, id, x, y, width, height, attr)
+				d.canvas.RectWithIdAndClass(onclickClass, id, x, y, width, height, attr)
 			}
 		} else {
 			if format.CornerRadius != nil {
@@ -437,7 +437,7 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int
 		currentX = d.DrawVerticalText(text2, currentX, currentY, width, &format.FontText2)
 	} else {
 		currentY := y + format.Padding
-		currentY = d.DrawTextWithIdAndAdditional(caption, x, currentY, width, &format.FontCaption, idStr, onclickCode)
+		currentY = d.DrawTextWithIdAndClass(caption, x, currentY, width, &format.FontCaption, idStr, onclickClass)
 		currentY = d.DrawText(text1, x, currentY, width, &format.FontText1)
 		currentY = d.DrawText(text2, x, currentY, width, &format.FontText2)
 	}
