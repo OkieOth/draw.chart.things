@@ -5,6 +5,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"syscall/js"
 
 	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
@@ -27,6 +28,37 @@ func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []strin
 	}
 
 	ret := boxesimpl.DrawBoxesFiltered(boxes, defaultDepth, expanded, blacklisted, debug)
+	if ret.ErrorMsg != "" {
+		return unknownSvg
+	}
+	return ret.SVG
+}
+
+func createSvgExt(boxesYaml string, additionalFormats, additionalConnections []string, defaultDepth int, expanded, blacklisted []string, debug bool) string {
+	var b boxes.Boxes
+	if err := y.Unmarshal([]byte(boxesYaml), &b); err != nil {
+		fmt.Printf("error while unmarshalling boxes layout: %v", err)
+		return unknownSvg
+	}
+
+	for i, c := range additionalConnections {
+		var extConnections map[string]boxes.ConnectionCont
+		if err := y.Unmarshal([]byte(c), &extConnections); err != nil {
+			fmt.Printf("error while unmarshalling external connections (%d): %v", i, err)
+			return unknownSvg
+		}
+		b.MixinConnections(extConnections)
+	}
+	for i, c := range additionalFormats {
+		var extFormats boxes.AdditionalFormats
+		if err := y.Unmarshal([]byte(c), &extFormats); err != nil {
+			fmt.Printf("error while unmarshalling external formats (%d): %v", i, err)
+			return unknownSvg
+		}
+		b.MixinFormats(extFormats)
+	}
+
+	ret := boxesimpl.DrawBoxesFiltered(b, defaultDepth, expanded, blacklisted, debug)
 	if ret.ErrorMsg != "" {
 		return unknownSvg
 	}
@@ -68,9 +100,36 @@ func createSvgWrapper(this js.Value, args []js.Value) interface{} {
 	return createSvg(input, depth, expanded, blacklisted, debug)
 }
 
+func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
+	if len(args) < 7 {
+		return "error: expected (string, string[], string[], number, string[], string[], bool)"
+	}
+	input := args[0].String()
+	additionalFormats, err := getArrayFromJsValue(args, 1)
+	if err != nil {
+		return "error: additionalFormats needs to be an array"
+	}
+	additionalConnections, err := getArrayFromJsValue(args, 2)
+	if err != nil {
+		return "error: additionalConnections needs to be an array"
+	}
+	expanded, err := getArrayFromJsValue(args, 3)
+	if err != nil {
+		return "error: expanded must be an array"
+	}
+	blacklisted, err := getArrayFromJsValue(args, 4)
+	if err != nil {
+		return "error: blacklisted must be an array"
+	}
+	depth := args[5].Int()
+	debug := args[6].Bool()
+	return createSvgExt(input, additionalFormats, additionalConnections, depth, expanded, blacklisted, debug)
+}
+
 func main() {
 	// Expose the function to JS as `getSvg`
 	js.Global().Set("createSvg", js.FuncOf(createSvgWrapper))
+	js.Global().Set("createSvgExt", js.FuncOf(createSvgExtWrapper))
 
 	// Keep Go running
 	select {}
