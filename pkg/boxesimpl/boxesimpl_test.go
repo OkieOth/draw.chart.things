@@ -190,20 +190,20 @@ func TestDrawBoxesForUi(t *testing.T) {
 		expanded    []string
 		blacklisted []string
 	}{
-		// {
-		// 	inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
-		// 	outputFile:  "../../temp/complex_complex_filtered_1.svg",
-		// 	depth:       1,
-		// 	expanded:    []string{},
-		// 	blacklisted: []string{},
-		// },
-		// {
-		// 	inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
-		// 	outputFile:  "../../temp/complex_complex_filtered_2.svg",
-		// 	depth:       2,
-		// 	expanded:    []string{},
-		// 	blacklisted: []string{},
-		// },
+		{
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			outputFile:  "../../temp/complex_complex_filtered_1.svg",
+			depth:       1,
+			expanded:    []string{},
+			blacklisted: []string{},
+		},
+		{
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			outputFile:  "../../temp/complex_complex_filtered_2.svg",
+			depth:       2,
+			expanded:    []string{},
+			blacklisted: []string{},
+		},
 		{
 			inputFile:   "../../ui/data/boxes_random.yaml",
 			outputFile:  "../../temp/boxes_random_2.svg",
@@ -225,6 +225,48 @@ func TestDrawBoxesForUi(t *testing.T) {
 	}
 }
 
+func TestDrawBoxesForUiExt(t *testing.T) {
+	tests := []struct {
+		inputFile           string
+		inputExtConnections string
+		inputExtFormats     string
+		outputFile          string
+		depth               int
+		expanded            []string
+		blacklisted         []string
+	}{
+		{
+			inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+			inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
+			inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
+			outputFile:          "../../temp/ext_complex_horizontal_connected_pics.svg",
+			depth:               2,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
+	}
+	for i, test := range tests {
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
+		require.Nil(t, err, "error while loading input file for test", i)
+
+		additionalConnections, err := types.LoadInputFromFile[map[string]boxes.ConnectionCont](test.inputExtConnections)
+		require.Nil(t, err)
+		require.NotNil(t, additionalConnections)
+
+		additionalFormats, err := types.LoadInputFromFile[boxes.AdditionalFormats](test.inputExtFormats)
+		require.Nil(t, err)
+		require.NotNil(t, additionalFormats)
+
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, *additionalFormats, *additionalConnections, test.depth, test.expanded, test.blacklisted, false)
+
+		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
+
+		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+		require.Nil(t, err, "error while writing output file for test", i)
+		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+	}
+}
+
 func TestFilterBoxes(t *testing.T) {
 	tests := []struct {
 		inputFile   string
@@ -233,74 +275,74 @@ func TestFilterBoxes(t *testing.T) {
 		expanded    []string
 		blacklisted []string
 	}{
-		// {
-		// 	inputFile: "../../resources/examples_boxes/complex_complex.yaml",
-		// 	checkFunc: func(b *boxes.Boxes) {
-		// 		for _, e := range b.Boxes.Horizontal {
-		// 			require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-1)")
-		// 			require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-1)")
-		// 		}
-		// 		for _, e := range b.Boxes.Vertical {
-		// 			require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-2)")
-		// 			require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-2)")
-		// 		}
-		// 	},
-		// 	depth:       1,
-		// 	expanded:    []string{},
-		// 	blacklisted: []string{},
-		// },
-		// {
-		// 	inputFile: "../../resources/examples_boxes/complex_complex.yaml",
-		// 	checkFunc: func(b *boxes.Boxes) {
-		// 		found := false
-		// 		for _, e := range b.Boxes.Horizontal {
-		// 			if len(e.Horizontal) > 0 {
-		// 				found = true
-		// 			}
-		// 			if len(e.Vertical) > 0 {
-		// 				found = true
-		// 			}
-		// 		}
-		// 		for _, e := range b.Boxes.Vertical {
-		// 			if len(e.Horizontal) > 0 {
-		// 				found = true
-		// 			}
-		// 			if len(e.Vertical) > 0 {
-		// 				found = true
-		// 			}
-		// 		}
-		// 		require.True(t, found, "didn't find second level")
-		// 	},
-		// 	depth:       2,
-		// 	expanded:    []string{},
-		// 	blacklisted: []string{},
-		// },
-		// {
-		// 	inputFile: "../../resources/examples_boxes/complex_complex.yaml",
-		// 	checkFunc: func(b *boxes.Boxes) {
-		// 		found := false
-		// 		for _, e := range b.Boxes.Horizontal {
-		// 			if len(e.Horizontal) > 0 {
-		// 				found = true
-		// 			}
-		// 			if len(e.Vertical) > 0 {
-		// 				found = true
-		// 			}
-		// 		}
-		// 		for _, e := range b.Boxes.Vertical {
-		// 			if len(e.Horizontal) > 0 {
-		// 				found = true
-		// 			}
-		// 			if len(e.Vertical) > 0 {
-		// 				found = true
-		// 			}
-		// 		}
-		// 		require.True(t, found, "didn't find second level")
-		// 	},
-		// 	depth:       20,
-		// 	expanded:    []string{},
-		// 	blacklisted: []string{"r2_2", "r4_1"},
-		// },
+		{
+			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
+			checkFunc: func(b *boxes.Boxes) {
+				for _, e := range b.Boxes.Horizontal {
+					require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-1)")
+					require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-1)")
+				}
+				for _, e := range b.Boxes.Vertical {
+					require.Equal(t, 0, len(e.Horizontal), "got unexpected horizontal childs (1-2)")
+					require.Equal(t, 0, len(e.Vertical), "got unexpected vertical childs (1-2)")
+				}
+			},
+			depth:       1,
+			expanded:    []string{},
+			blacklisted: []string{},
+		},
+		{
+			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
+			checkFunc: func(b *boxes.Boxes) {
+				found := false
+				for _, e := range b.Boxes.Horizontal {
+					if len(e.Horizontal) > 0 {
+						found = true
+					}
+					if len(e.Vertical) > 0 {
+						found = true
+					}
+				}
+				for _, e := range b.Boxes.Vertical {
+					if len(e.Horizontal) > 0 {
+						found = true
+					}
+					if len(e.Vertical) > 0 {
+						found = true
+					}
+				}
+				require.True(t, found, "didn't find second level")
+			},
+			depth:       2,
+			expanded:    []string{},
+			blacklisted: []string{},
+		},
+		{
+			inputFile: "../../resources/examples_boxes/complex_complex.yaml",
+			checkFunc: func(b *boxes.Boxes) {
+				found := false
+				for _, e := range b.Boxes.Horizontal {
+					if len(e.Horizontal) > 0 {
+						found = true
+					}
+					if len(e.Vertical) > 0 {
+						found = true
+					}
+				}
+				for _, e := range b.Boxes.Vertical {
+					if len(e.Horizontal) > 0 {
+						found = true
+					}
+					if len(e.Vertical) > 0 {
+						found = true
+					}
+				}
+				require.True(t, found, "didn't find second level")
+			},
+			depth:       20,
+			expanded:    []string{},
+			blacklisted: []string{"r2_2", "r4_1"},
+		},
 		{
 			inputFile: "../../ui/data/boxes_random.yaml",
 			checkFunc: func(b *boxes.Boxes) {

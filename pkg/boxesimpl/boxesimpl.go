@@ -226,12 +226,14 @@ func filterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []s
 
 func DrawBoxesFilteredExt(
 	layout boxes.Boxes,
-	additionalFormats map[string]boxes.BoxFormat,
-	additionalConnections map[string]boxes.Connection,
+	additionalFormats boxes.AdditionalFormats,
+	additionalConnections map[string]boxes.ConnectionCont,
 	defaultDepth int,
 	expanded, blacklisted []string,
 	debug bool) UIReturn {
-	return UIReturn{} // TODO
+	layout.MixinConnections(additionalConnections)
+	layout.MixinFormats(additionalFormats)
+	return DrawBoxesFiltered(layout, defaultDepth, expanded, blacklisted, debug)
 }
 
 func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, debug bool) UIReturn {

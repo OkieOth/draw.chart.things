@@ -5,10 +5,7 @@ import (
 	"slices"
 )
 
-func (b *Boxes) MixinFormats(additional *AdditionalFormats) {
-	if additional == nil {
-		return
-	}
+func (b *Boxes) MixinFormats(additional AdditionalFormats) {
 	if len(additional.Formats) > 0 {
 		maps.Copy(b.Formats, additional.Formats)
 	}

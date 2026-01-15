@@ -43,7 +43,7 @@ func TestLoadExternalFormats(t *testing.T) {
 	require.NotEqual(t, len(b2.Formats), len(b.Formats))
 	require.NotEqual(t, len(b2.Formats), len(b.Formats))
 
-	b.MixinFormats(additionalFormats)
+	b.MixinFormats(*additionalFormats)
 
 	require.Equal(t, len(b2.Formats), len(b.Formats))
 	require.Equal(t, len(b2.Formats), len(b.Formats))
