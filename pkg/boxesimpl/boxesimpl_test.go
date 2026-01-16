@@ -347,6 +347,9 @@ func TestFilterBoxes(t *testing.T) {
 			inputFile: "../../ui/data/boxes_random.yaml",
 			checkFunc: func(b *boxes.Boxes) {
 				require.NotNil(t, b)
+				require.Len(t, b.Boxes.Vertical[0].Horizontal[0].Vertical, 0)
+				require.Len(t, b.Boxes.Vertical[0].Horizontal[0].Horizontal, 0)
+				require.Len(t, b.Boxes.Vertical[0].Horizontal[0].Connections, 3)
 			},
 			depth:       2,
 			expanded:    []string{},
