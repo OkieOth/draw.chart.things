@@ -267,6 +267,13 @@ func TestSvgWithConnections(t *testing.T) {
 				// }
 			},
 		},
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_random_truncated.yaml",
+			outputFile: "../../temp/boxes_random_truncated.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
 	}
 	runTests(tests)
 }
