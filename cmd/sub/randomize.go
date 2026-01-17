@@ -9,7 +9,6 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var RandomizeCmd = &cobra.Command{
@@ -46,24 +45,7 @@ func RandomizeBoxes(input, output string) error {
 	}
 	faker := gofakeit.NewFaker(source.NewJSF(11), true)
 	randomizeBoxesLayout(&boxes.Boxes, faker)
-	bytes, err := yaml.Marshal(boxes)
-	if err != nil {
-		return fmt.Errorf("Error while serialize to yaml: %v", err)
-	}
-	if output == "" {
-		fmt.Println(string(bytes))
-	} else {
-		outputFile, err := os.Create(output)
-		if err != nil {
-			return fmt.Errorf("Error while creating output file: %v", err)
-		}
-		defer outputFile.Close()
-		_, err = outputFile.Write(bytes)
-		if err != nil {
-			return fmt.Errorf("Error while writing output file: %v", err)
-		}
-	}
-	return nil
+	return serializeToYaml(boxes, output)
 }
 
 func randomizeText(txt string, faker *gofakeit.Faker) string {

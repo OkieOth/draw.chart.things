@@ -216,7 +216,7 @@ func adjustTruncatedForCont(cont *[]boxes.Layout, truncatedObjects map[string]Tr
 	}
 }
 
-func filterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string) boxes.Boxes {
+func FilterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string) boxes.Boxes {
 	filteredBoxes := boxes.CopyBoxes(&layout)
 	b, truncatedObjects := truncBoxes(layout.Boxes, 0, defaultDepth, expanded, blacklisted)
 	adjustTruncated(&b, truncatedObjects)
@@ -238,7 +238,7 @@ func DrawBoxesFilteredExt(
 
 func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, debug bool) UIReturn {
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
-	filteredLayout := filterBoxes(layout, defaultDepth, expanded, blacklisted)
+	filteredLayout := FilterBoxes(layout, defaultDepth, expanded, blacklisted)
 	doc, err := InitialLayoutBoxes(&filteredLayout, textDimensionCalulator)
 	if err != nil {
 		return UIReturn{ErrorMsg: fmt.Sprintf("error while initialy layout: %v", err)}
