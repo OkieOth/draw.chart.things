@@ -260,6 +260,7 @@ func (doc *BoxesDocument) ConnectBoxes() {
 	doc.Roads2ConnectionNodes()
 	doc.connectImpl(&doc.Boxes)
 	doc.separateConnectionLines()
+	doc.adjustForOverlappingConnections()
 }
 
 func (doc *BoxesDocument) horizontalRoads2ConnectionNodes() {
