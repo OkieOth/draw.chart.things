@@ -97,6 +97,94 @@ func (doc *BoxesDocument) connectContImpl(layoutCont []LayoutElement) {
 	}
 }
 
+// The function guarantees that the lines always to top/down or left to right.
+// That simplifies the code for separating overlapping lines
+func (doc *BoxesDocument) createConnection(x1, y1, x2, y2 int) ConnectionLine {
+	if x1 == x2 {
+		// vertical line
+		if y1 > y2 {
+			// bottom/up line
+			y1, y2 = y2, y1
+		}
+	} else {
+		if x1 > x2 {
+			// right to left
+			x1, x2 = x2, x1
+		}
+	}
+	line := ConnectionLine{
+		StartX: x1,
+		StartY: y1,
+		EndX:   x2,
+		EndY:   y2,
+	}
+	return line
+}
+
+func (doc *BoxesDocument) extendConnection(line ConnectionLine, x, y int) ConnectionLine {
+	if line.StartX == line.EndX {
+		// vertical line
+		if line.StartY > y {
+			line.StartY = y
+		} else {
+			line.EndY = y
+		}
+	} else {
+		if line.StartX > x {
+			// right to left
+			line.StartX = x
+		} else {
+			line.EndX = x
+		}
+	}
+	return line
+}
+
+// aggregates line parts that have the same direction
+func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
+	reducedParts := make([]ConnectionLine, 0)
+	var lastE *ConnectionLine
+	for _, e := range connElem.Parts {
+		if lastE == nil {
+			lastE = &e
+		} else {
+			if lastE.StartX == lastE.EndX {
+				// lastE is vertical line
+				if e.StartX == e.EndX {
+					// ... still vertical line
+					// expects that e.StartX == lastE.StartX
+					if e.StartY < lastE.StartY {
+						lastE.StartY = e.StartY
+					} else {
+						lastE.EndY = e.EndY
+					}
+				} else {
+					// change from vertical to horizontal line
+					reducedParts = append(reducedParts, *lastE)
+					lastE = &e
+				}
+			} else {
+				// lastE is horizontal line
+				if e.StartY == e.EndY {
+					// ... still horizontal line
+					// expects that e.StartY == lastE.StartY
+					if e.StartX < lastE.StartX {
+						lastE.StartX = e.StartX
+					} else {
+						lastE.EndX = e.EndX
+					}
+				} else {
+					// change to vertical line
+					reducedParts = append(reducedParts, *lastE)
+					lastE = &e
+				}
+			}
+		}
+	}
+	reducedParts = append(reducedParts, *lastE)
+	connElem.Parts = reducedParts
+}
+
 func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *types.LineDef) {
 	if len(path) < 2 {
 		return
@@ -112,17 +200,15 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *t
 	var lastX, lastY int
 	for i, p := range pathToDraw {
 		if i > 0 {
-			line := ConnectionLine{
-				StartX: lastX,
-				StartY: lastY,
-				EndX:   p.X,
-				EndY:   p.Y,
-			}
+			var line ConnectionLine
+			line = doc.createConnection(lastX, lastY, p.X, p.Y)
 			connElem.Parts = append(connElem.Parts, line)
 		}
 		lastX = p.X
 		lastY = p.Y
 	}
+	// aggregates line parts that have the same direction
+	doc.reduceConnectionLines(connElem)
 	doc.Connections = append(doc.Connections, *connElem)
 }
 
@@ -146,11 +232,34 @@ func (doc *BoxesDocument) connectImpl(layout *LayoutElement) {
 	}
 }
 
+func (doc *BoxesDocument) separateConnectionLines() {
+	doc.HorizontalLines = make([]ConnectionLine, 0)
+	doc.VerticalLines = make([]ConnectionLine, 0)
+	for _, c := range doc.Connections {
+		for _, p := range c.Parts {
+			if p.StartX == p.EndX {
+				// vertical
+				doc.VerticalLines = append(doc.VerticalLines, p)
+			} else {
+				// assumed horizontal
+				doc.HorizontalLines = append(doc.HorizontalLines, p)
+			}
+		}
+	}
+	slices.SortFunc(doc.HorizontalLines, func(l1, l2 ConnectionLine) int {
+		return l1.StartY - l2.StartY
+	})
+	slices.SortFunc(doc.VerticalLines, func(l1, l2 ConnectionLine) int {
+		return l1.StartX - l2.StartX
+	})
+}
+
 func (doc *BoxesDocument) ConnectBoxes() {
 	doc.InitStartPositions()
 	doc.InitRoads()
 	doc.Roads2ConnectionNodes()
 	doc.connectImpl(&doc.Boxes)
+	doc.separateConnectionLines()
 }
 
 func (doc *BoxesDocument) horizontalRoads2ConnectionNodes() {

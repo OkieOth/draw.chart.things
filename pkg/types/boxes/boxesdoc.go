@@ -51,6 +51,12 @@ type BoxesDocument struct {
 
     // helper structure to take the node points for the possible connection graph
     ConnectionNodes []ConnectionNode  `yaml:"connectionNodes,omitempty"`
+
+    // helper structure for resolving the collisions
+    HorizontalLines []ConnectionLine  `yaml:"horizontalLines,omitempty"`
+
+    // helper structure for resolving the collisions
+    VerticalLines []ConnectionLine  `yaml:"verticalLines,omitempty"`
 }
 
 func NewBoxesDocument() *BoxesDocument {
@@ -63,6 +69,8 @@ func NewBoxesDocument() *BoxesDocument {
         VerticalRoads: make([]ConnectionLine, 0),
         HorizontalRoads: make([]ConnectionLine, 0),
         ConnectionNodes: make([]ConnectionNode, 0),
+        HorizontalLines: make([]ConnectionLine, 0),
+        VerticalLines: make([]ConnectionLine, 0),
     }
 }
 
@@ -105,6 +113,14 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     ret.ConnectionNodes = make([]ConnectionNode, 0)
     for _, e := range src.ConnectionNodes {
         ret.ConnectionNodes = append(ret.ConnectionNodes, e)
+    }
+    ret.HorizontalLines = make([]ConnectionLine, 0)
+    for _, e := range src.HorizontalLines {
+        ret.HorizontalLines = append(ret.HorizontalLines, e)
+    }
+    ret.VerticalLines = make([]ConnectionLine, 0)
+    for _, e := range src.VerticalLines {
+        ret.VerticalLines = append(ret.VerticalLines, e)
     }
 
     return &ret

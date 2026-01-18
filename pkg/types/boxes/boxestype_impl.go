@@ -193,11 +193,39 @@ func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
 		for i, l := range elem.Parts {
 			// drawing the connection lines
 			x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, i == 0, i == lastPos)
+			// DEBUG - Start
+			if x1 == x2 {
+				// vertical line
+				y1 += 3
+				y2 -= 3
+			} else {
+				// horizontal line
+				x1 += 3
+				x2 -= 3
+			}
+			// DEBUG - End
 			drawingImpl.DrawLine(x1, y1, x2, y2, lineFormat)
 		}
-
 	}
+	d.DrawMovedConnectionLines(drawingImpl)
 	return nil
+}
+
+func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
+	b := "black"
+	w := 1.0
+	s := types.LineDefStyleEnum_dashed
+	format := types.LineDef{
+		Width: &w,
+		Color: &b,
+		Style: &s,
+	}
+	for _, l := range d.HorizontalLines {
+		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
+	}
+	for _, l := range d.VerticalLines {
+		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
+	}
 }
 
 func (doc *BoxesDocument) AdjustDocHeight(le *LayoutElement, currentMax int) int {

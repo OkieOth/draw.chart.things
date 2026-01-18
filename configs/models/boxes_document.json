@@ -82,6 +82,20 @@
       "items": {
         "$ref": "#/definitions/ConnectionNode"
       }
+    },
+    "horizontalLines": {
+      "description": "helper structure for resolving the collisions",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ConnectionLine"
+      }
+    },
+    "verticalLines": {
+      "description": "helper structure for resolving the collisions",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ConnectionLine"
+      }
     }
   },
   "required": [

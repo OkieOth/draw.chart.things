@@ -5,61 +5,78 @@ package boxes
 // created by yacg (template: golang_types.mako v1.1.0)
 
 import (
-	"github.com/okieoth/draw.chart.things/pkg/types"
+    "github.com/okieoth/draw.chart.things/pkg/types"
 )
 
+
+
+
+
 type ConnectionCont struct {
-	Connections []Connection `yaml:"connections,omitempty"`
+
+    Connections []Connection  `yaml:"connections,omitempty"`
 }
 
 func NewConnectionCont() *ConnectionCont {
-	return &ConnectionCont{
-		Connections: make([]Connection, 0),
-	}
+    return &ConnectionCont{
+        Connections: make([]Connection, 0),
+    }
 }
 
 func CopyConnectionCont(src *ConnectionCont) *ConnectionCont {
-	if src == nil {
-		return nil
-	}
-	var ret ConnectionCont
-	ret.Connections = make([]Connection, 0)
-	for _, e := range src.Connections {
-		ret.Connections = append(ret.Connections, e)
-	}
+    if src == nil {
+        return nil
+    }
+    var ret ConnectionCont
+    ret.Connections = make([]Connection, 0)
+    for _, e := range src.Connections {
+        ret.Connections = append(ret.Connections, e)
+    }
 
-	return &ret
+    return &ret
 }
 
-/* Model to inject additional formats in a boxes layout definition
- */
-type AdditionalFormats struct {
-	Formats map[string]Format `yaml:"formats,omitempty"`
 
-	// optional list of images used in the generated graphic
-	Images []types.ImageDef `yaml:"images,omitempty"`
+
+
+
+/* Model to inject additional formats in a boxes layout definition
+*/
+type AdditionalFormats struct {
+
+    Formats map[string]Format  `yaml:"formats,omitempty"`
+
+    // optional list of images used in the generated graphic
+    Images []types.ImageDef  `yaml:"images,omitempty"`
 }
 
 func NewAdditionalFormats() *AdditionalFormats {
-	return &AdditionalFormats{
-		Formats: make(map[string]Format, 0),
-		Images:  make([]types.ImageDef, 0),
-	}
+    return &AdditionalFormats{
+        Formats: make(map[string]Format, 0),
+        Images: make([]types.ImageDef, 0),
+    }
 }
 
 func CopyAdditionalFormats(src *AdditionalFormats) *AdditionalFormats {
-	if src == nil {
-		return nil
-	}
-	var ret AdditionalFormats
-	ret.Formats = make(map[string]Format, 0)
-	for k, v := range src.Formats {
-		ret.Formats[k] = v
-	}
-	ret.Images = make([]types.ImageDef, 0)
-	for _, e := range src.Images {
-		ret.Images = append(ret.Images, e)
-	}
+    if src == nil {
+        return nil
+    }
+    var ret AdditionalFormats
+    ret.Formats = make(map[string]Format, 0)
+    for k, v := range src.Formats {
+        ret.Formats[k] = v
+    }
+    ret.Images = make([]types.ImageDef, 0)
+    for _, e := range src.Images {
+        ret.Images = append(ret.Images, e)
+    }
 
-	return &ret
+    return &ret
 }
+
+
+
+
+
+
+
