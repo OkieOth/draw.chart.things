@@ -368,9 +368,6 @@ type ConnectionLine struct {
     EndX int  `yaml:"endX"`
 
     EndY int  `yaml:"endY"`
-
-    // If the line is moved out by a box with a collision
-    MovedOut bool  `yaml:"movedOut"`
 }
 
 
@@ -383,7 +380,6 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.StartY = src.StartY
     ret.EndX = src.EndX
     ret.EndY = src.EndY
-    ret.MovedOut = src.MovedOut
 
     return &ret
 }

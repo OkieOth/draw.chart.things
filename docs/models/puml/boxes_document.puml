@@ -88,7 +88,6 @@ class "**ConnectionLine**" as ConnectionLine {
         IntegerType startY
         IntegerType endX
         IntegerType endY
-        BooleanType movedOut
 }
 
  
@@ -293,7 +292,6 @@ BoxFormat  *--  FillDef
 
 
     
-
 
 
 
