@@ -61,6 +61,7 @@ class "**ConnectionElem**" as ConnectionElem {
         BooleanType destArrow
         LineDef format
         ConnectionLine[] parts
+        IntegerType connectionIndex
 }
 
  
@@ -88,6 +89,9 @@ class "**ConnectionLine**" as ConnectionLine {
         IntegerType startY
         IntegerType endX
         IntegerType endY
+        StringType srcLayoutId
+        StringType destLayoutId
+        IntegerType connectionIndex
 }
 
  
@@ -272,6 +276,7 @@ ConnectionElem  *--  LineDef
 
 ConnectionElem "0" *-- "n" ConnectionLine
 
+
     
     
 
@@ -292,6 +297,9 @@ BoxFormat  *--  FillDef
 
 
     
+
+
+
 
 
 

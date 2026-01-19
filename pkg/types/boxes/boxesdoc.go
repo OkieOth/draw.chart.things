@@ -266,6 +266,9 @@ type ConnectionElem struct {
     Format *types.LineDef  `yaml:"format,omitempty"`
 
     Parts []ConnectionLine  `yaml:"parts,omitempty"`
+
+    // index of this connection, in the boxes_document object
+    ConnectionIndex int  `yaml:"connectionIndex"`
 }
 
 func NewConnectionElem() *ConnectionElem {
@@ -288,6 +291,7 @@ func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
     for _, e := range src.Parts {
         ret.Parts = append(ret.Parts, e)
     }
+    ret.ConnectionIndex = src.ConnectionIndex
 
     return &ret
 }
@@ -368,6 +372,15 @@ type ConnectionLine struct {
     EndX int  `yaml:"endX"`
 
     EndY int  `yaml:"endY"`
+
+    // in case the line is connected to the start layout element, then here is its id
+    SrcLayoutId *string  `yaml:"srcLayoutId,omitempty"`
+
+    // in case the line is connected to a end layout element, then here is its id
+    DestLayoutId *string  `yaml:"destLayoutId,omitempty"`
+
+    // index of the connection, in the boxes_document object, where this line belongs too
+    ConnectionIndex int  `yaml:"connectionIndex"`
 }
 
 
@@ -380,6 +393,9 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.StartY = src.StartY
     ret.EndX = src.EndX
     ret.EndY = src.EndY
+    ret.SrcLayoutId = src.SrcLayoutId
+    ret.DestLayoutId = src.DestLayoutId
+    ret.ConnectionIndex = src.ConnectionIndex
 
     return &ret
 }

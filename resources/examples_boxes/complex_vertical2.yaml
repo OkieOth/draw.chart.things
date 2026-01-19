@@ -15,6 +15,9 @@ boxes:
         - id: r5_2
           caption: Center Element
           text1: I am in the second line
+          connections:
+            - destId: r6_1
+            - destId: r6_2
         - id: r5_3
           caption: Right Element Für Erik und den ganzen Rest der Familie!!!
           text1: I am in the second line
@@ -24,8 +27,6 @@ boxes:
         - id: r6_1
           caption: Most Left Element Most Left Element Most Left Element
           text1: I am in the second line
-          connections:
-            - destId: r5_3
         - id: r6_2
           caption: Center Element
           text1: I am in the second line I am in the second line

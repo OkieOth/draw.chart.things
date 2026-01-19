@@ -302,8 +302,13 @@
           "items": {
             "$ref": "#/definitions/ConnectionLine"
           }
+        },
+        "connectionIndex": {
+          "description": "index of this connection, in the boxes_document object",
+          "type": "integer"
         }
-      }
+      },
+      "required": ["parts", "connectionIndex"]
     },
     "ConnectionLine": {
       "type": "object",
@@ -319,9 +324,21 @@
         },
         "endY": {
           "type": "integer"
+        },
+        "srcLayoutId": {
+          "description": "in case the line is connected to the start layout element, then here is its id",
+          "type": "string"
+        },
+        "destLayoutId": {
+          "description": "in case the line is connected to a end layout element, then here is its id",
+          "type": "string"
+        },
+        "connectionIndex": {
+          "description": "index of the connection, in the boxes_document object, where this line belongs too",
+          "type": "integer"
         }
       },
-      "required": ["startX", "startY", "endX", "endY"]
+      "required": ["startX", "startY", "endX", "endY", "connectionIndex"]
     },
     "BoxFormat": {
       "type": "object",
