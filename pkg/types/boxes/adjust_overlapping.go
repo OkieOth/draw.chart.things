@@ -104,6 +104,7 @@ func (doc *BoxesDocument) fixHorizontalStartAndEndOfVerticalLine(offset, yStart,
 				if line.DestLayoutId != nil {
 					doc.addXAdjustment(*line.DestLayoutId, line, endLineAdjustments)
 				}
+				// seems not to be needed
 				// if line.SrcLayoutId != nil {
 				// 	doc.addXAdjustment(*line.SrcLayoutId, line, endLineAdjustments)
 				// }
@@ -157,6 +158,7 @@ func (doc *BoxesDocument) adjustForOverlappingHorizontalLines() {
 				cur2.StartY += types.LineDist
 				cur2.EndY = cur2.StartY
 			}
+			doc.MoveBoxesHorizontal(current.StartY, types.LineDist)
 			xOffset += types.LineDist
 		}
 	}
@@ -190,6 +192,7 @@ func (doc *BoxesDocument) adjustForOverlappingVerticalLines() {
 				cur2.EndX = cur2.StartX
 				// TODO adjust in case start and end lines
 			}
+			doc.MoveBoxesVertical(current.StartX, types.LineDist)
 			yOffset += types.LineDist
 		}
 	}

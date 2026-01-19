@@ -175,38 +175,40 @@ func (d *BoxesDocument) adjustLineToWidth(startX, startY, endX, endY, offset int
 }
 
 func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
-	b := "blue"
-	w := 2.0
-	format := types.LineDef{
-		Width: &w,
-		Color: &b,
-	}
+	// DEBUG - start
+	// b := "blue"
+	// w := 2.0
+	// format := types.LineDef{
+	// 	Width: &w,
+	// 	Color: &b,
+	// }
 
-	for _, elem := range d.Connections {
-		// iterate over the connections of the document
-		lineFormat := format
-		if elem.Format != nil {
-			lineFormat = *elem.Format
-		}
-		offset := int(*lineFormat.Width / 2)
-		lastPos := len(elem.Parts) - 1
-		for i, l := range elem.Parts {
-			// drawing the connection lines
-			x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, i == 0, i == lastPos)
-			// DEBUG - Start
-			if x1 == x2 {
-				// vertical line
-				y1 += 3
-				y2 -= 3
-			} else {
-				// horizontal line
-				x1 += 3
-				x2 -= 3
-			}
-			// DEBUG - End
-			drawingImpl.DrawLine(x1, y1, x2, y2, lineFormat)
-		}
-	}
+	// for _, elem := range d.Connections {
+	// 	// iterate over the connections of the document
+	// 	lineFormat := format
+	// 	if elem.Format != nil {
+	// 		lineFormat = *elem.Format
+	// 	}
+	// 	offset := int(*lineFormat.Width / 2)
+	// 	lastPos := len(elem.Parts) - 1
+	// 	for i, l := range elem.Parts {
+	// 		// drawing the connection lines
+	// 		x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, i == 0, i == lastPos)
+	// 		// DEBUG - Start
+	// 		if x1 == x2 {
+	// 			// vertical line
+	// 			y1 += 3
+	// 			y2 -= 3
+	// 		} else {
+	// 			// horizontal line
+	// 			x1 += 3
+	// 			x2 -= 3
+	// 		}
+	// 		// DEBUG - End
+	// 		drawingImpl.DrawLine(x1, y1, x2, y2, lineFormat)
+	// 	}
+	// }
+	// DEBUG - end
 	d.DrawMovedConnectionLines(drawingImpl)
 	return nil
 }
