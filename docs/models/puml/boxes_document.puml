@@ -10,12 +10,18 @@ class "**BoxesDocument**" as BoxesDocument {
         IntegerType height
         IntegerType width
         ConnectionElem[] connections
+        StringType[] connectedElems
+        IntegerType lineDist
         IntegerType globalPadding
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
         Map<BoxFormat> formats
+        ImageDef[] images
         ConnectionLine[] verticalRoads
         ConnectionLine[] horizontalRoads
+        ConnectionNode[] connectionNodes
+        ConnectionLine[] horizontalLines
+        ConnectionLine[] verticalLines
 }
 note top: Internal model to describe the\nlayout if the boxes chart
 
@@ -40,18 +46,23 @@ class "**LayoutElement**" as LayoutElement {
         IntegerType rightYToStart
         IntegerType topXToStart
         IntegerType bottomXToStart
+        IntegerType xTextBox
+        IntegerType yTextBox
+        IntegerType widthTextBox
+        IntegerType heightTextBox
         StringType[] tags
 }
 
  
 
 class "**ConnectionElem**" as ConnectionElem {
-        LayoutElement from
-        LayoutElement to
+        StringType from
+        StringType to
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
         ConnectionLine[] parts
+        IntegerType connectionIndex
 }
 
  
@@ -62,9 +73,14 @@ class "**BoxFormat**" as BoxFormat {
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
-        LineDef border
+        LineDef line
+        IntegerType cornerRadius
         FillDef fill
+        StringType image
         IntegerType minBoxMargin
+        IntegerType fixedWidth
+        IntegerType fixedHeight
+        BooleanType verticalTxt
 }
 
  
@@ -74,8 +90,23 @@ class "**ConnectionLine**" as ConnectionLine {
         IntegerType startY
         IntegerType endX
         IntegerType endY
-        BooleanType movedOut
+        StringType srcLayoutId
+        StringType destLayoutId
+        IntegerType connectionIndex
+        IntegerType lineIndex
+        LineDef format
 }
+
+ 
+
+class "**ConnectionNode**" as ConnectionNode {
+        IntegerType x
+        IntegerType y
+        StringType nodeId
+        StringType boxId
+        ConnectionEdge[] edges
+}
+note top: helper type for calculating the\nconnections between elements
 
  
 
@@ -93,8 +124,19 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         StringType destId
         BooleanType sourceArrow
         BooleanType destArrow
+        LineDef format
         StringType[] tags
 }
+
+ 
+
+class "**ConnectionEdge**" as ConnectionEdge {
+        IntegerType x
+        IntegerType y
+        StringType destNodeId
+        IntegerType weight
+}
+note top: edge type to store edges\non a connection node
 
  
 
@@ -109,6 +151,7 @@ class "**FontDef**" as FontDef {
         IntegerType spaceTop
         IntegerType spaceBottom
         IntegerType maxLenBeforeBreak
+        FontDefAnchorEnum anchor
 }
 note top: Defines the font a text
 
@@ -130,8 +173,14 @@ enum "FontDefAlignedEnum" as FontDefAlignedEnum {
     RIGHT
 }
 
+enum "FontDefAnchorEnum" as FontDefAnchorEnum {
+    MIDDLE
+    LEFT
+    RIGHT
+}
+
 class "**LineDef**" as LineDef {
-        IntegerType width
+        NumberType width
         LineDefStyleEnum style
         StringType color
         NumberType opacity
@@ -154,6 +203,18 @@ note top: Defines the fill of the\nbox
 
  
 
+class "**ImageDef**" as ImageDef {
+        StringType id
+        StringType description
+        IntegerType width
+        IntegerType height
+        StringType base64
+        StringType base64Src
+}
+note top: parameters of an image to\nbe displayed in the SVG
+
+ 
+
 
     
 
@@ -166,7 +227,17 @@ BoxesDocument "0" *-- "n" ConnectionElem
 
 
 
+
+
 BoxesDocument  *--  BoxFormat
+
+BoxesDocument "0" *-- "n" ImageDef
+
+BoxesDocument "0" *-- "n" ConnectionLine
+
+BoxesDocument "0" *-- "n" ConnectionLine
+
+BoxesDocument "0" *-- "n" ConnectionNode
 
 BoxesDocument "0" *-- "n" ConnectionLine
 
@@ -196,16 +267,19 @@ LayoutElement "0" *-- "n" LayoutElemConnection
 
 
 
-    
-ConnectionElem  *--  LayoutElement
 
-ConnectionElem  *--  LayoutElement
+
+
+
+    
+
 
 
 
 ConnectionElem  *--  LineDef
 
 ConnectionElem "0" *-- "n" ConnectionLine
+
 
     
     
@@ -218,7 +292,12 @@ BoxFormat  *--  FontDef
 
 BoxFormat  *--  LineDef
 
+
 BoxFormat  *--  FillDef
+
+
+
+
 
 
     
@@ -226,6 +305,18 @@ BoxFormat  *--  FillDef
 
 
 
+
+
+
+
+ConnectionLine  *--  LineDef
+
+    
+
+
+
+
+ConnectionNode "0" *-- "n" ConnectionEdge
 
     
 
@@ -238,6 +329,13 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
 
 
+LayoutElemConnection  *--  LineDef
+
+
+    
+
+
+
 
     
 
@@ -250,6 +348,8 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
 
 
+
+    
     
     
     
@@ -260,6 +360,13 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
     
     
+
+
+    
+
+
+
+
 
 
 

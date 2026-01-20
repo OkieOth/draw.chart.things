@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Additional Formats",
+  "description": "Model to inject additional formats in a boxes layout definition",
+  "version": "0.1.0",
+  "x-domain": "external",
+  "type": "object",
+  "properties": {
+    "formats": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./boxes.json#/definitions/Format"
+      }
+    },
+    "images": {
+      "description": "optional list of images used in the generated graphic",
+      "type": "array",
+      "items": {
+        "$ref": "./formats.json#/definitions/ImageDef"
+      }
+    }
+  },
+  "examples": [
+    {
+      "formats": {
+        "b_core": {
+          "fontCaption": {
+            "size": 0,
+            "lineHeight": 0,
+            "maxLenBeforeBreak": 300
+          }
+        },
+        "b_ext": {
+          "fill": {
+            "color": "#f9bc85"
+          }
+        }
+      }
+    },
+    {
+      "images": [
+        {
+          "id": "smilie_01",
+          "width": 16,
+          "height": 16,
+          "base64": "iVBORw0KGgo...Jggg=="
+        },
+        {
+          "id": "smilie_02",
+          "width": 32,
+          "height": 32,
+          "base64Src": "../../resources/pngs/smilie_02_80x80_base64.txt"
+        }
+      ]
+    }
+  ]
+}

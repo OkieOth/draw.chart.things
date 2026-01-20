@@ -1,0 +1,12 @@
+title: Simple Diamond
+formats:
+  default:
+    line:
+      width: 2
+      color: blue
+    fill:
+      color: orange
+globalPadding: 10
+minBoxMargin: 20
+boxes:
+  extHorizontal: "./ext/ext_02.yaml"

@@ -19,6 +19,8 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(sub.BoxesCmd)
+	rootCmd.AddCommand(sub.RandomizeCmd)
+	rootCmd.AddCommand(sub.TruncInputCmd)
 	rootCmd.AddCommand(sub.VersionCmd)
 }
 

@@ -31,3 +31,8 @@ tmp
 temp
 *\ copy.*
 *\ copy\ *.*
+
+external
+__debug_*
+build
+*.wasm

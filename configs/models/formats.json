@@ -1,80 +1,125 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "Formats",
-    "description": "Some types to define base formats",
-    "type": "object",
-    "x-domain": "base",
-    "definitions": {
-        "FontDef": {
-            "type": "object",
-            "description": "Defines the font a text",
-            "properties": {
-                "size": {
-                    "type": "integer"
-                },
-                "font": {
-                    "type": "string",
-                    "example": "sans, sans-serif, monospace"
-                },
-                "type": {
-                    "enum": ["normal", "italic"]
-                },
-                "weight": {
-                    "enum": ["normal", "bold"]
-                },
-                "lineHeight": {
-                    "type": "number",
-                    "format": "float",
-                    "description": "Line height of the box"
-                },
-                "color": {
-                    "type": "string"
-                },
-                "aligned": {
-                    "enum": ["left", "center", "right"]
-                },
-                "spaceTop": {
-                    "type": "integer"
-                },
-                "spaceBottom": {
-                    "type": "integer"
-                },
-                "maxLenBeforeBreak": {
-                    "type": "integer",
-                    "description": "Maximum length of the text before it breaks"
-                }
-            },
-            "required": ["size", "font", "lineHeight", "color", "spaceTop", "spaceBottom", "maxLenBeforeBreak"]
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Formats",
+  "description": "Some types to define base formats",
+  "type": "object",
+  "x-domain": "base",
+  "definitions": {
+    "FontDef": {
+      "type": "object",
+      "description": "Defines the font a text",
+      "properties": {
+        "size": {
+          "type": "integer"
         },
-        "LineDef": {
-            "type": "object",
-            "description": "Defines how the border of the box looks like",
-            "properties": {
-                "width": {
-                    "type": "integer"
-                },
-                "style": {
-                    "enum": ["solid", "dotted", "dashed"]
-                },
-                "color": {
-                    "type": "string"
-                },
-                "opacity": {
-                    "type": "number"
-                }
-            }
+        "font": {
+          "type": "string",
+          "example": "sans, sans-serif, monospace"
         },
-        "FillDef": {
-            "type": "object",
-            "description": "Defines the fill of the box",
-            "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "opacity": {
-                    "type": "number"
-                }
-            }
+        "type": {
+          "enum": ["normal", "italic"]
+        },
+        "weight": {
+          "enum": ["normal", "bold"]
+        },
+        "lineHeight": {
+          "type": "number",
+          "format": "float",
+          "description": "Line height of the box"
+        },
+        "color": {
+          "type": "string"
+        },
+        "aligned": {
+          "enum": ["left", "center", "right"]
+        },
+        "spaceTop": {
+          "type": "integer"
+        },
+        "spaceBottom": {
+          "type": "integer"
+        },
+        "maxLenBeforeBreak": {
+          "type": "integer",
+          "description": "Maximum length of the text before it breaks"
+        },
+        "anchor": {
+          "enum": ["middle", "left", "right"]
         }
+      },
+      "required": [
+        "size",
+        "font",
+        "lineHeight",
+        "color",
+        "spaceTop",
+        "spaceBottom",
+        "maxLenBeforeBreak",
+        "anchor"
+      ]
+    },
+    "LineDef": {
+      "type": "object",
+      "description": "Defines how the border of the box looks like",
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "style": {
+          "enum": ["solid", "dotted", "dashed"]
+        },
+        "color": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      }
+    },
+    "FillDef": {
+      "type": "object",
+      "description": "Defines the fill of the box",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      }
+    },
+    "ImageDef": {
+      "type": "object",
+      "description": "parameters of an image to be displayed in the SVG",
+      "properties": {
+        "id": {
+          "description": "unique identifier to reference this image later in the document",
+          "type": "string"
+        },
+        "description": {
+          "description": "some words to explain what this image is about",
+          "type": "string"
+        },
+        "width": {
+          "description": "with of the displayed image",
+          "type": "integer"
+        },
+        "height": {
+          "description": "height of the displayed image",
+          "type": "integer"
+        },
+        "base64": {
+          "$comment": "attention, PNGs are expected",
+          "description": "base64 string of the image to use",
+          "type": "string"
+        },
+        "base64Src": {
+          "$comment": "attention, single line base64 txt files are expected",
+          "description": "file path to a text file that contains the base64 of the png",
+          "type": "string"
+        }
+      },
+      "required": ["id", "height", "width"]
     }
+  }
 }

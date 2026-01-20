@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+    nginx:
+        image: nginx:1.25-alpine
+        container_name: svgui_nginx
+        ports:
+            - "8080:80"
+        volumes:
+            # Serve the project html (index.html, example.svg) from nginx default web root
+            - ../html:/usr/share/nginx/html:ro
+            # Custom nginx config to expose the app under /dynsvg
+            - ./nginx:/etc/nginx/conf.d:ro
+            - ../data:/data:ro
+            - ../wasm:/wasm:ro
+        restart: unless-stopped

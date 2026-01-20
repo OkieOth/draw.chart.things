@@ -8,6 +8,8 @@ class "**Boxes**" as Boxes {
         StringType title
         Layout boxes
         Map<Format> formats
+        ImageDef[] images
+        IntegerType lineDist
         IntegerType globalPadding
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
@@ -21,7 +23,9 @@ class "**Layout**" as Layout {
         StringType caption
         StringType text1
         StringType text2
+        StringType extVertical
         Layout[] vertical
+        StringType extHorizontal
         Layout[] horizontal
         StringType[] tags
         Connection[] connections
@@ -32,13 +36,18 @@ class "**Layout**" as Layout {
 
 
 class "**Format**" as Format {
+        IntegerType fixedWidth
+        IntegerType fixedHeight
+        BooleanType verticalTxt
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
-        LineDef border
+        LineDef line
         FillDef fill
         IntegerType padding
         IntegerType boxMargin
+        IntegerType cornerRadius
+        StringType image
 }
 
  
@@ -50,6 +59,7 @@ class "**Connection**" as Connection {
         StringType destId
         BooleanType sourceArrow
         BooleanType destArrow
+        StringType format
         StringType[] tags
 }
 
@@ -66,6 +76,7 @@ class "**FontDef**" as FontDef {
         IntegerType spaceTop
         IntegerType spaceBottom
         IntegerType maxLenBeforeBreak
+        FontDefAnchorEnum anchor
 }
 note top: Defines the font a text
 
@@ -87,8 +98,14 @@ enum "FontDefAlignedEnum" as FontDefAlignedEnum {
     RIGHT
 }
 
+enum "FontDefAnchorEnum" as FontDefAnchorEnum {
+    MIDDLE
+    LEFT
+    RIGHT
+}
+
 class "**LineDef**" as LineDef {
-        IntegerType width
+        NumberType width
         LineDefStyleEnum style
         StringType color
         NumberType opacity
@@ -111,6 +128,18 @@ note top: Defines the fill of the\nbox
 
  
 
+class "**ImageDef**" as ImageDef {
+        StringType id
+        StringType description
+        IntegerType width
+        IntegerType height
+        StringType base64
+        StringType base64Src
+}
+note top: parameters of an image to\nbe displayed in the SVG
+
+ 
+
 
     
 
@@ -118,10 +147,14 @@ Boxes  *--  Layout
 
 Boxes  *--  Format
 
+Boxes "0" *-- "n" ImageDef
+
+
 
 
 
     
+
 
 
 
@@ -130,11 +163,15 @@ Layout "0" *-- "n" Layout
 
 
 
+
 Layout "0" *-- "n" Connection
 
 
     
     
+
+
+
 Format  *--  FontDef
 
 Format  *--  FontDef
@@ -147,24 +184,29 @@ Format  *--  FillDef
 
 
 
-    
-    
-
-
 
 
     
-
-
-
-
-
+    
 
 
 
 
 
     
+
+
+
+
+
+
+
+
+
+
+
+    
+    
     
     
     
@@ -174,6 +216,13 @@ Format  *--  FillDef
 
     
     
+
+
+    
+
+
+
+
 
 
 

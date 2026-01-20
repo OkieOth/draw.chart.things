@@ -1,0 +1,21 @@
+formats:
+  default:
+    line:
+      width: 1
+      color: black
+    fill:
+      color: lightgreen
+boxes:
+  id: main
+  caption: I am a simple box
+  text1: The first example layout
+  text2: This is a simple box layout. It is used to demonstrate the basic layout features.
+  vertical:
+    - id: r1_1
+      caption: Sub 1
+      vertical:
+        - id: r1_2
+          caption: 2
+  tags:
+    - simple
+    - test
