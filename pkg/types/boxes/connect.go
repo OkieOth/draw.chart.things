@@ -181,7 +181,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 				if e.StartX == e.EndX {
 					// ... still vertical line
 					// expects that e.StartX == lastE.StartX
-					if e.StartY < lastE.StartY {
+					if e.StartY <= lastE.StartY {
 						lastE.StartY = e.StartY
 					} else {
 						lastE.EndY = e.EndY
@@ -197,7 +197,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 				if e.StartY == e.EndY {
 					// ... still horizontal line
 					// expects that e.StartY == lastE.StartY
-					if e.StartX < lastE.StartX {
+					if e.StartX <= lastE.StartX {
 						lastE.StartX = e.StartX
 					} else {
 						lastE.EndX = e.EndX
@@ -223,10 +223,11 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *t
 	if len(path) < 2 {
 		return
 	}
-	pathToDraw := path[1 : len(path)-1]
+	pathLen := len(path)
+	pathToDraw := path[1 : pathLen-1]
 	connElem := NewConnectionElem()
 	connElem.From = path[0].NodeId
-	connElem.To = path[0].NodeId
+	connElem.To = path[pathLen-1].NodeId
 	connElem.ConnectionIndex = len(doc.Connections)
 	if format != nil {
 		connElem.Format = format
