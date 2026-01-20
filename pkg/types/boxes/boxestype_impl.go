@@ -223,10 +223,18 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		Style: &s,
 	}
 	for _, l := range d.HorizontalLines {
-		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
+		lineFormat := format
+		if l.Format != nil {
+			lineFormat = *l.Format
+		}
+		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat)
 	}
 	for _, l := range d.VerticalLines {
-		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, format)
+		lineFormat := format
+		if l.Format != nil {
+			lineFormat = *l.Format
+		}
+		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat)
 	}
 }
 

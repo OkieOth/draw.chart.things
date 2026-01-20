@@ -11,6 +11,7 @@ class "**BoxesDocument**" as BoxesDocument {
         IntegerType width
         ConnectionElem[] connections
         StringType[] connectedElems
+        IntegerType lineDist
         IntegerType globalPadding
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
@@ -93,6 +94,7 @@ class "**ConnectionLine**" as ConnectionLine {
         StringType destLayoutId
         IntegerType connectionIndex
         IntegerType lineIndex
+        LineDef format
 }
 
  
@@ -226,6 +228,7 @@ BoxesDocument "0" *-- "n" ConnectionElem
 
 
 
+
 BoxesDocument  *--  BoxFormat
 
 BoxesDocument "0" *-- "n" ImageDef
@@ -305,6 +308,8 @@ BoxFormat  *--  FillDef
 
 
 
+
+ConnectionLine  *--  LineDef
 
     
 

@@ -201,6 +201,18 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 	doc.Title = b.Title
 	doc.Formats = initFormats(b.Formats)
 	doc.Images = b.Images
+	if b.MinBoxMargin != nil {
+		doc.MinBoxMargin = *b.MinBoxMargin
+	}
+	if b.MinConnectorMargin != nil {
+		doc.MinConnectorMargin = *b.MinConnectorMargin
+	}
+	if b.GlobalPadding != nil {
+		doc.GlobalPadding = *b.GlobalPadding
+	}
+	if b.LineDist != nil {
+		doc.LineDist = *b.LineDist
+	}
 	if err := initExternalImages(doc); err != nil {
 		return nil, err
 	}
@@ -213,6 +225,9 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 	}
 	if doc.GlobalPadding == 0 {
 		doc.GlobalPadding = types.GlobalPadding
+	}
+	if doc.LineDist == 0 {
+		doc.LineDist = types.LineDist
 	}
 	return doc, nil
 }

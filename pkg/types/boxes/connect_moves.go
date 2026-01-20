@@ -24,20 +24,6 @@ func (doc *BoxesDocument) moveBoxHorizontal(box *LayoutElement, startX, offset i
 	doc.moveBoxContHorizontal(box.Vertical, startX, offset)
 }
 
-func (doc *BoxesDocument) moveLinesHorizontal(startX, offset int) {
-	for i := range len(doc.HorizontalLines) {
-		line := &doc.HorizontalLines[i]
-		if line.StartX < startX && line.EndX >= startX {
-			// if it starts before the x to begin the move ...
-			line.EndX += offset // ... then it's streched
-		} else if line.StartX >= startX {
-			// if the line starts after the x to begin .. the line is moved
-			line.StartX += offset
-			line.EndX += offset
-		}
-	}
-}
-
 func (doc *BoxesDocument) StretchAndMoveHorizontal(startX, offset int) {
 	doc.moveBoxHorizontal(&doc.Boxes, startX, offset)
 }
@@ -64,20 +50,6 @@ func (doc *BoxesDocument) moveBoxVertical(box *LayoutElement, startY, offset int
 	}
 	doc.moveBoxContVertical(box.Horizontal, startY, offset)
 	doc.moveBoxContVertical(box.Vertical, startY, offset)
-}
-
-func (doc *BoxesDocument) moveLinesVertical(startY, offset int) {
-	for i := range len(doc.VerticalLines) {
-		line := &doc.VerticalLines[i]
-		if line.StartY < startY && line.EndY >= startY {
-			// if it starts before the x to begin the move ...
-			// line.EndY += offset // ... then it's streched
-		} else if line.StartY >= startY {
-			// if the line starts after the x to begin .. the line is moved
-			line.StartY += offset
-			line.EndY += offset
-		}
-	}
 }
 
 func (doc *BoxesDocument) StretchAndMoveVertical(startY, offset int) {

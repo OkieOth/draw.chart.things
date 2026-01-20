@@ -189,12 +189,16 @@ func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]
 }
 
 func adjustDestIdInRespectOfTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
-	for i := range layout.Connections {
-		c := &layout.Connections[i]
+	normalizedConnections := make([]boxes.Connection, 0)
+	for _, c := range layout.Connections {
 		if trunc, found := truncatedObjects[c.DestId]; found {
 			c.DestId = trunc.newId
 		}
+		if !connectionExistsByDestId(normalizedConnections, c.DestId) {
+			normalizedConnections = append(normalizedConnections, c)
+		}
 	}
+	layout.Connections = normalizedConnections
 }
 
 func adjustTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {

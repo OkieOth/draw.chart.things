@@ -1,9 +1,5 @@
 package boxes
 
-import (
-	"github.com/okieoth/draw.chart.things/pkg/types"
-)
-
 // This nasty function tries to resolve collisions of connections lines.
 // The approach to solve the issue is, to move overlapping parts and strech
 // the elements and the picture in cases.
@@ -11,33 +7,6 @@ func (doc *BoxesDocument) adjustForOverlappingConnections() {
 	doc.adjustForOverlappingHorizontalLines()
 	doc.adjustForOverlappingVerticalLines()
 	doc.adjustStartAndEndLines()
-}
-
-func (doc *BoxesDocument) addYAdjustment(layoutId string, line *ConnectionLine, endLineAdjustments *map[string]EndLineAdjustments) {
-	alreadyStored, ok := (*endLineAdjustments)[layoutId]
-	if !ok {
-		alreadyStored = NewEndLineAdjustments()
-	}
-	line.EndY += types.LineDist
-	if alreadyStored.maxLen < line.EndY {
-		alreadyStored.maxLen = line.EndY
-	}
-	alreadyStored.maxLen += types.LineDist
-	alreadyStored.lines = append(alreadyStored.lines, line)
-	(*endLineAdjustments)[layoutId] = alreadyStored
-}
-
-func (doc *BoxesDocument) addXAdjustment(layoutId string, line *ConnectionLine, endLineAdjustments *map[string]EndLineAdjustments) {
-	alreadyStored, ok := (*endLineAdjustments)[layoutId]
-	if !ok {
-		alreadyStored = NewEndLineAdjustments()
-	}
-	line.EndX += types.LineDist
-	if alreadyStored.maxLen < line.EndX {
-		alreadyStored.maxLen = line.EndX
-	}
-	alreadyStored.lines = append(alreadyStored.lines, line)
-	(*endLineAdjustments)[layoutId] = alreadyStored
 }
 
 func (doc *BoxesDocument) fixVerticalStartAndEndOfHorizontalLine(xStart, xEnd, y, yBegin, connectionIndex int) {
@@ -51,8 +20,8 @@ func (doc *BoxesDocument) fixVerticalStartAndEndOfHorizontalLine(xStart, xEnd, y
 				// the vertical line cuts the triggering line
 				if line.StartY == y {
 					// vertical line goes down from the triggering line ... shorten the v-line
-					line.StartY += types.LineDist
-					line.EndY += types.LineDist
+					line.StartY += doc.LineDist
+					line.EndY += doc.LineDist
 					startFound = true
 					if startFound && endFound {
 						return
@@ -61,7 +30,7 @@ func (doc *BoxesDocument) fixVerticalStartAndEndOfHorizontalLine(xStart, xEnd, y
 				}
 				if line.EndY == y {
 					// vertical line goes down to the triggering line ... increase the v-line
-					line.EndY += types.LineDist
+					line.EndY += doc.LineDist
 					endFound = true
 					if startFound && endFound {
 						return
@@ -121,17 +90,17 @@ func (doc *BoxesDocument) adjustForOverlappingHorizontalLines() {
 			// adjust in case start and end lines ... but it's important before moving the h-line
 			doc.fixVerticalStartAndEndOfHorizontalLine(current.StartX, current.EndX, current.StartY, current.StartY, current.ConnectionIndex)
 			yStart := current.StartY
-			current.StartY += types.LineDist
+			current.StartY += doc.LineDist
 			current.EndY = current.StartY
 			for j := i + 1; j < horizontalCount; j++ {
 				cur2 := &doc.HorizontalLines[j]
 				// adjust in case start and end lines ... but it's important before moving the h-line
 				doc.fixVerticalStartAndEndOfHorizontalLine(cur2.StartX, cur2.EndX, cur2.StartY, yStart, cur2.ConnectionIndex)
-				cur2.StartY += types.LineDist
+				cur2.StartY += doc.LineDist
 				cur2.EndY = cur2.StartY
 			}
-			doc.StretchAndMoveVertical(yStart, types.LineDist)
-			xOffset += types.LineDist
+			doc.StretchAndMoveVertical(yStart, doc.LineDist)
+			xOffset += doc.LineDist
 		}
 	}
 	doc.Width += xOffset
@@ -149,19 +118,19 @@ func (doc *BoxesDocument) adjustForOverlappingVerticalLines() {
 		current := &doc.VerticalLines[i]
 		if current.StartX == last.StartX &&
 			overlapsVertically(current.StartY, current.EndY, last.StartY, last.EndY) {
-			doc.fixHorizontalStartAndEndOfVerticalLine(types.LineDist, current.StartY, current.EndY, current.StartX, current.StartX, current.ConnectionIndex)
+			doc.fixHorizontalStartAndEndOfVerticalLine(doc.LineDist, current.StartY, current.EndY, current.StartX, current.StartX, current.ConnectionIndex)
 			xStart := current.StartX
-			current.StartX += types.LineDist
+			current.StartX += doc.LineDist
 			current.EndX = current.StartX
 			for j := i + 1; j < verticalCount; j++ {
 				cur2 := &doc.VerticalLines[j]
-				doc.fixHorizontalStartAndEndOfVerticalLine(types.LineDist, cur2.StartY, cur2.EndY, cur2.StartX, xStart, cur2.ConnectionIndex)
-				cur2.StartX += types.LineDist
+				doc.fixHorizontalStartAndEndOfVerticalLine(doc.LineDist, cur2.StartY, cur2.EndY, cur2.StartX, xStart, cur2.ConnectionIndex)
+				cur2.StartX += doc.LineDist
 				cur2.EndX = cur2.StartX
 			}
 			// strech all horizontal lines, that are in range and not moved before
-			doc.StretchAndMoveHorizontal(xStart, types.LineDist)
-			yOffset += types.LineDist
+			doc.StretchAndMoveHorizontal(xStart, doc.LineDist)
+			yOffset += doc.LineDist
 		}
 	}
 	doc.Height += yOffset

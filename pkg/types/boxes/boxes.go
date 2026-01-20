@@ -24,6 +24,9 @@ type Boxes struct {
     // optional list of images used in the generated graphic
     Images []types.ImageDef  `yaml:"images,omitempty"`
 
+    // minimal distance between overlapping lines
+    LineDist *int  `yaml:"lineDist,omitempty"`
+
     // Padding used as default over the whole diagram
     GlobalPadding *int  `yaml:"globalPadding,omitempty"`
 
@@ -57,6 +60,7 @@ func CopyBoxes(src *Boxes) *Boxes {
     for _, e := range src.Images {
         ret.Images = append(ret.Images, e)
     }
+    ret.LineDist = src.LineDist
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin
     ret.MinConnectorMargin = src.MinConnectorMargin

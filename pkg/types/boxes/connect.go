@@ -309,6 +309,7 @@ func (doc *BoxesDocument) separateConnectionLines() {
 	doc.VerticalLines = make([]ConnectionLine, 0)
 	for _, c := range doc.Connections {
 		for _, p := range c.Parts {
+			p.Format = c.Format
 			if p.StartX == p.EndX {
 				// vertical
 				doc.VerticalLines = append(doc.VerticalLines, p)

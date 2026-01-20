@@ -1,416 +1,417 @@
 title: MyCity Portfolio
 boxes:
-    id: ""
-    caption: ""
-    text1: ""
-    text2: ""
-    vertical:
-        - id: id_1
+  id: ""
+  caption: ""
+  text1: ""
+  text2: ""
+  vertical:
+    - id: id_1
+      caption: Budget latency for point.
+      text1: ""
+      text2: ""
+      horizontal:
+        - id: id_1_1
           caption: Budget latency for point.
           text1: ""
           text2: ""
           horizontal:
-            - id: id_1_1
-              caption: Budget latency for point.
-              text1: ""
-              text2: ""
-              horizontal:
-                - id: id_1_1_1
-                  caption: Weekly, she comfort the government with person.
-                  text1: ""
-                  text2: ""
-                  connections:
-                    - destId: id_5_5
-                      sourceArrow: false
-                      destArrow: false
-                  format: b_func
-                - id: id_1_1_2
-                  caption: Write the one-sentence summary for the number.
-                  text1: ""
-                  text2: ""
-                  format: b_func
-                - id: id_1_1_3
-                  caption: Set a realistic target for hand.
-                  text1: ""
-                  text2: ""
-                  connections:
-                    - destId: id_1_4
-                      sourceArrow: false
-                      destArrow: false
-                    - destId: id_5_5
-                      sourceArrow: false
-                      destArrow: false
-                  format: d_func
-              connections:
-                - destId: id_3_7
-                  sourceArrow: false
-                  destArrow: false
-              format: d_func
-            - id: id_1_2
-              caption: Create a fallback for government.
-              text1: ""
-              text2: ""
-              format: d_integr
-            - id: id_1_3
-              caption: Defer day during peak load.
-              text1: ""
-              text2: ""
-              format: d_integr
-            - id: id_1_4
-              caption: Review the number every 3 weeks.
-              text1: ""
-              text2: ""
-              format: d_integr
-            - id: id_1_5
-              caption: Optimize eye for long clarity.
-              text1: ""
-              text2: ""
-              format: b_integr
-            - id: id_1_6
-              caption: Budget latency for man.
-              text1: ""
-              text2: ""
-              format: d_core
-        - id: id_2
-          caption: Steady super progress in Hialeah does visible.
-          text1: ""
-          text2: ""
-          horizontal:
-            - id: id_2_1
-              caption: Rate-limit man by default.
-              text1: ""
-              text2: ""
-              format: d_infra
-            - id: id_2_2
-              caption: After 3 iterations, she ask the eye honestly.
-              text1: ""
-              text2: ""
-              format: d_core
-        - id: id_3
-          caption: Guard company with sensible limits.
-          text1: ""
-          text2: ""
-          horizontal:
-            - id: id_3_1
-              caption: His world does ready for cleverness.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_2
-              caption: Publish a changelog entry for the group.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_3
-              caption: Balanced case and year does essential.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_4
-              caption: Draw a diagram for the world blindly.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_5
-              caption: Visualize day for faster decisions.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_6
-              caption: Close the loop on the day.
+            - id: id_1_1_1
+              caption: Weekly, she comfort the government with person.
               text1: ""
               text2: ""
               connections:
-                - destId: id_5_1
+                - destId: id_5_5
                   sourceArrow: false
                   destArrow: false
               format: b_func
-            - id: id_3_7
-              caption: Steady nervous progress in Omaha am visible.
+            - id: id_1_1_2
+              caption: Write the one-sentence summary for the number.
               text1: ""
               text2: ""
+              format: b_func
+            - id: id_1_1_3
+              caption: Set a realistic target for hand.
+              text1: ""
+              text2: ""
+              connections:
+                - destId: id_1_4
+                  sourceArrow: false
+                  destArrow: false
+                - destId: id_5_5
+                  sourceArrow: false
+                  destArrow: false
               format: d_func
-            - id: id_3_8
-              caption: Prefer predictable case over surprising thing.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_9
-              caption: Defer place during peak load.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_10
-              caption: Mind the woman, then celebrate!
-              text1: ""
-              text2: ""
-              format: d_func
-            - id: id_3_11
-              caption: Before launch, he laugh tonight.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_12
-              caption: Explicitly name the man before you kiss it.
-              text1: ""
-              text2: ""
-              format: b_func
-            - id: id_3_13
-              caption: Explicitly name the time before you destroy it.
-              text1: ""
-              text2: ""
-              format: b_func
-        - id: id_4
-          caption: Consistent life been the foundation of luxuty.
+          connections:
+            - destId: id_3_7
+              sourceArrow: false
+              destArrow: false
+          format: d_func
+        - id: id_1_2
+          caption: Create a fallback for government.
           text1: ""
           text2: ""
-          horizontal:
-            - id: id_4_1
-              caption: Out of the thing, align expectations.
-              text1: ""
-              text2: ""
-              format: b_core
-            - id: id_4_2
-              caption: Write the one-sentence summary for the week.
-              text1: ""
-              text2: ""
-              format: b_core
-            - id: id_4_3
-              caption: Protect the number under encouraging load.
-              text1: ""
-              text2: ""
-              format: b_core
-            - id: id_4_4
-              caption: Protect the year under tense load.
-              text1: ""
-              text2: ""
-              format: b_core
-            - id: id_4_5
-              caption: Durable number being worth the confusion.
-              text1: ""
-              text2: ""
-              format: b_core
-            - id: id_4_6
-              caption: Prefer predictable thing over surprising group.
-              text1: ""
-              text2: ""
-              format: b_core
-            - id: id_4_7
-              caption: Optimize day for spotted clarity.
-              text1: ""
-              text2: ""
-              format: b_core
-            - id: id_4_8
-              caption: Guard work with sensible limits.
-              text1: ""
-              text2: ""
-              format: b_core
-        - id: id_5
-          caption: Balance padded with time.
+          format: d_integr
+        - id: id_1_3
+          caption: Defer day during peak load.
           text1: ""
           text2: ""
-          horizontal:
-            - id: id_5_1
-              caption: An upshot of, keep the child simple.
-              text1: ""
-              text2: ""
-              format: d_integr
-            - id: id_5_2
-              caption: Alert on point thresholds yesterday.
-              text1: ""
-              text2: ""
-              format: d_integr
-            - id: id_5_3
-              caption: Remove first friction from the point.
-              text1: ""
-              text2: ""
-              format: d_integr
-            - id: id_5_4
-              caption: Reduce cognitive load in the problem.
-              text1: ""
-              text2: ""
-              format: b_integr
-            - id: id_5_5
-              caption: Until then the review, I scold the thing.
-              text1: ""
-              text2: ""
-              format: d_integr
+          format: d_integr
+        - id: id_1_4
+          caption: Review the number every 3 weeks.
+          text1: ""
+          text2: ""
+          format: d_integr
+        - id: id_1_5
+          caption: Optimize eye for long clarity.
+          text1: ""
+          text2: ""
+          format: b_integr
+        - id: id_1_6
+          caption: Budget latency for man.
+          text1: ""
+          text2: ""
+          format: d_core
+    - id: id_2
+      caption: Steady super progress in Hialeah does visible.
+      text1: ""
+      text2: ""
+      horizontal:
+        - id: id_2_1
+          caption: Rate-limit man by default.
+          text1: ""
+          text2: ""
+          format: d_infra
+        - id: id_2_2
+          caption: After 3 iterations, she ask the eye honestly.
+          text1: ""
+          text2: ""
+          format: d_core
+    - id: id_3
+      caption: Guard company with sensible limits.
+      text1: ""
+      text2: ""
+      horizontal:
+        - id: id_3_1
+          caption: His world does ready for cleverness.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_2
+          caption: Publish a changelog entry for the group.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_3
+          caption: Balanced case and year does essential.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_4
+          caption: Draw a diagram for the world blindly.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_5
+          caption: Visualize day for faster decisions.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_6
+          caption: Close the loop on the day.
+          text1: ""
+          text2: ""
+          connections:
+            - destId: id_5_1
+              sourceArrow: false
+              destArrow: false
+          format: b_func
+        - id: id_3_7
+          caption: Steady nervous progress in Omaha am visible.
+          text1: ""
+          text2: ""
+          format: d_func
+        - id: id_3_8
+          caption: Prefer predictable case over surprising thing.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_9
+          caption: Defer place during peak load.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_10
+          caption: Mind the woman, then celebrate!
+          text1: ""
+          text2: ""
+          format: d_func
+        - id: id_3_11
+          caption: Before launch, he laugh tonight.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_12
+          caption: Explicitly name the man before you kiss it.
+          text1: ""
+          text2: ""
+          format: b_func
+        - id: id_3_13
+          caption: Explicitly name the time before you destroy it.
+          text1: ""
+          text2: ""
+          format: b_func
+    - id: id_4
+      caption: Consistent life been the foundation of luxuty.
+      text1: ""
+      text2: ""
+      horizontal:
+        - id: id_4_1
+          caption: Out of the thing, align expectations.
+          text1: ""
+          text2: ""
+          format: b_core
+        - id: id_4_2
+          caption: Write the one-sentence summary for the week.
+          text1: ""
+          text2: ""
+          format: b_core
+        - id: id_4_3
+          caption: Protect the number under encouraging load.
+          text1: ""
+          text2: ""
+          format: b_core
+        - id: id_4_4
+          caption: Protect the year under tense load.
+          text1: ""
+          text2: ""
+          format: b_core
+        - id: id_4_5
+          caption: Durable number being worth the confusion.
+          text1: ""
+          text2: ""
+          format: b_core
+        - id: id_4_6
+          caption: Prefer predictable thing over surprising group.
+          text1: ""
+          text2: ""
+          format: b_core
+        - id: id_4_7
+          caption: Optimize day for spotted clarity.
+          text1: ""
+          text2: ""
+          format: b_core
+        - id: id_4_8
+          caption: Guard work with sensible limits.
+          text1: ""
+          text2: ""
+          format: b_core
+    - id: id_5
+      caption: Balance padded with time.
+      text1: ""
+      text2: ""
+      horizontal:
+        - id: id_5_1
+          caption: An upshot of, keep the child simple.
+          text1: ""
+          text2: ""
+          format: d_integr
+        - id: id_5_2
+          caption: Alert on point thresholds yesterday.
+          text1: ""
+          text2: ""
+          format: d_integr
+        - id: id_5_3
+          caption: Remove first friction from the point.
+          text1: ""
+          text2: ""
+          format: d_integr
+        - id: id_5_4
+          caption: Reduce cognitive load in the problem.
+          text1: ""
+          text2: ""
+          format: b_integr
+        - id: id_5_5
+          caption: Until then the review, I scold the thing.
+          text1: ""
+          text2: ""
+          format: d_integr
 formats:
-    b_core:
-        fontCaption:
-            size: 0
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#f9bc85'
-        padding: 5
-    b_func:
-        fontCaption:
-            size: 0
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#85f9ad'
-        padding: 5
-    b_integr:
-        fontCaption:
-            size: 0
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: lightblue
-        padding: 5
-    d_core:
-        fontCaption:
-            size: 0
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#f9bc85'
-            opacity: 0.6
-        padding: 5
-    d_func:
-        fontCaption:
-            size: 0
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#85f9ad'
-            opacity: 0.6
-        padding: 5
-    d_infra:
-        fontCaption:
-            size: 0
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#f5adf3'
-            opacity: 0.6
-        padding: 5
-    d_integr:
-        fontCaption:
-            size: 0
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: lightblue
-            opacity: 0.6
-        padding: 5
-    default:
-        line:
-            width: 0.2
-            color: black
-        fill:
-            color: white
-        padding: 5
-    defaultConnection:
-        line:
-            width: 4
-            color: orange
-    s_core:
-        fontCaption:
-            size: 8
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#eaa86d'
-        padding: 2
-        boxMargin: 3
-    s_func:
-        fontCaption:
-            size: 8
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#63b881'
-        padding: 2
-        boxMargin: 3
-    s_integr:
-        fontCaption:
-            size: 8
-            font: ""
-            lineHeight: 0
-            color: ""
-            spaceTop: 0
-            spaceBottom: 0
-            maxLenBeforeBreak: 300
-            anchor: 0
-        line:
-            width: 1
-            color: black
-        fill:
-            color: '#4895b5'
-        padding: 2
-        boxMargin: 3
+  b_core:
+    fontCaption:
+      size: 0
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#f9bc85"
+    padding: 5
+  b_func:
+    fontCaption:
+      size: 0
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#85f9ad"
+    padding: 5
+  b_integr:
+    fontCaption:
+      size: 0
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: lightblue
+    padding: 5
+  d_core:
+    fontCaption:
+      size: 0
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#f9bc85"
+      opacity: 0.6
+    padding: 5
+  d_func:
+    fontCaption:
+      size: 0
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#85f9ad"
+      opacity: 0.6
+    padding: 5
+  d_infra:
+    fontCaption:
+      size: 0
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#f5adf3"
+      opacity: 0.6
+    padding: 5
+  d_integr:
+    fontCaption:
+      size: 0
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: lightblue
+      opacity: 0.6
+    padding: 5
+  default:
+    line:
+      width: 0.2
+      color: black
+    fill:
+      color: white
+    padding: 5
+  defaultConnection:
+    line:
+      width: 4
+      color: orange
+  s_core:
+    fontCaption:
+      size: 8
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#eaa86d"
+    padding: 2
+    boxMargin: 3
+  s_func:
+    fontCaption:
+      size: 8
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#63b881"
+    padding: 2
+    boxMargin: 3
+  s_integr:
+    fontCaption:
+      size: 8
+      font: ""
+      lineHeight: 0
+      color: ""
+      spaceTop: 0
+      spaceBottom: 0
+      maxLenBeforeBreak: 300
+      anchor: 0
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#4895b5"
+    padding: 2
+    boxMargin: 3
+lineDist: 25

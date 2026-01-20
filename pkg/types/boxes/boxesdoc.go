@@ -28,6 +28,9 @@ type BoxesDocument struct {
 
     ConnectedElems []string  `yaml:"connectedElems,omitempty"`
 
+    // minimal distance between overlapping lines
+    LineDist int  `yaml:"lineDist"`
+
     // Padding used as default over the whole diagram
     GlobalPadding int  `yaml:"globalPadding"`
 
@@ -91,6 +94,7 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     for _, e := range src.ConnectedElems {
         ret.ConnectedElems = append(ret.ConnectedElems, e)
     }
+    ret.LineDist = src.LineDist
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin
     ret.MinConnectorMargin = src.MinConnectorMargin
@@ -384,6 +388,8 @@ type ConnectionLine struct {
 
     // position of the line in the connections part array
     LineIndex int  `yaml:"lineIndex"`
+
+    Format *types.LineDef  `yaml:"format,omitempty"`
 }
 
 
@@ -400,6 +406,7 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.DestLayoutId = src.DestLayoutId
     ret.ConnectionIndex = src.ConnectionIndex
     ret.LineIndex = src.LineIndex
+    ret.Format = types.CopyLineDef(src.Format)
 
     return &ret
 }

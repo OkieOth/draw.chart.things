@@ -32,6 +32,11 @@
         "type": "string"
       }
     },
+    "lineDist": {
+      "type": "integer",
+      "description": "minimal distance between overlapping lines",
+      "default": 4
+    },
     "globalPadding": {
       "type": "integer",
       "description": "Padding used as default over the whole diagram",
@@ -105,7 +110,8 @@
     "width",
     "minBoxMargin",
     "minConnectorMargin",
-    "globalPadding"
+    "globalPadding",
+    "lineDist"
   ],
   "definitions": {
     "LayoutElement": {
@@ -340,6 +346,9 @@
         "lineIndex": {
           "description": "position of the line in the connections part array",
           "type": "integer"
+        },
+        "format": {
+          "$ref": "./formats.json#/definitions/LineDef"
         }
       },
       "required": [

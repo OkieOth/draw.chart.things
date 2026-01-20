@@ -27,6 +27,11 @@
         "$ref": "./formats.json#/definitions/ImageDef"
       }
     },
+    "lineDist": {
+      "type": "integer",
+      "description": "minimal distance between overlapping lines",
+      "default": 4
+    },
     "globalPadding": {
       "type": "integer",
       "description": "Padding used as default over the whole diagram",
