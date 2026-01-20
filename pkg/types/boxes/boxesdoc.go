@@ -381,6 +381,9 @@ type ConnectionLine struct {
 
     // index of the connection, in the boxes_document object, where this line belongs too
     ConnectionIndex int  `yaml:"connectionIndex"`
+
+    // position of the line in the connections part array
+    LineIndex int  `yaml:"lineIndex"`
 }
 
 
@@ -396,6 +399,7 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.SrcLayoutId = src.SrcLayoutId
     ret.DestLayoutId = src.DestLayoutId
     ret.ConnectionIndex = src.ConnectionIndex
+    ret.LineIndex = src.LineIndex
 
     return &ret
 }

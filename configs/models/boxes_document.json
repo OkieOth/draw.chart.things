@@ -336,9 +336,20 @@
         "connectionIndex": {
           "description": "index of the connection, in the boxes_document object, where this line belongs too",
           "type": "integer"
+        },
+        "lineIndex": {
+          "description": "position of the line in the connections part array",
+          "type": "integer"
         }
       },
-      "required": ["startX", "startY", "endX", "endY", "connectionIndex"]
+      "required": [
+        "startX",
+        "startY",
+        "endX",
+        "endY",
+        "connectionIndex",
+        "lineIndex"
+      ]
     },
     "BoxFormat": {
       "type": "object",

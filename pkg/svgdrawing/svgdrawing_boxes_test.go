@@ -274,13 +274,13 @@ func TestSvgWithConnections(t *testing.T) {
 				require.NotNil(t, doc.Connections)
 			},
 		},
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_vcomplex_connected.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 	},
-		// },
+		{
+			inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
+			outputFile: "../../temp/TestSimpleSvg_vcomplex_connected.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
 		{
 			inputFile:  "../../resources/examples_boxes/complex_vertical2.yaml",
 			outputFile: "../../temp/TestSimpleSvg_vcomplex_connected2.svg",

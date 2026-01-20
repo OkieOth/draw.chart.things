@@ -188,6 +188,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 					}
 				} else {
 					// change from vertical to horizontal line
+					lastE.LineIndex = len(reducedParts)
 					reducedParts = append(reducedParts, *lastE)
 					lastE = &e
 				}
@@ -203,12 +204,17 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 					}
 				} else {
 					// change to vertical line
+					lastE.LineIndex = len(reducedParts)
 					reducedParts = append(reducedParts, *lastE)
 					lastE = &e
 				}
 			}
 		}
 	}
+	lastPart := connElem.Parts[len(connElem.Parts)-1]
+	lastE.DestLayoutId = lastPart.DestLayoutId
+	lastE.SrcLayoutId = lastPart.SrcLayoutId
+	lastE.LineIndex = len(reducedParts)
 	reducedParts = append(reducedParts, *lastE)
 	connElem.Parts = reducedParts
 }
@@ -227,7 +233,7 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *t
 	}
 
 	var lastX, lastY int
-	pathElemCount := len(pathToDraw)
+	pathElemCount := len(pathToDraw) - 1
 	for i, p := range pathToDraw {
 		if i > 0 {
 			var line ConnectionLine
@@ -247,6 +253,34 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *t
 	// aggregates line parts that have the same direction
 	doc.reduceConnectionLines(connElem)
 	doc.Connections = append(doc.Connections, *connElem)
+}
+
+func (doc *BoxesDocument) findBoxInContWithId(cont *LayoutElemContainer, id string) *LayoutElement {
+	if cont == nil {
+		return nil
+	}
+	for i := range len(cont.Elems) {
+		found := doc.findBoxWithId(&cont.Elems[i], id)
+		if found != nil {
+			return found
+		}
+	}
+	return nil
+}
+
+func (doc *BoxesDocument) findBoxWithId(box *LayoutElement, id string) *LayoutElement {
+	if box.Id == id {
+		return box
+	}
+	found := doc.findBoxInContWithId(box.Vertical, id)
+	if found != nil {
+		return found
+	}
+	return doc.findBoxInContWithId(box.Horizontal, id)
+}
+
+func (doc *BoxesDocument) FindBoxWithId(id string) *LayoutElement {
+	return doc.findBoxWithId(&doc.Boxes, id)
 }
 
 func (doc *BoxesDocument) connectImpl(layout *LayoutElement) {

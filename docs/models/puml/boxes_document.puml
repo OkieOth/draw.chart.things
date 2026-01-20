@@ -92,6 +92,7 @@ class "**ConnectionLine**" as ConnectionLine {
         StringType srcLayoutId
         StringType destLayoutId
         IntegerType connectionIndex
+        IntegerType lineIndex
 }
 
  
@@ -297,6 +298,7 @@ BoxFormat  *--  FillDef
 
 
     
+
 
 
 
