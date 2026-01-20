@@ -19,7 +19,7 @@ func TestConnections(t *testing.T) {
 		blacklisted []string
 	}{
 		{
-			inputFile: "../../ui/data/boxes_all.yaml",
+			inputFile: "../../ui/data/boxes_random.yaml",
 			checkFunc: func(d *boxes.BoxesDocument) {
 				require.NotNil(t, d)
 			},
