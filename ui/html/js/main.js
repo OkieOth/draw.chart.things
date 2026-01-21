@@ -51,7 +51,12 @@ function initPage() {
             setPreviousYamlContent("");
             console.log("Combo box changed: No Connections selected");
         }
-        // Always call createSvgExt with global additionalConnections
+        // Always call createSvgExt with global additionalConnections and current expanded/blacklist state
+        // Preserve only data-hid values before SVG refresh
+        const badgeList = document.getElementById("badge-list");
+        const savedBadgeState = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        const blacklistList = document.getElementById("blacklist-list");
+        const savedBlacklistState = blacklistList ? Array.from(blacklistList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
         try {
             if (typeof createSvgExt !== "function") {
                 console.error("createSvgExt is not available.");
@@ -60,8 +65,9 @@ function initPage() {
             const canvas = document.getElementById("canvas");
             if (!canvas) return;
             const arg = typeof window.input === "string" && window.input.length > 0 ? window.input : "";
-            const filterTexts = [];
-            const blacklistIds = [];
+            // Use saved state for filterTexts and blacklistIds
+            const filterTexts = savedBadgeState;
+            const blacklistIds = savedBlacklistState;
             let svgStr = createSvgExt(
                 arg,
                 [], // additionalFormats
@@ -80,6 +86,33 @@ function initPage() {
             canvas.innerHTML = svgStr;
             const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
             canvas.dispatchEvent(evtSwap);
+            // Restore badge collector state after SVG refresh using data-hid
+            const list = document.getElementById("badge-list");
+            if (list && Array.isArray(savedBadgeState)) {
+                list.innerHTML = "";
+                savedBadgeState.forEach(hid => {
+                    if (!hid) return;
+                    // Try to find the element in the new SVG
+                    const svg = document.querySelector("#canvas svg");
+                    let el = svg ? svg.querySelector(`[id='${hid}']`) : null;
+                    if (!el && svg) el = svg.querySelector(`[id^='${hid}']`);
+                    if (el && window.createBadgeForShape) {
+                        const badge = window.createBadgeForShape(el);
+                        badge.dataset.hid = hid;
+                        list.appendChild(badge);
+                    } else if (window.getCaptionForId) {
+                        // Fallback minimal badge
+                        const span = document.createElement("span");
+                        span.className = "badge";
+                        span.dataset.hid = hid;
+                        const label = document.createElement("span");
+                        label.textContent = window.getCaptionForId(hid);
+                        span.appendChild(label);
+                        list.appendChild(span);
+                    }
+                });
+                requestAnimationFrame(window.refitAllBadges || (()=>{}));
+            }
         } catch (e) {
             console.error("Error updating SVG via createSvgExt:", e);
         }
@@ -483,34 +516,6 @@ function initPage() {
                 reloadSvgFromBadges();
             },
         };
-
-        // // Space key enables temporary pan + NEW: Ctrl/Cmd+Z undo
-        // function onKeyDown(e) {
-        //     // NEW: Ctrl/Cmd+Z -> undo last click action
-        //     if (
-        //         (e.ctrlKey || e.metaKey) &&
-        //         !e.shiftKey &&
-        //         (e.key === "z" || e.code === "KeyZ")
-        //     ) {
-        //         performUndo();
-        //         e.preventDefault();
-        //         return;
-        //     }
-        //     if (e.code === "Space" && !spacePressed) {
-        //         spacePressed = true;
-        //         applyTransform();
-        //         // Prevent page scroll when space is pressed
-        //         e.preventDefault();
-        //     }
-        // }
-        // function onKeyUp(e) {
-        //     if (e.code === "Space") {
-        //         spacePressed = false;
-        //         // If releasing Space while dragging, end drag
-        //         if (isDragging) onWindowMouseUp();
-        //         applyTransform();
-        //     }
-        // }
 
         // After SVG loads, wrap and initialize sizes
         document.body.addEventListener("htmx:afterSwap", function (evt) {
