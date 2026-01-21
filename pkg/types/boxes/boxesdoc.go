@@ -390,6 +390,10 @@ type ConnectionLine struct {
     LineIndex int  `yaml:"lineIndex"`
 
     Format *types.LineDef  `yaml:"format,omitempty"`
+
+    IsStart bool  `yaml:"isStart"`
+
+    IsEnd bool  `yaml:"isEnd"`
 }
 
 
@@ -407,6 +411,8 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.ConnectionIndex = src.ConnectionIndex
     ret.LineIndex = src.LineIndex
     ret.Format = types.CopyLineDef(src.Format)
+    ret.IsStart = src.IsStart
+    ret.IsEnd = src.IsEnd
 
     return &ret
 }

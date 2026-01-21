@@ -349,6 +349,12 @@
         },
         "format": {
           "$ref": "./formats.json#/definitions/LineDef"
+        },
+        "isStart": {
+          "type": "boolean"
+        },
+        "isEnd": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -357,7 +363,9 @@
         "endX",
         "endY",
         "connectionIndex",
-        "lineIndex"
+        "lineIndex",
+        "isStart",
+        "isEnd"
       ]
     },
     "BoxFormat": {

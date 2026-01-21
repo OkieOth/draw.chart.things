@@ -227,7 +227,9 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		if l.Format != nil {
 			lineFormat = *l.Format
 		}
-		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat)
+		offset := int(*lineFormat.Width / 2)
+		x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, l.IsStart, l.IsEnd)
+		drawingImpl.DrawLine(x1, y1, x2, y2, lineFormat)
 	}
 	for _, l := range d.VerticalLines {
 		lineFormat := format

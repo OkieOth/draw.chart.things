@@ -157,8 +157,8 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	}
 	if line.StartY == line.EndY {
 		// horizontal line
-		diffXStart := absInt(box.CenterX - line.StartX)
-		diffXEnd := absInt(box.CenterX - line.EndX)
+		diffXStart := absInt((box.X + box.Width) - line.StartX)
+		diffXEnd := absInt(box.X - line.EndX)
 		if diffXStart < diffXEnd {
 			// line to right
 			line.StartX = box.X + box.Width
@@ -169,8 +169,8 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 
 	} else {
 		// vertical line
-		diffYStart := absInt(box.CenterY - line.StartY)
-		diffYEnd := absInt(box.CenterY - line.EndY)
+		diffYStart := absInt((box.Y + box.Height) - line.StartY)
+		diffYEnd := absInt(box.Y - line.EndY)
 		if diffYStart < diffYEnd {
 			// line down
 			line.StartY = box.Y + box.Height
@@ -194,6 +194,7 @@ func (doc *BoxesDocument) adjustVerticalEndLines() {
 }
 
 func (doc *BoxesDocument) adjustStartAndEndLines() {
+	// Critical - in case of not proper line endings on boxes look here
 	doc.adjustHorizontalEndLines()
 	doc.adjustVerticalEndLines()
 }

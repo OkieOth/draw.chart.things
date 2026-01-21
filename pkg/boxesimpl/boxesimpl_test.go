@@ -253,11 +253,15 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, additionalConnections)
 
-		additionalFormats, err := types.LoadInputFromFile[boxes.AdditionalFormats](test.inputExtFormats)
-		require.Nil(t, err)
-		require.NotNil(t, additionalFormats)
+		var additionalFormats boxes.AdditionalFormats
+		if test.inputExtFormats != "" {
+			extFormats, err := types.LoadInputFromFile[boxes.AdditionalFormats](test.inputExtFormats)
+			require.Nil(t, err)
+			require.NotNil(t, extFormats)
+			additionalFormats = *extFormats
+		}
 
-		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, *additionalFormats, *additionalConnections, test.depth, test.expanded, test.blacklisted, false)
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, additionalFormats, *additionalConnections, test.depth, test.expanded, test.blacklisted, false)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 

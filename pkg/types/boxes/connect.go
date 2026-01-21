@@ -175,6 +175,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 	for _, e := range connElem.Parts {
 		if lastE == nil {
 			lastE = &e
+			lastE.IsStart = true
 		} else {
 			if lastE.StartX == lastE.EndX {
 				// lastE is vertical line
@@ -215,6 +216,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 	lastE.DestLayoutId = lastPart.DestLayoutId
 	lastE.SrcLayoutId = lastPart.SrcLayoutId
 	lastE.LineIndex = len(reducedParts)
+	lastE.IsEnd = true
 	reducedParts = append(reducedParts, *lastE)
 	connElem.Parts = reducedParts
 }

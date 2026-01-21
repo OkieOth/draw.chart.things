@@ -13,9 +13,78 @@ let undoStack = [];
 let blacklistMode = false;
 let blacklist = [];
 
+// NEW: global additionalConnections for persistence
+let additionalConnections = [];
+
 function initPage() {
     window.addEventListener("resize", positionBlacklistCollector);
     window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
+    // Attach dummy handler for toolbar combo box
+    document.addEventListener("DOMContentLoaded", function () {
+        const combo = document.getElementById("toolbar-combo");
+        if (combo) {
+            let previousYamlContent = "";
+            combo.addEventListener("change", async function (e) {
+                await handleComboBoxChange(combo, previousYamlContent, function (newYaml) {
+                    previousYamlContent = newYaml;
+                    // Persist selection in global additionalConnections
+                    additionalConnections = newYaml ? [newYaml] : [];
+                });
+            });
+        }
+    // Production-ready: handle combo box change logic in a separate function
+    async function handleComboBoxChange(combo, previousYamlContent, setPreviousYamlContent) {
+        const val = combo.value;
+        let yamlContent = "";
+        if (val) {
+            try {
+                const resp = await fetch("./data/" + val, { cache: "no-cache" });
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                yamlContent = await resp.text();
+                setPreviousYamlContent(yamlContent);
+                console.log("Loaded YAML for", val, yamlContent);
+            } catch (err) {
+                console.error("Failed to load YAML for", val, err);
+                setPreviousYamlContent("");
+            }
+        } else {
+            setPreviousYamlContent("");
+            console.log("Combo box changed: No Connections selected");
+        }
+        // Always call createSvgExt with global additionalConnections
+        try {
+            if (typeof createSvgExt !== "function") {
+                console.error("createSvgExt is not available.");
+                return;
+            }
+            const canvas = document.getElementById("canvas");
+            if (!canvas) return;
+            const arg = typeof window.input === "string" && window.input.length > 0 ? window.input : "";
+            const filterTexts = [];
+            const blacklistIds = [];
+            let svgStr = createSvgExt(
+                arg,
+                [], // additionalFormats
+                additionalConnections,
+                window.defaultDepth,
+                filterTexts,
+                blacklistIds,
+                window.debug
+            );
+            svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+            if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
+                console.error("createSvgExt did not return a valid SVG string.");
+                console.error(svgStr);
+                return;
+            }
+            canvas.innerHTML = svgStr;
+            const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
+            canvas.dispatchEvent(evtSwap);
+        } catch (e) {
+            console.error("Error updating SVG via createSvgExt:", e);
+        }
+    }
+    });
     // Also reposition after collector content changes
     const observer = new MutationObserver(positionBlacklistCollector);
     observer.observe(document.getElementById("collector"), {
@@ -263,8 +332,10 @@ function initPage() {
                         "blacklist ids: ",
                         blacklistIds
                     );
-                    let svgStr = createSvg(
+                    let svgStr = createSvgExt(
                         arg,
+                        [], // additionalFormats
+                        additionalConnections, // additionalConnections
                         window.defaultDepth,
                         filterTexts,
                         blacklistIds,
@@ -628,8 +699,10 @@ async function loadSVGFromWasm() {
                 ? window.input
                 : "";
         console.log("Refreshing SVG: []", "blacklist ids: []");
-        const res = createSvg(
+        const res = createSvgExt(
             initialArg,
+            [], // additionalFormats
+            additionalConnections, // additionalConnections
             window.defaultDepth,
             [],
             [],
@@ -907,8 +980,10 @@ async function reloadSvgFromBadges() {
             "blacklist ids: ",
             blacklistIds
         );
-        let svgStr = createSvg(
+        let svgStr = createSvgExt(
             arg,
+            [], // additionalFormats
+            additionalConnections,
             window.defaultDepth,
             filterTexts,
             blacklistIds,
@@ -1122,8 +1197,10 @@ function observeCaptionAndRefresh(el) {
                     "blacklist ids: ",
                     blacklistIds
                 );
-                let svgStr = createSvg(
+                let svgStr = createSvgExt(
                     arg,
+                    [], // additionalFormats
+                    additionalConnections, // additionalConnections
                     window.defaultDepth,
                     filterTexts,
                     blacklistIds,

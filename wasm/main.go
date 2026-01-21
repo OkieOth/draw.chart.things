@@ -113,15 +113,15 @@ func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
 	if err != nil {
 		return "error: additionalConnections needs to be an array"
 	}
-	expanded, err := getArrayFromJsValue(args, 3)
+	expanded, err := getArrayFromJsValue(args, 4)
 	if err != nil {
 		return "error: expanded must be an array"
 	}
-	blacklisted, err := getArrayFromJsValue(args, 4)
+	blacklisted, err := getArrayFromJsValue(args, 5)
 	if err != nil {
 		return "error: blacklisted must be an array"
 	}
-	depth := args[5].Int()
+	depth := args[3].Int()
 	debug := args[6].Bool()
 	return createSvgExt(input, additionalFormats, additionalConnections, depth, expanded, blacklisted, debug)
 }
