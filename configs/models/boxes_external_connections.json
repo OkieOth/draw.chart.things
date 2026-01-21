@@ -2,12 +2,21 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Additional Connections",
   "description": "Model to inject additional connections in a boxes layout definition",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "object",
   "x-domain": "external",
   "$comment": "the IDs of the boxes to connect are the keys of the dictionary",
-  "additionalProperties": {
-    "$ref": "#/definitions/ConnectionCont"
+  "properties": {
+    "connections": {
+      "description": "dictionary of connection objects",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ConnectionCont"
+      }
+    },
+    "formats": {
+      "$ref": "./boxes.json#/definitions/Format"
+    }
   },
   "definitions": {
     "ConnectionCont": {
@@ -24,23 +33,33 @@
   },
   "examples": [
     {
-      "r1_1": {
-        "connections": [
-          {
-            "destId": "r5_1_2"
-          },
-          {
-            "destId": "r1_1",
-            "format": "dummy"
-          }
-        ]
+      "connections": {
+        "r1_1": {
+          "connections": [
+            {
+              "destId": "r5_1_2"
+            },
+            {
+              "destId": "r1_1",
+              "format": "dummy"
+            }
+          ]
+        },
+        "r1_2": {
+          "connections": [
+            {
+              "destId": "r4_1"
+            }
+          ]
+        }
       },
-      "r1_2": {
-        "connections": [
-          {
-            "destId": "r4_1"
+      "formats": {
+        "connLines": {
+          "line": {
+            "width": 2,
+            "color": "pink"
           }
-        ]
+        }
       }
     }
   ]
