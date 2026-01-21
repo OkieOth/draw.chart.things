@@ -9,6 +9,44 @@ import (
 )
 
 
+/* Model to inject additional connections in a boxes layout definition
+*/
+type AdditionalConnections struct {
+
+    // dictionary of connection objects
+    Connections map[string]ConnectionCont  `yaml:"connections,omitempty"`
+
+    Formats map[string]Format  `yaml:"formats,omitempty"`
+}
+
+func NewAdditionalConnections() *AdditionalConnections {
+    return &AdditionalConnections{
+        Connections: make(map[string]ConnectionCont, 0),
+        Formats: make(map[string]Format, 0),
+    }
+}
+
+func CopyAdditionalConnections(src *AdditionalConnections) *AdditionalConnections {
+    if src == nil {
+        return nil
+    }
+    var ret AdditionalConnections
+    ret.Connections = make(map[string]ConnectionCont, 0)
+    for k, v := range src.Connections {
+        ret.Connections[k] = v
+    }
+    ret.Formats = make(map[string]Format, 0)
+    for k, v := range src.Formats {
+        ret.Formats[k] = v
+    }
+
+    return &ret
+}
+
+
+
+
+
 
 
 
@@ -35,6 +73,9 @@ func CopyConnectionCont(src *ConnectionCont) *ConnectionCont {
 
     return &ret
 }
+
+
+
 
 
 

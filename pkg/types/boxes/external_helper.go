@@ -40,6 +40,9 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 	b.mixInConnectionsImplCont(l.Vertical, additional)
 }
 
-func (b *Boxes) MixinConnections(additional map[string]ConnectionCont) {
-	b.mixInConnectionsImpl(&b.Boxes, additional)
+func (b *Boxes) MixinConnections(additional AdditionalConnections) {
+	if len(additional.Formats) > 0 {
+		maps.Copy(b.Formats, additional.Formats)
+	}
+	b.mixInConnectionsImpl(&b.Boxes, additional.Connections)
 }

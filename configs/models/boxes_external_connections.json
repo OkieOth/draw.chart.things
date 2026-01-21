@@ -15,7 +15,10 @@
       }
     },
     "formats": {
-      "$ref": "./boxes.json#/definitions/Format"
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./boxes.json#/definitions/Format"
+      }
     }
   },
   "definitions": {

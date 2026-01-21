@@ -249,7 +249,7 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err, "error while loading input file for test", i)
 
-		additionalConnections, err := types.LoadInputFromFile[map[string]boxes.ConnectionCont](test.inputExtConnections)
+		additionalConnections, err := types.LoadInputFromFile[boxes.AdditionalConnections](test.inputExtConnections)
 		require.Nil(t, err)
 		require.NotNil(t, additionalConnections)
 

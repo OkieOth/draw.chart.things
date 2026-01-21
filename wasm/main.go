@@ -42,7 +42,7 @@ func createSvgExt(boxesYaml string, additionalFormats, additionalConnections []s
 	}
 
 	for i, c := range additionalConnections {
-		var extConnections map[string]boxes.ConnectionCont
+		var extConnections boxes.AdditionalConnections
 		if err := y.Unmarshal([]byte(c), &extConnections); err != nil {
 			fmt.Printf("error while unmarshalling external connections (%d): %v", i, err)
 			return unknownSvg

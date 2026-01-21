@@ -57,7 +57,7 @@ func TestLoadExternalConnections(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, b)
 
-	c, err := types.LoadInputFromFile[map[string]boxes.ConnectionCont](inputConnections)
+	c, err := types.LoadInputFromFile[boxes.AdditionalConnections](inputConnections)
 	require.Nil(t, err)
 	require.NotNil(t, c)
 
@@ -72,4 +72,10 @@ func TestLoadExternalConnections(t *testing.T) {
 	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 4)
 	// r5_2
 	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 1)
+
+	cl, ok := b.Formats["connLines"]
+	require.True(t, ok)
+	require.NotNil(t, cl.Line)
+	require.Equal(t, 2.0, *cl.Line.Width)
+	require.Equal(t, "pink", *cl.Line.Color)
 }

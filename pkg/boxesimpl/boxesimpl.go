@@ -231,7 +231,7 @@ func FilterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []s
 func DrawBoxesFilteredExt(
 	layout boxes.Boxes,
 	additionalFormats boxes.AdditionalFormats,
-	additionalConnections map[string]boxes.ConnectionCont,
+	additionalConnections boxes.AdditionalConnections,
 	defaultDepth int,
 	expanded, blacklisted []string,
 	debug bool) UIReturn {
