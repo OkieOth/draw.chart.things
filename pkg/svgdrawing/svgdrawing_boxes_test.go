@@ -117,11 +117,12 @@ func TestSvgWithConnections(t *testing.T) {
 			svgdrawing.Start(doc.Title, doc.Height, doc.Width)
 			svgdrawing.InitImages(doc.Images)
 			doc.DrawBoxes(svgdrawing)
-			// DEBUG
-			// svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
-			// doc.DrawRoads(svgdrawing)
-			// doc.DrawStartPositions(svgdrawing)
-			// doc.DrawConnectionNodes(svgdrawing)
+			// DEBUG - Start
+			svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+			doc.DrawRoads(svgdrawing)
+			doc.DrawStartPositions(svgdrawing)
+			doc.DrawConnectionNodes(svgdrawing)
+			// DEBUG - End
 			doc.DrawConnections(svgdrawing)
 
 			svgdrawing.Done()
