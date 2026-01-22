@@ -138,7 +138,7 @@ func TestInitDimensions(t *testing.T) {
 	emptyFormats := map[string]boxes.BoxFormat{}
 	for _, test := range tests {
 		dummy := make([]string, 0)
-		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats, &dummy)
+		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats, &dummy, false)
 		le.InitDimensions(dc)
 		assert.Equal(t, test.expectedHeight, le.Height)
 		assert.Equal(t, test.expectedWidth, le.Width)

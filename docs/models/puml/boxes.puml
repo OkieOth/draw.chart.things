@@ -9,6 +9,7 @@ class "**Boxes**" as Boxes {
         Layout boxes
         Map<Format> formats
         ImageDef[] images
+        BooleanType hideTextsForParents
         IntegerType lineDist
         IntegerType globalPadding
         IntegerType minBoxMargin
@@ -148,6 +149,7 @@ Boxes  *--  Layout
 Boxes  *--  Format
 
 Boxes "0" *-- "n" ImageDef
+
 
 
 

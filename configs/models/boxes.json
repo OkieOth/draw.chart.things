@@ -27,6 +27,11 @@
         "$ref": "./formats.json#/definitions/ImageDef"
       }
     },
+    "hideTextsForParents": {
+      "type": "boolean",
+      "description": "If that is set, then the additional texts are only visible when the box has no visible children",
+      "default": false
+    },
     "lineDist": {
       "type": "integer",
       "description": "minimal distance between overlapping lines",
@@ -48,7 +53,7 @@
       "default": 10
     }
   },
-  "required": ["title", "boxes"],
+  "required": ["title", "boxes", "hideTextsForParents"],
   "definitions": {
     "Layout": {
       "type": "object",

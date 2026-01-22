@@ -24,6 +24,9 @@ type Boxes struct {
     // optional list of images used in the generated graphic
     Images []types.ImageDef  `yaml:"images,omitempty"`
 
+    // If that is set, then the additional texts are only visible when the box has no visible children
+    HideTextsForParents bool  `yaml:"hideTextsForParents"`
+
     // minimal distance between overlapping lines
     LineDist *int  `yaml:"lineDist,omitempty"`
 
@@ -60,6 +63,7 @@ func CopyBoxes(src *Boxes) *Boxes {
     for _, e := range src.Images {
         ret.Images = append(ret.Images, e)
     }
+    ret.HideTextsForParents = src.HideTextsForParents
     ret.LineDist = src.LineDist
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin

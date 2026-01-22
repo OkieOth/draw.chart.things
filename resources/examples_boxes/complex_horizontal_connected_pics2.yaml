@@ -1,0 +1,121 @@
+title: Simple Diamond
+formats:
+  default:
+    line:
+      width: 2
+      color: black
+    fill:
+      color: white
+  extraMargin:
+    line:
+      width: 2
+      color: black
+    fill:
+      color: white
+    margin: 5
+  img1:
+    image: smilie_01_43
+    fixedWidth: 16
+    fixedHeight: 16
+    boxMargin: 1
+
+  img2:
+    image: smilie_02_80
+    fixedWidth: 32
+    fixedHeight: 32
+    boxMargin: 1
+  img3:
+    image: smilie_03_80
+    fixedWidth: 32
+    fixedHeight: 32
+    boxMargin: 1
+images:
+  - id: smilie_01_43
+    width: 16
+    height: 16
+    base64: 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
+  - id: smilie_02_80
+    width: 32
+    height: 32
+    base64Src: ../../resources/pngs/smilie_02_80x80_base64.txt
+  - id: smilie_03_80
+    width: 32
+    height: 32
+    base64Src: ../../resources/pngs/smilie_03_80x80_base64.txt
+boxes:
+  horizontal:
+    - vertical:
+        - id: r4_1
+          caption: Ferdows
+          text1: Stuff ...
+          text2: More stuff
+          connections:
+            - destId: r6_4
+            - destId: r6_5
+          horizontal:
+            - format: img2
+            - format: img3
+            - format: img2
+            - format: img3
+    - vertical:
+        - id: r5_1
+          caption: Most Left Element, Das ist für Matthias mal sehen was passiert
+          text1: I am in the second line
+          text2: Just a comment
+          vertical:
+            - id: r5_1_1
+              caption: Vertical Child 1
+            - id: r5_1_2
+              caption: Vertical Child 2
+        - id: r5_2
+          caption: Center Element
+          text1: I am in the second line
+          horizontal:
+            - id: r5_2_1
+              caption: Horizontal Child 1
+        - id: r5_3
+          caption: Right Element
+          text1: I am in the second line
+          connections:
+            - destId: r4_1
+          horizontal:
+            - format: img1
+    - vertical:
+        - id: r6_1
+          caption: Most Left Element
+          text1: I am in the second line
+          connections:
+            - destId: r4_1
+        - id: r6_2
+          caption: Center Element
+          text1: I am in the second line
+          connections:
+            - destId: r4_1
+        - id: r6_3
+          caption: Right Element
+          text1: I am in the second line
+        - id: r6_4
+          caption: Right Element
+          text1: I am in the second line
+        - id: r6_5
+          caption: Right Element
+          text1: I am in the second line
+    - vertical:
+        - id: r7_1
+          caption: Another Box
+          horizontal:
+            - format: img2
+            - format: img3
+            - format: img2
+            - format: img3
+          connections:
+            - destId: r6_4
+            - destId: r6_5
+        - id: r7_2
+          caption: Last Box
+          horizontal:
+            - format: img1
+            - format: img1
+            - format: img1
+          connections:
+            - destId: r5_1
