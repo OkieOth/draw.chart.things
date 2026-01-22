@@ -54,7 +54,6 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	padding := types.GlobalPadding
 	boxMargin := types.GlobalMinBoxMargin
 	var fixedHeight, fixedWidth, cornerRadius *int
-	var image *string
 	if f != nil {
 		fontCaption = f.FontCaption
 		fontText1 = f.FontText1
@@ -77,7 +76,6 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		fixedHeight = f.FixedHeight
 		fixedWidth = f.FixedWidth
 		cornerRadius = f.CornerRadius
-		image = f.Image
 	}
 
 	return boxes.BoxFormat{
@@ -92,7 +90,6 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		FixedHeight:  fixedHeight,
 		VerticalTxt:  verticalTxt,
 		CornerRadius: cornerRadius,
-		Image:        image,
 	}
 }
 

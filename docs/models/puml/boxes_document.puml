@@ -32,6 +32,7 @@ class "**LayoutElement**" as LayoutElement {
         StringType caption
         StringType text1
         StringType text2
+        ImageContainer image
         LayoutElemContainer vertical
         LayoutElemContainer horizontal
         IntegerType x
@@ -76,7 +77,6 @@ class "**BoxFormat**" as BoxFormat {
         LineDef line
         IntegerType cornerRadius
         FillDef fill
-        StringType image
         IntegerType minBoxMargin
         IntegerType fixedWidth
         IntegerType fixedHeight
@@ -109,6 +109,16 @@ class "**ConnectionNode**" as ConnectionNode {
         ConnectionEdge[] edges
 }
 note top: helper type for calculating the\nconnections between elements
+
+ 
+
+class "**ImageContainer**" as ImageContainer {
+        IntegerType x
+        IntegerType y
+        IntegerType width
+        IntegerType height
+        StringType imgId
+}
 
  
 
@@ -250,6 +260,8 @@ BoxesDocument "0" *-- "n" ConnectionLine
 
 
 
+LayoutElement  *--  ImageContainer
+
 LayoutElement  *--  LayoutElemContainer
 
 LayoutElement  *--  LayoutElemContainer
@@ -301,7 +313,6 @@ BoxFormat  *--  FillDef
 
 
 
-
     
 
 
@@ -321,6 +332,12 @@ ConnectionLine  *--  LineDef
 
 
 ConnectionNode "0" *-- "n" ConnectionEdge
+
+    
+
+
+
+
 
     
 

@@ -148,6 +148,8 @@ type LayoutElement struct {
     // Second additional text
     Text2 string  `yaml:"text2"`
 
+    Image *ImageContainer  `yaml:"image,omitempty"`
+
     Vertical *LayoutElemContainer  `yaml:"vertical,omitempty"`
 
     Horizontal *LayoutElemContainer  `yaml:"horizontal,omitempty"`
@@ -220,6 +222,7 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     ret.Caption = src.Caption
     ret.Text1 = src.Text1
     ret.Text2 = src.Text2
+    ret.Image = CopyImageContainer(src.Image)
     ret.Vertical = CopyLayoutElemContainer(src.Vertical)
     ret.Horizontal = CopyLayoutElemContainer(src.Horizontal)
     ret.X = src.X
@@ -325,9 +328,6 @@ type BoxFormat struct {
 
     Fill *types.FillDef  `yaml:"fill,omitempty"`
 
-    // ID of an image to use
-    Image *string  `yaml:"image,omitempty"`
-
     // Minimum margin between boxes
     MinBoxMargin int  `yaml:"minBoxMargin"`
 
@@ -354,7 +354,6 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.Line = types.CopyLineDef(src.Line)
     ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
-    ret.Image = src.Image
     ret.MinBoxMargin = src.MinBoxMargin
     ret.FixedWidth = src.FixedWidth
     ret.FixedHeight = src.FixedHeight
@@ -459,6 +458,43 @@ func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
     for _, e := range src.Edges {
         ret.Edges = append(ret.Edges, e)
     }
+
+    return &ret
+}
+
+
+
+
+
+type ImageContainer struct {
+
+    // X position of the element
+    X int  `yaml:"x"`
+
+    // Y position of the element
+    Y int  `yaml:"y"`
+
+    // Width of the container
+    Width int  `yaml:"width"`
+
+    // Height of the container
+    Height int  `yaml:"height"`
+
+    // reference to the globally declared image
+    ImgId *string  `yaml:"imgId,omitempty"`
+}
+
+
+func CopyImageContainer(src *ImageContainer) *ImageContainer {
+    if src == nil {
+        return nil
+    }
+    var ret ImageContainer
+    ret.X = src.X
+    ret.Y = src.Y
+    ret.Width = src.Width
+    ret.Height = src.Height
+    ret.ImgId = src.ImgId
 
     return &ret
 }

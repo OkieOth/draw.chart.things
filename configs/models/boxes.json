@@ -74,6 +74,10 @@
           "description": "Second additional text",
           "type": "string"
         },
+        "image": {
+          "description": "Reference to an image that should be displayed, needs to be declared in the global image section",
+          "type": "string"
+        },
         "extVertical": {
           "description": "If set, then the content for 'vertical' attrib is loaded from an external file",
           "$comment": "relative paths are possible",
@@ -190,11 +194,6 @@
         "cornerRadius": {
           "description": "radius of the box corners in pixel",
           "type": "integer"
-        },
-        "image": {
-          "$comment": "the used images needs to be declared before in the images section",
-          "description": "ID of an image to use",
-          "type": "string"
         }
       }
     }

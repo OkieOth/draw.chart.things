@@ -133,6 +133,10 @@
           "description": "Second additional text",
           "type": "string"
         },
+        "image": {
+          "discription": "image to be displayed",
+          "$ref": "#/definitions/ImageContainer"
+        },
         "vertical": {
           "$ref": "#/definitions/LayoutElemContainer"
         },
@@ -368,6 +372,32 @@
         "isEnd"
       ]
     },
+    "ImageContainer": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X position of the element"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y position of the element"
+        },
+        "width": {
+          "type": "integer",
+          "description": "Width of the container"
+        },
+        "height": {
+          "type": "integer",
+          "description": "Height of the container"
+        },
+        "imgId": {
+          "type": "string",
+          "description": "reference to the globally declared image"
+        }
+      },
+      "required": ["x", "y", "width", "height", "elems"]
+    },
     "BoxFormat": {
       "type": "object",
       "properties": {
@@ -393,11 +423,6 @@
         },
         "fill": {
           "$ref": "./formats.json#/definitions/FillDef"
-        },
-        "image": {
-          "$comment": "the used images needs to be declared before in the images section",
-          "description": "ID of an image to use",
-          "type": "string"
         },
         "minBoxMargin": {
           "type": "integer",

@@ -9,6 +9,7 @@ class "**Layout**" as Layout {
         StringType caption
         StringType text1
         StringType text2
+        StringType image
         StringType extVertical
         Layout[] vertical
         StringType extHorizontal
@@ -45,7 +46,6 @@ class "**Format**" as Format {
         IntegerType padding
         IntegerType boxMargin
         IntegerType cornerRadius
-        StringType image
 }
 
  
@@ -132,6 +132,7 @@ note top: parameters of an image to\nbe displayed in the SVG
 
 
 
+
 Layout "0" *-- "n" Layout
 
 
@@ -160,7 +161,6 @@ Format  *--  FontDef
 Format  *--  LineDef
 
 Format  *--  FillDef
-
 
 
 
