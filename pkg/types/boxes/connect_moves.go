@@ -17,7 +17,7 @@ func (doc *BoxesDocument) moveBoxContHorizontal(cont *LayoutElemContainer, start
 func (doc *BoxesDocument) moveBoxHorizontal(box *LayoutElement, startX, offset int) {
 	if box.X < startX && (box.X+box.Width) > startX {
 		box.Width += offset
-	} else if box.X > startX {
+	} else if box.X >= startX {
 		box.X += offset
 	}
 	doc.moveBoxContHorizontal(box.Horizontal, startX, offset)

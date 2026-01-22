@@ -21,7 +21,8 @@ func (doc *BoxesDocument) fixVerticalStartAndEndOfHorizontalLine(xStart, xEnd, y
 				if line.StartY == y {
 					// vertical line goes down from the triggering line ... shorten the v-line
 					line.StartY += doc.LineDist
-					line.EndY += doc.LineDist
+					// this was removed for a bug ... could be wrong
+					//line.EndY += doc.LineDist
 					startFound = true
 					if startFound && endFound {
 						return

@@ -244,6 +244,15 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 			expanded:            []string{},
 			blacklisted:         []string{},
 		},
+		{
+			inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+			inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
+			inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
+			outputFile:          "../../temp/ext_complex_horizontal_connected_pics.svg",
+			depth:               2,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
 	}
 	for i, test := range tests {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
