@@ -276,6 +276,9 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
 	padding := types.GlobalPadding
+	if l.Format != nil && l.Format.Padding > 0 {
+		padding = l.Format.Padding
+	}
 	yTextBox := l.Y + padding
 	if l.Format != nil && l.Format.Padding > 0 {
 		padding = l.Format.Padding

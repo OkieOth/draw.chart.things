@@ -234,8 +234,6 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 			doc.roadRight(&rightRoad, elem)
 			doc.addHorizontalRoad(rightRoad)
 		}
-	}
-	if elem.TopXToStart != nil {
 		defRoadType = DefRoadType_All
 	}
 	if defRoadType == DefRoadType_All {
@@ -285,18 +283,12 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 	if elem.Vertical != nil {
 		for i := range len(elem.Vertical.Elems) {
 			defRoadType := DefRoadType_Vertical
-			if i == 0 {
-				defRoadType = DefRoadType_None
-			}
 			doc.initRoadsImpl(&elem.Vertical.Elems[i], defRoadType)
 		}
 	}
 	if elem.Horizontal != nil {
 		for i := range len(elem.Horizontal.Elems) {
 			defRoadType := DefRoadType_Horizontal
-			if i == 0 {
-				defRoadType = DefRoadType_None
-			}
 			doc.initRoadsImpl(&elem.Horizontal.Elems[i], defRoadType)
 		}
 	}

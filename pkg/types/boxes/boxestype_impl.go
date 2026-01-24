@@ -261,13 +261,6 @@ func (doc *BoxesDocument) AdjustDocHeight(le *LayoutElement, currentMax int) int
 	return currentMax
 }
 
-func defaultOrPointerValue(defaultVal int, val *int) int {
-	if val != nil {
-		return *val
-	}
-	return defaultVal
-}
-
 func (b *LayoutElement) Draw(drawing types.Drawing) error {
 	if b.Format != nil {
 		f := types.RectWithTextFormat{
@@ -303,6 +296,39 @@ func (b *LayoutElement) Draw(drawing types.Drawing) error {
 	if b.Horizontal != nil {
 		for _, elem := range b.Horizontal.Elems {
 			if err := elem.Draw(drawing); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (b *LayoutElement) DrawTextBoxes(drawing types.Drawing) error {
+	if b.Format != nil {
+		c := "black"
+		w := 2.0
+		o := 0.4
+		f := types.LineDef{
+			Color:   &c,
+			Width:   &w,
+			Opacity: &o,
+		}
+		if b.XTextBox != nil {
+			if err := drawing.DrawSolidRect(*b.XTextBox, *b.YTextBox, *b.WidthTextBox, *b.HeightTextBox, f); err != nil {
+				return fmt.Errorf("Error drawing text boxes element %s: %w", b.Id, err)
+			}
+		}
+	}
+	if b.Vertical != nil {
+		for _, elem := range b.Vertical.Elems {
+			if err := elem.DrawTextBoxes(drawing); err != nil {
+				return err
+			}
+		}
+	}
+	if b.Horizontal != nil {
+		for _, elem := range b.Horizontal.Elems {
+			if err := elem.DrawTextBoxes(drawing); err != nil {
 				return err
 			}
 		}
