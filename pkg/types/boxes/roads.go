@@ -205,6 +205,9 @@ const (
 )
 
 func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoadType) {
+	if elem.Caption == "" && elem.Text1 == "" && elem.Text2 == "" {
+		defRoadType = DefRoadType_None
+	}
 	stepSize := 2 * types.RasterSize
 	if elem.TopXToStart != nil { // elem has connections by itself
 		// draw line from the top x start, till the first collision
