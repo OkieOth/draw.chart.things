@@ -275,7 +275,7 @@ func (b *LayoutElement) Draw(drawing types.Drawing) error {
 		}
 		textYOffset := 0
 		if b.Image != nil {
-			textYOffset = (b.Image.Y - b.Y) + b.Image.Height + (2 * b.Image.MarginTopBottom)
+			textYOffset = (b.Image.Y - b.Y) + b.Image.Height + b.Image.MarginTopBottom
 		}
 		if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, f); err != nil {
 			return fmt.Errorf("Error drawing element %s: %w", b.Id, err)

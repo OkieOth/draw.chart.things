@@ -129,14 +129,21 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 		var w int
 		var hasChilds bool
 		lv := len(l.Vertical.Elems)
+		margin := types.GlobalMinBoxMargin
+		if l.Format != nil {
+			margin = l.Format.MinBoxMargin
+		}
 		hasSubWithTxt := false
 		for i := range lv {
 			sub := &l.Vertical.Elems[i]
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
 			}
-			marginToUse := 0
-			if sub.Format != nil && sub.Format.MinBoxMargin != 0 {
+			marginToUse := margin
+			if sub.Caption == "" && sub.Text1 == "" && sub.Text2 == "" && sub.Image != nil {
+				// in case sub contains only a picture, then the image margin overrides the format margin
+				marginToUse = 0
+			} else if sub.Format != nil && sub.Format.MinBoxMargin != 0 {
 				marginToUse = sub.Format.MinBoxMargin
 			}
 			sub.X = curX
@@ -214,7 +221,10 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 				hasChilds = true
 			}
 			marginToUse := margin
-			if sub.Format != nil && sub.Format.MinBoxMargin != 0 {
+			if sub.Caption == "" && sub.Text1 == "" && sub.Text2 == "" && sub.Image != nil {
+				// in case sub contains only a picture, then the image margin overrides the format margin
+				marginToUse = 0
+			} else if sub.Format != nil && sub.Format.MinBoxMargin != 0 {
 				marginToUse = sub.Format.MinBoxMargin
 			}
 			if w > 0 {
@@ -285,8 +295,8 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	}
 	if l.Image != nil {
 		w := (l.Image.Width + (2 * l.Image.MarginLeftRight))
-		h := l.Image.Height + (2 * l.Image.MarginTopBottom) + padding
-		l.Image.Y = l.Y + padding + l.Image.MarginTopBottom
+		h := l.Image.Height + (2 * l.Image.MarginTopBottom)
+		l.Image.Y = l.Y + (padding / 2) + l.Image.MarginTopBottom
 		l.Height += h
 		if l.Width < w {
 			l.Width = w
@@ -324,11 +334,18 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			t1W, t1H = c.Dimensions(l.Text1, &l.Format.FontText1)
 			if !l.Format.VerticalTxt {
 				l.Height += t1H
-				if l.Text2 == "" {
-					l.Height += l.Format.Padding
-				} else {
+				// if l.Text2 == "" {
+				// 	l.Height += l.Format.Padding
+				// } else {
+				// 	l.Height += l.Format.FontText1.SpaceBottom
+				// }
+				if l.Text2 != "" {
 					l.Height += l.Format.FontText1.SpaceBottom
+				} else if l.Vertical == nil && l.Horizontal == nil {
+					// if there are no childs the some distance to the bottom is needed
+					l.Height += l.Format.Padding
 				}
+
 				textWidth = getMax(textWidth, t1W)
 				textHeight += t1H
 			} else {
