@@ -29,6 +29,10 @@ function initPage() {
                     previousYamlContent = newYaml;
                     // Persist selection in global additionalConnections
                     additionalConnections = newYaml ? [newYaml] : [];
+                    // Set currentYamlFile to combo value if present
+                    if (combo.value) {
+                        window.currentYamlFile = combo.value;
+                    }
                 });
             });
         }
@@ -595,23 +599,28 @@ async function loadYamlInput() {
             );
             window.input = "";
             window.inputLoaded = Promise.resolve();
+            window.currentYamlFile = undefined;
             return;
         }
+        const yamlFile = window.queryInput;
         const p = (async () => {
-            const resp = await fetch("/data/" + window.queryInput, {
+            const resp = await fetch("/data/" + yamlFile, {
                 cache: "no-cache",
             });
             if (!resp.ok) throw new Error("HTTP " + resp.status);
             window.input = await resp.text();
+            window.currentYamlFile = yamlFile;
         })().catch((e) => {
             console.error("Failed to fetch " + window.queryInput + ":", e);
             window.input = "";
+            window.currentYamlFile = undefined;
         });
         window.inputLoaded = p.then(() => undefined);
     } catch (e) {
         console.error("Unexpected error loading " + window.queryInput + ":", e);
         window.input = "";
         window.inputLoaded = Promise.resolve();
+        window.currentYamlFile = undefined;
     }
 }
 
