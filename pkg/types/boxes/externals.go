@@ -88,13 +88,13 @@ type AdditionalFormats struct {
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
     // optional list of images used in the generated graphic
-    Images []types.ImageDef  `yaml:"images,omitempty"`
+    Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 }
 
 func NewAdditionalFormats() *AdditionalFormats {
     return &AdditionalFormats{
         Formats: make(map[string]Format, 0),
-        Images: make([]types.ImageDef, 0),
+        Images: make(map[string]types.ImageDef, 0),
     }
 }
 
@@ -107,13 +107,16 @@ func CopyAdditionalFormats(src *AdditionalFormats) *AdditionalFormats {
     for k, v := range src.Formats {
         ret.Formats[k] = v
     }
-    ret.Images = make([]types.ImageDef, 0)
-    for _, e := range src.Images {
-        ret.Images = append(ret.Images, e)
+    ret.Images = make(map[string]types.ImageDef, 0)
+    for k, v := range src.Images {
+        ret.Images[k] = v
     }
 
     return &ret
 }
+
+
+
 
 
 

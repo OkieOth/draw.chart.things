@@ -124,7 +124,7 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 		var hasChilds bool
 		lv := len(l.Vertical.Elems)
 		hasSubWithTxt := false
-		for i := 0; i < lv; i++ {
+		for i := range lv {
 			sub := &l.Vertical.Elems[i]
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
@@ -136,7 +136,7 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 			sub.X = curX
 			sub.Y = curY
 			sub.InitDimensions(c)
-			if sub.Caption != "" || sub.Text1 != "" || sub.Text2 != "" {
+			if sub.Caption != "" || sub.Text1 != "" || sub.Text2 != "" || sub.Image != nil {
 				hasSubWithTxt = true
 			}
 			if marginToUse > 0 {
@@ -181,7 +181,7 @@ func (l *LayoutElement) adjustDimensionsBasedOnNested(width, padding int) {
 	// 	l.Height += padding
 	// }
 	if width > l.Width {
-		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
+		if l.Caption != "" || l.Text1 != "" || l.Text2 != "" || l.Image != nil {
 			l.Width = width + (2 * padding)
 		} else {
 			l.Width = width
@@ -217,7 +217,7 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 			sub.X = curX
 			sub.Y = curY
 			sub.InitDimensions(c)
-			if sub.Caption != "" || sub.Text1 != "" || sub.Text2 != "" {
+			if sub.Caption != "" || sub.Text1 != "" || sub.Text2 != "" || sub.Image != nil {
 				hasSubWithTxt = true
 			}
 			curX += (sub.Width + marginToUse)
@@ -269,8 +269,23 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	var cW, cH, t1W, t1H, t2W, t2H, textWidth, textHeight int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
+	padding := types.GlobalPadding
+	yTextBox := l.Y + padding
+	if l.Format != nil && l.Format.Padding > 0 {
+		padding = l.Format.Padding
+	}
+	if l.Image != nil {
+		w := (l.Image.Width + (2 * l.Image.MarginLeftRight))
+		h := l.Image.Height + (2 * l.Image.MarginTopBottom) + padding
+		l.Image.Y = l.Y + padding + l.Image.MarginTopBottom
+		l.Height += h
+		if l.Width < w {
+			l.Width = w
+		}
+		yInnerOffset += h
+		yTextBox = l.Y + h
+	}
 	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
-		l.Height = 0
 		if l.Caption != "" {
 			p := l.Format.Padding
 			if l.Format.FontCaption.SpaceTop > 0 {
@@ -385,12 +400,10 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	}
 	xTextBox := l.X + (l.Width-textWidth)/2
 	l.XTextBox = &xTextBox
-	padding := types.GlobalPadding
-	if l.Format != nil && l.Format.Padding > 0 {
-		padding = l.Format.Padding
-	}
-	yTextBox := l.Y + padding
 	l.YTextBox = &yTextBox
+	if l.Image != nil {
+		l.Image.X = l.X + ((l.Width - l.Image.Width - l.Image.MarginLeftRight - l.Image.MarginLeftRight) / 2)
+	}
 }
 
 func (l *LayoutElement) adjustToRaster(value int) int {

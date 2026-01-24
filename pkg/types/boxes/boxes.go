@@ -21,8 +21,8 @@ type Boxes struct {
     // Map of formats available to be used in the boxes
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
-    // optional list of images used in the generated graphic
-    Images []types.ImageDef  `yaml:"images,omitempty"`
+    // optional map of images used in the generated graphic
+    Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 
     // If that is set, then the additional texts are only visible when the box has no visible children
     HideTextsForParents bool  `yaml:"hideTextsForParents"`
@@ -44,7 +44,7 @@ func NewBoxes() *Boxes {
     return &Boxes{
         Boxes: *NewLayout(),
         Formats: make(map[string]Format, 0),
-        Images: make([]types.ImageDef, 0),
+        Images: make(map[string]types.ImageDef, 0),
     }
 }
 
@@ -59,9 +59,9 @@ func CopyBoxes(src *Boxes) *Boxes {
     for k, v := range src.Formats {
         ret.Formats[k] = v
     }
-    ret.Images = make([]types.ImageDef, 0)
-    for _, e := range src.Images {
-        ret.Images = append(ret.Images, e)
+    ret.Images = make(map[string]types.ImageDef, 0)
+    for k, v := range src.Images {
+        ret.Images[k] = v
     }
     ret.HideTextsForParents = src.HideTextsForParents
     ret.LineDist = src.LineDist
@@ -213,6 +213,9 @@ func CopyFormat(src *Format) *Format {
 
     return &ret
 }
+
+
+
 
 
 

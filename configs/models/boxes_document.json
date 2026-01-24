@@ -61,9 +61,9 @@
       }
     },
     "images": {
-      "description": "optional list of images used in the generated graphic",
-      "type": "array",
-      "items": {
+      "description": "Map of images used in the generated graphic",
+      "type": "object",
+      "additionalProperties": {
         "$ref": "./formats.json#/definitions/ImageDef"
       }
     },
@@ -391,12 +391,31 @@
           "type": "integer",
           "description": "Height of the container"
         },
+        "marginTopBottom": {
+          "description": "distance top and bottom of the image",
+          "type": "integer",
+          "default": 5
+        },
+        "marginLeftRight": {
+          "description": "distance left and right of the image",
+          "type": "integer",
+          "default": 2
+        },
         "imgId": {
           "type": "string",
           "description": "reference to the globally declared image"
         }
       },
-      "required": ["x", "y", "width", "height", "elems"]
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height",
+        "elems",
+        "marginTopBottom",
+        "marginLeftRight",
+        "imgId"
+      ]
     },
     "BoxFormat": {
       "type": "object",

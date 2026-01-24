@@ -14,8 +14,8 @@
     },
     "images": {
       "description": "optional list of images used in the generated graphic",
-      "type": "array",
-      "items": {
+      "type": "object",
+      "additionalProperties": {
         "$ref": "./formats.json#/definitions/ImageDef"
       }
     }
@@ -38,20 +38,18 @@
       }
     },
     {
-      "images": [
-        {
-          "id": "smilie_01",
+      "images": {
+        "smilie_01": {
           "width": 16,
           "height": 16,
           "base64": "iVBORw0KGgo...Jggg=="
         },
-        {
-          "id": "smilie_02",
+        "smilie_02": {
           "width": 32,
           "height": 32,
           "base64Src": "../../resources/pngs/smilie_02_80x80_base64.txt"
         }
-      ]
+      }
     }
   ]
 }

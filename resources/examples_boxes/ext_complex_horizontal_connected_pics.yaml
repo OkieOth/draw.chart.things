@@ -14,11 +14,11 @@ formats:
       color: white
     margin: 5
 images:
-  - id: smilie_02_80
+  smilie_02_80:
     width: 32
     height: 32
     base64Src: ../../resources/pngs/smilie_02_80x80_base64.txt
-  - id: smilie_03_80
+  smilie_03_80:
     width: 32
     height: 32
     base64Src: ../../resources/pngs/smilie_03_80x80_base64.txt

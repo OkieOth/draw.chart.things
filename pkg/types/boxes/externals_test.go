@@ -17,36 +17,28 @@ func TestLoadExternalFormats(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, additionalFormats)
 
-	require.Len(t, additionalFormats.Formats, 3)
+	require.Len(t, additionalFormats.Formats, 0)
+	require.Len(t, additionalFormats.Images, 1)
 
-	_, ok := additionalFormats.Formats["img1"]
-	require.True(t, ok)
-
-	_, ok = additionalFormats.Formats["img2"]
-	require.True(t, ok)
-
-	_, ok = additionalFormats.Formats["img3"]
+	img, ok := additionalFormats.Images["smilie_01_43"]
 	require.True(t, ok)
 
 	b, err := types.LoadInputFromFile[boxes.Boxes](inputLayout)
 	require.Nil(t, err)
 	require.NotNil(t, b)
 
-	require.Len(t, additionalFormats.Images, 1)
-	require.NotNil(t, additionalFormats.Images[0].Base64)
-	require.Nil(t, additionalFormats.Images[0].Base64Src)
+	require.NotNil(t, img.Base64)
+	require.Nil(t, img.Base64Src)
 
 	b2, err := types.LoadInputFromFile[boxes.Boxes](inputLayout2)
 	require.Nil(t, err)
 	require.NotNil(t, b2)
 
-	require.NotEqual(t, len(b2.Formats), len(b.Formats))
-	require.NotEqual(t, len(b2.Formats), len(b.Formats))
+	require.NotEqual(t, len(b2.Images), len(b.Formats))
 
 	b.MixinFormats(*additionalFormats)
 
-	require.Equal(t, len(b2.Formats), len(b.Formats))
-	require.Equal(t, len(b2.Formats), len(b.Formats))
+	require.Equal(t, len(b2.Images), len(b.Images))
 }
 
 func TestLoadExternalConnections(t *testing.T) {

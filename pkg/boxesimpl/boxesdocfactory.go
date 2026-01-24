@@ -10,14 +10,14 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
-func initLayoutElemContainer(l []boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedElems *[]string, hideTextsForParents bool) *boxes.LayoutElemContainer {
+func initLayoutElemContainer(l []boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedElems *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) *boxes.LayoutElemContainer {
 	if len(l) == 0 {
 		return nil
 	}
 	var ret boxes.LayoutElemContainer
 	ret.Elems = make([]boxes.LayoutElement, 0)
 	for _, elem := range l {
-		ret.Elems = append(ret.Elems, initLayoutElement(&elem, inputFormats, connectedElems, hideTextsForParents))
+		ret.Elems = append(ret.Elems, initLayoutElement(&elem, inputFormats, connectedElems, hideTextsForParents, definedImages))
 	}
 	return &ret
 }
@@ -119,7 +119,33 @@ func initFormats(inputFormat map[string]boxes.Format) map[string]boxes.BoxFormat
 	return res
 }
 
-func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool) boxes.LayoutElement {
+func initImage(l *boxes.Layout, definedImages map[string]types.ImageDef) *boxes.ImageContainer {
+	if l.Image == nil {
+		return nil
+	}
+	imageDef, ok := definedImages[*l.Image]
+	if !ok {
+		return nil
+	}
+	marginTopBottom := 5
+	if imageDef.MarginTopBottom != nil {
+		marginTopBottom = *imageDef.MarginTopBottom
+	}
+	marginLeftRight := 2
+	if imageDef.MarginLeftRight != nil {
+		marginLeftRight = *imageDef.MarginLeftRight
+	}
+	img := boxes.ImageContainer{
+		Width:           imageDef.Width,
+		Height:          imageDef.Height,
+		ImgId:           *l.Image,
+		MarginTopBottom: marginTopBottom,
+		MarginLeftRight: marginLeftRight,
+	}
+	return &img
+}
+
+func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) boxes.LayoutElement {
 	var f *boxes.BoxFormat
 	// for _, tag := range l.Tags {
 	// 	if val, ok := inputFormats[tag]; ok {
@@ -173,26 +199,28 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		Caption:     l.Caption,
 		Text1:       text1,
 		Text2:       text2,
-		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, hideTextsForParents),
-		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, hideTextsForParents),
+		Image:       initImage(l, definedImages), // TODO
+		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, hideTextsForParents, definedImages),
+		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, hideTextsForParents, definedImages),
 		Format:      f,
 		Connections: initConnections(l.Connections, inputFormats),
 	}
 }
 
 func initExternalImages(doc *boxes.BoxesDocument) error {
-	for i := range len(doc.Images) {
-		if doc.Images[i].Base64 == nil && doc.Images[i].Base64Src == nil {
-			return fmt.Errorf("Missing 'base64' or 'base64Src' attribute for imageDef id=%s", doc.Images[i].Id)
+	for key, img := range doc.Images {
+		if img.Base64 == nil && img.Base64Src == nil {
+			return fmt.Errorf("Missing 'base64' or 'base64Src' attribute for imageDef id=%s", key)
 		}
-		if doc.Images[i].Base64Src != nil {
+		if img.Base64Src != nil {
 			// load the base64 string from the file given by the attrib
-			bytes, err := os.ReadFile(*doc.Images[i].Base64Src)
+			bytes, err := os.ReadFile(*img.Base64Src)
 			if err != nil {
-				return fmt.Errorf("Error while reading content of 'base64Src' (%s) for imageDef id=%s", *doc.Images[i].Base64Src, doc.Images[i].Id)
+				return fmt.Errorf("Error while reading content of 'base64Src' (%s) for imageDef id=%s", *img.Base64Src, key)
 			}
 			base64Str := string(bytes)
-			doc.Images[i].Base64 = &base64Str
+			img.Base64 = &base64Str
+			doc.Images[key] = img
 		}
 	}
 	return nil
@@ -218,7 +246,8 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 	if err := initExternalImages(doc); err != nil {
 		return nil, err
 	}
-	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats, &doc.ConnectedElems, b.HideTextsForParents)
+
+	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats, &doc.ConnectedElems, b.HideTextsForParents, b.Images)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin
 	}

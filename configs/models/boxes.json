@@ -21,9 +21,9 @@
       }
     },
     "images": {
-      "description": "optional list of images used in the generated graphic",
-      "type": "array",
-      "items": {
+      "description": "optional map of images used in the generated graphic",
+      "type": "object",
+      "additionalProperties": {
         "$ref": "./formats.json#/definitions/ImageDef"
       }
     },

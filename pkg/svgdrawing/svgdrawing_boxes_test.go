@@ -87,6 +87,7 @@ func TestSimpleSvg(t *testing.T) {
 		require.Nil(t, err)
 		svgdrawing := svgdrawing.NewDrawing(output)
 		svgdrawing.Start(doc.Title, doc.Height, doc.Width)
+		svgdrawing.InitImages(doc.Images)
 		svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 		doc.DrawBoxes(svgdrawing)
 		svgdrawing.Done()

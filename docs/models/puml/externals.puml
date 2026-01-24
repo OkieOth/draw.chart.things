@@ -114,11 +114,12 @@ note top: Defines the fill of the\nbox
  
 
 class "**ImageDef**" as ImageDef {
-        StringType id
         StringType description
         IntegerType width
         IntegerType height
         StringType base64
+        IntegerType marginTopBottom
+        IntegerType marginLeftRight
         StringType base64Src
 }
 note top: parameters of an image to\nbe displayed in the SVG
@@ -191,6 +192,7 @@ Format  *--  FillDef
 
 
     
+
 
 
 

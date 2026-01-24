@@ -195,7 +195,7 @@ func drawGroupEntries(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, 
 				Border:      &f,
 				Fill:        &fill,
 			}
-			drawing.DrawRectWithText("", entry.Name, "", "", *doc.GroupNameWidth+xOffset, entry.Y+yOffset, width, types.GlobalGanttEntryHeight, rf)
+			drawing.DrawRectWithText("", entry.Name, "", "", *doc.GroupNameWidth+xOffset, entry.Y+yOffset, width, 0, types.GlobalGanttEntryHeight, rf)
 		}
 	}
 }

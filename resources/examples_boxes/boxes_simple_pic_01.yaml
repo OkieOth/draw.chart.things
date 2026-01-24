@@ -1,0 +1,8 @@
+title: Simple Pic Example (1)
+boxes:
+  horizontal:
+    - id: id1
+      caption: "Only one Box"
+      image: img1
+    - id: id2
+      caption: "Only one Box"

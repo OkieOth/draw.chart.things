@@ -217,7 +217,7 @@ func (d *SvgDrawing) Start(title string, height, width int) error {
 	return nil
 }
 
-func (d *SvgDrawing) InitImages(imageDefs []types.ImageDef) error {
+func (d *SvgDrawing) InitImages(imageDefs map[string]types.ImageDef) error {
 	if len(imageDefs) == 0 {
 		return nil
 	}
@@ -231,8 +231,8 @@ func (d *SvgDrawing) InitImages(imageDefs []types.ImageDef) error {
 	//   />
 	// </defs>
 	d.canvas.Def()
-	for _, imgDef := range imageDefs {
-		d.canvas.PngWithIdBase64(0, 0, imgDef.Width, imgDef.Height, imgDef.Id, *imgDef.Base64)
+	for key, imgDef := range imageDefs {
+		d.canvas.PngWithIdBase64(0, 0, imgDef.Width, imgDef.Height, key, *imgDef.Base64)
 	}
 	defer d.canvas.DefEnd()
 	return nil
@@ -379,7 +379,7 @@ func (d *SvgDrawing) DrawPng(x, y int, pngId string) error {
 }
 
 // Draw renders a box with text elements
-func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int, width, height int, format types.RectWithTextFormat) error {
+func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.RectWithTextFormat) error {
 	const onclickClass = "svg-clickable" // "onclick=\"window.shapeClick(event)\""
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
@@ -437,6 +437,9 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int
 		currentX = d.DrawVerticalText(text2, currentX, currentY, width, &format.FontText2)
 	} else {
 		currentY := y + format.Padding
+		if textYOffset > 0 {
+			currentY = y + textYOffset
+		}
 		currentY = d.DrawTextWithIdAndClass(caption, x, currentY, width, &format.FontCaption, idStr, onclickClass)
 		currentY = d.DrawText(text1, x, currentY, width, &format.FontText1)
 		currentY = d.DrawText(text2, x, currentY, width, &format.FontText2)

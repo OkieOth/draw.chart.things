@@ -8,7 +8,7 @@ class "**Boxes**" as Boxes {
         StringType title
         Layout boxes
         Map<Format> formats
-        ImageDef[] images
+        Map<ImageDef> images
         BooleanType hideTextsForParents
         IntegerType lineDist
         IntegerType globalPadding
@@ -52,6 +52,7 @@ class "**Format**" as Format {
 }
 
  
+
 
 class "**LayoutArray**" as LayoutArray extends List {
 }
@@ -130,11 +131,12 @@ note top: Defines the fill of the\nbox
  
 
 class "**ImageDef**" as ImageDef {
-        StringType id
         StringType description
         IntegerType width
         IntegerType height
         StringType base64
+        IntegerType marginTopBottom
+        IntegerType marginLeftRight
         StringType base64Src
 }
 note top: parameters of an image to\nbe displayed in the SVG
@@ -148,7 +150,7 @@ Boxes  *--  Layout
 
 Boxes  *--  Format
 
-Boxes "0" *-- "n" ImageDef
+Boxes  *--  ImageDef
 
 
 
@@ -190,6 +192,7 @@ Format  *--  FillDef
 
     
     
+    
 
 
 
@@ -221,6 +224,7 @@ Format  *--  FillDef
 
 
     
+
 
 
 

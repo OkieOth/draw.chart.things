@@ -38,7 +38,7 @@ type RectWithTextFormat struct {
 
 type Drawing interface {
 	Start(title string, height, width int) error
-	DrawRectWithText(id, caption, text1, text2 string, x, y, width, height int, format RectWithTextFormat) error
+	DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format RectWithTextFormat) error
 	DrawPng(x, y int, pngId string) error
 	DrawLine(x1, y1, x2, y2 int, format LineDef) error
 	DrawArrow(x, y, angle int, format LineDef) error

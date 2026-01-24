@@ -138,7 +138,7 @@ func TestInitDimensions(t *testing.T) {
 	emptyFormats := map[string]boxes.BoxFormat{}
 	for _, test := range tests {
 		dummy := make([]string, 0)
-		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats, &dummy, false)
+		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats, &dummy, false, map[string]types.ImageDef{})
 		le.InitDimensions(dc)
 		assert.Equal(t, test.expectedHeight, le.Height)
 		assert.Equal(t, test.expectedWidth, le.Width)
@@ -235,20 +235,74 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		expanded            []string
 		blacklisted         []string
 	}{
+		// {
+		// 	inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+		// 	inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
+		// 	inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
+		// 	outputFile:          "../../temp/ext_complex_horizontal_connected_pics.svg",
+		// 	depth:               2,
+		// 	expanded:            []string{},
+		// 	blacklisted:         []string{},
+		// },
+		// {
+		// 	inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+		// 	inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
+		// 	inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
+		// 	outputFile:          "../../temp/ext_complex_horizontal_connected_pics.svg",
+		// 	depth:               2,
+		// 	expanded:            []string{},
+		// 	blacklisted:         []string{},
+		// },
 		{
-			inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
-			inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
-			inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
-			outputFile:          "../../temp/ext_complex_horizontal_connected_pics.svg",
+			inputFile:           "../../resources/examples_boxes/boxes_simple_pic_01.yaml",
+			inputExtConnections: "",
+			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
+			outputFile:          "../../temp/boxes_simple_pic_01.svg",
 			depth:               2,
 			expanded:            []string{},
 			blacklisted:         []string{},
 		},
 		{
-			inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
-			inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
-			inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
-			outputFile:          "../../temp/ext_complex_horizontal_connected_pics.svg",
+			inputFile:           "../../resources/examples_boxes/boxes_simple_pic_01_2.yaml",
+			inputExtConnections: "",
+			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
+			outputFile:          "../../temp/boxes_simple_pic_01_2.svg",
+			depth:               2,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
+		{
+			inputFile:           "../../resources/examples_boxes/boxes_simple_pic_02.yaml",
+			inputExtConnections: "",
+			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
+			outputFile:          "../../temp/boxes_simple_pic_02.svg",
+			depth:               2,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
+		{
+			inputFile:           "../../resources/examples_boxes/boxes_simple_pic_02_2.yaml",
+			inputExtConnections: "",
+			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
+			outputFile:          "../../temp/boxes_simple_pic_02_2.svg",
+			depth:               2,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
+		{
+			inputFile:           "../../resources/examples_boxes/boxes_simple_pic_03.yaml",
+			inputExtConnections: "",
+			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
+			outputFile:          "../../temp/boxes_simple_pic_03.svg",
+			depth:               2,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
+		{
+			inputFile:           "../../resources/examples_boxes/boxes_simple_pic_03_2.yaml",
+			inputExtConnections: "",
+			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
+			outputFile:          "../../temp/boxes_simple_pic_03_2.svg",
 			depth:               2,
 			expanded:            []string{},
 			blacklisted:         []string{},
@@ -258,9 +312,13 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err, "error while loading input file for test", i)
 
-		additionalConnections, err := types.LoadInputFromFile[boxes.AdditionalConnections](test.inputExtConnections)
-		require.Nil(t, err)
-		require.NotNil(t, additionalConnections)
+		var additionalConnections boxes.AdditionalConnections
+		if test.inputExtConnections != "" {
+			extConnections, err := types.LoadInputFromFile[boxes.AdditionalConnections](test.inputExtConnections)
+			require.Nil(t, err)
+			require.NotNil(t, extConnections)
+			additionalConnections = *extConnections
+		}
 
 		var additionalFormats boxes.AdditionalFormats
 		if test.inputExtFormats != "" {
@@ -270,7 +328,7 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 			additionalFormats = *extFormats
 		}
 
-		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, additionalFormats, *additionalConnections, test.depth, test.expanded, test.blacklisted, false)
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, additionalFormats, additionalConnections, test.depth, test.expanded, test.blacklisted, false)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 

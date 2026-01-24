@@ -70,17 +70,20 @@ func TestLoadBoxes(t *testing.T) {
 			verify: func(t *testing.T, b *boxes.Boxes, testNr int) {
 				assert.NotNil(t, b)
 				assert.Len(t, b.Images, 3)
-				assert.NotNil(t, b.Images[0].Id)
-				assert.NotNil(t, b.Images[0].Base64)
-				assert.Nil(t, b.Images[0].Base64Src)
+				img1, ok := b.Images["smilie_01_43"]
+				assert.True(t, ok)
+				assert.NotNil(t, img1.Base64)
+				assert.Nil(t, img1.Base64Src)
 
-				assert.NotNil(t, b.Images[1].Id)
-				assert.Nil(t, b.Images[1].Base64)
-				assert.NotNil(t, b.Images[1].Base64Src)
+				img2, ok := b.Images["smilie_02_80"]
+				assert.True(t, ok)
+				assert.Nil(t, img2.Base64)
+				assert.NotNil(t, img2.Base64Src)
 
-				assert.NotNil(t, b.Images[2].Id)
-				assert.Nil(t, b.Images[2].Base64)
-				assert.NotNil(t, b.Images[2].Base64Src)
+				img3, ok := b.Images["smilie_03_80"]
+				assert.True(t, ok)
+				assert.Nil(t, img3.Base64)
+				assert.NotNil(t, img3.Base64Src)
 			},
 		},
 	}

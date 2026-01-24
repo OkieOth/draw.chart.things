@@ -43,8 +43,8 @@ type BoxesDocument struct {
     // Map of formats available to be used in the boxes
     Formats map[string]BoxFormat  `yaml:"formats,omitempty"`
 
-    // optional list of images used in the generated graphic
-    Images []types.ImageDef  `yaml:"images,omitempty"`
+    // Map of images used in the generated graphic
+    Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 
     // Vertical roads available to connect boxes in a vertical way
     VerticalRoads []ConnectionLine  `yaml:"verticalRoads,omitempty"`
@@ -68,7 +68,7 @@ func NewBoxesDocument() *BoxesDocument {
         Connections: make([]ConnectionElem, 0),
         ConnectedElems: make([]string, 0),
         Formats: make(map[string]BoxFormat, 0),
-        Images: make([]types.ImageDef, 0),
+        Images: make(map[string]types.ImageDef, 0),
         VerticalRoads: make([]ConnectionLine, 0),
         HorizontalRoads: make([]ConnectionLine, 0),
         ConnectionNodes: make([]ConnectionNode, 0),
@@ -102,9 +102,9 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     for k, v := range src.Formats {
         ret.Formats[k] = v
     }
-    ret.Images = make([]types.ImageDef, 0)
-    for _, e := range src.Images {
-        ret.Images = append(ret.Images, e)
+    ret.Images = make(map[string]types.ImageDef, 0)
+    for k, v := range src.Images {
+        ret.Images[k] = v
     }
     ret.VerticalRoads = make([]ConnectionLine, 0)
     for _, e := range src.VerticalRoads {
@@ -366,6 +366,9 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
 
 
 
+
+
+
 type ConnectionLine struct {
 
     StartX int  `yaml:"startX"`
@@ -480,8 +483,14 @@ type ImageContainer struct {
     // Height of the container
     Height int  `yaml:"height"`
 
+    // distance top and bottom of the image
+    MarginTopBottom int  `yaml:"marginTopBottom"`
+
+    // distance left and right of the image
+    MarginLeftRight int  `yaml:"marginLeftRight"`
+
     // reference to the globally declared image
-    ImgId *string  `yaml:"imgId,omitempty"`
+    ImgId string  `yaml:"imgId"`
 }
 
 
@@ -494,6 +503,8 @@ func CopyImageContainer(src *ImageContainer) *ImageContainer {
     ret.Y = src.Y
     ret.Width = src.Width
     ret.Height = src.Height
+    ret.MarginTopBottom = src.MarginTopBottom
+    ret.MarginLeftRight = src.MarginLeftRight
     ret.ImgId = src.ImgId
 
     return &ret

@@ -3,14 +3,22 @@ package boxes
 import (
 	"maps"
 	"slices"
+
+	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
 func (b *Boxes) MixinFormats(additional AdditionalFormats) {
 	if len(additional.Formats) > 0 {
+		if b.Formats == nil {
+			b.Formats = make(map[string]Format)
+		}
 		maps.Copy(b.Formats, additional.Formats)
 	}
-	for _, i := range additional.Images {
-		b.Images = append(b.Images, i)
+	if len(additional.Images) > 0 {
+		if b.Images == nil {
+			b.Images = make(map[string]types.ImageDef)
+		}
+		maps.Copy(b.Images, additional.Images)
 	}
 }
 
