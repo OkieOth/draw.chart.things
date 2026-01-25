@@ -708,18 +708,23 @@ async function loadSVGFromWasm() {
         ) {
             await window.inputLoaded;
         }
+        // Get current expanded and blacklisted IDs from the DOM (badges)
+        const badgeList = document.getElementById("badge-list");
+        const blacklistList = document.getElementById("blacklist-list");
+        const filterTexts = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        const blacklistIds = blacklistList ? Array.from(blacklistList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
         const initialArg =
             typeof window.input === "string" && window.input.length > 0
                 ? window.input
                 : "";
-        console.log("Refreshing SVG: []", "blacklist ids: []");
+        console.log("Refreshing SVG:", filterTexts, "blacklist ids:", blacklistIds);
         const res = createSvgExt(
             initialArg,
             [], // additionalFormats
             additionalConnections, // additionalConnections
             window.defaultDepth,
-            [],
-            [],
+            filterTexts,
+            blacklistIds,
             window.debug
         );
         svgStr = res && typeof res.then === "function" ? await res : res;
@@ -729,7 +734,7 @@ async function loadSVGFromWasm() {
     }
 
     if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
-        console.error("createSvg did not return a valid SVG string.");
+        console.error("createSvgExt did not return a valid SVG string.");
         console.error(svgStr);
         return;
     }
@@ -756,6 +761,69 @@ function handleInputQueryParam() {
                 ? truthy.includes(String(rawDebug).toLowerCase())
                 : false;
         window.debug = val;
+
+        // --- NEW: Parse combo, expandedIds, blacklistedIds ---
+        // Combo box
+        if (params.has("combo")) {
+            const comboVal = params.get("combo");
+            // Set combo box value after DOMContentLoaded
+            document.addEventListener("DOMContentLoaded", function () {
+                const combo = document.getElementById("toolbar-combo");
+                if (combo && comboVal) {
+                    combo.value = comboVal;
+                    // Optionally trigger change event to load YAML
+                    combo.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+            });
+        }
+
+        // Expanded IDs (badges)
+        if (params.has("expandedIds")) {
+            const expandedIds = params.get("expandedIds").split(",").map(s => s.trim()).filter(Boolean);
+            document.addEventListener("DOMContentLoaded", function () {
+                const list = document.getElementById("badge-list");
+                if (list && expandedIds.length) {
+                    // Remove existing badges
+                    list.innerHTML = "";
+                    expandedIds.forEach(hid => {
+                        // Try to find the element in the SVG after load
+                        // Fallback: create minimal badge
+                        const span = document.createElement("span");
+                        span.className = "badge";
+                        span.dataset.hid = hid;
+                        const label = document.createElement("span");
+                        label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
+                        span.appendChild(label);
+                        list.appendChild(span);
+                    });
+                    requestAnimationFrame(window.refitAllBadges || (()=>{}));
+                }
+            });
+        }
+
+        // Blacklisted IDs (badges)
+        if (params.has("blacklistedIds")) {
+            const blacklistedIds = params.get("blacklistedIds").split(",").map(s => s.trim()).filter(Boolean);
+            document.addEventListener("DOMContentLoaded", function () {
+                const list = document.getElementById("blacklist-list");
+                if (list && blacklistedIds.length) {
+                    list.innerHTML = "";
+                    blacklistedIds.forEach(hid => {
+                        const span = document.createElement("span");
+                        span.className = "badge blacklist-badge";
+                        span.dataset.hid = hid;
+                        const label = document.createElement("span");
+                        label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
+                        span.appendChild(label);
+                        list.appendChild(span);
+                    });
+                }
+                // Also update the global blacklist array
+                if (Array.isArray(window.blacklist)) {
+                    window.blacklist = blacklistedIds;
+                }
+            });
+        }
     } catch (e) {
         console.error("Failed to read query params:", e);
         // Defaults when parsing fails
