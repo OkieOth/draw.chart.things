@@ -425,12 +425,12 @@ function initPage() {
                             behavior: "smooth",
                             block: "nearest",
                         });
+                        updateBlacklistUI(); // Always update UI from window.blacklist when showing
                     } else {
                         blist.classList.add("hidden");
                         blist.setAttribute("aria-hidden", "true");
                     }
                 }
-                updateBlacklistUI();
                 updateToolButtons();
             },
             zoom(factor) {
@@ -683,16 +683,16 @@ async function loadSVGFromWasm() {
         return;
     }
 
-    // Start the runtime, then wait for createSvg to appear.
+    // Start the runtime, then wait for createSvgExt to appear.
     go.run(instance).catch((e) => console.warn("go.run finished/failed:", e));
 
-    // Wait until createSvg is exposed by the Go code (poll with timeout)
+    // Wait until createSvgExt is exposed by the Go code (poll with timeout)
     const timeoutMs = 5000;
     const start = Date.now();
-    while (typeof createSvg !== "function") {
+    while (typeof window.createSvgExt !== "function") {
         if (Date.now() - start > timeoutMs) {
             console.error(
-                'createSvg is not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvg", fn).'
+                'createSvgExt is not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn).'
             );
             return;
         }
@@ -701,24 +701,24 @@ async function loadSVGFromWasm() {
 
     let svgStr;
     try {
-        // Wait for YAML load if available, then pass it to createSvg
+        // Wait for YAML load if available, then pass it to createSvgExt
         if (
             window.inputLoaded &&
             typeof window.inputLoaded.then === "function"
         ) {
             await window.inputLoaded;
         }
-        // Get current expanded and blacklisted IDs from the DOM (badges)
+        // Get current expanded and blacklisted IDs
         const badgeList = document.getElementById("badge-list");
-        const blacklistList = document.getElementById("blacklist-list");
         const filterTexts = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
-        const blacklistIds = blacklistList ? Array.from(blacklistList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        // Use window.blacklist if set, otherwise fallback to DOM
+        const blacklistIds = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : (document.getElementById("blacklist-list") ? Array.from(document.getElementById("blacklist-list").querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : []);
         const initialArg =
             typeof window.input === "string" && window.input.length > 0
                 ? window.input
                 : "";
         console.log("Refreshing SVG:", filterTexts, "blacklist ids:", blacklistIds);
-        const res = createSvgExt(
+        const res = window.createSvgExt(
             initialArg,
             [], // additionalFormats
             additionalConnections, // additionalConnections
@@ -729,7 +729,7 @@ async function loadSVGFromWasm() {
         );
         svgStr = res && typeof res.then === "function" ? await res : res;
     } catch (e) {
-        console.error("Error calling createSvg:", e);
+        console.error("Error calling createSvgExt:", e);
         return;
     }
 
@@ -805,23 +805,7 @@ function handleInputQueryParam() {
         if (params.has("blacklistedIds")) {
             const blacklistedIds = params.get("blacklistedIds").split(",").map(s => s.trim()).filter(Boolean);
             document.addEventListener("DOMContentLoaded", function () {
-                const list = document.getElementById("blacklist-list");
-                if (list && blacklistedIds.length) {
-                    list.innerHTML = "";
-                    blacklistedIds.forEach(hid => {
-                        const span = document.createElement("span");
-                        span.className = "badge blacklist-badge";
-                        span.dataset.hid = hid;
-                        const label = document.createElement("span");
-                        label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
-                        span.appendChild(label);
-                        list.appendChild(span);
-                    });
-                }
-                // Also update the global blacklist array
-                if (Array.isArray(window.blacklist)) {
-                    window.blacklist = blacklistedIds;
-                }
+                window.blacklist = blacklistedIds;
             });
         }
     } catch (e) {
@@ -1724,8 +1708,14 @@ function updateToolButtons() {
 function addToBlacklist(el) {
     if (!el || !el.id) return;
     const boxId = getBoxPrefix(el.id);
-    if (blacklist.includes(boxId)) return;
-    blacklist.push(boxId);
+    // Always update both window.blacklist and local blacklist
+    if (window.blacklist && Array.isArray(window.blacklist)) {
+        if (window.blacklist.includes(boxId)) return;
+        window.blacklist.push(boxId);
+    }
+    if (!blacklist.includes(boxId)) {
+        blacklist.push(boxId);
+    }
     updateBlacklistUI();
     // Reload SVG after adding to blacklist
     if (typeof reloadSvgFromBadges === "function") reloadSvgFromBadges();
@@ -1744,7 +1734,9 @@ function updateBlacklistUI() {
     const list = document.getElementById("blacklist-list");
     if (!list) return;
     list.innerHTML = "";
-    blacklist.forEach((boxId) => {
+    // Use window.blacklist if set, otherwise fallback to local blacklist
+    const ids = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : blacklist;
+    ids.forEach((boxId) => {
         // Try to find the SVG element for color extraction
         const el =
             document.getElementById(boxId) ||
@@ -1768,7 +1760,15 @@ function updateBlacklistUI() {
             }
         }
         badge.onclick = function () {
-            removeFromBlacklist(boxId);
+            // Remove from window.blacklist if present, else from local blacklist
+            if (window.blacklist && Array.isArray(window.blacklist)) {
+                window.blacklist = window.blacklist.filter(id => id !== boxId);
+            } else {
+                blacklist = blacklist.filter(id => id !== boxId);
+            }
+            updateBlacklistUI();
+            // Also reload the SVG to reflect the change
+            if (typeof reloadSvgFromBadges === "function") reloadSvgFromBadges();
         };
         list.appendChild(badge);
     });
