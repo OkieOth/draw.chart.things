@@ -93,6 +93,9 @@ type Layout struct {
     // Reference to an image that should be displayed, needs to be declared in the global image section
     Image *string  `yaml:"image,omitempty"`
 
+    // in case the picture is rendered with given expanded IDs, and maxDepth, then if this flag is true, the box is still displayed expanded
+    Expand bool  `yaml:"expand"`
+
     // If set, then the content for 'vertical' attrib is loaded from an external file
     ExtVertical *string  `yaml:"extVertical,omitempty"`
 
@@ -132,6 +135,7 @@ func CopyLayout(src *Layout) *Layout {
     ret.Text1 = src.Text1
     ret.Text2 = src.Text2
     ret.Image = src.Image
+    ret.Expand = src.Expand
     ret.ExtVertical = src.ExtVertical
     ret.Vertical = make([]Layout, 0)
     for _, e := range src.Vertical {

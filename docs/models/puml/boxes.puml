@@ -25,6 +25,7 @@ class "**Layout**" as Layout {
         StringType text1
         StringType text2
         StringType image
+        BooleanType expand
         StringType extVertical
         Layout[] vertical
         StringType extHorizontal
@@ -158,6 +159,7 @@ Boxes  *--  ImageDef
 
 
     
+
 
 
 

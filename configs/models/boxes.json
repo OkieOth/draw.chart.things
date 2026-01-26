@@ -78,6 +78,10 @@
           "description": "Reference to an image that should be displayed, needs to be declared in the global image section",
           "type": "string"
         },
+        "expand": {
+          "description": "in case the picture is rendered with given expanded IDs, and maxDepth, then if this flag is true, the box is still displayed expanded",
+          "type": "boolean"
+        },
         "extVertical": {
           "description": "If set, then the content for 'vertical' attrib is loaded from an external file",
           "$comment": "relative paths are possible",
@@ -113,7 +117,7 @@
           "type": "string"
         }
       },
-      "required": ["type", "id", "caption", "text1", "text2"]
+      "required": ["type", "id", "caption", "text1", "text2", "expand"]
     },
     "LayoutArray": {
       "type": "array",

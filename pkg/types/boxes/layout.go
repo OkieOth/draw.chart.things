@@ -296,7 +296,7 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	if l.Image != nil {
 		w := (l.Image.Width + (2 * l.Image.MarginLeftRight))
 		h := l.Image.Height + (2 * l.Image.MarginTopBottom)
-		l.Image.Y = l.Y + (padding / 2) + l.Image.MarginTopBottom
+		l.Image.Y = l.Y + l.Image.MarginTopBottom
 		l.Height += h
 		if l.Width < w {
 			l.Width = w
@@ -304,17 +304,19 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 		yInnerOffset += h
 		yTextBox = l.Y + h
 	}
+	p := types.GlobalPadding
+	if l.Format != nil && l.Format.Padding > 0 {
+		p = l.Format.Padding
+	}
 	if l.Caption != "" || l.Text1 != "" || l.Text2 != "" {
 		if l.Caption != "" {
-			p := l.Format.Padding
-			if l.Format.FontCaption.SpaceTop > 0 {
-				p = l.Format.FontCaption.SpaceTop
-			}
 			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
 			if !l.Format.VerticalTxt {
-				l.Height += cH + p
+				l.Height += cH
 				l.Height += l.Format.FontCaption.SpaceBottom
-
+				if l.Text1 == "" && l.Text2 == "" {
+					l.Height += p
+				}
 			} else {
 				// vertical text
 				cW, cH = cH, cW
@@ -334,18 +336,10 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			t1W, t1H = c.Dimensions(l.Text1, &l.Format.FontText1)
 			if !l.Format.VerticalTxt {
 				l.Height += t1H
-				// if l.Text2 == "" {
-				// 	l.Height += l.Format.Padding
-				// } else {
-				// 	l.Height += l.Format.FontText1.SpaceBottom
-				// }
-				if l.Text2 != "" {
-					l.Height += l.Format.FontText1.SpaceBottom
-				} else if l.Vertical == nil && l.Horizontal == nil {
-					// if there are no childs the some distance to the bottom is needed
-					l.Height += l.Format.Padding
+				l.Height += l.Format.FontText1.SpaceBottom
+				if l.Text2 == "" && l.Vertical == nil && l.Horizontal == nil {
+					l.Height += p
 				}
-
 				textWidth = getMax(textWidth, t1W)
 				textHeight += t1H
 			} else {
@@ -359,14 +353,10 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			}
 		}
 		if l.Text2 != "" {
-			p := l.Format.Padding
-			if l.Format.FontText2.SpaceTop > 0 {
-				p = l.Format.FontText2.SpaceTop
-			}
 			t2W, t2H = c.Dimensions(l.Text2, &l.Format.FontText2)
 			if !l.Format.VerticalTxt {
 				l.Height += t2H
-				l.Height += l.Format.Padding
+				l.Height += p
 				textWidth = getMax(textWidth, t2W)
 				textHeight += t2H
 			} else {

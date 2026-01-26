@@ -110,7 +110,7 @@ func getNewId() string {
 
 func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blacklisted []string) (boxes.Layout, map[string]TruncatedInfo) {
 	truncatedBoxes := make(map[string]TruncatedInfo, 0)
-	if (currentDepth >= maxDepth) && (!isRelatedToId(b, expanded)) {
+	if (currentDepth >= maxDepth) && (!b.Expand) && (!isRelatedToId(b, expanded)) {
 		// possible removed connections to this object
 		if b.Id == "" {
 			b.Id = getNewId()

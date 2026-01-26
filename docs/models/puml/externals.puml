@@ -10,6 +10,7 @@ class "**Layout**" as Layout {
         StringType text1
         StringType text2
         StringType image
+        BooleanType expand
         StringType extVertical
         Layout[] vertical
         StringType extHorizontal
@@ -128,6 +129,7 @@ note top: parameters of an image to\nbe displayed in the SVG
 
 
     
+
 
 
 

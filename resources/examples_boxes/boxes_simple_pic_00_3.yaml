@@ -1,21 +1,65 @@
 title: Simple Pic Example (2)
 boxes:
-  horizontal:
+  vertical:
     - id: id1
-      caption: "Only one Box"
+      caption: Line 1
       horizontal:
-        - image: img1
-        - image: img1
-        - image: img1
-        - image: img1
-        - image: img1
-        - image: img1
-        - image: img1
-        - image: img1
-        - image: img1
-        - image: img1
+        - id: id1_1
+          caption: "Only one Box"
+          horizontal:
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+        - id: id1_2
+          caption: "Only one Box"
+          vertical:
+            - id: id1_2_1
+              caption: "Only one Box (1)"
+            - id: id1_2_2
+              caption: "Only one Box (2)"
+              horizontal:
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+            - id: id1_2_3
+              caption: "Only one Box (3)"
+        - id: id1_3
+          caption: "Only one Box"
+          horizontal:
+            - image: img1
+            - image: img1
     - id: id2
-      caption: "Only one Box"
+      caption: Line 2
       horizontal:
-        - image: img1
-        - image: img1
+        - id: id2_1
+          caption: "Only one Box"
+          horizontal:
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+        - id: id2_2
+          caption: "Only one Box"
+          horizontal:
+            - image: img1
+            - image: img1
