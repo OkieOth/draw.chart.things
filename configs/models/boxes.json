@@ -20,6 +20,10 @@
         "$ref": "#/definitions/Format"
       }
     },
+    "formatVariations": {
+      "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
+      "$ref": "#/definitions/FormatVariations"
+    },
     "images": {
       "description": "optional map of images used in the generated graphic",
       "type": "object",
@@ -198,6 +202,19 @@
         "cornerRadius": {
           "description": "radius of the box corners in pixel",
           "type": "integer"
+        }
+      }
+    },
+    "FormatVariations": {
+      "type": "object",
+      "properties": {
+        "hasTag": {
+          "description": "dictionary with tag values as key, that contains format definitions.",
+          "$comment": "when an object contains a specific tag, then it originally format, will be overwritten with the here defined values",
+          "type": "object",
+          "additionalItems": {
+            "$ref": "#/definitions/Format"
+          }
         }
       }
     }
