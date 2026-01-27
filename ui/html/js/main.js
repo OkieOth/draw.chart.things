@@ -1046,12 +1046,12 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
         }
 
         let expandedIds = [];
-        if (forceAllExpanded && typeof window.getAllBoxIds === "function") {
-            // Use all non-blacklisted box ids
-            const allBoxIds = window.getAllBoxIds();
-            const blacklist = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : (window.blacklist || []);
-            expandedIds = allBoxIds.filter(id => !blacklist.includes(id));
-        } else {
+        let maxDepth = window.defaultDepth;
+        if (forceAllExpanded) {
+            // Instead of collecting all box IDs, set maxDepth to 100 to expand all
+            maxDepth = 100;
+        }
+        else {
             // Use badges in the collector
             const list = document.getElementById("badge-list");
             if (list) {
@@ -1066,7 +1066,7 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
             arg,
             [], // additionalFormats
             additionalConnections,
-            window.defaultDepth,
+            maxDepth,
             expandedIds,
             blacklistIds,
             window.debug
