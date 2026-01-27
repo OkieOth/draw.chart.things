@@ -8,6 +8,7 @@ class "**Boxes**" as Boxes {
         StringType title
         Layout boxes
         Map<Format> formats
+        FormatVariations formatVariations
         Map<ImageDef> images
         BooleanType hideTextsForParents
         IntegerType lineDist
@@ -54,6 +55,12 @@ class "**Format**" as Format {
 
  
 
+class "**FormatVariations**" as FormatVariations {
+        Map<Format> hasTag
+}
+
+ 
+
 
 class "**LayoutArray**" as LayoutArray extends List {
 }
@@ -67,6 +74,7 @@ class "**Connection**" as Connection {
 }
 
  
+
 
 class "**FontDef**" as FontDef {
         IntegerType size
@@ -151,6 +159,8 @@ Boxes  *--  Layout
 
 Boxes  *--  Format
 
+Boxes  *--  FormatVariations
+
 Boxes  *--  ImageDef
 
 
@@ -193,13 +203,17 @@ Format  *--  FillDef
 
 
     
+FormatVariations  *--  Format
+
     
     
+    
 
 
 
 
 
+    
     
 
 

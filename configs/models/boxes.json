@@ -212,7 +212,7 @@
           "description": "dictionary with tag values as key, that contains format definitions.",
           "$comment": "when an object contains a specific tag, then it originally format, will be overwritten with the here defined values",
           "type": "object",
-          "additionalItems": {
+          "additionalProperties": {
             "$ref": "#/definitions/Format"
           }
         }

@@ -21,6 +21,9 @@ type Boxes struct {
     // Map of formats available to be used in the boxes
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
+    // Set of formats that overwrites the style of boxes, if specific conditions are met
+    FormatVariations *FormatVariations  `yaml:"formatVariations,omitempty"`
+
     // optional map of images used in the generated graphic
     Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 
@@ -44,6 +47,7 @@ func NewBoxes() *Boxes {
     return &Boxes{
         Boxes: *NewLayout(),
         Formats: make(map[string]Format, 0),
+        FormatVariations: NewFormatVariations(),
         Images: make(map[string]types.ImageDef, 0),
     }
 }
@@ -59,6 +63,7 @@ func CopyBoxes(src *Boxes) *Boxes {
     for k, v := range src.Formats {
         ret.Formats[k] = v
     }
+    ret.FormatVariations = CopyFormatVariations(src.FormatVariations)
     ret.Images = make(map[string]types.ImageDef, 0)
     for k, v := range src.Images {
         ret.Images[k] = v
@@ -222,6 +227,35 @@ func CopyFormat(src *Format) *Format {
 
 
 
+type FormatVariations struct {
+
+    // dictionary with tag values as key, that contains format definitions.
+    HasTag map[string]Format  `yaml:"hasTag,omitempty"`
+}
+
+func NewFormatVariations() *FormatVariations {
+    return &FormatVariations{
+        HasTag: make(map[string]Format, 0),
+    }
+}
+
+func CopyFormatVariations(src *FormatVariations) *FormatVariations {
+    if src == nil {
+        return nil
+    }
+    var ret FormatVariations
+    ret.HasTag = make(map[string]Format, 0)
+    for k, v := range src.HasTag {
+        ret.HasTag[k] = v
+    }
+
+    return &ret
+}
+
+
+
+
+
 
 
 
@@ -268,6 +302,9 @@ func CopyConnection(src *Connection) *Connection {
 
     return &ret
 }
+
+
+
 
 
 

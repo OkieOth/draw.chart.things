@@ -77,7 +77,7 @@ func TestInitDimensions(t *testing.T) {
 				Caption: "test2",
 				Text1:   "test2-text1",
 			},
-			expectedHeight: 150,
+			expectedHeight: 120,
 			expectedWidth:  150,
 		},
 		{
@@ -87,7 +87,7 @@ func TestInitDimensions(t *testing.T) {
 				Text1:   "test3-text1",
 				Text2:   "test3-text2",
 			},
-			expectedHeight: 200,
+			expectedHeight: 180,
 			expectedWidth:  150,
 		},
 		{
@@ -108,7 +108,7 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 500,
+			expectedHeight: 480,
 			expectedWidth:  150,
 		},
 		{
@@ -129,7 +129,7 @@ func TestInitDimensions(t *testing.T) {
 					},
 				},
 			},
-			expectedHeight: 300,
+			expectedHeight: 280,
 			expectedWidth:  530,
 		},
 	}
@@ -138,7 +138,8 @@ func TestInitDimensions(t *testing.T) {
 	emptyFormats := map[string]boxes.BoxFormat{}
 	for _, test := range tests {
 		dummy := make([]string, 0)
-		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats, &dummy, false, map[string]types.ImageDef{})
+		b := boxes.NewBoxes()
+		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats, &dummy, b)
 		le.InitDimensions(dc)
 		assert.Equal(t, test.expectedHeight, le.Height)
 		assert.Equal(t, test.expectedWidth, le.Width)

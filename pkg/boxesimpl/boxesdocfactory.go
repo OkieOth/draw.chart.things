@@ -10,14 +10,14 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
-func initLayoutElemContainer(l []boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedElems *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) *boxes.LayoutElemContainer {
+func initLayoutElemContainer(l []boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedElems *[]string, b *boxes.Boxes) *boxes.LayoutElemContainer {
 	if len(l) == 0 {
 		return nil
 	}
 	var ret boxes.LayoutElemContainer
 	ret.Elems = make([]boxes.LayoutElement, 0)
 	for _, elem := range l {
-		ret.Elems = append(ret.Elems, initLayoutElement(&elem, inputFormats, connectedElems, hideTextsForParents, definedImages))
+		ret.Elems = append(ret.Elems, initLayoutElement(&elem, inputFormats, connectedElems, b))
 	}
 	return &ret
 }
@@ -93,6 +93,78 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	}
 }
 
+func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxFormat {
+	var border *types.LineDef
+	var fill *types.FillDef
+
+	var fontCaption *types.FontDef
+	var fontText1 *types.FontDef
+	var fontText2 *types.FontDef
+	var verticalTxt bool
+	padding := types.GlobalPadding
+	boxMargin := types.GlobalMinBoxMargin
+	var fixedHeight, fixedWidth, cornerRadius *int
+	if f != nil {
+		fontCaption = &f.FontCaption
+		fontText1 = &f.FontText1
+		fontText2 = &f.FontText2
+		border = types.CopyLineDef(f.Line)
+		if f.Fill != nil {
+			fill = types.CopyFillDef(f.Fill)
+		}
+		if f.Padding > 0 {
+			padding = f.Padding
+		}
+		if f.MinBoxMargin > 0 {
+			boxMargin = f.MinBoxMargin
+		}
+		fixedHeight = f.FixedHeight
+		fixedWidth = f.FixedWidth
+		cornerRadius = f.CornerRadius
+	}
+
+	ret := boxes.BoxFormat{
+		Padding:      padding,
+		MinBoxMargin: boxMargin,
+		FontCaption:  types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
+		FontText1:    types.InitFontDef(fontText1, "serif", 8, false, false, 10),
+		FontText2:    types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
+		Line:         border,
+		Fill:         fill,
+		FixedWidth:   fixedWidth,
+		FixedHeight:  fixedHeight,
+		VerticalTxt:  verticalTxt,
+		CornerRadius: cornerRadius,
+	}
+
+	if adjustment != nil {
+		if adjustment.Fill != nil {
+			if adjustment.Fill.Color != nil {
+				ret.Fill.Color = adjustment.Fill.Color
+			}
+			if adjustment.Fill.Opacity != nil {
+				ret.Fill.Opacity = adjustment.Fill.Opacity
+			}
+		}
+		if adjustment.Line != nil {
+			if adjustment.Line.Color != nil {
+				ret.Line.Color = adjustment.Line.Color
+			}
+			if adjustment.Line.Opacity != nil {
+				ret.Line.Opacity = adjustment.Line.Opacity
+			}
+			if adjustment.Line.Width != nil {
+				ret.Line.Width = adjustment.Line.Width
+			}
+			if adjustment.Line.Style != nil {
+				ret.Line.Style = adjustment.Line.Style
+			}
+		}
+	}
+
+	return ret
+}
+
 func getDefaultFormat() boxes.BoxFormat {
 	return boxes.BoxFormat{
 		Padding:      types.GlobalPadding,
@@ -145,7 +217,8 @@ func initImage(l *boxes.Layout, definedImages map[string]types.ImageDef) *boxes.
 	return &img
 }
 
-func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) boxes.LayoutElement {
+// func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) boxes.LayoutElement {
+func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, b *boxes.Boxes) boxes.LayoutElement {
 	var f *boxes.BoxFormat
 	// for _, tag := range l.Tags {
 	// 	if val, ok := inputFormats[tag]; ok {
@@ -190,7 +263,7 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		}
 	}
 	var text1, text2 string
-	if !hideTextsForParents || (len(l.Vertical) == 0 && len(l.Horizontal) == 0) {
+	if !b.HideTextsForParents || (len(l.Vertical) == 0 && len(l.Horizontal) == 0) {
 		text1 = l.Text1
 		text2 = l.Text2
 	}
@@ -199,12 +272,26 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		Caption:     l.Caption,
 		Text1:       text1,
 		Text2:       text2,
-		Image:       initImage(l, definedImages), // TODO
-		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, hideTextsForParents, definedImages),
-		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, hideTextsForParents, definedImages),
-		Format:      f,
+		Image:       initImage(l, b.Images),
+		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, b),
+		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, b),
+		Format:      adjustFormatBasedOnVariations(l, b, f),
 		Connections: initConnections(l.Connections, inputFormats),
 	}
+}
+
+func adjustFormatBasedOnVariations(l *boxes.Layout, b *boxes.Boxes, f *boxes.BoxFormat) *boxes.BoxFormat {
+	if b.FormatVariations != nil && b.FormatVariations.HasTag != nil {
+		// mix in format adjustment
+		for _, t := range l.Tags {
+			if adjustment, ok := b.FormatVariations.HasTag[t]; ok {
+				// needed adjustment found
+				newFormat := adjustBoxFormat(f, &adjustment)
+				return &newFormat
+			}
+		}
+	}
+	return f
 }
 
 func initExternalImages(doc *boxes.BoxesDocument) error {
@@ -247,7 +334,7 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 		return nil, err
 	}
 
-	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats, &doc.ConnectedElems, b.HideTextsForParents, b.Images)
+	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats, &doc.ConnectedElems, b)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin
 	}

@@ -51,6 +51,13 @@ class "**Format**" as Format {
 
  
 
+class "**FormatVariations**" as FormatVariations {
+        Map<Format> hasTag
+}
+
+ 
+
+
 class "**FontDef**" as FontDef {
         IntegerType size
         StringType font
@@ -168,6 +175,10 @@ Format  *--  FillDef
 
 
 
+    
+FormatVariations  *--  Format
+
+    
     
 
 
