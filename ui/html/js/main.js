@@ -1,3 +1,17 @@
+// Return all box ids present in the current SVG (top-level boxes only, not blacklisted)
+window.getAllBoxIds = function () {
+    const svg = getSvg();
+    if (!svg) return [];
+    // Assume box elements have id matching the box id pattern (e.g., box_1, box_2, ...)
+    // We'll collect all elements with an id that matches the box prefix logic
+    const elements = svg.querySelectorAll('[id]');
+    const ids = new Set();
+    elements.forEach(el => {
+        const boxId = getBoxPrefix(el.id);
+        if (boxId) ids.add(boxId);
+    });
+    return Array.from(ids);
+};
 let state = { scale: 1, tx: 0, ty: 0 };
 let baseSize = { width: 0, height: 0 };
 let minimapVisible = false;
@@ -1014,65 +1028,64 @@ function fitBadgeLabel(badge) {
 }
 
 // NEW: reload SVG using current badges
-async function reloadSvgFromBadges() {
+function reloadSvgFromBadges(forceAllExpanded = false) {
+    return reloadSvgFromBadgesImpl(forceAllExpanded);
+}
+
+async function reloadSvgFromBadgesImpl(forceAllExpanded) {
     try {
-        if (typeof createSvg !== "function") return;
+        if (typeof createSvgExt !== "function") return;
         const canvas = document.getElementById("canvas");
         if (!canvas) return;
 
         // NEW: preserve current zoom/pan state before reload
         const preservedState = { ...state };
 
-        if (
-            window.inputLoaded &&
-            typeof window.inputLoaded.then === "function"
-        ) {
+        if (window.inputLoaded && typeof window.inputLoaded.then === "function") {
             await window.inputLoaded;
         }
 
-        const count = document.querySelectorAll("#badge-list .badge").length;
-        const fallbackArg = count % 2 === 1 ? "1" : "2";
-        const arg =
-            typeof window.input === "string" && window.input.length > 0
-                ? window.input
-                : fallbackArg;
-
-        const filterTexts = getAllBadgeCaptions("badge-list");
+        let expandedIds = [];
+        if (forceAllExpanded && typeof window.getAllBoxIds === "function") {
+            // Use all non-blacklisted box ids
+            const allBoxIds = window.getAllBoxIds();
+            const blacklist = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : (window.blacklist || []);
+            expandedIds = allBoxIds.filter(id => !blacklist.includes(id));
+        } else {
+            // Use badges in the collector
+            const list = document.getElementById("badge-list");
+            if (list) {
+                expandedIds = Array.from(list.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean);
+            }
+        }
         // Extract ids from blacklisted badges (elements in blacklist)
         const blacklistIds = getAllBadgeCaptions("blacklist-list");
-        console.log(
-            "Refreshing SVG: ",
-            filterTexts,
-            "blacklist ids: ",
-            blacklistIds
-        );
-        let svgStr = createSvgExt(
+        // Use input YAML filename or fallback
+        const arg = (typeof window.input === "string" && window.input.length > 0) ? window.input : "1";
+        let svgStr = window.createSvgExt(
             arg,
             [], // additionalFormats
             additionalConnections,
             window.defaultDepth,
-            filterTexts,
+            expandedIds,
             blacklistIds,
             window.debug
         );
-        svgStr =
-            svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
-        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg"))
-            return;
+        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) return;
 
         canvas.innerHTML = svgStr;
 
         // NEW: restore zoom/pan state after DOM update but before event
         state = preservedState;
 
-        const evtSwap = new Event("htmx:afterSwap", {
-            bubbles: true,
-        });
+        const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
         canvas.dispatchEvent(evtSwap);
     } catch (e) {
         console.error("Error updating SVG via createSvg:", e);
     }
 }
+window.reloadSvgFromBadges = reloadSvgFromBadges;
 
 // Helper: create a badge element from a shape
 function createBadgeForShape(el) {
