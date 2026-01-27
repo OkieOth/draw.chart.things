@@ -30,6 +30,47 @@ let blacklist = [];
 // NEW: global additionalConnections for persistence
 let additionalConnections = [];
 
+// Spinner helpers
+window.showSpinner = function () {
+    const el = document.getElementById("spinner");
+    console.log("Spinner start");
+    if (!el) return;
+    el.classList.remove("hidden");
+    el.setAttribute("aria-hidden", "false");
+};
+window.hideSpinner = function () {
+    const el = document.getElementById("spinner");
+    console.log("Spinner stop");
+    if (!el) return;
+    el.classList.add("hidden");
+    el.setAttribute("aria-hidden", "true");
+};
+
+function installCreateSvgExtSpinnerWrapper() {
+    if (typeof window.createSvgExt !== "function") return;
+    if (window.createSvgExt.__wrappedWithSpinner) return;
+    const raw = window.createSvgExt;
+    const wrapped = async function (...args) {
+        try {
+            if (typeof window.showSpinner === "function") window.showSpinner();
+            // Yield to the browser so the spinner can paint before heavy work
+            await new Promise((r) => requestAnimationFrame(() => r()));
+            // A second rAF improves reliability on some browsers
+            await new Promise((r) => requestAnimationFrame(() => r()));
+            let res = raw.apply(this, args);
+            if (res && typeof res.then === "function") {
+                res = await res;
+            }
+            return res;
+        } finally {
+            if (typeof window.hideSpinner === "function") window.hideSpinner();
+        }
+    };
+    wrapped.__wrappedWithSpinner = true;
+    wrapped.__original = raw;
+    window.createSvgExt = wrapped;
+}
+
 function initPage() {
     window.addEventListener("resize", positionBlacklistCollector);
     window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
@@ -712,6 +753,9 @@ async function loadSVGFromWasm() {
         }
         await new Promise((r) => setTimeout(r, 50));
     }
+
+    // Install spinner wrapper once createSvgExt is available
+    installCreateSvgExtSpinnerWrapper();
 
     let svgStr;
     try {

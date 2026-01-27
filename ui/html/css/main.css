@@ -217,3 +217,39 @@ button.tool-btn.active {
     cursor: pointer;
     max-width: 100%;
 }
+
+/* Spinner overlay */
+#spinner {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; /* above menu/minimap */
+}
+#spinner.hidden {
+    display: none;
+}
+#spinner .spinner-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(1px);
+}
+#spinner .spinner-content {
+    position: relative;
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    color: #333;
+    font-weight: 600;
+}
+#spinner .spinner-content i {
+    font-size: 20px;
+    color: #0a84ff;
+}
