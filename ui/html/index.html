@@ -298,6 +298,16 @@
                             : "";
                     })();
                     if (origInput) params.set("input", origInput);
+                    // Also include the original 'options' query parameter if present in the URL
+                    const origOptions = (function () {
+                        const urlParams = new URLSearchParams(
+                            window.location.search,
+                        );
+                        return urlParams.has("options")
+                            ? urlParams.get("options")
+                            : "";
+                    })();
+                    if (origOptions) params.set("options", origOptions);
                     const combo = getComboValue();
                     if (combo) {
                         params.set("combo", combo);

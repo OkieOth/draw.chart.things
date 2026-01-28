@@ -1,6 +1,7 @@
 package boxes
 
 import (
+	"fmt"
 	"maps"
 	"slices"
 
@@ -26,6 +27,9 @@ func (b *Boxes) mixInConnectionsImplCont(cont []Layout, additional map[string]Co
 }
 
 func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]ConnectionCont) {
+	if l.Caption == "mongodb4-shard0-data" {
+		fmt.Println("DEBUG")
+	}
 	if l.Id != "" {
 		if cc, ok := additional[l.Id]; ok {
 			for _, c := range cc.Connections {
@@ -33,7 +37,8 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 					l.Connections = append(l.Connections, c)
 				}
 			}
-		} else if l.Caption != "" {
+		}
+		if l.Caption != "" {
 			if cc, ok := additional[l.Caption]; ok {
 				for _, c := range cc.Connections {
 					if !hasConnectionByCapt(l.Connections, c.Dest) {
