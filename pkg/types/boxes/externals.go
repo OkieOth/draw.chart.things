@@ -9,28 +9,36 @@ import (
 )
 
 
-/* Model to inject additional connections in a boxes layout definition
+/* Model to inject additional things in a boxes layout definition
 */
-type AdditionalConnections struct {
+type BoxesFileMixings struct {
 
     // dictionary of connection objects
     Connections map[string]ConnectionCont  `yaml:"connections,omitempty"`
 
     Formats map[string]Format  `yaml:"formats,omitempty"`
+
+    // Set of formats that overwrites the style of boxes, if specific conditions are met
+    FormatVariations *FormatVariations  `yaml:"formatVariations,omitempty"`
+
+    // optional map of images used in the generated graphic
+    Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 }
 
-func NewAdditionalConnections() *AdditionalConnections {
-    return &AdditionalConnections{
+func NewBoxesFileMixings() *BoxesFileMixings {
+    return &BoxesFileMixings{
         Connections: make(map[string]ConnectionCont, 0),
         Formats: make(map[string]Format, 0),
+        FormatVariations: NewFormatVariations(),
+        Images: make(map[string]types.ImageDef, 0),
     }
 }
 
-func CopyAdditionalConnections(src *AdditionalConnections) *AdditionalConnections {
+func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
     if src == nil {
         return nil
     }
-    var ret AdditionalConnections
+    var ret BoxesFileMixings
     ret.Connections = make(map[string]ConnectionCont, 0)
     for k, v := range src.Connections {
         ret.Connections[k] = v
@@ -38,6 +46,11 @@ func CopyAdditionalConnections(src *AdditionalConnections) *AdditionalConnection
     ret.Formats = make(map[string]Format, 0)
     for k, v := range src.Formats {
         ret.Formats[k] = v
+    }
+    ret.FormatVariations = CopyFormatVariations(src.FormatVariations)
+    ret.Images = make(map[string]types.ImageDef, 0)
+    for k, v := range src.Images {
+        ret.Images[k] = v
     }
 
     return &ret
@@ -69,47 +82,6 @@ func CopyConnectionCont(src *ConnectionCont) *ConnectionCont {
     ret.Connections = make([]Connection, 0)
     for _, e := range src.Connections {
         ret.Connections = append(ret.Connections, e)
-    }
-
-    return &ret
-}
-
-
-
-
-
-
-
-
-/* Model to inject additional formats in a boxes layout definition
-*/
-type AdditionalFormats struct {
-
-    Formats map[string]Format  `yaml:"formats,omitempty"`
-
-    // optional list of images used in the generated graphic
-    Images map[string]types.ImageDef  `yaml:"images,omitempty"`
-}
-
-func NewAdditionalFormats() *AdditionalFormats {
-    return &AdditionalFormats{
-        Formats: make(map[string]Format, 0),
-        Images: make(map[string]types.ImageDef, 0),
-    }
-}
-
-func CopyAdditionalFormats(src *AdditionalFormats) *AdditionalFormats {
-    if src == nil {
-        return nil
-    }
-    var ret AdditionalFormats
-    ret.Formats = make(map[string]Format, 0)
-    for k, v := range src.Formats {
-        ret.Formats[k] = v
-    }
-    ret.Images = make(map[string]types.ImageDef, 0)
-    for k, v := range src.Images {
-        ret.Images[k] = v
     }
 
     return &ret

@@ -358,23 +358,22 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err, "error while loading input file for test", i)
 
-		var additionalConnections boxes.AdditionalConnections
+		mixins := make([]boxes.BoxesFileMixings, 0)
 		if test.inputExtConnections != "" {
-			extConnections, err := types.LoadInputFromFile[boxes.AdditionalConnections](test.inputExtConnections)
+			extConnections, err := types.LoadInputFromFile[boxes.BoxesFileMixings](test.inputExtConnections)
 			require.Nil(t, err)
 			require.NotNil(t, extConnections)
-			additionalConnections = *extConnections
+			mixins = append(mixins, *extConnections)
 		}
 
-		var additionalFormats boxes.AdditionalFormats
 		if test.inputExtFormats != "" {
-			extFormats, err := types.LoadInputFromFile[boxes.AdditionalFormats](test.inputExtFormats)
+			extFormats, err := types.LoadInputFromFile[boxes.BoxesFileMixings](test.inputExtFormats)
 			require.Nil(t, err)
 			require.NotNil(t, extFormats)
-			additionalFormats = *extFormats
+			mixins = append(mixins, *extFormats)
 		}
 
-		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, additionalFormats, additionalConnections, test.depth, test.expanded, test.blacklisted, false)
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, test.depth, test.expanded, test.blacklisted, false)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 

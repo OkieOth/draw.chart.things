@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Additional Connections",
-  "description": "Model to inject additional connections in a boxes layout definition",
-  "version": "0.2.0",
+  "title": "Boxes file mixings",
+  "description": "Model to inject additional things in a boxes layout definition",
+  "version": "0.3.0",
   "type": "object",
   "x-domain": "external",
   "$comment": "the IDs of the boxes to connect are the keys of the dictionary",
@@ -18,6 +18,17 @@
       "type": "object",
       "additionalProperties": {
         "$ref": "./boxes.json#/definitions/Format"
+      }
+    },
+    "formatVariations": {
+      "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
+      "$ref": "./boxes.json#/definitions/FormatVariations"
+    },
+    "images": {
+      "description": "optional map of images used in the generated graphic",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./formats.json#/definitions/ImageDef"
       }
     }
   },
@@ -62,6 +73,36 @@
             "width": 2,
             "color": "pink"
           }
+        }
+      }
+    },
+    {
+      "formats": {
+        "b_core": {
+          "fontCaption": {
+            "size": 0,
+            "lineHeight": 0,
+            "maxLenBeforeBreak": 300
+          }
+        },
+        "b_ext": {
+          "fill": {
+            "color": "#f9bc85"
+          }
+        }
+      }
+    },
+    {
+      "images": {
+        "smilie_01": {
+          "width": 16,
+          "height": 16,
+          "base64": "iVBORw0KGgo...Jggg=="
+        },
+        "smilie_02": {
+          "width": 32,
+          "height": 32,
+          "base64Src": "../../resources/pngs/smilie_02_80x80_base64.txt"
         }
       }
     }

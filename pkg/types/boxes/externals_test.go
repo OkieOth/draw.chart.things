@@ -13,7 +13,7 @@ func TestLoadExternalFormats(t *testing.T) {
 	inputLayout := "../../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml"
 	inputLayout2 := "../../../resources/examples_boxes/complex_horizontal_connected_pics.yaml"
 
-	additionalFormats, err := types.LoadInputFromFile[boxes.AdditionalFormats](inputFormat)
+	additionalFormats, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputFormat)
 	require.Nil(t, err)
 	require.NotNil(t, additionalFormats)
 
@@ -36,7 +36,7 @@ func TestLoadExternalFormats(t *testing.T) {
 
 	require.NotEqual(t, len(b2.Images), len(b.Formats))
 
-	b.MixinFormats(*additionalFormats)
+	b.MixinThings(*additionalFormats)
 
 	require.Equal(t, len(b2.Images), len(b.Images))
 }
@@ -49,7 +49,7 @@ func TestLoadExternalConnections(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, b)
 
-	c, err := types.LoadInputFromFile[boxes.AdditionalConnections](inputConnections)
+	c, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputConnections)
 	require.Nil(t, err)
 	require.NotNil(t, c)
 
@@ -58,7 +58,7 @@ func TestLoadExternalConnections(t *testing.T) {
 	// r5_2
 	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 0)
 
-	b.MixinConnections(*c)
+	b.MixinThings(*c)
 
 	// r4_1
 	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 4)

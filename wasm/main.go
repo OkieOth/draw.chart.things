@@ -34,28 +34,20 @@ func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []strin
 	return ret.SVG
 }
 
-func createSvgExt(boxesYaml string, additionalFormats, additionalConnections []string, defaultDepth int, expanded, blacklisted []string, debug bool) string {
+func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded, blacklisted []string, debug bool) string {
 	var b boxes.Boxes
 	if err := y.Unmarshal([]byte(boxesYaml), &b); err != nil {
 		fmt.Printf("error while unmarshalling boxes layout: %v", err)
 		return unknownSvg
 	}
 
-	for i, c := range additionalConnections {
-		var extConnections boxes.AdditionalConnections
-		if err := y.Unmarshal([]byte(c), &extConnections); err != nil {
+	for i, c := range mixins {
+		var m boxes.BoxesFileMixings
+		if err := y.Unmarshal([]byte(c), &m); err != nil {
 			fmt.Printf("error while unmarshalling external connections (%d): %v", i, err)
 			return unknownSvg
 		}
-		b.MixinConnections(extConnections)
-	}
-	for i, c := range additionalFormats {
-		var extFormats boxes.AdditionalFormats
-		if err := y.Unmarshal([]byte(c), &extFormats); err != nil {
-			fmt.Printf("error while unmarshalling external formats (%d): %v", i, err)
-			return unknownSvg
-		}
-		b.MixinFormats(extFormats)
+		b.MixinThings(m)
 	}
 
 	ret := boxesimpl.DrawBoxesFiltered(b, defaultDepth, expanded, blacklisted, debug)
@@ -105,25 +97,21 @@ func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
 		return "error: expected (string, string[], string[], number, string[], string[], bool)"
 	}
 	input := args[0].String()
-	additionalFormats, err := getArrayFromJsValue(args, 1)
+	mixins, err := getArrayFromJsValue(args, 1)
 	if err != nil {
 		return "error: additionalFormats needs to be an array"
 	}
-	additionalConnections, err := getArrayFromJsValue(args, 2)
-	if err != nil {
-		return "error: additionalConnections needs to be an array"
-	}
-	expanded, err := getArrayFromJsValue(args, 4)
+	expanded, err := getArrayFromJsValue(args, 3)
 	if err != nil {
 		return "error: expanded must be an array"
 	}
-	blacklisted, err := getArrayFromJsValue(args, 5)
+	blacklisted, err := getArrayFromJsValue(args, 4)
 	if err != nil {
 		return "error: blacklisted must be an array"
 	}
-	depth := args[3].Int()
-	debug := args[6].Bool()
-	return createSvgExt(input, additionalFormats, additionalConnections, depth, expanded, blacklisted, debug)
+	depth := args[2].Int()
+	debug := args[5].Bool()
+	return createSvgExt(input, mixins, depth, expanded, blacklisted, debug)
 }
 
 func main() {

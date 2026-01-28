@@ -231,13 +231,13 @@ func FilterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []s
 
 func DrawBoxesFilteredExt(
 	layout boxes.Boxes,
-	additionalFormats boxes.AdditionalFormats,
-	additionalConnections boxes.AdditionalConnections,
+	mixins []boxes.BoxesFileMixings,
 	defaultDepth int,
 	expanded, blacklisted []string,
 	debug bool) UIReturn {
-	layout.MixinConnections(additionalConnections)
-	layout.MixinFormats(additionalFormats)
+	for _, m := range mixins {
+		layout.MixinThings(m)
+	}
 	return DrawBoxesFiltered(layout, defaultDepth, expanded, blacklisted, debug)
 }
 

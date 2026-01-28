@@ -7,21 +7,6 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
-func (b *Boxes) MixinFormats(additional AdditionalFormats) {
-	if len(additional.Formats) > 0 {
-		if b.Formats == nil {
-			b.Formats = make(map[string]Format)
-		}
-		maps.Copy(b.Formats, additional.Formats)
-	}
-	if len(additional.Images) > 0 {
-		if b.Images == nil {
-			b.Images = make(map[string]types.ImageDef)
-		}
-		maps.Copy(b.Images, additional.Images)
-	}
-}
-
 func hasConnection(connections []Connection, destId string) bool {
 	return slices.ContainsFunc(connections, func(c Connection) bool {
 		return c.DestId == destId
@@ -48,9 +33,32 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 	b.mixInConnectionsImplCont(l.Vertical, additional)
 }
 
-func (b *Boxes) MixinConnections(additional AdditionalConnections) {
+func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	if len(additional.Formats) > 0 {
+		if b.Formats == nil {
+			b.Formats = make(map[string]Format, 0)
+		}
 		maps.Copy(b.Formats, additional.Formats)
 	}
 	b.mixInConnectionsImpl(&b.Boxes, additional.Connections)
+	if len(additional.Formats) > 0 {
+		if b.Formats == nil {
+			b.Formats = make(map[string]Format)
+		}
+		maps.Copy(b.Formats, additional.Formats)
+	}
+	if len(additional.Images) > 0 {
+		if b.Images == nil {
+			b.Images = make(map[string]types.ImageDef)
+		}
+		maps.Copy(b.Images, additional.Images)
+	}
+	if additional.FormatVariations != nil {
+		if len(additional.FormatVariations.HasTag) > 0 {
+			if b.FormatVariations == nil {
+				b.FormatVariations = NewFormatVariations()
+			}
+			maps.Copy(b.FormatVariations.HasTag, additional.FormatVariations.HasTag)
+		}
+	}
 }
