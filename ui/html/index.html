@@ -213,7 +213,6 @@
         </div>
 
         <script>
-
             window.initPage();
             window.handleInputQueryParam();
             window.loadYamlInput();
@@ -224,16 +223,30 @@
                 const btnExpandAll = document.getElementById("btn-expand-all");
                 if (!btnExpandAll) return;
                 btnExpandAll.addEventListener("click", function () {
-                    if (!window.getAllBoxIds || !window.applyBadgeState || !window.reloadSvgFromBadges) {
-                        alert("Expand All is not available: missing required functions.");
+                    if (
+                        !window.getAllBoxIds ||
+                        !window.applyBadgeState ||
+                        !window.reloadSvgFromBadges
+                    ) {
+                        alert(
+                            "Expand All is not available: missing required functions.",
+                        );
                         return;
                     }
                     // Get all box ids, filter out blacklisted
                     const allBoxIds = window.getAllBoxIds();
-                    const blacklist = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : (window.blacklist || []);
-                    const toExpand = allBoxIds.filter(id => !blacklist.includes(id));
+                    const blacklist =
+                        window.blacklist && Array.isArray(window.blacklist)
+                            ? window.blacklist
+                            : window.blacklist || [];
+                    const toExpand = allBoxIds.filter(
+                        (id) => !blacklist.includes(id),
+                    );
                     // Build badge state objects
-                    const badgeState = toExpand.map(id => ({ id: "", hid: id }));
+                    const badgeState = toExpand.map((id) => ({
+                        id: "",
+                        hid: id,
+                    }));
                     window.applyBadgeState(badgeState);
                     window.reloadSvgFromBadges(true);
                 });

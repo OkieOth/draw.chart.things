@@ -78,6 +78,15 @@ function initPage() {
     document.addEventListener("DOMContentLoaded", function () {
         const combo = document.getElementById("toolbar-combo");
         if (combo) {
+            // Hide combo if no 'options' param was provided
+            if (!window.queryOptions) {
+                combo.style.display = "none";
+            }
+            // Load combo options dynamically from YAML if 'options' query param is present
+            if (typeof window.loadComboOptionsFromYaml === "function") {
+                // Fire and forget; selection will be set inside loader if 'combo' is present
+                window.loadComboOptionsFromYaml();
+            }
             let previousYamlContent = "";
             combo.addEventListener("change", async function (e) {
                 await handleComboBoxChange(combo, previousYamlContent, function (newYaml) {
@@ -811,6 +820,13 @@ function handleInputQueryParam() {
             const content = raw.replace(/\+/g, " ");
             window.queryInput = content;
         }
+        // NEW: parse 'options' query param for dynamic combo source
+        if (params.has("options")) {
+            const rawOptions = params.get("options") || "";
+            window.queryOptions = rawOptions.replace(/\+/g, " ");
+        } else {
+            window.queryOptions = undefined;
+        }
         // NEW: parse 'debug' query param and store as global boolean
         const rawDebug = params.get("debug");
         const truthy = ["true", "1", "yes", "on"];
@@ -824,6 +840,8 @@ function handleInputQueryParam() {
         // Combo box
         if (params.has("combo")) {
             const comboVal = params.get("combo");
+            // Store for use after dynamic options load
+            window.queryCombo = comboVal || "";
             // Set combo box value after DOMContentLoaded
             document.addEventListener("DOMContentLoaded", function () {
                 const combo = document.getElementById("toolbar-combo");
@@ -833,6 +851,8 @@ function handleInputQueryParam() {
                     combo.dispatchEvent(new Event("change", { bubbles: true }));
                 }
             });
+        } else {
+            window.queryCombo = undefined;
         }
 
         // Expanded IDs (badges)
@@ -874,6 +894,73 @@ function handleInputQueryParam() {
         }
         window.debug = false;
     }
+}
+
+// NEW: Load combo-box options from a YAML mapping specified by the 'options' query param
+window.loadComboOptionsFromYaml = async function () {
+    try {
+        // Only proceed if an 'options' param was provided
+        const src = window.queryOptions;
+        if (!src) return;
+        if (location.protocol === "file:") {
+            console.error("Options YAML must be served over HTTP(S).");
+            return;
+        }
+        const resp = await fetch("/data/" + src, { cache: "no-cache" });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const text = await resp.text();
+        // Parse a simple YAML mapping: label: value (labels may be quoted)
+        const entries = parseSimpleYamlMapping(text);
+        const sel = document.getElementById("toolbar-combo");
+        if (!sel) return;
+        // Ensure it's visible when options are available
+        sel.style.display = "";
+        // Replace existing options with dynamically loaded ones
+        sel.innerHTML = "";
+        for (const [label, value] of entries) {
+            const opt = document.createElement("option");
+            opt.value = value;
+            opt.textContent = label;
+            sel.appendChild(opt);
+        }
+        // If a combo selection was provided via query param, apply it
+        if (typeof window.queryCombo === "string" && sel.querySelector(`option[value='${CSS.escape(window.queryCombo)}']`)) {
+            sel.value = window.queryCombo;
+        } else if (!sel.value && sel.options.length) {
+            // Ensure the first option is selected if nothing is selected
+            sel.selectedIndex = 0;
+        }
+        // Trigger a change to load the associated YAML if a non-empty value is selected
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (e) {
+        console.error("Failed to load combo options from YAML:", e);
+    }
+};
+
+// Helper: very small YAML mapping parser for lines like: "Label": value
+function parseSimpleYamlMapping(text) {
+    const lines = String(text).split(/\r?\n/);
+    const out = [];
+    for (let line of lines) {
+        // Strip comments and trim
+        line = line.replace(/#.*/, "").trim();
+        if (!line) continue;
+        // Match key: value allowing quoted keys and values
+        const m = line.match(/^([^:]+):\s*(.*)$/);
+        if (!m) continue;
+        let key = m[1].trim();
+        let val = m[2].trim();
+        // Remove surrounding quotes from key
+        if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+            key = key.slice(1, -1);
+        }
+        // Remove surrounding quotes from value
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+            val = val.slice(1, -1);
+        }
+        out.push([key, val]);
+    }
+    return out;
 }
 
 function attachBadgeRemoval() {
