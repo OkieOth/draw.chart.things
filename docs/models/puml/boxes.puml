@@ -66,6 +66,7 @@ class "**LayoutArray**" as LayoutArray extends List {
 }
 
 class "**Connection**" as Connection {
+        StringType dest
         StringType destId
         BooleanType sourceArrow
         BooleanType destArrow
@@ -208,6 +209,7 @@ FormatVariations  *--  Format
     
     
     
+
 
 
 

@@ -7,9 +7,15 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
-func hasConnection(connections []Connection, destId string) bool {
+func hasConnectionById(connections []Connection, destId string) bool {
 	return slices.ContainsFunc(connections, func(c Connection) bool {
 		return c.DestId == destId
+	})
+}
+
+func hasConnectionByCapt(connections []Connection, caption string) bool {
+	return slices.ContainsFunc(connections, func(c Connection) bool {
+		return c.Dest == caption
 	})
 }
 
@@ -23,8 +29,17 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 	if l.Id != "" {
 		if cc, ok := additional[l.Id]; ok {
 			for _, c := range cc.Connections {
-				if !hasConnection(l.Connections, c.DestId) {
+				if !hasConnectionById(l.Connections, c.DestId) {
 					l.Connections = append(l.Connections, c)
+				}
+			}
+		} else if l.Caption != "" {
+			if cc, ok := additional[l.Caption]; ok {
+				for _, c := range cc.Connections {
+					if !hasConnectionByCapt(l.Connections, c.Dest) {
+						c.DestId = b.FindBoxWithCaption(c.Dest)
+						l.Connections = append(l.Connections, c)
+					}
 				}
 			}
 		}
@@ -61,4 +76,32 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 			maps.Copy(b.FormatVariations.HasTag, additional.FormatVariations.HasTag)
 		}
 	}
+}
+
+func (b *Boxes) findBoxInContWithCaption(cont []Layout, caption string) string {
+	if cont == nil {
+		return ""
+	}
+	for i := range len(cont) {
+		found := b.findBoxWithCaption(&cont[i], caption)
+		if found != "" {
+			return found
+		}
+	}
+	return ""
+}
+
+func (b *Boxes) findBoxWithCaption(box *Layout, caption string) string {
+	if box.Caption == caption {
+		return box.Id
+	}
+	found := b.findBoxInContWithCaption(box.Vertical, caption)
+	if found != "" {
+		return found
+	}
+	return b.findBoxInContWithCaption(box.Horizontal, caption)
+}
+
+func (b *Boxes) FindBoxWithCaption(caption string) string {
+	return b.findBoxWithCaption(&b.Boxes, caption)
 }

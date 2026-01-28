@@ -264,6 +264,9 @@ func CopyFormatVariations(src *FormatVariations) *FormatVariations {
 
 type Connection struct {
 
+    // Caption text of the destination box, can be used as alternative to 'destId'
+    Dest string  `yaml:"dest"`
+
     // box id of the destination
     DestId string  `yaml:"destId"`
 
@@ -291,6 +294,7 @@ func CopyConnection(src *Connection) *Connection {
         return nil
     }
     var ret Connection
+    ret.Dest = src.Dest
     ret.DestId = src.DestId
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow

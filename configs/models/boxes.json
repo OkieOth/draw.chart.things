@@ -132,6 +132,10 @@
     "Connection": {
       "type": "object",
       "properties": {
+        "dest": {
+          "description": "Caption text of the destination box, can be used as alternative to 'destId'",
+          "type": "string"
+        },
         "destId": {
           "description": "box id of the destination",
           "type": "string"
@@ -156,7 +160,7 @@
           }
         }
       },
-      "required": ["destId", "sourceArrow", "destArrow", "tags"]
+      "required": ["dest", "destId", "sourceArrow", "destArrow", "tags"]
     },
     "Format": {
       "type": "object",

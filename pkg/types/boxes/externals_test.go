@@ -71,3 +71,28 @@ func TestLoadExternalConnections(t *testing.T) {
 	require.Equal(t, 2.0, *cl.Line.Width)
 	require.Equal(t, "pink", *cl.Line.Color)
 }
+
+func TestLoadExternalConnections2(t *testing.T) {
+	input := "../../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml"
+	inputConnections := "../../../resources/examples_boxes/ext_connections2.yaml"
+
+	b, err := types.LoadInputFromFile[boxes.Boxes](input)
+	require.Nil(t, err)
+	require.NotNil(t, b)
+
+	c, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputConnections)
+	require.Nil(t, err)
+	require.NotNil(t, c)
+
+	// r4_1
+	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 2)
+	// r5_2
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 0)
+
+	b.MixinThings(*c)
+
+	// r4_1
+	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 4)
+	// r5_2
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 1)
+}

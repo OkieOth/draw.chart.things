@@ -36,3 +36,4 @@ external
 __debug_*
 build
 *.wasm
+ext_*
