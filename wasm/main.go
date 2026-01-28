@@ -93,13 +93,13 @@ func createSvgWrapper(this js.Value, args []js.Value) interface{} {
 }
 
 func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
-	if len(args) < 7 {
-		return "error: expected (string, string[], string[], number, string[], string[], bool)"
+	if len(args) < 6 {
+		return "error: expected (string, string[], number, string[], string[], bool)"
 	}
 	input := args[0].String()
 	mixins, err := getArrayFromJsValue(args, 1)
 	if err != nil {
-		return "error: additionalFormats needs to be an array"
+		return "error: mixins need to be an array"
 	}
 	expanded, err := getArrayFromJsValue(args, 3)
 	if err != nil {

@@ -27,8 +27,8 @@ let undoStack = [];
 let blacklistMode = false;
 let blacklist = [];
 
-// NEW: global additionalConnections for persistence
-let additionalConnections = [];
+// NEW: global additional mixins for persistence
+let mixins = [];
 
 // Spinner helpers
 window.showSpinner = function () {
@@ -91,8 +91,8 @@ function initPage() {
             combo.addEventListener("change", async function (e) {
                 await handleComboBoxChange(combo, previousYamlContent, function (newYaml) {
                     previousYamlContent = newYaml;
-                    // Persist selection in global additionalConnections
-                    additionalConnections = newYaml ? [newYaml] : [];
+                    // Persist selection in global mixins
+                    mixins = newYaml ? [newYaml] : [];
                     // Set currentYamlFile to combo value if present
                     if (combo.value) {
                         window.currentYamlFile = combo.value;
@@ -119,7 +119,7 @@ function initPage() {
             setPreviousYamlContent("");
             console.log("Combo box changed: No Connections selected");
         }
-        // Always call createSvgExt with global additionalConnections and current expanded/blacklist state
+        // Always call createSvgExt with global mixins and current expanded/blacklist state
         // Preserve only data-hid values before SVG refresh
         const badgeList = document.getElementById("badge-list");
         const savedBadgeState = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
@@ -138,8 +138,7 @@ function initPage() {
             const blacklistIds = savedBlacklistState;
             let svgStr = createSvgExt(
                 arg,
-                [], // additionalFormats
-                additionalConnections,
+                mixins,
                 window.defaultDepth,
                 filterTexts,
                 blacklistIds,
@@ -435,8 +434,7 @@ function initPage() {
                     );
                     let svgStr = createSvgExt(
                         arg,
-                        [], // additionalFormats
-                        additionalConnections, // additionalConnections
+                        mixins, // additional mixins to hone the layout input
                         window.defaultDepth,
                         filterTexts,
                         blacklistIds,
@@ -787,8 +785,7 @@ async function loadSVGFromWasm() {
         console.log("Refreshing SVG:", filterTexts, "blacklist ids:", blacklistIds);
         const res = window.createSvgExt(
             initialArg,
-            [], // additionalFormats
-            additionalConnections, // additionalConnections
+            mixins, // additional mixins to hone the layout input
             window.defaultDepth,
             filterTexts,
             blacklistIds,
@@ -1195,8 +1192,7 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
         const arg = (typeof window.input === "string" && window.input.length > 0) ? window.input : "1";
         let svgStr = window.createSvgExt(
             arg,
-            [], // additionalFormats
-            additionalConnections,
+            mixins,
             maxDepth,
             expandedIds,
             blacklistIds,
@@ -1409,8 +1405,7 @@ function observeCaptionAndRefresh(el) {
                 );
                 let svgStr = createSvgExt(
                     arg,
-                    [], // additionalFormats
-                    additionalConnections, // additionalConnections
+                    mixins, // additional mixins to hone the layout input
                     window.defaultDepth,
                     filterTexts,
                     blacklistIds,
