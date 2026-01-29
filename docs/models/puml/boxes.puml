@@ -6,6 +6,8 @@ hide empty fields
 
 class "**Boxes**" as Boxes {
         StringType title
+        StringType titleFormat
+        Legend legend
         Layout boxes
         Map<Format> formats
         FormatVariations formatVariations
@@ -17,6 +19,14 @@ class "**Boxes**" as Boxes {
         IntegerType minConnectorMargin
 }
 note top: Model to describe the input\nof block diagrams
+
+ 
+
+class "**Legend**" as Legend {
+        LegendEntry[] entries
+        StringType format
+}
+note top: Definition of the output for\nthe legend
 
  
 
@@ -61,6 +71,14 @@ class "**FormatVariations**" as FormatVariations {
 
  
 
+
+class "**LegendEntry**" as LegendEntry {
+        StringType text
+        StringType format
+}
+note top: Definition of one legend entry
+
+ 
 
 class "**LayoutArray**" as LayoutArray extends List {
 }
@@ -156,6 +174,9 @@ note top: parameters of an image to\nbe displayed in the SVG
 
     
 
+
+Boxes  *--  Legend
+
 Boxes  *--  Layout
 
 Boxes  *--  Format
@@ -167,6 +188,10 @@ Boxes  *--  ImageDef
 
 
 
+
+
+    
+Legend "0" *-- "n" LegendEntry
 
 
     
@@ -207,6 +232,9 @@ Format  *--  FillDef
 FormatVariations  *--  Format
 
     
+    
+
+
     
     
 

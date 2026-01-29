@@ -333,7 +333,7 @@ func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, 
 
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		if d.Weekday() == time.Sunday || d.Weekday() == time.Saturday {
-			drawing.DrawSolidRect(currentX, yStart+monthStartOffset, dayWidth, length, weekendBoxFormat)
+			drawing.DrawSolidRect(currentX, yStart+monthStartOffset, dayWidth, length, nil, &weekendBoxFormat)
 		}
 		if d.Day() == 1 {
 			// new month

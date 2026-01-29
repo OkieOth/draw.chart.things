@@ -41,6 +41,7 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	}
 
 	doc.ConnectBoxes()
+	doc.AdjustDocHeightTLegend(textDimensionCalulator)
 	output, err := os.Create(outputFile)
 	svgdrawing := svgdrawing.NewDrawing(output)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
@@ -48,6 +49,8 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 	doc.DrawBoxes(svgdrawing)
 	doc.DrawConnections(svgdrawing)
+	doc.DrawTitle(svgdrawing, textDimensionCalulator)
+	doc.DrawLegend(svgdrawing, textDimensionCalulator)
 	svgdrawing.Done()
 	output.Close()
 	return nil
@@ -249,6 +252,7 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 		return UIReturn{ErrorMsg: fmt.Sprintf("error while initialy layout: %v", err)}
 	}
 	doc.ConnectBoxes()
+	doc.AdjustDocHeightTLegend(textDimensionCalulator)
 	var svgBuilder strings.Builder
 	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
@@ -266,6 +270,8 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 		doc.Boxes.DrawTextBoxes(svgdrawing)
 	}
 	doc.DrawConnections(svgdrawing)
+	doc.DrawTitle(svgdrawing, textDimensionCalulator)
+	doc.DrawLegend(svgdrawing, textDimensionCalulator)
 	svgdrawing.Done()
 	return UIReturn{SVG: svgBuilder.String()}
 }
@@ -332,21 +338,25 @@ func InitialLayoutBoxes(b *boxes.Boxes, c types.TextDimensionCalculator) (*boxes
 	if err != nil {
 		return nil, err
 	}
+
 	doc.Boxes.X = doc.GlobalPadding
 	doc.Boxes.Y = doc.GlobalPadding
+
 	doc.Boxes.InitDimensions(c)
 	doc.Width = doc.Boxes.Width + doc.GlobalPadding*2
 	doc.Height = doc.Boxes.Height + doc.GlobalPadding*2
+	doc.Boxes.Center()
+	doc.Height = doc.AdjustDocHeight(&doc.Boxes, 0) + (2 * doc.GlobalPadding)
+
 	if doc.Title != "" {
-		defaultFormat := doc.Formats["default"] // risky doesn't check if default exists
-		w, h := c.Dimensions(doc.Title, &defaultFormat.FontCaption)
+		format2Use := doc.GetTitleFormat()
+		w, h := c.Dimensions(doc.Title, &format2Use)
 		doc.Height += h + (2 * doc.GlobalPadding)
 		if w > doc.Width {
 			doc.Width = w + (2 * doc.GlobalPadding)
 		}
 	}
-	doc.Boxes.Center()
-	doc.Height = doc.AdjustDocHeight(&doc.Boxes, 0) + (2 * doc.GlobalPadding)
+
 	return doc, nil
 }
 
@@ -360,15 +370,16 @@ func LayoutBoxesWithFilter(b *boxes.Boxes, c types.TextDimensionCalculator, defa
 	doc.Boxes.InitDimensions(c)
 	doc.Width = doc.Boxes.Width + doc.GlobalPadding*2
 	doc.Height = doc.Boxes.Height + doc.GlobalPadding*2
+	doc.Boxes.Center()
+	doc.Height = doc.AdjustDocHeight(&doc.Boxes, 0) + (2 * doc.GlobalPadding)
+
 	if doc.Title != "" {
-		defaultFormat := doc.Formats["default"] // risky doesn't check if default exists
-		w, h := c.Dimensions(doc.Title, &defaultFormat.FontCaption)
+		format2Use := doc.GetTitleFormat()
+		w, h := c.Dimensions(doc.Title, &format2Use)
 		doc.Height += h + (2 * doc.GlobalPadding)
 		if w > doc.Width {
 			doc.Width = w + (2 * doc.GlobalPadding)
 		}
 	}
-	doc.Boxes.Center()
-	doc.Height = doc.AdjustDocHeight(&doc.Boxes, 0) + (2 * doc.GlobalPadding)
 	return doc, nil
 }

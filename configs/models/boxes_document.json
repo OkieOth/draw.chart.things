@@ -6,8 +6,16 @@
   "x-domain": "implementation",
   "properties": {
     "title": {
-      "type": "string",
-      "description": "Title of the document"
+      "description": "Title of the document",
+      "type": "string"
+    },
+    "titleFormat": {
+      "description": "format reference used for the title",
+      "type": "string"
+    },
+    "legend": {
+      "description": "Legend definition used in this diagram",
+      "$ref": "./boxes.json#/definitions/Legend"
     },
     "boxes": {
       "$ref": "#/definitions/LayoutElement"

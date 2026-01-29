@@ -54,6 +54,17 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 }
 
 func (b *Boxes) MixinThings(additional BoxesFileMixings) {
+	if additional.Title != nil {
+		b.Title += ": " + *additional.Title
+	}
+	if additional.Legend != nil {
+		if b.Legend == nil {
+			b.Legend = NewLegend()
+		}
+		if len(additional.Legend.Entries) > 0 {
+			b.Legend.Entries = append(b.Legend.Entries, additional.Legend.Entries...)
+		}
+	}
 	if len(additional.Formats) > 0 {
 		if b.Formats == nil {
 			b.Formats = make(map[string]Format, 0)

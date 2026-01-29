@@ -261,6 +261,124 @@ func (doc *BoxesDocument) AdjustDocHeight(le *LayoutElement, currentMax int) int
 	return currentMax
 }
 
+func (doc *BoxesDocument) GetTitleFormat() types.FontDef {
+	format2Use := doc.Formats["default"].FontCaption // risky doesn't check if default exists
+	if doc.TitleFormat != nil {
+		if titleFormat, ok := doc.Formats[*doc.TitleFormat]; ok {
+			format2Use = titleFormat.FontCaption
+		}
+	}
+	format2Use.Anchor = types.FontDefAnchorEnum_left
+	return format2Use
+}
+
+func (doc *BoxesDocument) DrawTitle(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	if doc.Title != "" {
+		format2Use := doc.GetTitleFormat()
+		//_, h := c.Dimensions(doc.Title, &format2Use)
+		x := doc.Boxes.X
+		y := doc.Boxes.Y + doc.Boxes.Height
+		drawing.DrawText(doc.Title, x, y, 0, &format2Use)
+	}
+	return nil
+}
+func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	if doc.Legend != nil {
+		if len(doc.Legend.Entries) > 0 {
+			format2Use := doc.Formats["default"].FontCaption // risky doesn't check if default exists
+			if doc.Legend.Format != nil {
+				if legendFormat, ok := doc.Formats[*doc.Legend.Format]; ok {
+					format2Use = legendFormat.FontCaption
+				}
+			}
+			format2Use.Anchor = types.FontDefAnchorEnum_left
+			currentX := doc.GlobalPadding
+			lineW := 0.5
+			lineC := "#9a9a9a"
+			lineFormat := types.LineDef{
+				Width: &lineW,
+				Color: &lineC,
+			}
+			currentY := doc.Boxes.Y + doc.Boxes.Height + (2 * types.GlobalPadding)
+			drawing.DrawLine(currentX, currentY-5, currentX+doc.Boxes.Width, currentY, lineFormat)
+			for _, e := range doc.Legend.Entries {
+				if e.Format == "" {
+					// no format found - the entry isn't included in the legend
+					continue
+				}
+				legendFormat, ok := doc.Formats[e.Format]
+				if !ok {
+					// no suitable format found - the entry isn't included in the legend
+					continue
+				}
+				text := e.Text + ": "
+				w, _ := c.Dimensions(text, &format2Use)
+				if (currentX + w) >= (doc.Boxes.X + doc.Boxes.Width) {
+					currentX = doc.GlobalPadding
+					currentY += types.GlobalPadding
+				}
+				drawing.DrawText(text, currentX, currentY, 0, &format2Use)
+				currentX += w
+				if legendFormat.Fill != nil {
+					// draw example box
+					currentX += 5
+					c := "#606060"
+					line := types.LineDef{
+						Color: &c,
+					}
+					drawing.DrawSolidRect(currentX, currentY, 6, 10, legendFormat.Fill, &line)
+					currentX += 6
+				} else if legendFormat.Line != nil {
+					// draw line example
+					currentX += 5
+					drawing.DrawLine(currentX, currentY+2, currentX+6, currentY+2, *legendFormat.Line)
+					drawing.DrawLine(currentX+6, currentY+2, currentX+6, currentY+6, *legendFormat.Line)
+					drawing.DrawLine(currentX+6, currentY+6, currentX+12, currentY+6, *legendFormat.Line)
+					currentX += 12
+				} else {
+					// dummy output
+					currentX += 5
+					drawing.DrawText("?", currentX, currentY, 0, &format2Use) // Dummy
+					currentX += 6
+				}
+				drawing.DrawText(",", currentX, currentY, 0, &format2Use)
+				currentX += doc.GlobalPadding
+			}
+		}
+	}
+	return nil
+}
+
+func (doc *BoxesDocument) AdjustDocHeightTLegend(c types.TextDimensionCalculator) error {
+	if doc.Legend != nil {
+		if len(doc.Legend.Entries) > 0 {
+			format2Use := doc.Formats["default"].FontCaption // risky doesn't check if default exists
+			if doc.Legend.Format != nil {
+				if legendFormat, ok := doc.Formats[*doc.Legend.Format]; ok {
+					format2Use = legendFormat.FontCaption
+				}
+			}
+			currentX := doc.GlobalPadding
+			currentY := doc.Boxes.Y + doc.Boxes.Height + (2 * types.GlobalPadding)
+			for _, e := range doc.Legend.Entries {
+				text := e.Text + ": "
+				w, _ := c.Dimensions(text, &format2Use)
+				if (currentX + w) >= (doc.Boxes.X + doc.Boxes.Width) {
+					currentX = doc.GlobalPadding
+					currentY += types.GlobalPadding
+				}
+				currentX += w
+				currentX += 6
+				currentX += doc.GlobalPadding
+			}
+			if currentY > doc.Height {
+				doc.Height = currentY + doc.GlobalPadding
+			}
+		}
+	}
+	return nil
+}
+
 func (b *LayoutElement) Draw(drawing types.Drawing) error {
 	if b.Format != nil {
 		f := types.RectWithTextFormat{
@@ -314,7 +432,7 @@ func (b *LayoutElement) DrawTextBoxes(drawing types.Drawing) error {
 			Opacity: &o,
 		}
 		if b.XTextBox != nil {
-			if err := drawing.DrawSolidRect(*b.XTextBox, *b.YTextBox, *b.WidthTextBox, *b.HeightTextBox, f); err != nil {
+			if err := drawing.DrawSolidRect(*b.XTextBox, *b.YTextBox, *b.WidthTextBox, *b.HeightTextBox, nil, &f); err != nil {
 				return fmt.Errorf("Error drawing text boxes element %s: %w", b.Id, err)
 			}
 		}

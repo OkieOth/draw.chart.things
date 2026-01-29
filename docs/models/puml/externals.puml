@@ -4,6 +4,22 @@ hide empty methods
 hide empty fields
 
 
+class "**Legend**" as Legend {
+        LegendEntry[] entries
+        StringType format
+}
+note top: Definition of the output for\nthe legend
+
+ 
+
+class "**LegendEntry**" as LegendEntry {
+        StringType text
+        StringType format
+}
+note top: Definition of one legend entry
+
+ 
+
 class "**Layout**" as Layout {
         StringType id
         StringType caption
@@ -134,6 +150,13 @@ class "**ImageDef**" as ImageDef {
 note top: parameters of an image to\nbe displayed in the SVG
 
  
+
+
+    
+Legend "0" *-- "n" LegendEntry
+
+
+    
 
 
     

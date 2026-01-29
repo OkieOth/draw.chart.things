@@ -7,6 +7,14 @@
   "x-domain": "external",
   "$comment": "the IDs of the boxes to connect are the keys of the dictionary",
   "properties": {
+    "title": {
+      "description": "optional title, that's appended to the original layout title",
+      "type": "string"
+    },
+    "legend": {
+      "description": "Legend definition used in this diagram",
+      "$ref": "./boxes.json#/definitions/Legend"
+    },
     "connections": {
       "description": "dictionary of connection objects",
       "type": "object",

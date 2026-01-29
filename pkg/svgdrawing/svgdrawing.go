@@ -465,13 +465,20 @@ func (d *SvgDrawing) DrawArrow(x, y, angle int, format types.LineDef) error {
 	return nil
 }
 
-func (d *SvgDrawing) DrawSolidRect(x, y, width, height int, format types.LineDef) error {
+func (d *SvgDrawing) DrawSolidRect(x, y, width, height int, fill *types.FillDef, line *types.LineDef) error {
 	attr := ""
-	if format.Color != nil {
-		attr = fmt.Sprintf("fill: %s", *format.Color)
-		if format.Opacity != nil {
-			attr += fmt.Sprintf(";opacity: %f", *format.Opacity)
+	if fill != nil && fill.Color != nil {
+		attr = fmt.Sprintf("fill: %s", *fill.Color)
+		if fill.Opacity != nil {
+			attr += fmt.Sprintf(";opacity: %f", *fill.Opacity)
 		}
+	}
+	if line != nil && line.Color != nil {
+		sep := ""
+		if attr != "" {
+			sep = ";"
+		}
+		attr = fmt.Sprintf("%s%sstroke: %s", attr, sep, *line.Color)
 	}
 	d.canvas.Rect(x, y, width, height, attr)
 	return nil

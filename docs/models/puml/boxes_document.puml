@@ -6,6 +6,8 @@ hide empty fields
 
 class "**BoxesDocument**" as BoxesDocument {
         StringType title
+        StringType titleFormat
+        Legend legend
         LayoutElement boxes
         IntegerType height
         IntegerType width
@@ -233,6 +235,9 @@ note top: parameters of an image to\nbe displayed in the SVG
 
 
     
+
+
+BoxesDocument  *--  Legend
 
 BoxesDocument  *--  LayoutElement
 

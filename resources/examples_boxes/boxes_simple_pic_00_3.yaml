@@ -1,5 +1,11 @@
 title: Simple Pic Example (2)
+titleFormat: title
 formats:
+  title:
+    fontCaption:
+      maxLenBeforeBreak: 300
+      size: 6
+      color: blue
   default:
     fontCaption:
       maxLenBeforeBreak: 300

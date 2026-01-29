@@ -16,6 +16,12 @@ type BoxesDocument struct {
     // Title of the document
     Title string  `yaml:"title"`
 
+    // format reference used for the title
+    TitleFormat *string  `yaml:"titleFormat,omitempty"`
+
+    // Legend definition used in this diagram
+    Legend *Legend  `yaml:"legend,omitempty"`
+
     Boxes LayoutElement  `yaml:"boxes"`
 
     // Height of the document
@@ -64,6 +70,7 @@ type BoxesDocument struct {
 
 func NewBoxesDocument() *BoxesDocument {
     return &BoxesDocument{
+        Legend: NewLegend(),
         Boxes: *NewLayoutElement(),
         Connections: make([]ConnectionElem, 0),
         ConnectedElems: make([]string, 0),
@@ -83,6 +90,8 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     }
     var ret BoxesDocument
     ret.Title = src.Title
+    ret.TitleFormat = src.TitleFormat
+    ret.Legend = CopyLegend(src.Legend)
     ret.Boxes = *CopyLayoutElement(&src.Boxes)
     ret.Height = src.Height
     ret.Width = src.Width

@@ -316,6 +316,8 @@ func initExternalImages(doc *boxes.BoxesDocument) error {
 func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 	doc := boxes.NewBoxesDocument()
 	doc.Title = b.Title
+	doc.TitleFormat = b.TitleFormat
+	doc.Legend = b.Legend
 	doc.Formats = initFormats(b.Formats)
 	doc.Images = b.Images
 	if b.MinBoxMargin != nil {

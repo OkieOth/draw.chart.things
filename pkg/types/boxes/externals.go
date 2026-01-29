@@ -13,6 +13,12 @@ import (
 */
 type BoxesFileMixings struct {
 
+    // optional title, that's appended to the original layout title
+    Title *string  `yaml:"title,omitempty"`
+
+    // Legend definition used in this diagram
+    Legend *Legend  `yaml:"legend,omitempty"`
+
     // dictionary of connection objects
     Connections map[string]ConnectionCont  `yaml:"connections,omitempty"`
 
@@ -27,6 +33,7 @@ type BoxesFileMixings struct {
 
 func NewBoxesFileMixings() *BoxesFileMixings {
     return &BoxesFileMixings{
+        Legend: NewLegend(),
         Connections: make(map[string]ConnectionCont, 0),
         Formats: make(map[string]Format, 0),
         FormatVariations: NewFormatVariations(),
@@ -39,6 +46,8 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
         return nil
     }
     var ret BoxesFileMixings
+    ret.Title = src.Title
+    ret.Legend = CopyLegend(src.Legend)
     ret.Connections = make(map[string]ConnectionCont, 0)
     for k, v := range src.Connections {
         ret.Connections[k] = v

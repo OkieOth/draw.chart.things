@@ -16,6 +16,12 @@ type Boxes struct {
     // Title of the document
     Title string  `yaml:"title"`
 
+    // format reference used for the title
+    TitleFormat *string  `yaml:"titleFormat,omitempty"`
+
+    // Legend definition used in this diagram
+    Legend *Legend  `yaml:"legend,omitempty"`
+
     Boxes Layout  `yaml:"boxes"`
 
     // Map of formats available to be used in the boxes
@@ -45,6 +51,7 @@ type Boxes struct {
 
 func NewBoxes() *Boxes {
     return &Boxes{
+        Legend: NewLegend(),
         Boxes: *NewLayout(),
         Formats: make(map[string]Format, 0),
         FormatVariations: NewFormatVariations(),
@@ -58,6 +65,8 @@ func CopyBoxes(src *Boxes) *Boxes {
     }
     var ret Boxes
     ret.Title = src.Title
+    ret.TitleFormat = src.TitleFormat
+    ret.Legend = CopyLegend(src.Legend)
     ret.Boxes = *CopyLayout(&src.Boxes)
     ret.Formats = make(map[string]Format, 0)
     for k, v := range src.Formats {
@@ -73,6 +82,40 @@ func CopyBoxes(src *Boxes) *Boxes {
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin
     ret.MinConnectorMargin = src.MinConnectorMargin
+
+    return &ret
+}
+
+
+
+
+
+/* Definition of the output for the legend
+*/
+type Legend struct {
+
+    Entries []LegendEntry  `yaml:"entries,omitempty"`
+
+    // format reference used for the legend texts
+    Format *string  `yaml:"format,omitempty"`
+}
+
+func NewLegend() *Legend {
+    return &Legend{
+        Entries: make([]LegendEntry, 0),
+    }
+}
+
+func CopyLegend(src *Legend) *Legend {
+    if src == nil {
+        return nil
+    }
+    var ret Legend
+    ret.Entries = make([]LegendEntry, 0)
+    for _, e := range src.Entries {
+        ret.Entries = append(ret.Entries, e)
+    }
+    ret.Format = src.Format
 
     return &ret
 }
@@ -254,6 +297,32 @@ func CopyFormatVariations(src *FormatVariations) *FormatVariations {
 
 
 
+
+
+
+
+
+/* Definition of one legend entry
+*/
+type LegendEntry struct {
+
+    Text string  `yaml:"text"`
+
+    // this format reference used to identify how the here described object is in the picture displayed.
+    Format string  `yaml:"format"`
+}
+
+
+func CopyLegendEntry(src *LegendEntry) *LegendEntry {
+    if src == nil {
+        return nil
+    }
+    var ret LegendEntry
+    ret.Text = src.Text
+    ret.Format = src.Format
+
+    return &ret
+}
 
 
 

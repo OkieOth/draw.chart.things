@@ -6,8 +6,16 @@
   "type": "object",
   "properties": {
     "title": {
-      "type": "string",
-      "description": "Title of the document"
+      "description": "Title of the document",
+      "type": "string"
+    },
+    "titleFormat": {
+      "description": "format reference used for the title",
+      "type": "string"
+    },
+    "legend": {
+      "description": "Legend definition used in this diagram",
+      "$ref": "#/definitions/Legend"
     },
     "boxes": {
       "$ref": "#/definitions/Layout"
@@ -59,6 +67,36 @@
   },
   "required": ["title", "boxes", "hideTextsForParents"],
   "definitions": {
+    "Legend": {
+      "description": "Definition of the output for the legend",
+      "type": "object",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegendEntry"
+          }
+        },
+        "format": {
+          "description": "format reference used for the legend texts",
+          "type": "string"
+        }
+      }
+    },
+    "LegendEntry": {
+      "description": "Definition of one legend entry",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "format": {
+          "description": "this format reference used to identify how the here described object is in the picture displayed.",
+          "type": "string"
+        }
+      },
+      "required": ["text", "format"]
+    },
     "Layout": {
       "type": "object",
       "properties": {
