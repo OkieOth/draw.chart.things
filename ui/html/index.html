@@ -362,6 +362,78 @@
                     }
                 });
             })();
+
+            // Grouped connection line highlighting (delegated handlers)
+            (function () {
+                const canvas = document.getElementById("canvas");
+                if (!canvas) return;
+
+                function getGroupClass(classList) {
+                    for (const c of classList) {
+                        if (/^conLine_\d+$/.test(c)) return c;
+                    }
+                    return null;
+                }
+
+                function addHighlight(groupClass) {
+                    const svg = canvas.querySelector("svg");
+                    if (!svg || !groupClass) return;
+                    const lines = svg.querySelectorAll(
+                        `line.connection.${groupClass}`,
+                    );
+                    for (const line of lines) {
+                        line.classList.add("highlight-group");
+                    }
+                }
+
+                function removeHighlight(groupClass) {
+                    const svg = canvas.querySelector("svg");
+                    if (!svg || !groupClass) return;
+                    const lines = svg.querySelectorAll(
+                        `line.connection.${groupClass}.highlight-group`,
+                    );
+                    for (const line of lines) {
+                        line.classList.remove("highlight-group");
+                    }
+                }
+
+                // Use mouseover/mouseout with delegation; avoid flicker by checking relatedTarget
+                canvas.addEventListener("mouseover", function (e) {
+                    const t = e.target;
+                    if (
+                        t &&
+                        t.tagName &&
+                        t.tagName.toLowerCase() === "line" &&
+                        t.classList.contains("connection")
+                    ) {
+                        const grp = getGroupClass(t.classList);
+                        if (grp) addHighlight(grp);
+                    }
+                });
+
+                canvas.addEventListener("mouseout", function (e) {
+                    const t = e.target;
+                    if (
+                        t &&
+                        t.tagName &&
+                        t.tagName.toLowerCase() === "line" &&
+                        t.classList.contains("connection")
+                    ) {
+                        const grp = getGroupClass(t.classList);
+                        // Keep highlight if moving to another connection line in same group
+                        const rt = e.relatedTarget;
+                        const movingWithinGroup =
+                            rt &&
+                            rt.tagName &&
+                            rt.tagName.toLowerCase() === "line" &&
+                            rt.classList &&
+                            rt.classList.contains("connection") &&
+                            grp &&
+                            rt.classList.contains(grp);
+                        if (!movingWithinGroup && grp) removeHighlight(grp);
+                    }
+                });
+            })();
         </script>
     </body>
 </html>

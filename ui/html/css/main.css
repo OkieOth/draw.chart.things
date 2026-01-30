@@ -253,3 +253,8 @@ button.tool-btn.active {
     font-size: 20px;
     color: #0a84ff;
 }
+
+/* Highlight for hovered connection line: increase stroke width only */
+.connection.highlight-group {
+    stroke-width: 4 !important;
+}
