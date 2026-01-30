@@ -41,6 +41,7 @@ type Drawing interface {
 	DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format RectWithTextFormat) error
 	DrawPng(x, y int, pngId string) error
 	DrawLine(x1, y1, x2, y2 int, format LineDef) error
+	DrawLineWithClass(x1, y1, x2, y2 int, format LineDef, className string) error
 	DrawArrow(x, y, angle int, format LineDef) error
 	DrawSolidRect(x, y, width, height int, fill *FillDef, line *LineDef) error
 	DrawSolidCircle(x, y, radius int, color string) error

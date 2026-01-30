@@ -460,6 +460,19 @@ func (d *SvgDrawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 	return nil
 }
 
+func (d *SvgDrawing) DrawLineWithClass(x1, y1, x2, y2 int, format types.LineDef, className string) error {
+	color := "black"
+	if (format.Color != nil) && (*format.Color != "") {
+		color = *format.Color
+	}
+	width := 1.0
+	if (format.Width != nil) && (*format.Width != 0) {
+		width = *format.Width
+	}
+	d.canvas.LineWithClass(x1, y1, x2, y2, className, fmt.Sprintf("stroke:%s;stroke-width:%f", color, width))
+	return nil
+}
+
 func (d *SvgDrawing) DrawArrow(x, y, angle int, format types.LineDef) error {
 	// TODO
 	return nil

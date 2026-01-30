@@ -229,14 +229,16 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		}
 		offset := int(*lineFormat.Width / 2)
 		x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, l.IsStart, l.IsEnd)
-		drawingImpl.DrawLine(x1, y1, x2, y2, lineFormat)
+		classNames := fmt.Sprintf("connection conLine_%s", l.ConnectionIndex)
+		drawingImpl.DrawLineWithClass(x1, y1, x2, y2, lineFormat, classNames)
 	}
 	for _, l := range d.VerticalLines {
 		lineFormat := format
 		if l.Format != nil {
 			lineFormat = *l.Format
 		}
-		drawingImpl.DrawLine(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat)
+		classNames := fmt.Sprintf("connection conLine_%s", l.ConnectionIndex)
+		drawingImpl.DrawLineWithClass(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat, classNames)
 	}
 }
 
@@ -327,14 +329,14 @@ func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensio
 						Color: &c,
 					}
 					drawing.DrawSolidRect(currentX, currentY, 6, 10, legendFormat.Fill, &line)
-					currentX += 6
+					currentX += 8
 				} else if legendFormat.Line != nil {
 					// draw line example
 					currentX += 5
 					drawing.DrawLine(currentX, currentY+2, currentX+6, currentY+2, *legendFormat.Line)
 					drawing.DrawLine(currentX+6, currentY+2, currentX+6, currentY+6, *legendFormat.Line)
 					drawing.DrawLine(currentX+6, currentY+6, currentX+12, currentY+6, *legendFormat.Line)
-					currentX += 12
+					currentX += 14
 				} else {
 					// dummy output
 					currentX += 5

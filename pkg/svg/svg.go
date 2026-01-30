@@ -423,6 +423,12 @@ func (svg *SVG) Line(x1 int, y1 int, x2 int, y2 int, s ...string) {
 	svg.printf(`<line x1="%d" y1="%d" x2="%d" y2="%d" %s`, x1, y1, x2, y2, endstyle(s, emptyclose))
 }
 
+// Line draws a straight line between two points, with optional style.
+// Standard Reference: http://www.w3.org/TR/SVG11/shapes.html#LineElement
+func (svg *SVG) LineWithClass(x1 int, y1 int, x2 int, y2 int, className string, s ...string) {
+	svg.printf(`<line class="%s" x1="%d" y1="%d" x2="%d" y2="%d" %s`, className, x1, y1, x2, y2, endstyle(s, emptyclose))
+}
+
 // Polyline draws connected lines between coordinates, with optional style.
 // Standard Reference: http://www.w3.org/TR/SVG11/shapes.html#PolylineElement
 func (svg *SVG) Polyline(x []int, y []int, s ...string) {
