@@ -82,19 +82,30 @@ func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *L
 		}
 		if !currentElemIsParentToStart && !currentElemIsParentToEnd {
 			// end - not needed any longer because only roads need that this function
-			curMinX := currentElem.X
-			curMaxX := currentElem.X + currentElem.Width
-			curMinY := currentElem.Y
-			curMaxY := currentElem.Y + currentElem.Height
-			if (x <= curMaxX) && (x >= curMinX) &&
-				(y >= curMinY) && (y <= curMaxY) {
-				return CollisionType_WithElem
+			if currentElem.XTextBox != nil && currentElem.DontBlockConPaths != nil && *currentElem.DontBlockConPaths {
+				curMinX := *currentElem.XTextBox
+				curMaxX := *currentElem.XTextBox + *currentElem.WidthTextBox
+				curMinY := *currentElem.YTextBox
+				curMaxY := *currentElem.YTextBox + *currentElem.HeightTextBox
+				if (x <= curMaxX) && (x >= curMinX) &&
+					(y >= curMinY) && (y <= curMaxY) {
+					return CollisionType_WithElem
+				}
+
+			} else {
+				curMinX := currentElem.X
+				curMaxX := currentElem.X + currentElem.Width
+				curMinY := currentElem.Y
+				curMaxY := currentElem.Y + currentElem.Height
+				if (x <= curMaxX) && (x >= curMinX) &&
+					(y >= curMinY) && (y <= curMaxY) {
+					return CollisionType_WithElem
+				}
+				if (x <= (curMaxX + types.RasterSize)) && (x >= (curMinX - types.RasterSize)) &&
+					(y >= (curMinY - types.RasterSize)) && (y <= (curMaxY + types.RasterSize)) {
+					return CollisionType_WithSurroundings
+				}
 			}
-			if (x <= (curMaxX + types.RasterSize)) && (x >= (curMinX - types.RasterSize)) &&
-				(y >= (curMinY - types.RasterSize)) && (y <= (curMaxY + types.RasterSize)) {
-				return CollisionType_WithSurroundings
-			}
-			// start - not needed any longer because only roads need that this function
 		}
 		// not needed any longer because only roads need that this function
 		if currentElemIsParentToStart {

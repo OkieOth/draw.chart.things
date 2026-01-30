@@ -162,6 +162,9 @@ type Layout struct {
 
     // reference to the format to use for this box
     Format *string  `yaml:"format,omitempty"`
+
+    // if that is set then connections can run through the box, as long as they don't cross the text
+    DontBlockConPaths *bool  `yaml:"dontBlockConPaths,omitempty"`
 }
 
 func NewLayout() *Layout {
@@ -203,6 +206,7 @@ func CopyLayout(src *Layout) *Layout {
         ret.Connections = append(ret.Connections, e)
     }
     ret.Format = src.Format
+    ret.DontBlockConPaths = src.DontBlockConPaths
 
     return &ret
 }
@@ -215,6 +219,9 @@ func CopyLayout(src *Layout) *Layout {
 
 
 type Format struct {
+
+    // sets the width of the object to the width of the parent
+    WidthOfParent *bool  `yaml:"widthOfParent,omitempty"`
 
     // optional fixed width that will be applied on the box
     FixedWidth *int  `yaml:"fixedWidth,omitempty"`
@@ -251,6 +258,7 @@ func CopyFormat(src *Format) *Format {
         return nil
     }
     var ret Format
+    ret.WidthOfParent = src.WidthOfParent
     ret.FixedWidth = src.FixedWidth
     ret.FixedHeight = src.FixedHeight
     ret.VerticalTxt = src.VerticalTxt

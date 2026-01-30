@@ -54,6 +54,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	padding := types.GlobalPadding
 	boxMargin := types.GlobalMinBoxMargin
 	var fixedHeight, fixedWidth, cornerRadius *int
+	var widthOfParent *bool
 	if f != nil {
 		fontCaption = f.FontCaption
 		fontText1 = f.FontText1
@@ -76,20 +77,22 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		fixedHeight = f.FixedHeight
 		fixedWidth = f.FixedWidth
 		cornerRadius = f.CornerRadius
+		widthOfParent = f.WidthOfParent
 	}
 
 	return boxes.BoxFormat{
-		Padding:      padding,
-		MinBoxMargin: boxMargin,
-		FontCaption:  types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
-		FontText1:    types.InitFontDef(fontText1, "serif", 8, false, false, 10),
-		FontText2:    types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
-		Line:         border,
-		Fill:         fill,
-		FixedWidth:   fixedWidth,
-		FixedHeight:  fixedHeight,
-		VerticalTxt:  verticalTxt,
-		CornerRadius: cornerRadius,
+		Padding:       padding,
+		MinBoxMargin:  boxMargin,
+		FontCaption:   types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
+		FontText1:     types.InitFontDef(fontText1, "serif", 8, false, false, 10),
+		FontText2:     types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
+		Line:          border,
+		Fill:          fill,
+		FixedWidth:    fixedWidth,
+		FixedHeight:   fixedHeight,
+		WidthOfParent: widthOfParent,
+		VerticalTxt:   verticalTxt,
+		CornerRadius:  cornerRadius,
 	}
 }
 
@@ -104,6 +107,7 @@ func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxForm
 	padding := types.GlobalPadding
 	boxMargin := types.GlobalMinBoxMargin
 	var fixedHeight, fixedWidth, cornerRadius *int
+	var widthOfParent *bool
 	if f != nil {
 		fontCaption = &f.FontCaption
 		fontText1 = &f.FontText1
@@ -120,21 +124,23 @@ func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxForm
 		}
 		fixedHeight = f.FixedHeight
 		fixedWidth = f.FixedWidth
+		widthOfParent = f.WidthOfParent
 		cornerRadius = f.CornerRadius
 	}
 
 	ret := boxes.BoxFormat{
-		Padding:      padding,
-		MinBoxMargin: boxMargin,
-		FontCaption:  types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
-		FontText1:    types.InitFontDef(fontText1, "serif", 8, false, false, 10),
-		FontText2:    types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
-		Line:         border,
-		Fill:         fill,
-		FixedWidth:   fixedWidth,
-		FixedHeight:  fixedHeight,
-		VerticalTxt:  verticalTxt,
-		CornerRadius: cornerRadius,
+		Padding:       padding,
+		MinBoxMargin:  boxMargin,
+		FontCaption:   types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
+		FontText1:     types.InitFontDef(fontText1, "serif", 8, false, false, 10),
+		FontText2:     types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
+		Line:          border,
+		Fill:          fill,
+		FixedWidth:    fixedWidth,
+		FixedHeight:   fixedHeight,
+		WidthOfParent: widthOfParent,
+		VerticalTxt:   verticalTxt,
+		CornerRadius:  cornerRadius,
 	}
 
 	if adjustment != nil {
@@ -268,15 +274,16 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		text2 = l.Text2
 	}
 	return boxes.LayoutElement{
-		Id:          l.Id,
-		Caption:     l.Caption,
-		Text1:       text1,
-		Text2:       text2,
-		Image:       initImage(l, b.Images),
-		Vertical:    initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, b),
-		Horizontal:  initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, b),
-		Format:      adjustFormatBasedOnVariations(l, b, f),
-		Connections: initConnections(l.Connections, inputFormats),
+		Id:                l.Id,
+		Caption:           l.Caption,
+		Text1:             text1,
+		Text2:             text2,
+		Image:             initImage(l, b.Images),
+		Vertical:          initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, b),
+		Horizontal:        initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, b),
+		Format:            adjustFormatBasedOnVariations(l, b, f),
+		DontBlockConPaths: l.DontBlockConPaths,
+		Connections:       initConnections(l.Connections, inputFormats),
 	}
 }
 

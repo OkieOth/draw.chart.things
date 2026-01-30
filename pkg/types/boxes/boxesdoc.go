@@ -209,6 +209,9 @@ type LayoutElement struct {
     // Height of the text area
     HeightTextBox *int  `yaml:"heightTextBox,omitempty"`
 
+    // if that is set then connections can run through the box, as long as they don't cross the text
+    DontBlockConPaths *bool  `yaml:"dontBlockConPaths,omitempty"`
+
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -253,6 +256,7 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     ret.YTextBox = src.YTextBox
     ret.WidthTextBox = src.WidthTextBox
     ret.HeightTextBox = src.HeightTextBox
+    ret.DontBlockConPaths = src.DontBlockConPaths
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
@@ -340,6 +344,9 @@ type BoxFormat struct {
     // Minimum margin between boxes
     MinBoxMargin int  `yaml:"minBoxMargin"`
 
+    // sets the width of the object to the width of the parent
+    WidthOfParent *bool  `yaml:"widthOfParent,omitempty"`
+
     // optional fixed width that will be applied on the box
     FixedWidth *int  `yaml:"fixedWidth,omitempty"`
 
@@ -364,6 +371,7 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
     ret.MinBoxMargin = src.MinBoxMargin
+    ret.WidthOfParent = src.WidthOfParent
     ret.FixedWidth = src.FixedWidth
     ret.FixedHeight = src.FixedHeight
     ret.VerticalTxt = src.VerticalTxt

@@ -414,11 +414,30 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	if l.Horizontal != nil {
 		l.initHorizontal(c, yInnerOffset)
 	}
+	l.adjustToParentWidth(l.Vertical)   // doesn't go recursive through the children
+	l.adjustToParentWidth(l.Horizontal) // doesn't go recursive through the children
+
 	xTextBox := l.X + (l.Width-textWidth)/2
 	l.XTextBox = &xTextBox
 	l.YTextBox = &yTextBox
 	if l.Image != nil {
 		l.Image.X = l.X + ((l.Width - l.Image.Width - l.Image.MarginLeftRight - l.Image.MarginLeftRight) / 2)
+	}
+}
+
+func (l *LayoutElement) adjustToParentWidth(cont *LayoutElemContainer) {
+	if cont != nil {
+		for i := range len(cont.Elems) {
+			e := &cont.Elems[i]
+			if e.Format != nil && e.Format.WidthOfParent != nil && *e.Format.WidthOfParent {
+				e.Width = cont.Width
+				e.X = cont.X
+				if e.XTextBox != nil {
+					x := e.X + ((e.Width - *e.WidthTextBox) / 2)
+					e.XTextBox = &x
+				}
+			}
+		}
 	}
 }
 

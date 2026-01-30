@@ -53,6 +53,7 @@ class "**LayoutElement**" as LayoutElement {
         IntegerType yTextBox
         IntegerType widthTextBox
         IntegerType heightTextBox
+        BooleanType dontBlockConPaths
         StringType[] tags
 }
 
@@ -80,6 +81,7 @@ class "**BoxFormat**" as BoxFormat {
         IntegerType cornerRadius
         FillDef fill
         IntegerType minBoxMargin
+        BooleanType widthOfParent
         IntegerType fixedWidth
         IntegerType fixedHeight
         BooleanType verticalTxt
@@ -294,6 +296,7 @@ LayoutElement "0" *-- "n" LayoutElemConnection
 
 
 
+
     
 
 
@@ -317,6 +320,7 @@ BoxFormat  *--  LineDef
 
 
 BoxFormat  *--  FillDef
+
 
 
 

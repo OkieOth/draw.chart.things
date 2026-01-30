@@ -157,6 +157,10 @@
         "format": {
           "description": "reference to the format to use for this box",
           "type": "string"
+        },
+        "dontBlockConPaths": {
+          "description": "if that is set then connections can run through the box, as long as they don't cross the text",
+          "type": "boolean"
         }
       },
       "required": ["type", "id", "caption", "text1", "text2", "expand"]
@@ -203,6 +207,10 @@
     "Format": {
       "type": "object",
       "properties": {
+        "widthOfParent": {
+          "description": "sets the width of the object to the width of the parent",
+          "type": "boolean"
+        },
         "fixedWidth": {
           "type": "integer",
           "description": "optional fixed width that will be applied on the box"

@@ -34,6 +34,7 @@ class "**Layout**" as Layout {
         StringType[] tags
         Connection[] connections
         StringType format
+        BooleanType dontBlockConPaths
 }
 
  
@@ -53,6 +54,7 @@ class "**Connection**" as Connection {
  
 
 class "**Format**" as Format {
+        BooleanType widthOfParent
         IntegerType fixedWidth
         IntegerType fixedHeight
         BooleanType verticalTxt
@@ -175,15 +177,17 @@ Layout "0" *-- "n" Layout
 Layout "0" *-- "n" Connection
 
 
-    
-    
-
-
-
-
-
 
     
+    
+
+
+
+
+
+
+    
+
 
 
 

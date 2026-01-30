@@ -216,6 +216,10 @@
           "type": "integer",
           "description": "Height of the text area"
         },
+        "dontBlockConPaths": {
+          "description": "if that is set then connections can run through the box, as long as they don't cross the text",
+          "type": "boolean"
+        },
         "tags": {
           "description": "Tags to annotate the box, tags are used to format and filter",
           "type": "array",
@@ -454,6 +458,10 @@
         "minBoxMargin": {
           "type": "integer",
           "description": "Minimum margin between boxes"
+        },
+        "widthOfParent": {
+          "description": "sets the width of the object to the width of the parent",
+          "type": "boolean"
         },
         "fixedWidth": {
           "type": "integer",

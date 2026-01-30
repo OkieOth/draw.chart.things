@@ -282,13 +282,13 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 	}
 	if elem.Vertical != nil {
 		for i := range len(elem.Vertical.Elems) {
-			defRoadType := DefRoadType_Vertical
+			defRoadType := DefRoadType_All
 			doc.initRoadsImpl(&elem.Vertical.Elems[i], defRoadType)
 		}
 	}
 	if elem.Horizontal != nil {
 		for i := range len(elem.Horizontal.Elems) {
-			defRoadType := DefRoadType_Horizontal
+			defRoadType := DefRoadType_All
 			doc.initRoadsImpl(&elem.Horizontal.Elems[i], defRoadType)
 		}
 	}
