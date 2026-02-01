@@ -40,6 +40,7 @@ type Drawing interface {
 	Start(title string, height, width int) error
 	DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format RectWithTextFormat) error
 	DrawPng(x, y int, pngId string) error
+	DrawPngWithAdditionalLink(x, y int, pngId, link string) error
 	DrawLine(x1, y1, x2, y2 int, format LineDef) error
 	DrawLineWithClass(x1, y1, x2, y2 int, format LineDef, className string) error
 	DrawArrow(x, y, angle int, format LineDef) error

@@ -288,6 +288,12 @@ func (svg *SVG) Use(x int, y int, link string, s ...string) {
 	svg.printf(`<use %s %s %s`, loc(x, y), href(link), endstyle(s, emptyclose))
 }
 
+// Use places the object referenced at link at the location x, y, with optional style.
+// Standard Reference: http://www.w3.org/TR/SVG11/struct.html#UseElement
+func (svg *SVG) UseWithAdditionalDataLink(x int, y int, link, className, additionalDataLink string, s ...string) {
+	svg.printf(`<use class="%s" data-link="%s" %s %s %s`, className, additionalDataLink, loc(x, y), href(link), endstyle(s, emptyclose))
+}
+
 // Mask creates a mask with a specified id, dimension, and optional style.
 func (svg *SVG) Mask(id string, x int, y int, w int, h int, s ...string) {
 	svg.printf(`<mask id="%s" x="%d" y="%d" width="%d" height="%d" %s`, id, x, y, w, h, endstyle(s, `>`))

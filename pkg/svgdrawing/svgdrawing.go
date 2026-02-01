@@ -378,6 +378,13 @@ func (d *SvgDrawing) DrawPng(x, y int, pngId string) error {
 	return nil
 }
 
+const ADDITIONAL_LINK string = "additionalLink"
+
+func (d *SvgDrawing) DrawPngWithAdditionalLink(x, y int, pngId, link string) error {
+	d.canvas.UseWithAdditionalDataLink(x, y, "#"+pngId, ADDITIONAL_LINK, link)
+	return nil
+}
+
 // Draw renders a box with text elements
 func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.RectWithTextFormat) error {
 	const onclickClass = "svg-clickable" // "onclick=\"window.shapeClick(event)\""

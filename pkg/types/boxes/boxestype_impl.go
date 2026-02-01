@@ -402,8 +402,15 @@ func (b *LayoutElement) Draw(drawing types.Drawing) error {
 		}
 	}
 	if b.Image != nil {
-		if err := drawing.DrawPng(b.Image.X, b.Image.Y, b.Image.ImgId); err != nil {
-			return fmt.Errorf("Error drawing image %s: %w", b.Id, err)
+		if b.DataLink != nil && *b.DataLink != "" {
+			if err := drawing.DrawPngWithAdditionalLink(b.Image.X, b.Image.Y, b.Image.ImgId, *b.DataLink); err != nil {
+				return fmt.Errorf("Error drawing image %s: %w", b.Id, err)
+			}
+
+		} else {
+			if err := drawing.DrawPng(b.Image.X, b.Image.Y, b.Image.ImgId); err != nil {
+				return fmt.Errorf("Error drawing image %s: %w", b.Id, err)
+			}
 		}
 	}
 	if b.Vertical != nil {
