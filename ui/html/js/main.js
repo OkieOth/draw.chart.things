@@ -626,9 +626,54 @@ function initPage() {
                             );
                         }
                     });
+                    // Also attach handlers for elements that should open external links
+                    attachAdditionalLinkHandlers();
                 }
             }
         });
+
+// Attach click handlers to .additionalLink elements inside the current SVG
+function attachAdditionalLinkHandlers() {
+    const svg = getSvg();
+    if (!svg) return;
+    const nodes = svg.querySelectorAll(".additionalLink");
+    nodes.forEach((node) => {
+        try {
+            node.style.cursor = "pointer";
+        } catch {}
+        if (node.__additionalLinkBound) return;
+        node.__additionalLinkBound = true;
+        node.addEventListener(
+            "click",
+            function (evt) {
+                try {
+                    let el = evt.target;
+                    while (
+                        el &&
+                        el !== svg &&
+                        !(el.classList && el.classList.contains("additionalLink"))
+                    ) {
+                        el = el.parentNode;
+                    }
+                    const url = el && el.getAttribute ? el.getAttribute("data-link") : null;
+                    if (url && typeof url === "string") {
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    } else {
+                        console.warn("additionalLink clicked without data-link URL", el);
+                    }
+                } catch (err) {
+                    console.error("Failed to handle additionalLink click:", err);
+                } finally {
+                    if (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                    }
+                }
+            },
+            { capture: true }
+        );
+    });
+}
 
         // Keep centered and minimap in sync on resize
         window.addEventListener("resize", function () {

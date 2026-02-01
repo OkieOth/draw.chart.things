@@ -283,6 +283,7 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		Horizontal:        initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, b),
 		Format:            adjustFormatBasedOnVariations(l, b, f),
 		DontBlockConPaths: l.DontBlockConPaths,
+		DataLink:          l.DataLink,
 		Connections:       initConnections(l.Connections, inputFormats),
 	}
 }

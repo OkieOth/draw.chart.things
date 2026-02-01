@@ -13,4 +13,5 @@ boxes:
       caption: "Only one Box"
       horizontal:
         - image: img1
+          dataLink: https://backstage.io/
         - image: img1
