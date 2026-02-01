@@ -214,6 +214,9 @@ type LayoutElement struct {
 
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
+
+    // Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.
+    DataLink *string  `yaml:"dataLink,omitempty"`
 }
 
 func NewLayoutElement() *LayoutElement {
@@ -261,6 +264,7 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
     }
+    ret.DataLink = src.DataLink
 
     return &ret
 }

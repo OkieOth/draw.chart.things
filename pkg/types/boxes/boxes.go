@@ -165,6 +165,9 @@ type Layout struct {
 
     // if that is set then connections can run through the box, as long as they don't cross the text
     DontBlockConPaths *bool  `yaml:"dontBlockConPaths,omitempty"`
+
+    // Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.
+    DataLink *string  `yaml:"dataLink,omitempty"`
 }
 
 func NewLayout() *Layout {
@@ -207,6 +210,7 @@ func CopyLayout(src *Layout) *Layout {
     }
     ret.Format = src.Format
     ret.DontBlockConPaths = src.DontBlockConPaths
+    ret.DataLink = src.DataLink
 
     return &ret
 }

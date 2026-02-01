@@ -35,6 +35,7 @@ class "**Layout**" as Layout {
         Connection[] connections
         StringType format
         BooleanType dontBlockConPaths
+        StringType dataLink
 }
 
  
@@ -175,6 +176,7 @@ Layout "0" *-- "n" Layout
 
 
 Layout "0" *-- "n" Connection
+
 
 
 
