@@ -20,11 +20,9 @@ build-wasm:
 
 docker-push:
 	docker push ghcr.io/okieoth/draw.chart.things:$(VERSION)
-	docker push ghcr.io/okieoth/draw.chart.things
 
 docker-ui-push:
 	docker push ghcr.io/okieoth/draw.chart.things.ui:$(VERSION)
-	docker push ghcr.io/okieoth/draw.chart.things.ui
 
 generate-all:
 	bash -c scripts/generateAll.sh
