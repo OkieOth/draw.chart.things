@@ -7,78 +7,54 @@ on:
 env:
     REGISTRY: ghcr.io
     IMAGE_NAME: ${{ github.repository }}
+    IMAGE_NAME_UI: ${{ github.repository }}.ui
 
 jobs:
-    build:
-        name: Create Release
+    tag_repo:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
-            - name: Create Release
-              id: create_release
-              uses: actions/create-release@v1
+              uses: actions/checkout@v4
+
+            - name: Extract version from cmd/sub/version.go
+              id: get_version
+              run: |
+                  TAG_NAME=v$(grep "const Version =" cmd/sub/version.go | grep "const Version =" | sed -e 's-.*= "--' -e 's-".*--')
+                  echo "tag_name=$TAG_NAME" >> $GITHUB_ENV
+            - name: Create a tag
+              env:
+                  TAG_NAME: ${{ env.tag_name }}
+              uses: actions/github-script@v5
+              with:
+                  script: |
+                      github.rest.git.createRef({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: `refs/tags/${process.env.TAG_NAME}`,
+                      sha: context.sha
+                      })
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ env.tag_name }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  tag_name: ${{ github.ref }}
-                  release_name: ${{ github.ref }}
-                  body_path: CHANGELOG.md
-                  draft: false
-                  prerelease: false
     publish:
         name: Publish
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            packages: write
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-            - name: Log in to the Container registry
-              uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-              with:
-                  registry: ${{ env.REGISTRY }}
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
-            - name: Extract metadata (tags, labels) for Docker
-              id: meta
-              uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-              with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            - name: Build and push Docker image
-              uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
-              with:
-                  context: .
-                  push: true
-                  file: Dockerfile.release
-                  tags: ${{ steps.meta.outputs.tags }}
-                  labels: ${{ steps.meta.outputs.labels }}
-    publish-ui:
-        name: Publish UI
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            packages: write
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-            - name: Log in to the Container registry
-              uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-              with:
-                  registry: ${{ env.REGISTRY }}
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
-            - name: Extract metadata (tags, labels) for Docker
-              id: meta
-              uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-              with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            - name: Build and push UI Docker image
-              uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
-              with:
-                  context: .
-                  push: true
-                  file: ui/Dockerfile.ui
-                  tags: ${{ steps.meta.outputs.tags }}
-                  labels: ${{ steps.meta.outputs.labels }}
+            - uses: actions/checkout@v2
+            - name: build image
+              run: make build-docker
+            - name: Login to GitHub Registry
+              run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u okieoth --password-stdin
+            - name: Push the Docker image
+              run: make docker-push
+            - name: build ui image
+              run: make build-docker-ui
+            - name: Login to GitHub Registry
+              run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u okieoth --password-stdin
+            - name: Push the ui Docker image
+              run: make docker-ui-push
