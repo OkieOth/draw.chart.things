@@ -13,9 +13,9 @@ type PointToTest struct {
 	HasCollision bool
 }
 
-type checkForCollFunc2 func(x, y int, currentElem, startElem, endElem *LayoutElement) CollisionType
+type checkForCollFunc2 func(x, y int, currentElem, startElem, endElem *LayoutElement, isForHorizontalLine bool) CollisionType
 
-func (doc *BoxesDocument) checkForCollInContainer2(cont *LayoutElemContainer, f checkForCollFunc2, x, y int, startElem, endElem *LayoutElement) CollisionType {
+func (doc *BoxesDocument) checkForCollInContainer2(cont *LayoutElemContainer, f checkForCollFunc2, x, y int, startElem, endElem *LayoutElement, isForHorizontalLine bool) CollisionType {
 	if cont != nil {
 		l := len(cont.Elems)
 		for i := range l {
@@ -23,7 +23,7 @@ func (doc *BoxesDocument) checkForCollInContainer2(cont *LayoutElemContainer, f 
 			if e == startElem || e == endElem {
 				continue
 			}
-			if ct := f(x, y, e, startElem, endElem); ct != CollisionType_NoCollision {
+			if ct := f(x, y, e, startElem, endElem, isForHorizontalLine); ct != CollisionType_NoCollision {
 				return ct
 			}
 		}
@@ -68,9 +68,10 @@ func (doc *BoxesDocument) isParent(possibleParent, elemToCheckFor *LayoutElement
 }
 
 // checks if a point is inside a box, returns true if so
-func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *LayoutElement) CollisionType {
+func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *LayoutElement, isForHorizontalLine bool) CollisionType {
 	if (currentElem != startElem) && (currentElem != endElem) &&
 		(doc.ShouldHandle(currentElem)) {
+		// start - not needed any longer because only roads need that this function
 		currentElemIsParentToStart := false
 		if startElem != nil {
 			currentElemIsParentToStart = doc.isParent(currentElem, startElem)
@@ -80,20 +81,33 @@ func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *L
 			currentElemIsParentToEnd = doc.isParent(currentElem, endElem)
 		}
 		if !currentElemIsParentToStart && !currentElemIsParentToEnd {
-			curMinX := currentElem.X
-			curMaxX := currentElem.X + currentElem.Width
-			curMinY := currentElem.Y
-			curMaxY := currentElem.Y + currentElem.Height
-			if (x <= curMaxX) && (x >= curMinX) &&
-				(y >= curMinY) && (y <= curMaxY) {
-				return CollisionType_WithElem
-			}
-			if (x <= (curMaxX + types.RasterSize)) && (x >= (curMinX - types.RasterSize)) &&
-				(y >= (curMinY - types.RasterSize)) && (y <= (curMaxY + types.RasterSize)) {
-				return CollisionType_WithSurroundings
+			// end - not needed any longer because only roads need that this function
+			if currentElem.XTextBox != nil && currentElem.DontBlockConPaths != nil && *currentElem.DontBlockConPaths {
+				curMinX := *currentElem.XTextBox
+				curMaxX := *currentElem.XTextBox + *currentElem.WidthTextBox
+				curMinY := *currentElem.YTextBox
+				curMaxY := *currentElem.YTextBox + *currentElem.HeightTextBox
+				if (x <= curMaxX) && (x >= curMinX) &&
+					(y >= curMinY) && (y <= curMaxY) {
+					return CollisionType_WithElem
+				}
+
+			} else {
+				curMinX := currentElem.X
+				curMaxX := currentElem.X + currentElem.Width
+				curMinY := currentElem.Y
+				curMaxY := currentElem.Y + currentElem.Height
+				if (x <= curMaxX) && (x >= curMinX) &&
+					(y >= curMinY) && (y <= curMaxY) {
+					return CollisionType_WithElem
+				}
+				if (x <= (curMaxX + types.RasterSize)) && (x >= (curMinX - types.RasterSize)) &&
+					(y >= (curMinY - types.RasterSize)) && (y <= (curMaxY + types.RasterSize)) {
+					return CollisionType_WithSurroundings
+				}
 			}
 		}
-
+		// not needed any longer because only roads need that this function
 		if currentElemIsParentToStart {
 			// check if there is a collision with the text
 			if currentElem.WidthTextBox != nil {
@@ -101,13 +115,27 @@ func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *L
 					(y >= *currentElem.YTextBox) && (y <= (*currentElem.YTextBox + *currentElem.HeightTextBox)) {
 					return CollisionType_WithElem
 				}
+				if isForHorizontalLine {
+					curMinY := currentElem.Y
+					curMaxY := currentElem.Y + currentElem.Height
+					if (y == curMinY) || (y == curMaxY) {
+						return CollisionType_WithElem
+					}
+				} else {
+					curMinX := currentElem.X
+					curMaxX := currentElem.X + currentElem.Width
+					if (x == curMaxX) || (x == curMinX) {
+						return CollisionType_WithElem
+					}
+				}
 			}
 		}
+		// end - not needed any longer because only roads need that this function
 	}
-	if ct := doc.checkForCollInContainer2(currentElem.Vertical, doc.checkColl, x, y, startElem, endElem); ct != CollisionType_NoCollision {
+	if ct := doc.checkForCollInContainer2(currentElem.Vertical, doc.checkColl, x, y, startElem, endElem, isForHorizontalLine); ct != CollisionType_NoCollision {
 		return ct
 	}
-	return doc.checkForCollInContainer2(currentElem.Horizontal, doc.checkColl, x, y, startElem, endElem)
+	return doc.checkForCollInContainer2(currentElem.Horizontal, doc.checkColl, x, y, startElem, endElem, isForHorizontalLine)
 }
 
 func newConnectionLine(x1, y1, x2, y2 int) ConnectionLine {
@@ -175,6 +203,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 	for _, e := range connElem.Parts {
 		if lastE == nil {
 			lastE = &e
+			lastE.IsStart = true
 		} else {
 			if lastE.StartX == lastE.EndX {
 				// lastE is vertical line
@@ -215,6 +244,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 	lastE.DestLayoutId = lastPart.DestLayoutId
 	lastE.SrcLayoutId = lastPart.SrcLayoutId
 	lastE.LineIndex = len(reducedParts)
+	lastE.IsEnd = true
 	reducedParts = append(reducedParts, *lastE)
 	connElem.Parts = reducedParts
 }

@@ -6,8 +6,16 @@
   "x-domain": "implementation",
   "properties": {
     "title": {
-      "type": "string",
-      "description": "Title of the document"
+      "description": "Title of the document",
+      "type": "string"
+    },
+    "titleFormat": {
+      "description": "format reference used for the title",
+      "type": "string"
+    },
+    "legend": {
+      "description": "Legend definition used in this diagram",
+      "$ref": "./boxes.json#/definitions/Legend"
     },
     "boxes": {
       "$ref": "#/definitions/LayoutElement"
@@ -61,9 +69,9 @@
       }
     },
     "images": {
-      "description": "optional list of images used in the generated graphic",
-      "type": "array",
-      "items": {
+      "description": "Map of images used in the generated graphic",
+      "type": "object",
+      "additionalProperties": {
         "$ref": "./formats.json#/definitions/ImageDef"
       }
     },
@@ -132,6 +140,10 @@
         "text2": {
           "description": "Second additional text",
           "type": "string"
+        },
+        "image": {
+          "discription": "image to be displayed",
+          "$ref": "#/definitions/ImageContainer"
         },
         "vertical": {
           "$ref": "#/definitions/LayoutElemContainer"
@@ -204,12 +216,20 @@
           "type": "integer",
           "description": "Height of the text area"
         },
+        "dontBlockConPaths": {
+          "description": "if that is set then connections can run through the box, as long as they don't cross the text",
+          "type": "boolean"
+        },
         "tags": {
           "description": "Tags to annotate the box, tags are used to format and filter",
           "type": "array",
           "items": {
             "type": "string"
           }
+        },
+        "dataLink": {
+          "description": "Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.",
+          "type": "string"
         }
       },
       "required": [
@@ -349,6 +369,12 @@
         },
         "format": {
           "$ref": "./formats.json#/definitions/LineDef"
+        },
+        "isStart": {
+          "type": "boolean"
+        },
+        "isEnd": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -357,7 +383,54 @@
         "endX",
         "endY",
         "connectionIndex",
-        "lineIndex"
+        "lineIndex",
+        "isStart",
+        "isEnd"
+      ]
+    },
+    "ImageContainer": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X position of the element"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y position of the element"
+        },
+        "width": {
+          "type": "integer",
+          "description": "Width of the container"
+        },
+        "height": {
+          "type": "integer",
+          "description": "Height of the container"
+        },
+        "marginTopBottom": {
+          "description": "distance top and bottom of the image",
+          "type": "integer",
+          "default": 5
+        },
+        "marginLeftRight": {
+          "description": "distance left and right of the image",
+          "type": "integer",
+          "default": 2
+        },
+        "imgId": {
+          "type": "string",
+          "description": "reference to the globally declared image"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height",
+        "elems",
+        "marginTopBottom",
+        "marginLeftRight",
+        "imgId"
       ]
     },
     "BoxFormat": {
@@ -386,14 +459,13 @@
         "fill": {
           "$ref": "./formats.json#/definitions/FillDef"
         },
-        "image": {
-          "$comment": "the used images needs to be declared before in the images section",
-          "description": "ID of an image to use",
-          "type": "string"
-        },
         "minBoxMargin": {
           "type": "integer",
           "description": "Minimum margin between boxes"
+        },
+        "widthOfParent": {
+          "description": "sets the width of the object to the width of the parent",
+          "type": "boolean"
         },
         "fixedWidth": {
           "type": "integer",

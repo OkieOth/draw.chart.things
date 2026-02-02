@@ -16,6 +16,12 @@ type BoxesDocument struct {
     // Title of the document
     Title string  `yaml:"title"`
 
+    // format reference used for the title
+    TitleFormat *string  `yaml:"titleFormat,omitempty"`
+
+    // Legend definition used in this diagram
+    Legend *Legend  `yaml:"legend,omitempty"`
+
     Boxes LayoutElement  `yaml:"boxes"`
 
     // Height of the document
@@ -43,8 +49,8 @@ type BoxesDocument struct {
     // Map of formats available to be used in the boxes
     Formats map[string]BoxFormat  `yaml:"formats,omitempty"`
 
-    // optional list of images used in the generated graphic
-    Images []types.ImageDef  `yaml:"images,omitempty"`
+    // Map of images used in the generated graphic
+    Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 
     // Vertical roads available to connect boxes in a vertical way
     VerticalRoads []ConnectionLine  `yaml:"verticalRoads,omitempty"`
@@ -64,11 +70,12 @@ type BoxesDocument struct {
 
 func NewBoxesDocument() *BoxesDocument {
     return &BoxesDocument{
+        Legend: NewLegend(),
         Boxes: *NewLayoutElement(),
         Connections: make([]ConnectionElem, 0),
         ConnectedElems: make([]string, 0),
         Formats: make(map[string]BoxFormat, 0),
-        Images: make([]types.ImageDef, 0),
+        Images: make(map[string]types.ImageDef, 0),
         VerticalRoads: make([]ConnectionLine, 0),
         HorizontalRoads: make([]ConnectionLine, 0),
         ConnectionNodes: make([]ConnectionNode, 0),
@@ -83,6 +90,8 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     }
     var ret BoxesDocument
     ret.Title = src.Title
+    ret.TitleFormat = src.TitleFormat
+    ret.Legend = CopyLegend(src.Legend)
     ret.Boxes = *CopyLayoutElement(&src.Boxes)
     ret.Height = src.Height
     ret.Width = src.Width
@@ -102,9 +111,9 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     for k, v := range src.Formats {
         ret.Formats[k] = v
     }
-    ret.Images = make([]types.ImageDef, 0)
-    for _, e := range src.Images {
-        ret.Images = append(ret.Images, e)
+    ret.Images = make(map[string]types.ImageDef, 0)
+    for k, v := range src.Images {
+        ret.Images[k] = v
     }
     ret.VerticalRoads = make([]ConnectionLine, 0)
     for _, e := range src.VerticalRoads {
@@ -147,6 +156,8 @@ type LayoutElement struct {
 
     // Second additional text
     Text2 string  `yaml:"text2"`
+
+    Image *ImageContainer  `yaml:"image,omitempty"`
 
     Vertical *LayoutElemContainer  `yaml:"vertical,omitempty"`
 
@@ -198,8 +209,14 @@ type LayoutElement struct {
     // Height of the text area
     HeightTextBox *int  `yaml:"heightTextBox,omitempty"`
 
+    // if that is set then connections can run through the box, as long as they don't cross the text
+    DontBlockConPaths *bool  `yaml:"dontBlockConPaths,omitempty"`
+
     // Tags to annotate the box, tags are used to format and filter
     Tags []string  `yaml:"tags,omitempty"`
+
+    // Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.
+    DataLink *string  `yaml:"dataLink,omitempty"`
 }
 
 func NewLayoutElement() *LayoutElement {
@@ -220,6 +237,7 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     ret.Caption = src.Caption
     ret.Text1 = src.Text1
     ret.Text2 = src.Text2
+    ret.Image = CopyImageContainer(src.Image)
     ret.Vertical = CopyLayoutElemContainer(src.Vertical)
     ret.Horizontal = CopyLayoutElemContainer(src.Horizontal)
     ret.X = src.X
@@ -241,10 +259,12 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     ret.YTextBox = src.YTextBox
     ret.WidthTextBox = src.WidthTextBox
     ret.HeightTextBox = src.HeightTextBox
+    ret.DontBlockConPaths = src.DontBlockConPaths
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
     }
+    ret.DataLink = src.DataLink
 
     return &ret
 }
@@ -325,11 +345,11 @@ type BoxFormat struct {
 
     Fill *types.FillDef  `yaml:"fill,omitempty"`
 
-    // ID of an image to use
-    Image *string  `yaml:"image,omitempty"`
-
     // Minimum margin between boxes
     MinBoxMargin int  `yaml:"minBoxMargin"`
+
+    // sets the width of the object to the width of the parent
+    WidthOfParent *bool  `yaml:"widthOfParent,omitempty"`
 
     // optional fixed width that will be applied on the box
     FixedWidth *int  `yaml:"fixedWidth,omitempty"`
@@ -354,14 +374,17 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.Line = types.CopyLineDef(src.Line)
     ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
-    ret.Image = src.Image
     ret.MinBoxMargin = src.MinBoxMargin
+    ret.WidthOfParent = src.WidthOfParent
     ret.FixedWidth = src.FixedWidth
     ret.FixedHeight = src.FixedHeight
     ret.VerticalTxt = src.VerticalTxt
 
     return &ret
 }
+
+
+
 
 
 
@@ -390,6 +413,10 @@ type ConnectionLine struct {
     LineIndex int  `yaml:"lineIndex"`
 
     Format *types.LineDef  `yaml:"format,omitempty"`
+
+    IsStart bool  `yaml:"isStart"`
+
+    IsEnd bool  `yaml:"isEnd"`
 }
 
 
@@ -407,6 +434,8 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.ConnectionIndex = src.ConnectionIndex
     ret.LineIndex = src.LineIndex
     ret.Format = types.CopyLineDef(src.Format)
+    ret.IsStart = src.IsStart
+    ret.IsEnd = src.IsEnd
 
     return &ret
 }
@@ -453,6 +482,51 @@ func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
     for _, e := range src.Edges {
         ret.Edges = append(ret.Edges, e)
     }
+
+    return &ret
+}
+
+
+
+
+
+type ImageContainer struct {
+
+    // X position of the element
+    X int  `yaml:"x"`
+
+    // Y position of the element
+    Y int  `yaml:"y"`
+
+    // Width of the container
+    Width int  `yaml:"width"`
+
+    // Height of the container
+    Height int  `yaml:"height"`
+
+    // distance top and bottom of the image
+    MarginTopBottom int  `yaml:"marginTopBottom"`
+
+    // distance left and right of the image
+    MarginLeftRight int  `yaml:"marginLeftRight"`
+
+    // reference to the globally declared image
+    ImgId string  `yaml:"imgId"`
+}
+
+
+func CopyImageContainer(src *ImageContainer) *ImageContainer {
+    if src == nil {
+        return nil
+    }
+    var ret ImageContainer
+    ret.X = src.X
+    ret.Y = src.Y
+    ret.Width = src.Width
+    ret.Height = src.Height
+    ret.MarginTopBottom = src.MarginTopBottom
+    ret.MarginLeftRight = src.MarginLeftRight
+    ret.ImgId = src.ImgId
 
     return &ret
 }

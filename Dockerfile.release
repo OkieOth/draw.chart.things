@@ -5,7 +5,12 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+RUN mkdir temp
+
 COPY cmd ./cmd
+COPY pkg ./pkg
+COPY ui ./ui
+COPY resources ./resources
 
 RUN go test -v ./...
 

@@ -4,11 +4,29 @@ hide empty methods
 hide empty fields
 
 
+class "**Legend**" as Legend {
+        LegendEntry[] entries
+        StringType format
+}
+note top: Definition of the output for\nthe legend
+
+ 
+
+class "**LegendEntry**" as LegendEntry {
+        StringType text
+        StringType format
+}
+note top: Definition of one legend entry
+
+ 
+
 class "**Layout**" as Layout {
         StringType id
         StringType caption
         StringType text1
         StringType text2
+        StringType image
+        BooleanType expand
         StringType extVertical
         Layout[] vertical
         StringType extHorizontal
@@ -16,6 +34,8 @@ class "**Layout**" as Layout {
         StringType[] tags
         Connection[] connections
         StringType format
+        BooleanType dontBlockConPaths
+        StringType dataLink
 }
 
  
@@ -24,6 +44,7 @@ class "**LayoutArray**" as LayoutArray extends List {
 }
 
 class "**Connection**" as Connection {
+        StringType dest
         StringType destId
         BooleanType sourceArrow
         BooleanType destArrow
@@ -34,6 +55,7 @@ class "**Connection**" as Connection {
  
 
 class "**Format**" as Format {
+        BooleanType widthOfParent
         IntegerType fixedWidth
         IntegerType fixedHeight
         BooleanType verticalTxt
@@ -45,10 +67,16 @@ class "**Format**" as Format {
         IntegerType padding
         IntegerType boxMargin
         IntegerType cornerRadius
-        StringType image
 }
 
  
+
+class "**FormatVariations**" as FormatVariations {
+        Map<Format> hasTag
+}
+
+ 
+
 
 class "**FontDef**" as FontDef {
         IntegerType size
@@ -114,11 +142,12 @@ note top: Defines the fill of the\nbox
  
 
 class "**ImageDef**" as ImageDef {
-        StringType id
         StringType description
         IntegerType width
         IntegerType height
         StringType base64
+        IntegerType marginTopBottom
+        IntegerType marginLeftRight
         StringType base64Src
 }
 note top: parameters of an image to\nbe displayed in the SVG
@@ -127,6 +156,15 @@ note top: parameters of an image to\nbe displayed in the SVG
 
 
     
+Legend "0" *-- "n" LegendEntry
+
+
+    
+
+
+    
+
+
 
 
 
@@ -140,14 +178,18 @@ Layout "0" *-- "n" Layout
 Layout "0" *-- "n" Connection
 
 
-    
-    
-
-
-
 
 
     
+    
+
+
+
+
+
+
+    
+
 
 
 
@@ -164,33 +206,37 @@ Format  *--  FillDef
 
 
 
-
     
+FormatVariations  *--  Format
 
-
-
-
-
-
-
-
-
-
-
-    
-    
-    
     
     
 
 
 
 
+
+
+
+
+
+
+
+    
+    
+    
+    
+    
+
+
+
+
     
     
 
 
     
+
 
 
 

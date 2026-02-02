@@ -1,22 +1,22 @@
 package boxes
 
 import (
+	"fmt"
 	"maps"
 	"slices"
+
+	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
-func (b *Boxes) MixinFormats(additional AdditionalFormats) {
-	if len(additional.Formats) > 0 {
-		maps.Copy(b.Formats, additional.Formats)
-	}
-	for _, i := range additional.Images {
-		b.Images = append(b.Images, i)
-	}
-}
-
-func hasConnection(connections []Connection, destId string) bool {
+func hasConnectionById(connections []Connection, destId string) bool {
 	return slices.ContainsFunc(connections, func(c Connection) bool {
 		return c.DestId == destId
+	})
+}
+
+func hasConnectionByCapt(connections []Connection, caption string) bool {
+	return slices.ContainsFunc(connections, func(c Connection) bool {
+		return c.Dest == caption
 	})
 }
 
@@ -27,11 +27,24 @@ func (b *Boxes) mixInConnectionsImplCont(cont []Layout, additional map[string]Co
 }
 
 func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]ConnectionCont) {
+	if l.Caption == "mongodb4-shard0-data" {
+		fmt.Println("DEBUG")
+	}
 	if l.Id != "" {
 		if cc, ok := additional[l.Id]; ok {
 			for _, c := range cc.Connections {
-				if !hasConnection(l.Connections, c.DestId) {
+				if !hasConnectionById(l.Connections, c.DestId) {
 					l.Connections = append(l.Connections, c)
+				}
+			}
+		}
+		if l.Caption != "" {
+			if cc, ok := additional[l.Caption]; ok {
+				for _, c := range cc.Connections {
+					if !hasConnectionByCapt(l.Connections, c.Dest) {
+						c.DestId = b.FindBoxWithCaption(c.Dest)
+						l.Connections = append(l.Connections, c)
+					}
 				}
 			}
 		}
@@ -40,6 +53,71 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 	b.mixInConnectionsImplCont(l.Vertical, additional)
 }
 
-func (b *Boxes) MixinConnections(additional map[string]ConnectionCont) {
-	b.mixInConnectionsImpl(&b.Boxes, additional)
+func (b *Boxes) MixinThings(additional BoxesFileMixings) {
+	if additional.Title != nil {
+		b.Title += ": " + *additional.Title
+	}
+	if additional.Legend != nil {
+		if b.Legend == nil {
+			b.Legend = NewLegend()
+		}
+		if len(additional.Legend.Entries) > 0 {
+			b.Legend.Entries = append(b.Legend.Entries, additional.Legend.Entries...)
+		}
+	}
+	if len(additional.Formats) > 0 {
+		if b.Formats == nil {
+			b.Formats = make(map[string]Format, 0)
+		}
+		maps.Copy(b.Formats, additional.Formats)
+	}
+	b.mixInConnectionsImpl(&b.Boxes, additional.Connections)
+	if len(additional.Formats) > 0 {
+		if b.Formats == nil {
+			b.Formats = make(map[string]Format)
+		}
+		maps.Copy(b.Formats, additional.Formats)
+	}
+	if len(additional.Images) > 0 {
+		if b.Images == nil {
+			b.Images = make(map[string]types.ImageDef)
+		}
+		maps.Copy(b.Images, additional.Images)
+	}
+	if additional.FormatVariations != nil {
+		if len(additional.FormatVariations.HasTag) > 0 {
+			if b.FormatVariations == nil {
+				b.FormatVariations = NewFormatVariations()
+			}
+			maps.Copy(b.FormatVariations.HasTag, additional.FormatVariations.HasTag)
+		}
+	}
+}
+
+func (b *Boxes) findBoxInContWithCaption(cont []Layout, caption string) string {
+	if cont == nil {
+		return ""
+	}
+	for i := range len(cont) {
+		found := b.findBoxWithCaption(&cont[i], caption)
+		if found != "" {
+			return found
+		}
+	}
+	return ""
+}
+
+func (b *Boxes) findBoxWithCaption(box *Layout, caption string) string {
+	if box.Caption == caption {
+		return box.Id
+	}
+	found := b.findBoxInContWithCaption(box.Vertical, caption)
+	if found != "" {
+		return found
+	}
+	return b.findBoxInContWithCaption(box.Horizontal, caption)
+}
+
+func (b *Boxes) FindBoxWithCaption(caption string) string {
+	return b.findBoxWithCaption(&b.Boxes, caption)
 }

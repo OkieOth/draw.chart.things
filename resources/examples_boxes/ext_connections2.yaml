@@ -1,0 +1,9 @@
+connections:
+  Ferdows:
+    connections:
+      - dest: Most Left Element, Das ist für Matthias mal sehen was passiert
+      - dest: Right Element 0
+      - destId: Right Element 2
+  Center Element 1:
+    connections:
+      - destId: Right Element 1

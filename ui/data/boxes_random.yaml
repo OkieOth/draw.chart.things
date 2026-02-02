@@ -2066,3 +2066,4 @@ formats:
       color: "#4895b5"
     padding: 2
     boxMargin: 3
+lineDist: 8

@@ -83,10 +83,7 @@
     "description": "code gen types for external injection of things",
     "models": [
       {
-        "schema": "/project/configs/models/boxes_external_connections.json"
-      },
-      {
-        "schema": "/project/configs/models/boxes_external_formats.json"
+        "schema": "/project/configs/models/boxes_external_mixins.json"
       }
     ],
     "tasks": [

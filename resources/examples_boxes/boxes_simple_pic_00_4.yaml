@@ -1,0 +1,7 @@
+title: Simple Pic Example (2)
+boxes:
+  vertical:
+    - id: id1
+      caption: Line 1
+      horizontal:
+        - image: img1

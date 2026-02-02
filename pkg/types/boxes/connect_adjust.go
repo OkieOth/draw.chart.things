@@ -21,7 +21,8 @@ func (doc *BoxesDocument) fixVerticalStartAndEndOfHorizontalLine(xStart, xEnd, y
 				if line.StartY == y {
 					// vertical line goes down from the triggering line ... shorten the v-line
 					line.StartY += doc.LineDist
-					line.EndY += doc.LineDist
+					// this was removed for a bug ... could be wrong
+					//line.EndY += doc.LineDist
 					startFound = true
 					if startFound && endFound {
 						return
@@ -86,7 +87,7 @@ func (doc *BoxesDocument) adjustForOverlappingHorizontalLines() {
 		last := &doc.HorizontalLines[i-1]
 		current := &doc.HorizontalLines[i]
 		if current.StartY == last.StartY &&
-			overlapsHorizontally(current.StartX, current.EndX, last.StartX, last.EndX) {
+			OverlapsHorizontally(current.StartX, current.EndX, last.StartX, last.EndX) {
 			// adjust in case start and end lines ... but it's important before moving the h-line
 			doc.fixVerticalStartAndEndOfHorizontalLine(current.StartX, current.EndX, current.StartY, current.StartY, current.ConnectionIndex)
 			yStart := current.StartY
@@ -117,7 +118,7 @@ func (doc *BoxesDocument) adjustForOverlappingVerticalLines() {
 		last := &doc.VerticalLines[i-1]
 		current := &doc.VerticalLines[i]
 		if current.StartX == last.StartX &&
-			overlapsVertically(current.StartY, current.EndY, last.StartY, last.EndY) {
+			OverlapsVertically(current.StartY, current.EndY, last.StartY, last.EndY) {
 			doc.fixHorizontalStartAndEndOfVerticalLine(doc.LineDist, current.StartY, current.EndY, current.StartX, current.StartX, current.ConnectionIndex)
 			xStart := current.StartX
 			current.StartX += doc.LineDist
@@ -157,8 +158,8 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	}
 	if line.StartY == line.EndY {
 		// horizontal line
-		diffXStart := absInt(box.CenterX - line.StartX)
-		diffXEnd := absInt(box.CenterX - line.EndX)
+		diffXStart := absInt((box.X + box.Width) - line.StartX)
+		diffXEnd := absInt(box.X - line.EndX)
 		if diffXStart < diffXEnd {
 			// line to right
 			line.StartX = box.X + box.Width
@@ -169,8 +170,8 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 
 	} else {
 		// vertical line
-		diffYStart := absInt(box.CenterY - line.StartY)
-		diffYEnd := absInt(box.CenterY - line.EndY)
+		diffYStart := absInt((box.Y + box.Height) - line.StartY)
+		diffYEnd := absInt(box.Y - line.EndY)
 		if diffYStart < diffYEnd {
 			// line down
 			line.StartY = box.Y + box.Height
@@ -194,6 +195,7 @@ func (doc *BoxesDocument) adjustVerticalEndLines() {
 }
 
 func (doc *BoxesDocument) adjustStartAndEndLines() {
+	// Critical - in case of not proper line endings on boxes look here
 	doc.adjustHorizontalEndLines()
 	doc.adjustVerticalEndLines()
 }
@@ -210,7 +212,7 @@ func NewEndLineAdjustments() EndLineAdjustments {
 	}
 }
 
-func overlapsVertically(yTop1, yBottom1, yTop2, yBottom2 int) bool {
+func OverlapsVertically(yTop1, yBottom1, yTop2, yBottom2 int) bool {
 	return ((yTop1 >= yTop2 && yTop1 <= yBottom2) || // yTop1 is in range of v-line 2
 		(yBottom1 >= yTop2 && yBottom1 <= yBottom2)) || // ...yBottom1 is in range of v-line2
 		((yTop2 >= yTop1 && yTop2 <= yBottom1) ||
@@ -219,7 +221,7 @@ func overlapsVertically(yTop1, yBottom1, yTop2, yBottom2 int) bool {
 		(yBottom1 == yTop2) || (yBottom1 == yBottom2)
 }
 
-func overlapsHorizontally(xLeft1, xRight1, xLeft2, xRight2 int) bool {
+func OverlapsHorizontally(xLeft1, xRight1, xLeft2, xRight2 int) bool {
 	return ((xLeft1 >= xLeft2 && xLeft1 <= xRight2) || // yTop1 is in range of v-line 2
 		(xRight1 >= xLeft2 && xRight1 <= xRight2)) || // ...yBottom1 is in range of v-line2
 		((xLeft2 >= xLeft1 && xLeft2 <= xRight1) ||

@@ -6,9 +6,13 @@ hide empty fields
 
 class "**Boxes**" as Boxes {
         StringType title
+        StringType titleFormat
+        Legend legend
         Layout boxes
         Map<Format> formats
-        ImageDef[] images
+        FormatVariations formatVariations
+        Map<ImageDef> images
+        BooleanType hideTextsForParents
         IntegerType lineDist
         IntegerType globalPadding
         IntegerType minBoxMargin
@@ -18,11 +22,21 @@ note top: Model to describe the input\nof block diagrams
 
  
 
+class "**Legend**" as Legend {
+        LegendEntry[] entries
+        StringType format
+}
+note top: Definition of the output for\nthe legend
+
+ 
+
 class "**Layout**" as Layout {
         StringType id
         StringType caption
         StringType text1
         StringType text2
+        StringType image
+        BooleanType expand
         StringType extVertical
         Layout[] vertical
         StringType extHorizontal
@@ -30,12 +44,15 @@ class "**Layout**" as Layout {
         StringType[] tags
         Connection[] connections
         StringType format
+        BooleanType dontBlockConPaths
+        StringType dataLink
 }
 
  
 
 
 class "**Format**" as Format {
+        BooleanType widthOfParent
         IntegerType fixedWidth
         IntegerType fixedHeight
         BooleanType verticalTxt
@@ -47,8 +64,22 @@ class "**Format**" as Format {
         IntegerType padding
         IntegerType boxMargin
         IntegerType cornerRadius
-        StringType image
 }
+
+ 
+
+class "**FormatVariations**" as FormatVariations {
+        Map<Format> hasTag
+}
+
+ 
+
+
+class "**LegendEntry**" as LegendEntry {
+        StringType text
+        StringType format
+}
+note top: Definition of one legend entry
 
  
 
@@ -56,6 +87,7 @@ class "**LayoutArray**" as LayoutArray extends List {
 }
 
 class "**Connection**" as Connection {
+        StringType dest
         StringType destId
         BooleanType sourceArrow
         BooleanType destArrow
@@ -64,6 +96,7 @@ class "**Connection**" as Connection {
 }
 
  
+
 
 class "**FontDef**" as FontDef {
         IntegerType size
@@ -129,11 +162,12 @@ note top: Defines the fill of the\nbox
  
 
 class "**ImageDef**" as ImageDef {
-        StringType id
         StringType description
         IntegerType width
         IntegerType height
         StringType base64
+        IntegerType marginTopBottom
+        IntegerType marginLeftRight
         StringType base64Src
 }
 note top: parameters of an image to\nbe displayed in the SVG
@@ -143,17 +177,29 @@ note top: parameters of an image to\nbe displayed in the SVG
 
     
 
+
+Boxes  *--  Legend
+
 Boxes  *--  Layout
 
 Boxes  *--  Format
 
-Boxes "0" *-- "n" ImageDef
+Boxes  *--  FormatVariations
+
+Boxes  *--  ImageDef
+
 
 
 
 
 
     
+Legend "0" *-- "n" LegendEntry
+
+
+    
+
+
 
 
 
@@ -167,8 +213,11 @@ Layout "0" *-- "n" Layout
 Layout "0" *-- "n" Connection
 
 
+
+
     
     
+
 
 
 
@@ -185,6 +234,20 @@ Format  *--  FillDef
 
 
 
+    
+FormatVariations  *--  Format
+
+    
+    
+
+
+    
+    
+
+
+
+
+
 
     
     
@@ -193,12 +256,6 @@ Format  *--  FillDef
 
 
 
-    
-
-
-
-
-
 
 
 
@@ -219,6 +276,7 @@ Format  *--  FillDef
 
 
     
+
 
 
 

@@ -1,0 +1,1987 @@
+// Return all box ids present in the current SVG (top-level boxes only, not blacklisted)
+window.getAllBoxIds = function () {
+    const svg = getSvg();
+    if (!svg) return [];
+    // Assume box elements have id matching the box id pattern (e.g., box_1, box_2, ...)
+    // We'll collect all elements with an id that matches the box prefix logic
+    const elements = svg.querySelectorAll('[id]');
+    const ids = new Set();
+    elements.forEach(el => {
+        const boxId = getBoxPrefix(el.id);
+        if (boxId) ids.add(boxId);
+    });
+    return Array.from(ids);
+};
+let state = { scale: 1, tx: 0, ty: 0 };
+let baseSize = { width: 0, height: 0 };
+let minimapVisible = false;
+// Pan tool state
+let panToolActive = false;
+let spacePressed = false;
+let isDragging = false;
+let dragStart = { x: 0, y: 0, tx: 0, ty: 0 };
+// NEW: undo stack of previous badge states
+let undoStack = [];
+
+// Update toolbar active states
+let blacklistMode = false;
+let blacklist = [];
+
+// NEW: global additional mixins for persistence
+let mixins = [];
+
+// Spinner helpers
+window.showSpinner = function () {
+    const el = document.getElementById("spinner");
+    console.log("Spinner start");
+    if (!el) return;
+    el.classList.remove("hidden");
+    el.setAttribute("aria-hidden", "false");
+};
+window.hideSpinner = function () {
+    const el = document.getElementById("spinner");
+    console.log("Spinner stop");
+    if (!el) return;
+    el.classList.add("hidden");
+    el.setAttribute("aria-hidden", "true");
+};
+
+function installCreateSvgExtSpinnerWrapper() {
+    if (typeof window.createSvgExt !== "function") return;
+    if (window.createSvgExt.__wrappedWithSpinner) return;
+    const raw = window.createSvgExt;
+    const wrapped = async function (...args) {
+        try {
+            if (typeof window.showSpinner === "function") window.showSpinner();
+            // Yield to the browser so the spinner can paint before heavy work
+            await new Promise((r) => requestAnimationFrame(() => r()));
+            // A second rAF improves reliability on some browsers
+            await new Promise((r) => requestAnimationFrame(() => r()));
+            let res = raw.apply(this, args);
+            if (res && typeof res.then === "function") {
+                res = await res;
+            }
+            return res;
+        } finally {
+            if (typeof window.hideSpinner === "function") window.hideSpinner();
+        }
+    };
+    wrapped.__wrappedWithSpinner = true;
+    wrapped.__original = raw;
+    window.createSvgExt = wrapped;
+}
+
+function initPage() {
+    window.addEventListener("resize", positionBlacklistCollector);
+    window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
+    // Attach dummy handler for toolbar combo box
+    document.addEventListener("DOMContentLoaded", function () {
+        const combo = document.getElementById("toolbar-combo");
+        if (combo) {
+            // Hide combo if no 'options' param was provided
+            if (!window.queryOptions) {
+                combo.style.display = "none";
+            }
+            // Load combo options dynamically from YAML if 'options' query param is present
+            if (typeof window.loadComboOptionsFromYaml === "function") {
+                // Fire and forget; selection will be set inside loader if 'combo' is present
+                window.loadComboOptionsFromYaml();
+            }
+            let previousYamlContent = "";
+            combo.addEventListener("change", async function (e) {
+                await handleComboBoxChange(combo, previousYamlContent, function (newYaml) {
+                    previousYamlContent = newYaml;
+                    // Persist selection in global mixins
+                    mixins = newYaml ? [newYaml] : [];
+                    // Set currentYamlFile to combo value if present
+                    if (combo.value) {
+                        window.currentYamlFile = combo.value;
+                    }
+                });
+            });
+        }
+    // Production-ready: handle combo box change logic in a separate function
+    async function handleComboBoxChange(combo, previousYamlContent, setPreviousYamlContent) {
+        const val = combo.value;
+        let yamlContent = "";
+        if (val) {
+            try {
+                const resp = await fetch("./data/" + val, { cache: "no-cache" });
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                yamlContent = await resp.text();
+                setPreviousYamlContent(yamlContent);
+                console.log("Loaded YAML for", val, yamlContent);
+            } catch (err) {
+                console.error("Failed to load YAML for", val, err);
+                setPreviousYamlContent("");
+            }
+        } else {
+            setPreviousYamlContent("");
+            console.log("Combo box changed: No Connections selected");
+        }
+        // Always call createSvgExt with global mixins and current expanded/blacklist state
+        // Preserve only data-hid values before SVG refresh
+        const badgeList = document.getElementById("badge-list");
+        const savedBadgeState = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        const blacklistList = document.getElementById("blacklist-list");
+        const savedBlacklistState = blacklistList ? Array.from(blacklistList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        try {
+            if (typeof createSvgExt !== "function") {
+                console.error("createSvgExt is not available.");
+                return;
+            }
+            const canvas = document.getElementById("canvas");
+            if (!canvas) return;
+            const arg = typeof window.input === "string" && window.input.length > 0 ? window.input : "";
+            // Use saved state for filterTexts and blacklistIds
+            const filterTexts = savedBadgeState;
+            const blacklistIds = savedBlacklistState;
+            let svgStr = createSvgExt(
+                arg,
+                mixins,
+                window.defaultDepth,
+                filterTexts,
+                blacklistIds,
+                window.debug
+            );
+            svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+            if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
+                console.error("createSvgExt did not return a valid SVG string.");
+                console.error(svgStr);
+                return;
+            }
+            canvas.innerHTML = svgStr;
+            const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
+            canvas.dispatchEvent(evtSwap);
+            // Restore badge collector state after SVG refresh using data-hid
+            const list = document.getElementById("badge-list");
+            if (list && Array.isArray(savedBadgeState)) {
+                list.innerHTML = "";
+                savedBadgeState.forEach(hid => {
+                    if (!hid) return;
+                    // Try to find the element in the new SVG
+                    const svg = document.querySelector("#canvas svg");
+                    let el = svg ? svg.querySelector(`[id='${hid}']`) : null;
+                    if (!el && svg) el = svg.querySelector(`[id^='${hid}']`);
+                    if (el && window.createBadgeForShape) {
+                        const badge = window.createBadgeForShape(el);
+                        badge.dataset.hid = hid;
+                        list.appendChild(badge);
+                    } else if (window.getCaptionForId) {
+                        // Fallback minimal badge
+                        const span = document.createElement("span");
+                        span.className = "badge";
+                        span.dataset.hid = hid;
+                        const label = document.createElement("span");
+                        label.textContent = window.getCaptionForId(hid);
+                        span.appendChild(label);
+                        list.appendChild(span);
+                    }
+                });
+                requestAnimationFrame(window.refitAllBadges || (()=>{}));
+            }
+        } catch (e) {
+            console.error("Error updating SVG via createSvgExt:", e);
+        }
+    }
+    });
+    // Also reposition after collector content changes
+    const observer = new MutationObserver(positionBlacklistCollector);
+    observer.observe(document.getElementById("collector"), {
+        childList: true,
+        subtree: true,
+    });
+    (function () {
+        // Polyfill: CSS.escape (minimal) for older browsers
+        if (typeof CSS === "undefined" || typeof CSS.escape !== "function") {
+            window.CSS = window.CSS || {};
+            CSS.escape = function (sel) {
+                return String(sel).replace(/[^a-zA-Z0-9_\-]/g, "\\$&");
+            };
+        }
+
+        // Collect texts from a node (including nested text/tspan)
+        function collectTextsFromNode(node, acc) {
+            if (!node) return;
+            // caption companion
+            if (node.id) {
+                const capt = document.getElementById(`${node.id}_capt`);
+                if (capt && String(capt.tagName).toLowerCase() === "text") {
+                    const t = (capt.textContent || "").trim();
+                    if (t)
+                        t.split(/\r?\n/)
+                            .map((s) => s.trim())
+                            .filter(Boolean)
+                            .forEach((x) => acc.add(x));
+                }
+            }
+            // direct text nodes
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const tag = String(node.tagName).toLowerCase();
+                if (tag === "text" || tag === "tspan") {
+                    const t = (node.textContent || "").trim();
+                    if (t)
+                        t.split(/\r?\n/)
+                            .map((s) => s.trim())
+                            .filter(Boolean)
+                            .forEach((x) => acc.add(t));
+                }
+                // aria-label/title or title element
+                const titleAttr =
+                    node.getAttribute &&
+                    (node.getAttribute("title") ||
+                        node.getAttribute("aria-label"));
+                if (titleAttr) acc.add(titleAttr.trim());
+                // traverse children
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    collectTextsFromNode(node.childNodes[i], acc);
+                }
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                const t = (node.textContent || "").trim();
+                if (t) acc.add(t);
+            }
+        }
+
+        // Robust: aggregate filter texts for all elements in the clicked box
+        function getFilterTextsForBox(el) {
+            if (!el || !el.id) return [];
+
+            const svg = getSvg();
+            if (!svg) return getTextContentArray(el);
+
+            const boxId = getBoxPrefix(el.id);
+
+            // Prefer exact container match
+            let container = svg.querySelector(`#${CSS.escape(boxId)}`);
+            // Fallback: any descendant whose id starts with boxId
+            const acc = new Set();
+            if (container) {
+                collectTextsFromNode(container, acc);
+            } else {
+                const related = svg.querySelectorAll(
+                    `[id^="${CSS.escape(boxId)}"]`
+                );
+                related.forEach((node) => collectTextsFromNode(node, acc));
+            }
+
+            // If nothing collected, include element-level text arrays across related nodes
+            if (acc.size === 0) {
+                const related = svg.querySelectorAll(
+                    `[id^="${CSS.escape(boxId)}"]`
+                );
+                related.forEach((node) => {
+                    getTextContentArray(node).forEach((t) => acc.add(t));
+                });
+            }
+
+            // Always include a readable caption for the box itself
+            acc.add(getCaptionForId(boxId));
+
+            // As last resort, include ids to make filters stable
+            const relatedIds = svg.querySelectorAll(
+                `[id^="${CSS.escape(boxId)}"]`
+            );
+            relatedIds.forEach((node) => acc.add(node.id));
+
+            return Array.from(acc)
+                .map((s) => s.trim())
+                .filter(Boolean);
+        }
+
+        // Global click handler for SVG shapes
+        window.shapeClick = function (evt) {
+            const el = evt.target;
+            if (!el || !el.id) return;
+
+            // If blacklist collector is visible, collect to blacklist; otherwise, collect to expanded collector
+            const blacklistBox = document.getElementById("blacklist-collector");
+            const blacklistVisible =
+                blacklistBox && !blacklistBox.classList.contains("hidden");
+            if (blacklistVisible) {
+                addToBlacklist(el);
+                // Do not forcibly show the blacklist collector here; only toggleBlacklist controls it
+                return;
+            }
+
+            // --- Existing expanded collector logic ---
+            // NEW: ignore click on a parent if a child is already in the collector
+            const clickedHid = getBoxPrefix(el.id);
+            if (anyBadgeIsChildOf(clickedHid)) {
+                console.log(
+                    "Ignoring parent click because a child is already selected:",
+                    el.id
+                );
+                return;
+            }
+
+            // Snapshot current badges BEFORE applying click changes
+            const prevState = getCurrentBadgeState();
+
+            // NEW: if a parent badge exists and user clicked a child, remove parent badge(s) and deselect parent shape(s)
+            const ancestorBadges = findAncestorBadgesOf(clickedHid);
+            if (ancestorBadges.length > 0) {
+                ancestorBadges.forEach((b) => {
+                    const hid =
+                        b.dataset.hid ||
+                        (b.dataset.id ? getBoxPrefix(b.dataset.id) : "");
+                    if (hid) deselectElementByHid(hid);
+                    b.remove();
+                });
+            }
+
+            // Ensure collector is visible if hidden
+            const collector = document.getElementById("collector");
+            if (collector && collector.classList.contains("hidden")) {
+                collector.classList.remove("hidden");
+                collector.setAttribute("aria-hidden", "false");
+                updateToolButtons();
+            }
+
+            // Simple highlight: toggle a data-selected flag and adjust stroke
+            const selected = el.getAttribute("data-selected") === "true";
+            el.setAttribute("data-selected", selected ? "false" : "true");
+            if (selected) {
+                el.setAttribute(
+                    "stroke-width",
+                    el.getAttribute("data-original-stroke-width") || "3"
+                );
+                el.removeAttribute("filter");
+            } else {
+                // Store original stroke width once
+                if (!el.hasAttribute("data-original-stroke-width")) {
+                    el.setAttribute(
+                        "data-original-stroke-width",
+                        el.getAttribute("stroke-width") || "3"
+                    );
+                }
+                el.setAttribute(
+                    "stroke-width",
+                    String(
+                        Number(el.getAttribute("data-original-stroke-width")) +
+                            2
+                    )
+                );
+            }
+            console.log("Clicked item:", el.id);
+
+            // Toggle badge in collector: remove if exists, otherwise add
+            const list = document.getElementById("badge-list");
+            if (list) {
+                const boxId = getBoxPrefix(el.id);
+                const existingBadges = findBadgesByBoxId(boxId);
+                if (existingBadges.length > 0) {
+                    existingBadges.forEach((b) => b.remove());
+                    // NEW: refit remaining badges after removal
+                    requestAnimationFrame(refitAllBadges);
+                } else {
+                    const badge = createBadgeForShape(el);
+                    list.insertBefore(badge, list.firstChild); // prepend
+                    // NEW: fit newly added badge
+                    requestAnimationFrame(() => fitBadgeLabel(badge));
+                }
+            }
+
+            // NEW: push undo state only if state changed
+            const newState = getCurrentBadgeState();
+            if (!statesEqual(prevState, newState)) {
+                undoStack.push(prevState);
+            }
+
+            // Replace displayed SVG using createSvg; use YAML input when loaded
+            (async () => {
+                try {
+                    if (typeof createSvg !== "function") {
+                        console.error("createSvg is not available.");
+                        return;
+                    }
+                    const canvas = document.getElementById("canvas");
+                    if (!canvas) return;
+
+                    // Wait for YAML load if promise exists
+                    if (
+                        window.inputLoaded &&
+                        typeof window.inputLoaded.then === "function"
+                    ) {
+                        await window.inputLoaded;
+                    }
+
+                    // Fallback: toggle arg if no YAML loaded
+                    const count =
+                        document.querySelectorAll("#badge-list .badge").length;
+                    const fallbackArg = count % 2 === 1 ? "1" : "2";
+                    const arg =
+                        typeof window.input === "string" &&
+                        window.input.length > 0
+                            ? window.input
+                            : fallbackArg;
+
+                    // UPDATED: pass all badge captions currently in the clicked shapes box
+
+                    const filterTexts = getAllBadgeCaptions("badge-list");
+                    // Extract ids from blacklisted badges (elements in blacklist)
+                    const blacklistIds = blacklist
+                        .map((boxId) => {
+                            // Try to get the element and its id
+                            const el = document.getElementById(boxId);
+                            return el ? el.id : boxId;
+                        })
+                        .filter(Boolean);
+                    console.log(
+                        "Refreshing SVG: ",
+                        filterTexts,
+                        "blacklist ids: ",
+                        blacklistIds
+                    );
+                    let svgStr = createSvgExt(
+                        arg,
+                        mixins, // additional mixins to hone the layout input
+                        window.defaultDepth,
+                        filterTexts,
+                        blacklistIds,
+                        window.debug
+                    );
+                    svgStr =
+                        svgStr && typeof svgStr.then === "function"
+                            ? await svgStr
+                            : svgStr;
+
+                    if (
+                        typeof svgStr !== "string" ||
+                        !svgStr.trim().startsWith("<svg")
+                    ) {
+                        console.error(
+                            "createSvg did not return a valid SVG string."
+                        );
+                        console.error(svgStr);
+                        return;
+                    }
+
+                    // Swap SVG and trigger existing initialization
+                    canvas.innerHTML = svgStr;
+                    const evtSwap = new Event("htmx:afterSwap", {
+                        bubbles: true,
+                    });
+                    canvas.dispatchEvent(evtSwap);
+
+                    // NEW: after click, observe caption/text changes and refresh when filled
+                    observeCaptionAndRefresh(el);
+                } catch (e) {
+                    console.error("Error updating SVG via createSvg:", e);
+                }
+            })();
+        };
+
+        // NEW: click a badge to remove it and reload the SVG
+        window.attachBadgeRemoval();
+
+        window.svgControls = {
+            // Ensure toggleBlacklist is always available on window.svgControls
+            toggleBlacklist() {
+                blacklistMode = !blacklistMode;
+                const blist = document.getElementById("blacklist-collector");
+                if (blist) {
+                    if (blacklistMode) {
+                        blist.classList.remove("hidden");
+                        blist.setAttribute("aria-hidden", "false");
+                        blist.scrollIntoView({
+                            behavior: "smooth",
+                            block: "nearest",
+                        });
+                        updateBlacklistUI(); // Always update UI from window.blacklist when showing
+                    } else {
+                        blist.classList.add("hidden");
+                        blist.setAttribute("aria-hidden", "true");
+                    }
+                }
+                updateToolButtons();
+            },
+            zoom(factor) {
+                state.scale *= factor;
+                applyTransform();
+            },
+            pan(dx, dy) {
+                state.tx += dx;
+                state.ty += dy;
+                applyTransform();
+            },
+            reset() {
+                state = { scale: 1, tx: 0, ty: 0 };
+                applyTransform();
+            },
+            save() {
+                const svg = getSvg();
+                if (!svg) return;
+                // Clone to avoid mutating live DOM
+                const clone = svg.cloneNode(true);
+                // Ensure xmlns attributes present for a standalone file
+                if (!clone.getAttribute("xmlns")) {
+                    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                }
+                if (!clone.getAttribute("xmlns:xlink")) {
+                    clone.setAttribute(
+                        "xmlns:xlink",
+                        "http://www.w3.org/1999/xlink"
+                    );
+                }
+                // Preserve viewBox if available; fallback to width/height
+                const vb = clone.viewBox && clone.viewBox.baseVal;
+                if (!vb) {
+                    const w = clone.getAttribute("width") || "800";
+                    const h = clone.getAttribute("height") || "600";
+                    clone.setAttribute("viewBox", `0 0 ${w} ${h}`);
+                }
+                const xml = new XMLSerializer().serializeToString(clone);
+                const blob = new Blob([xml], {
+                    type: "image/svg+xml;charset=utf-8",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "canvas.svg";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            },
+            toggleMinimap() {
+                minimapVisible = !minimapVisible;
+                const mmWrap = document.getElementById("minimap");
+                if (!mmWrap) return;
+                mmWrap.style.display = minimapVisible ? "flex" : "none";
+                mmWrap.setAttribute(
+                    "aria-hidden",
+                    minimapVisible ? "false" : "true"
+                );
+                if (minimapVisible) {
+                    initMinimap();
+                    populateMinimapPreview();
+                    updateMinimap();
+                }
+                // Always update the toolbar button state
+                updateToolButtons();
+            },
+            toggleCollector() {
+                const box = document.getElementById("collector");
+                if (!box) return;
+                const hidden = box.classList.toggle("hidden");
+                box.setAttribute("aria-hidden", hidden ? "true" : "false");
+                updateToolButtons();
+                // NEW: when showing, refit badges (sizes are measurable again)
+                if (!hidden) requestAnimationFrame(refitAllBadges);
+            },
+            // Toggle pan tool
+            togglePanTool() {
+                panToolActive = !panToolActive;
+                applyTransform(); // updates cursor class
+                updateToolButtons();
+            },
+            // Toggle debug mode and refresh SVG
+            toggleDebug() {
+                window.debug = !window.debug;
+                updateToolButtons();
+                reloadSvgFromBadges();
+            },
+        };
+
+        // After SVG loads, wrap and initialize sizes
+        document.body.addEventListener("htmx:afterSwap", function (evt) {
+            if (evt.target && evt.target.id === "canvas") {
+                ensureStageWrapped();
+                // NEW: only reset state if it's not already preserved
+                if (state.scale === 1 && state.tx === 0 && state.ty === 0) {
+                    // This is likely an initial load, keep the reset
+                    state = { scale: 1, tx: 0, ty: 0 };
+                }
+                // If state was preserved (non-default values), keep it as-is
+                computeBaseSize();
+                applyTransform();
+                initMinimap();
+                populateMinimapPreview();
+                updateMinimap();
+
+                // Attach pan handlers to stage
+                const stage = getStage();
+                if (stage) {
+                    stage.addEventListener("mousedown", onStageMouseDown);
+                }
+                updateToolButtons();
+                // NEW: refit badges in case layout changed
+                requestAnimationFrame(refitAllBadges);
+
+                // Add pointer cursor to SVG elements with click handlers
+                const svg = getSvg();
+                if (svg) {
+                    // Remove svg-clickable from elements that have an onclick handler
+                    svg.querySelectorAll(".svg-clickable").forEach((el) => {
+                        if (el.hasAttribute("onclick")) {
+                            el.classList.remove("svg-clickable");
+                        }
+                    });
+                    // Add onclick handler to all elements with svg-clickable class
+                    svg.querySelectorAll(".svg-clickable").forEach((el) => {
+                        if (!el.hasAttribute("onclick")) {
+                            el.setAttribute(
+                                "onclick",
+                                "window.shapeClick(event)"
+                            );
+                        }
+                    });
+                    // Also attach handlers for elements that should open external links
+                    attachAdditionalLinkHandlers();
+                }
+            }
+        });
+
+// Attach click handlers to .additionalLink elements inside the current SVG
+function attachAdditionalLinkHandlers() {
+    const svg = getSvg();
+    if (!svg) return;
+    const nodes = svg.querySelectorAll(".additionalLink");
+    nodes.forEach((node) => {
+        try {
+            node.style.cursor = "pointer";
+        } catch {}
+        if (node.__additionalLinkBound) return;
+        node.__additionalLinkBound = true;
+        node.addEventListener(
+            "click",
+            function (evt) {
+                try {
+                    let el = evt.target;
+                    while (
+                        el &&
+                        el !== svg &&
+                        !(el.classList && el.classList.contains("additionalLink"))
+                    ) {
+                        el = el.parentNode;
+                    }
+                    const url = el && el.getAttribute ? el.getAttribute("data-link") : null;
+                    if (url && typeof url === "string") {
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    } else {
+                        console.warn("additionalLink clicked without data-link URL", el);
+                    }
+                } catch (err) {
+                    console.error("Failed to handle additionalLink click:", err);
+                } finally {
+                    if (evt) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                    }
+                }
+            },
+            { capture: true }
+        );
+    });
+}
+
+        // Keep centered and minimap in sync on resize
+        window.addEventListener("resize", function () {
+            applyTransform(); // recenter and resize stage
+            if (minimapVisible) {
+                initMinimap();
+                populateMinimapPreview();
+                updateMinimap();
+            }
+            // NEW: badges may need refitting on resize
+            requestAnimationFrame(refitAllBadges);
+        });
+        getCanvas().addEventListener("scroll", function () {
+            updateMinimap();
+        });
+
+        // Global keyboard listeners for Space pan
+        window.addEventListener("keydown", onKeyDown, {
+            passive: false,
+        });
+        window.addEventListener("keyup", onKeyUp);
+    })();
+}
+
+async function loadYamlInput() {
+    try {
+        if (location.protocol === "file:") {
+            console.error(
+                "YAML must be served over HTTP(S). Use a local web server to host this page."
+            );
+            window.input = "";
+            window.inputLoaded = Promise.resolve();
+            window.currentYamlFile = undefined;
+            return;
+        }
+        const yamlFile = window.queryInput;
+        const p = (async () => {
+            const resp = await fetch("/data/" + yamlFile, {
+                cache: "no-cache",
+            });
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+            window.input = await resp.text();
+            window.currentYamlFile = yamlFile;
+        })().catch((e) => {
+            console.error("Failed to fetch " + window.queryInput + ":", e);
+            window.input = "";
+            window.currentYamlFile = undefined;
+        });
+        window.inputLoaded = p.then(() => undefined);
+    } catch (e) {
+        console.error("Unexpected error loading " + window.queryInput + ":", e);
+        window.input = "";
+        window.inputLoaded = Promise.resolve();
+        window.currentYamlFile = undefined;
+    }
+}
+
+async function loadSVGFromWasm() {
+    const canvas = document.getElementById("canvas");
+    if (!canvas) return;
+
+    if (typeof Go !== "function") {
+        console.error(
+            "Go runtime not available. Ensure ./wasm_exec.js is loaded before this script."
+        );
+        return;
+    }
+    // Warn if running from file:// which cannot fetch WASM
+    if (location.protocol === "file:") {
+        console.error(
+            "WASM must be served over HTTP(S). Use a local web server to host this page."
+        );
+        return;
+    }
+
+    const go = new Go();
+
+    // Fetch boxes.wasm with streaming fallback
+    let resp;
+    try {
+        resp = await fetch("/wasm/boxes.wasm", {
+            cache: "no-cache",
+        });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+    } catch (e) {
+        console.error("Failed to fetch boxes.wasm:", e);
+        return;
+    }
+
+    let instance;
+    try {
+        if (WebAssembly.instantiateStreaming) {
+            try {
+                ({ instance } = await WebAssembly.instantiateStreaming(
+                    resp,
+                    go.importObject
+                ));
+            } catch {
+                const buf = await resp.arrayBuffer();
+                ({ instance } = await WebAssembly.instantiate(
+                    buf,
+                    go.importObject
+                ));
+            }
+        } else {
+            const buf = await resp.arrayBuffer();
+            ({ instance } = await WebAssembly.instantiate(
+                buf,
+                go.importObject
+            ));
+        }
+    } catch (e) {
+        console.error("Error instantiating boxes.wasm:", e);
+        return;
+    }
+
+    // Start the runtime, then wait for createSvgExt to appear.
+    go.run(instance).catch((e) => console.warn("go.run finished/failed:", e));
+
+    // Wait until createSvgExt is exposed by the Go code (poll with timeout)
+    const timeoutMs = 5000;
+    const start = Date.now();
+    while (typeof window.createSvgExt !== "function") {
+        if (Date.now() - start > timeoutMs) {
+            console.error(
+                'createSvgExt is not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn).'
+            );
+            return;
+        }
+        await new Promise((r) => setTimeout(r, 50));
+    }
+
+    // Install spinner wrapper once createSvgExt is available
+    installCreateSvgExtSpinnerWrapper();
+
+    let svgStr;
+    try {
+        // Wait for YAML load if available, then pass it to createSvgExt
+        if (
+            window.inputLoaded &&
+            typeof window.inputLoaded.then === "function"
+        ) {
+            await window.inputLoaded;
+        }
+        // Get current expanded and blacklisted IDs
+        const badgeList = document.getElementById("badge-list");
+        const filterTexts = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        // Use window.blacklist if set, otherwise fallback to DOM
+        const blacklistIds = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : (document.getElementById("blacklist-list") ? Array.from(document.getElementById("blacklist-list").querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : []);
+        const initialArg =
+            typeof window.input === "string" && window.input.length > 0
+                ? window.input
+                : "";
+        console.log("Refreshing SVG:", filterTexts, "blacklist ids:", blacklistIds);
+        const res = window.createSvgExt(
+            initialArg,
+            mixins, // additional mixins to hone the layout input
+            window.defaultDepth,
+            filterTexts,
+            blacklistIds,
+            window.debug
+        );
+        svgStr = res && typeof res.then === "function" ? await res : res;
+    } catch (e) {
+        console.error("Error calling createSvgExt:", e);
+        return;
+    }
+
+    if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
+        console.error("createSvgExt did not return a valid SVG string.");
+        console.error(svgStr);
+        return;
+    }
+
+    canvas.innerHTML = svgStr;
+    const evt = new Event("htmx:afterSwap", { bubbles: true });
+    canvas.dispatchEvent(evt);
+}
+
+function handleInputQueryParam() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        // Store input (existing)
+        if (params.has("input")) {
+            const raw = params.get("input") || "";
+            const content = raw.replace(/\+/g, " ");
+            window.queryInput = content;
+        }
+        // NEW: parse 'options' query param for dynamic combo source
+        if (params.has("options")) {
+            const rawOptions = params.get("options") || "";
+            window.queryOptions = rawOptions.replace(/\+/g, " ");
+        } else {
+            window.queryOptions = undefined;
+        }
+        // NEW: parse 'debug' query param and store as global boolean
+        const rawDebug = params.get("debug");
+        const truthy = ["true", "1", "yes", "on"];
+        const val =
+            rawDebug != null
+                ? truthy.includes(String(rawDebug).toLowerCase())
+                : false;
+        window.debug = val;
+
+        // --- NEW: Parse combo, expandedIds, blacklistedIds ---
+        // Combo box
+        if (params.has("combo")) {
+            const comboVal = params.get("combo");
+            // Store for use after dynamic options load
+            window.queryCombo = comboVal || "";
+            // Set combo box value after DOMContentLoaded
+            document.addEventListener("DOMContentLoaded", function () {
+                const combo = document.getElementById("toolbar-combo");
+                if (combo && comboVal) {
+                    combo.value = comboVal;
+                    // Optionally trigger change event to load YAML
+                    combo.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+            });
+        } else {
+            window.queryCombo = undefined;
+        }
+
+        // Expanded IDs (badges)
+        if (params.has("expandedIds")) {
+            const expandedIds = params.get("expandedIds").split(",").map(s => s.trim()).filter(Boolean);
+            document.addEventListener("DOMContentLoaded", function () {
+                const list = document.getElementById("badge-list");
+                if (list && expandedIds.length) {
+                    // Remove existing badges
+                    list.innerHTML = "";
+                    expandedIds.forEach(hid => {
+                        // Try to find the element in the SVG after load
+                        // Fallback: create minimal badge
+                        const span = document.createElement("span");
+                        span.className = "badge";
+                        span.dataset.hid = hid;
+                        const label = document.createElement("span");
+                        label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
+                        span.appendChild(label);
+                        list.appendChild(span);
+                    });
+                    requestAnimationFrame(window.refitAllBadges || (()=>{}));
+                }
+            });
+        }
+
+        // Blacklisted IDs (badges)
+        if (params.has("blacklistedIds")) {
+            const blacklistedIds = params.get("blacklistedIds").split(",").map(s => s.trim()).filter(Boolean);
+            document.addEventListener("DOMContentLoaded", function () {
+                window.blacklist = blacklistedIds;
+            });
+        }
+    } catch (e) {
+        console.error("Failed to read query params:", e);
+        // Defaults when parsing fails
+        if (typeof window.queryInput === "undefined") {
+            window.queryInput = undefined;
+        }
+        window.debug = false;
+    }
+}
+
+// NEW: Load combo-box options from a YAML mapping specified by the 'options' query param
+window.loadComboOptionsFromYaml = async function () {
+    try {
+        // Only proceed if an 'options' param was provided
+        const src = window.queryOptions;
+        if (!src) return;
+        if (location.protocol === "file:") {
+            console.error("Options YAML must be served over HTTP(S).");
+            return;
+        }
+        const resp = await fetch("/data/" + src, { cache: "no-cache" });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const text = await resp.text();
+        // Parse a simple YAML mapping: label: value (labels may be quoted)
+        const entries = parseSimpleYamlMapping(text);
+        const sel = document.getElementById("toolbar-combo");
+        if (!sel) return;
+        // Ensure it's visible when options are available
+        sel.style.display = "";
+        // Replace existing options with dynamically loaded ones
+        sel.innerHTML = "";
+        for (const [label, value] of entries) {
+            const opt = document.createElement("option");
+            opt.value = value;
+            opt.textContent = label;
+            sel.appendChild(opt);
+        }
+        // If a combo selection was provided via query param, apply it
+        if (typeof window.queryCombo === "string" && sel.querySelector(`option[value='${CSS.escape(window.queryCombo)}']`)) {
+            sel.value = window.queryCombo;
+        } else if (!sel.value && sel.options.length) {
+            // Ensure the first option is selected if nothing is selected
+            sel.selectedIndex = 0;
+        }
+        // Trigger a change to load the associated YAML if a non-empty value is selected
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (e) {
+        console.error("Failed to load combo options from YAML:", e);
+    }
+};
+
+// Helper: very small YAML mapping parser for lines like: "Label": value
+function parseSimpleYamlMapping(text) {
+    const lines = String(text).split(/\r?\n/);
+    const out = [];
+    for (let line of lines) {
+        // Strip comments and trim
+        line = line.replace(/#.*/, "").trim();
+        if (!line) continue;
+        // Match key: value allowing quoted keys and values
+        const m = line.match(/^([^:]+):\s*(.*)$/);
+        if (!m) continue;
+        let key = m[1].trim();
+        let val = m[2].trim();
+        // Remove surrounding quotes from key
+        if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+            key = key.slice(1, -1);
+        }
+        // Remove surrounding quotes from value
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+            val = val.slice(1, -1);
+        }
+        out.push([key, val]);
+    }
+    return out;
+}
+
+function attachBadgeRemoval() {
+    const list = document.getElementById("badge-list");
+    if (!list) return;
+    list.addEventListener("click", (evt) => {
+        const badge = evt.target.closest(".badge");
+        if (!badge) return;
+
+        // Snapshot current badges BEFORE removal
+        const prevState = getCurrentBadgeState();
+
+        // Deselect related SVG element(s) for visual consistency
+        if (badge.dataset.hid) deselectElementByHid(badge.dataset.hid);
+        if (badge.dataset.id) {
+            const el = document.getElementById(badge.dataset.id);
+            if (el && el.getAttribute("data-selected") === "true") {
+                el.setAttribute("data-selected", "false");
+                el.setAttribute(
+                    "stroke-width",
+                    el.getAttribute("data-original-stroke-width") || "3"
+                );
+                el.removeAttribute("filter");
+            }
+        }
+
+        badge.remove();
+        // NEW: refit after removal
+        requestAnimationFrame(refitAllBadges);
+
+        // Push undo entry and reload
+        undoStack.push(prevState);
+        reloadSvgFromBadges();
+    });
+}
+
+function getAllBadgeCaptions(boxId) {
+    const list = document.getElementById(boxId);
+    if (!list) return [];
+    const badges = list.querySelectorAll(".badge");
+    const out = new Set();
+    badges.forEach((b) => {
+        const id = b.dataset.id;
+        if (id) out.add(id);
+        const hid = b.dataset.hid;
+        if (hid) out.add(hid);
+    });
+    return Array.from(out);
+}
+
+// NEW: snapshot current badge state (ordered)
+function getCurrentBadgeState() {
+    const list = document.getElementById("badge-list");
+    if (!list) return [];
+    const badges = Array.from(list.querySelectorAll(".badge"));
+    return badges.map((b) => ({
+        id: b.dataset.id || "",
+        hid: b.dataset.hid || "",
+    }));
+}
+
+// NEW: shallow compare two badge states
+function statesEqual(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b)) return false;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i].id !== b[i].id || a[i].hid !== b[i].hid) return false;
+    }
+    return true;
+}
+
+// NEW: create a badge from an id/hid snapshot
+function createBadgeFromIdOrHid(item) {
+    const { id, hid } = item || {};
+    let el = null;
+    // Prefer exact id
+    if (id) el = document.getElementById(id);
+    // Else try the hierarchical container id
+    if (!el && hid) {
+        el = document.getElementById(hid);
+        if (!el) {
+            // fallback: any descendant starting with hid
+            const svg = getSvg();
+            if (svg) el = svg.querySelector(`[id^="${CSS.escape(hid)}"]`);
+        }
+    }
+    if (el) {
+        const badge = createBadgeForShape(el);
+        if (id) badge.dataset.id = id;
+        if (hid) badge.dataset.hid = hid;
+        return badge;
+    }
+    // Fallback minimal badge if element not found (e.g., filtered out)
+    const span = document.createElement("span");
+    span.className = "badge";
+    if (id) span.dataset.id = id;
+    if (hid) span.dataset.hid = hid;
+    const label = document.createElement("span");
+    label.textContent = getCaptionForId(hid || id || "item");
+    span.appendChild(label);
+    return span;
+}
+
+// NEW: apply a badge state and reload SVG
+function applyBadgeState(state) {
+    const list = document.getElementById("badge-list");
+    if (!list) return;
+    list.innerHTML = "";
+    state.forEach((item) => {
+        const badge = createBadgeFromIdOrHid(item);
+        list.appendChild(badge);
+    });
+    // NEW: fit after re-creating badges
+    requestAnimationFrame(refitAllBadges);
+    reloadSvgFromBadges();
+}
+
+// NEW: perform undo (Ctrl/Cmd+Z)
+function performUndo() {
+    if (!undoStack.length) return;
+    const prev = undoStack.pop();
+    applyBadgeState(prev);
+}
+
+function deselectElementByHid(hid) {
+    if (!hid) return;
+    const el = document.getElementById(hid);
+    if (!el) return;
+    if (el.getAttribute("data-selected") === "true") {
+        el.setAttribute("data-selected", "false");
+        el.setAttribute(
+            "stroke-width",
+            el.getAttribute("data-original-stroke-width") || "3"
+        );
+        el.removeAttribute("filter");
+    }
+}
+
+// NEW: refit all badges currently in the collector
+function refitAllBadges() {
+    const list = document.getElementById("badge-list");
+    if (!list) return;
+    const badges = list.querySelectorAll(".badge");
+    badges.forEach((b) => fitBadgeLabel(b));
+}
+
+// NEW: truncate badge label from the left so it fits the available width
+function fitBadgeLabel(badge) {
+    if (!badge) return;
+    const label = badge.querySelector("span:first-child");
+    if (!label) return;
+
+    const full = badge.dataset.fullLabel || label.textContent || "";
+    badge.dataset.fullLabel = full;
+    label.textContent = full;
+
+    // If not measurable (e.g., hidden), skip
+    const cw = label.clientWidth;
+    if (!cw) return;
+
+    // Fits already
+    if (label.scrollWidth <= cw) return;
+
+    const sep = " > ";
+    const parts = full
+        .split(sep)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    // Remove left-most breadcrumb segments first
+    let cutSegments = 0;
+    while (cutSegments < parts.length - 1) {
+        const txt = "… > " + parts.slice(cutSegments + 1).join(sep);
+        label.textContent = txt;
+        if (label.scrollWidth <= cw) return;
+        cutSegments++;
+    }
+
+    // Only last segment remains; chop characters from the left using binary search
+    const last = parts.length ? parts[parts.length - 1] : full;
+    let lo = 0,
+        hi = last.length,
+        best = "";
+    while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        const candidate = "… " + last.slice(mid);
+        label.textContent = candidate;
+        if (label.scrollWidth <= cw) {
+            best = last.slice(mid);
+            hi = mid - 1; // try to remove fewer chars
+        } else {
+            lo = mid + 1; // need to remove more
+        }
+    }
+    label.textContent = best ? "… " + best : "…";
+}
+
+// NEW: reload SVG using current badges
+function reloadSvgFromBadges(forceAllExpanded = false) {
+    return reloadSvgFromBadgesImpl(forceAllExpanded);
+}
+
+async function reloadSvgFromBadgesImpl(forceAllExpanded) {
+    try {
+        if (typeof createSvgExt !== "function") return;
+        const canvas = document.getElementById("canvas");
+        if (!canvas) return;
+
+        // NEW: preserve current zoom/pan state before reload
+        const preservedState = { ...state };
+
+        if (window.inputLoaded && typeof window.inputLoaded.then === "function") {
+            await window.inputLoaded;
+        }
+
+        let expandedIds = [];
+        let maxDepth = window.defaultDepth;
+        if (forceAllExpanded) {
+            // Instead of collecting all box IDs, set maxDepth to 100 to expand all
+            maxDepth = 100;
+        }
+        else {
+            // Use badges in the collector
+            const list = document.getElementById("badge-list");
+            if (list) {
+                expandedIds = Array.from(list.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean);
+            }
+        }
+        // Extract ids from blacklisted badges (elements in blacklist)
+        const blacklistIds = getAllBadgeCaptions("blacklist-list");
+        // Use input YAML filename or fallback
+        const arg = (typeof window.input === "string" && window.input.length > 0) ? window.input : "1";
+        let svgStr = window.createSvgExt(
+            arg,
+            mixins,
+            maxDepth,
+            expandedIds,
+            blacklistIds,
+            window.debug
+        );
+        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) return;
+
+        canvas.innerHTML = svgStr;
+
+        // NEW: restore zoom/pan state after DOM update but before event
+        state = preservedState;
+
+        const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
+        canvas.dispatchEvent(evtSwap);
+    } catch (e) {
+        console.error("Error updating SVG via createSvg:", e);
+    }
+}
+window.reloadSvgFromBadges = reloadSvgFromBadges;
+
+// Helper: create a badge element from a shape
+function createBadgeForShape(el) {
+    // Build breadcrumb label from clicked and its parents
+    const breadcrumb = buildBreadcrumbForId(el.id || "unnamed");
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+
+    // Store stable identifier for toggle behavior
+    const boxId = getBoxPrefix(el.id || "");
+    if (boxId) badge.dataset.hid = boxId;
+
+    // NEW: store full clicked element id for filtering
+    if (el.id) badge.dataset.id = el.id;
+
+    // Label
+    const label = document.createElement("span");
+    label.textContent = breadcrumb;
+
+    // NEW: show full breadcrumb on hover
+    badge.title = breadcrumb;
+
+    // Compose
+    badge.appendChild(label);
+
+    // Take color from the clicked object's effective fill
+    el =
+        document.getElementById(boxId) ||
+        document.querySelector(`[data-hid='${boxId}']`);
+
+    const fillColor = getEffectiveFill(el);
+    if (fillColor) {
+        badge.dataset.fill = fillColor;
+        badge.style.background = fillColor;
+        badge.style.color = pickTextColor(fillColor);
+    } else {
+        // ...existing fallback styling via CSS .badge...
+    }
+
+    // Preserve any stroke info for future use
+    const stroke = el.getAttribute("stroke");
+    if (stroke) badge.dataset.stroke = stroke;
+
+    return badge;
+}
+
+// NEW: resolve the effective fill color of an SVG element (attribute, style, or inherited/computed)
+function getEffectiveFill(el) {
+    if (!el || !(el instanceof Element)) return null;
+
+    // Direct attribute first
+    let fill = el.getAttribute && el.getAttribute("fill");
+    if (fill && fill.toLowerCase() !== "none") return fill;
+
+    // Computed style on this element
+    try {
+        const cs = getComputedStyle(el);
+        if (cs && cs.fill && cs.fill !== "none") return cs.fill;
+    } catch {
+        /* ignore */
+    }
+
+    // Walk up to find inherited/computed non-none fill
+    let cur = el.parentElement;
+    while (cur && cur.tagName && cur.tagName.toLowerCase() !== "svg") {
+        try {
+            const cs = getComputedStyle(cur);
+            if (cs && cs.fill && cs.fill !== "none") return cs.fill;
+        } catch {
+            /* ignore */
+        }
+        const attrFill = cur.getAttribute && cur.getAttribute("fill");
+        if (attrFill && attrFill.toLowerCase() !== "none") return attrFill;
+        cur = cur.parentElement;
+    }
+
+    return null;
+}
+
+// NEW: pick contrasting text color based on background
+function pickTextColor(bg) {
+    if (!bg) return "#000";
+
+    // Normalize the color to rgb(r,g,b)
+    let rgb = bg;
+    if (!/^rgba?\(/i.test(bg)) {
+        const tmp = document.createElement("span");
+        tmp.style.color = bg;
+        document.body.appendChild(tmp);
+        const resolved = getComputedStyle(tmp).color;
+        document.body.removeChild(tmp);
+        rgb = resolved || bg;
+    }
+    const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!m) return "#000";
+
+    const r = parseInt(m[1], 10);
+    const g = parseInt(m[2], 10);
+    const b = parseInt(m[3], 10);
+    // Perceived brightness
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 140 ? "#000" : "#fff";
+}
+
+// NEW: extract text content of the clicked box as a string array
+function getTextContentArray(el) {
+    const texts = [];
+    try {
+        const captionEl = document.getElementById(`${el.id}_capt`);
+        if (captionEl && String(captionEl.tagName).toLowerCase() === "text") {
+            const t = (captionEl.textContent || "").trim();
+            if (t) {
+                t.split(/\r?\n/)
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .forEach((x) => texts.push(x));
+            }
+        }
+    } catch {
+        /* ignore */
+    }
+
+    if (texts.length === 0) {
+        const tc = (el.textContent || "").trim();
+        if (tc) {
+            tc.split(/\r?\n/)
+                .map((s) => s.trim())
+                .filter(Boolean)
+                .forEach((x) => texts.push(x));
+        }
+    }
+    if (texts.length === 0 && el.id) {
+        texts.push(el.id);
+    }
+    return texts;
+}
+
+// NEW: observe caption/text changes and trigger a refresh
+function observeCaptionAndRefresh(el) {
+    const target = document.getElementById(`${el.id}_capt`) || el; // fallback to the element itself
+
+    if (!target) return;
+
+    const getCurrentTexts = () => getTextContentArray(el);
+
+    // Initial snapshot
+    let lastTexts = getCurrentTexts();
+    // If already has text, nothing to wait for
+    if (lastTexts.length > 0) return;
+
+    const obs = new MutationObserver(async (mutations) => {
+        const texts = getCurrentTexts();
+        // Trigger when text becomes non-empty
+        if (texts.length > 0) {
+            obs.disconnect();
+            try {
+                if (typeof createSvg !== "function") return;
+
+                // Wait for YAML load if promise exists
+                if (
+                    window.inputLoaded &&
+                    typeof window.inputLoaded.then === "function"
+                ) {
+                    await window.inputLoaded;
+                }
+
+                const canvas = document.getElementById("canvas");
+                if (!canvas) return;
+
+                const arg =
+                    typeof window.input === "string" && window.input.length > 0
+                        ? window.input
+                        : "";
+
+                const filterTexts = getAllBadgeCaptions("badge-list");
+                // Extract ids from blacklisted badges (elements in blacklist)
+                const blacklistIds = blacklist
+                    .map((boxId) => {
+                        // Try to get the element and its id
+                        const el = document.getElementById(boxId);
+                        return el ? el.id : boxId;
+                    })
+                    .filter(Boolean);
+                console.log(
+                    "Refreshing SVG: ",
+                    filterTexts,
+                    "blacklist ids: ",
+                    blacklistIds
+                );
+                let svgStr = createSvgExt(
+                    arg,
+                    mixins, // additional mixins to hone the layout input
+                    window.defaultDepth,
+                    filterTexts,
+                    blacklistIds,
+                    window.debug
+                );
+
+                svgStr =
+                    svgStr && typeof svgStr.then === "function"
+                        ? await svgStr
+                        : svgStr;
+                if (
+                    typeof svgStr !== "string" ||
+                    !svgStr.trim().startsWith("<svg")
+                )
+                    return;
+
+                canvas.innerHTML = svgStr;
+                const evtSwap = new Event("htmx:afterSwap", {
+                    bubbles: true,
+                });
+                canvas.dispatchEvent(evtSwap);
+            } catch (e) {
+                console.error("Error refreshing SVG after fill:", e);
+            }
+        }
+    });
+
+    obs.observe(target, {
+        subtree: true,
+        characterData: true,
+        childList: true,
+    });
+}
+
+// Helper: return caption (text) for a given hierarchical id via its companion <id>_capt <text> element
+function getCaptionForId(hid) {
+    try {
+        const captionEl = document.getElementById(`${hid}_capt`);
+        if (captionEl && String(captionEl.tagName).toLowerCase() === "text") {
+            const text = (captionEl.textContent || "").trim();
+            if (text) return text;
+        }
+    } catch {
+        /* ignore */
+    }
+    return hid; // fallback to id
+}
+
+// Helper: build breadcrumb text for a shape id
+function buildBreadcrumbForId(id) {
+    const chain = getHierarchyIds(id);
+    if (chain.length === 0) return getCaptionForId(id);
+    const captions = chain.map(getCaptionForId);
+    return captions.join(" > ");
+}
+
+// Helper: split an id into hierarchical ids from top to deepest
+// Example: "id_1_2_3" -> ["id_1", "id_1_2", "id_1_2_3"]
+function getHierarchyIds(id) {
+    if (!id) return [];
+    const parts = id.split("_");
+    const isNumeric = (s) => /^\d+$/.test(s);
+
+    // Find first numeric segment index
+    let firstNumIdx = -1;
+    for (let i = 0; i < parts.length; i++) {
+        if (isNumeric(parts[i])) {
+            firstNumIdx = i;
+            break;
+        }
+    }
+    if (firstNumIdx === -1) return []; // no hierarchy
+
+    const basePrefix = parts.slice(0, firstNumIdx).join("_");
+    const nums = parts.slice(firstNumIdx);
+    // Only include numeric segments (ignore trailing non-numeric if any)
+    const pureNums = nums.filter(isNumeric);
+
+    const ids = [];
+    for (let i = 0; i < pureNums.length && i < 5; i++) {
+        // cap at five levels
+        const suffix = pureNums.slice(0, i + 1).join("_");
+        ids.push(basePrefix ? `${basePrefix}_${suffix}` : suffix);
+    }
+    return ids;
+}
+
+function getBoxPrefix(id) {
+    const parts = id.split("_");
+    const isNumeric = (s) => /^\d+$/.test(s);
+    let firstNumIdx = parts.findIndex(isNumeric);
+    if (firstNumIdx < 0) return id;
+    const base = parts.slice(0, firstNumIdx).join("_");
+    const nums = parts.slice(firstNumIdx).filter(isNumeric);
+    // Build deepest id available as the box id
+    const deep = nums.join("_");
+    return base ? `${base}_${deep}` : deep;
+}
+
+// Helper: find existing badges by hierarchical box id
+function findBadgesByBoxId(boxId) {
+    const list = document.getElementById("badge-list");
+    if (!list || !boxId) return [];
+    // Use [data-hid] to uniquely identify badges per box
+    return Array.from(
+        list.querySelectorAll(`.badge[data-hid="${CSS.escape(boxId)}"]`)
+    );
+}
+
+// NEW: check hierarchical relationship between hids (strict descendant)
+function isDescendantHid(childHid, parentHid) {
+    if (!childHid || !parentHid) return false;
+    if (childHid === parentHid) return false;
+    return childHid.startsWith(parentHid + "_");
+}
+
+// NEW: does the collector already contain a child of the given parent hid?
+function anyBadgeIsChildOf(parentHid) {
+    const list = document.getElementById("badge-list");
+    if (!list || !parentHid) return false;
+    const badges = list.querySelectorAll(".badge");
+    for (const b of badges) {
+        // Prefer dataset.hid; fallback to getBoxPrefix of dataset.id
+        const hid =
+            b.dataset.hid || (b.dataset.id ? getBoxPrefix(b.dataset.id) : "");
+        if (hid && isDescendantHid(hid, parentHid)) return true;
+    }
+    return false;
+}
+
+// NEW: find badges that are ancestors of a given child hid
+function findAncestorBadgesOf(childHid) {
+    const list = document.getElementById("badge-list");
+    if (!list || !childHid) return [];
+    const badges = list.querySelectorAll(".badge");
+    return Array.from(badges).filter((b) => {
+        const hid =
+            b.dataset.hid || (b.dataset.id ? getBoxPrefix(b.dataset.id) : "");
+        return hid && isDescendantHid(childHid, hid); // badge.hid is an ancestor if child startsWith parent + "_"
+    });
+}
+
+// Pan/zoom via CSS transform on an HTML wrapper (#svg-stage) to avoid SVG viewport clipping.
+// Ensure blacklist-collector always sits just below collector, never overlapping
+function positionBlacklistCollector() {
+    const collector = document.getElementById("collector");
+    const blacklist = document.getElementById("blacklist-collector");
+    if (collector && blacklist) {
+        const rect = collector.getBoundingClientRect();
+        blacklist.style.top = window.scrollY + rect.bottom + 6 + "px";
+    }
+}
+
+// Drag to pan: start on mousedown if pan tool or space is active
+function onStageMouseDown(e) {
+    // Only left-button drag
+    if (e.button !== 0) return;
+    // Require pan tool or Space
+    if (!(panToolActive || spacePressed)) return;
+    ensureStageWrapped();
+    const stage = getStage();
+    if (!stage) return;
+
+    isDragging = true;
+    dragStart.x = e.clientX;
+    dragStart.y = e.clientY;
+    dragStart.tx = state.tx;
+    dragStart.ty = state.ty;
+
+    // Update cursor immediately
+    applyTransform();
+
+    // Prevent text selection during drag
+    e.preventDefault();
+
+    // Listen on window to keep drag even if cursor leaves stage
+    window.addEventListener("mousemove", onWindowMouseMove);
+    window.addEventListener("mouseup", onWindowMouseUp);
+}
+
+function onWindowMouseMove(e) {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    // Pan in screen pixels; translation is before scale, so apply directly
+    state.tx = dragStart.tx + dx;
+    state.ty = dragStart.ty + dy;
+    applyTransform();
+}
+
+function onWindowMouseUp() {
+    if (!isDragging) return;
+    isDragging = false;
+    window.removeEventListener("mousemove", onWindowMouseMove);
+    window.removeEventListener("mouseup", onWindowMouseUp);
+    applyTransform();
+}
+
+function ensureStageWrapped() {
+    const canvas = getCanvas();
+    if (!canvas) return;
+    // If the SVG is directly under #canvas, wrap it in #svg-stage
+    const existingStage = getStage();
+    if (existingStage) return;
+    const svg = canvas.querySelector("svg");
+    if (!svg) return;
+    const stage = document.createElement("div");
+    stage.id = "svg-stage";
+    canvas.innerHTML = "";
+    stage.appendChild(svg);
+    canvas.appendChild(stage);
+}
+
+function computeBaseSize() {
+    const svg = getSvg();
+    if (!svg) return;
+    // from viewBox if present
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    if (vb && vb.width && vb.height) {
+        baseSize.width = vb.width;
+        baseSize.height = vb.height;
+        return;
+    }
+    // fallback bbox/client size
+    try {
+        const bbox = svg.getBBox();
+        baseSize.width = bbox.width || svg.clientWidth || 800;
+        baseSize.height = bbox.height || svg.clientHeight || 600;
+    } catch {
+        baseSize.width = svg.clientWidth || 800;
+        baseSize.height = svg.clientHeight || 600;
+    }
+}
+
+// Centering helpers: only horizontal centering
+function getCenterOffset() {
+    const canvas = getCanvas();
+    if (!canvas || !baseSize.width || !baseSize.height) return { cx: 0, cy: 0 };
+    const cx = (canvas.clientWidth - baseSize.width * state.scale) / 2;
+    const cy = 0; // vertical centering disabled
+    return { cx, cy };
+}
+function getEffectiveTxTy() {
+    const { cx, cy } = getCenterOffset();
+    return { tx: cx + state.tx, ty: cy + state.ty };
+}
+
+function resizeStage() {
+    // Keep scroll area equal to the visible canvas viewport, not scaling with zoom
+    const stage = getStage();
+    const canvas = getCanvas();
+    if (!stage || !canvas) return;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    stage.style.width = w + "px";
+    stage.style.height = h + "px";
+}
+
+function applyTransform() {
+    ensureStageWrapped();
+    const stage = getStage();
+    if (!stage) return;
+    // Use centered translation plus user pan offsets
+    const { tx, ty } = getEffectiveTxTy();
+    stage.style.transform = `translate(${tx}px, ${ty}px) scale(${state.scale})`;
+    // Update cursor classes based on pan capability and drag
+    stage.classList.toggle("pan-enabled", panToolActive || spacePressed);
+    stage.classList.toggle("pan-dragging", isDragging);
+    resizeStage();
+    updateMinimap();
+    updateToolButtons();
+}
+
+function initMinimap() {
+    const mm = getMinimap();
+    const scene = getMinimapScene();
+    if (!mm || !scene || !baseSize.width || !baseSize.height) return;
+    // Fit scene into minimap viewBox 0..100 with uniform scale
+    mm.setAttribute("viewBox", `0 0 100 100`);
+    // Compute scale to map scene -> 0..100 space while preserving aspect
+    const sx = 100 / baseSize.width;
+    const sy = 100 / baseSize.height;
+    const s = Math.min(sx, sy);
+    const sceneW = baseSize.width * s;
+    const sceneH = baseSize.height * s;
+    const offsetX = (100 - sceneW) / 2;
+    const offsetY = (100 - sceneH) / 2;
+    scene.setAttribute("x", String(offsetX));
+    scene.setAttribute("y", String(offsetY));
+    scene.setAttribute("width", String(sceneW));
+    scene.setAttribute("height", String(sceneH));
+    // Store mapping for quick updates
+    mm._map = { s, offsetX, offsetY };
+    updateMinimap(); // initial vp
+    // reflect visibility state
+    const mmWrap = document.getElementById("minimap");
+    if (mmWrap) {
+        mmWrap.style.display = minimapVisible ? "flex" : "none";
+        mmWrap.setAttribute("aria-hidden", minimapVisible ? "false" : "true");
+        populateMinimapPreview();
+    }
+}
+
+function populateMinimapPreview() {
+    const mm = getMinimap();
+    const svg = getSvg();
+    const content = getMinimapContent();
+    if (!mm || !svg || !content || !baseSize.width || !baseSize.height) return;
+    // Clear previous preview
+    while (content.firstChild) content.removeChild(content.firstChild);
+
+    // Clone visible scene (children of the root SVG). Avoid copying width/height/viewBox, styles are inline.
+    const frag = document.createDocumentFragment();
+    const children = svg.cloneNode(true).children; // shallow clone then use its children
+    for (let i = 0; i < children.length; i++) {
+        frag.appendChild(children[i].cloneNode(true));
+    }
+    content.appendChild(frag);
+
+    // Scale and center cloned content to fit minimap scene using stored map
+    const map = mm._map;
+    if (!map) return;
+    const tx = map.offsetX;
+    const ty = map.offsetY;
+    const s = map.s;
+    content.setAttribute("transform", `translate(${tx},${ty}) scale(${s})`);
+}
+
+function updateMinimap() {
+    const mmWrap = document.getElementById("minimap");
+    if (!minimapVisible || !mmWrap || mmWrap.style.display === "none") return;
+    const mm = getMinimap();
+    const vp = getMinimapVp();
+    const scene = getMinimapScene();
+    const canvas = getCanvas();
+    const svg = getSvg();
+    if (
+        !mm ||
+        !vp ||
+        !scene ||
+        !canvas ||
+        !svg ||
+        !baseSize.width ||
+        !baseSize.height
+    )
+        return;
+    const map = mm._map;
+    if (!map) return;
+
+    // Visible viewport size in scene coordinates:
+    // canvas shows a window of size (canvas.clientWidth, canvas.clientHeight) over the transformed stage.
+    // Since we apply CSS scale to the stage, effective scene pixels per screen pixel = scale.
+    const viewWScene = canvas.clientWidth / state.scale;
+    const viewHScene = canvas.clientHeight / state.scale;
+
+    // Top-left scene coordinate of current view considering pan and canvas scroll
+    // Pan translates the stage by (tx, ty), positive moves content right/down => view moves left/up in scene.
+    // Canvas scroll offsets move the view window within the stage.
+    // Use effective (centered) translation for viewport origin
+    const { tx: effTx, ty: effTy } = getEffectiveTxTy();
+    const sx = (-effTx + canvas.scrollLeft) / state.scale;
+    const sy = (-effTy + canvas.scrollTop) / state.scale;
+
+    // Map to minimap coordinates
+    const x = map.offsetX + sx * map.s;
+    const y = map.offsetY + sy * map.s;
+    const w = viewWScene * map.s;
+    const h = viewHScene * map.s;
+
+    // Clamp viewport inside scene rect
+    const maxX =
+        parseFloat(scene.getAttribute("x")) +
+        parseFloat(scene.getAttribute("width")) -
+        w;
+    const maxY =
+        parseFloat(scene.getAttribute("y")) +
+        parseFloat(scene.getAttribute("height")) -
+        h;
+    vp.setAttribute(
+        "x",
+        String(Math.max(parseFloat(scene.getAttribute("x")), Math.min(x, maxX)))
+    );
+    vp.setAttribute(
+        "y",
+        String(Math.max(parseFloat(scene.getAttribute("y")), Math.min(y, maxY)))
+    );
+    vp.setAttribute("width", String(Math.max(1, w)));
+    vp.setAttribute("height", String(Math.max(1, h)));
+}
+
+function getCanvas() {
+    return document.getElementById("canvas");
+}
+function getStage() {
+    return document.getElementById("svg-stage");
+}
+function getSvg() {
+    return (
+        document.querySelector("#svg-stage svg") ||
+        document.querySelector("#canvas svg")
+    );
+}
+function getMinimap() {
+    return document.getElementById("minimap-svg");
+}
+function getMinimapScene() {
+    return document.getElementById("minimap-scene");
+}
+function getMinimapVp() {
+    return document.getElementById("minimap-vp");
+}
+function getMinimapContent() {
+    return document.getElementById("minimap-content");
+}
+
+function updateToolButtons() {
+    const btnPan = document.getElementById("btn-pan");
+    const btnMinimap = document.getElementById("btn-minimap");
+    const btnCollector = document.getElementById("btn-collector");
+    const btnBlacklist = document.getElementById("btn-blacklist");
+    const btnDebug = document.getElementById("btn-debug");
+    if (btnPan)
+        btnPan.classList.toggle("active", panToolActive || spacePressed);
+    if (btnMinimap) btnMinimap.classList.toggle("active", minimapVisible);
+    // Collector is active when visible (not hidden)
+    const collector = document.getElementById("collector");
+    const collectorVisible =
+        collector && !collector.classList.contains("hidden");
+    if (btnCollector)
+        btnCollector.classList.toggle("active", !!collectorVisible);
+    // Blacklist is active when blacklistMode is true
+    if (btnBlacklist) btnBlacklist.classList.toggle("active", blacklistMode);
+    if (btnDebug) btnDebug.classList.toggle("active", !!window.debug);
+}
+
+// Blacklist tool toggle (moved to global svgControls below)
+
+// Add to blacklist and update UI
+function addToBlacklist(el) {
+    if (!el || !el.id) return;
+    const boxId = getBoxPrefix(el.id);
+    // Always update both window.blacklist and local blacklist
+    if (window.blacklist && Array.isArray(window.blacklist)) {
+        if (window.blacklist.includes(boxId)) return;
+        window.blacklist.push(boxId);
+    }
+    if (!blacklist.includes(boxId)) {
+        blacklist.push(boxId);
+    }
+    updateBlacklistUI();
+    // Reload SVG after adding to blacklist
+    if (typeof reloadSvgFromBadges === "function") reloadSvgFromBadges();
+}
+
+// Remove from blacklist
+function removeFromBlacklist(boxId) {
+    blacklist = blacklist.filter((id) => id !== boxId);
+    updateBlacklistUI();
+    // Reload SVG after removing from blacklist
+    if (typeof reloadSvgFromBadges === "function") reloadSvgFromBadges();
+}
+
+// Update blacklist collector UI
+function updateBlacklistUI() {
+    const list = document.getElementById("blacklist-list");
+    if (!list) return;
+    list.innerHTML = "";
+    // Use window.blacklist if set, otherwise fallback to local blacklist
+    const ids = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : blacklist;
+    ids.forEach((boxId) => {
+        // Try to find the SVG element for color extraction
+        const el =
+            document.getElementById(boxId) ||
+            document.querySelector(`[data-hid='${boxId}']`);
+        const breadcrumb = buildBreadcrumbForId(boxId);
+        const badge = document.createElement("span");
+        badge.className = "badge blacklist-badge";
+        badge.dataset.hid = boxId;
+        // Label span for truncation, etc.
+        const label = document.createElement("span");
+        label.textContent = breadcrumb;
+        badge.appendChild(label);
+        badge.title = breadcrumb;
+        // Color from shape if possible
+        if (el) {
+            const fillColor = getEffectiveFill(el);
+            if (fillColor) {
+                badge.dataset.fill = fillColor;
+                badge.style.background = fillColor;
+                badge.style.color = pickTextColor(fillColor);
+            }
+        }
+        badge.onclick = function () {
+            // Remove from window.blacklist if present, else from local blacklist
+            if (window.blacklist && Array.isArray(window.blacklist)) {
+                window.blacklist = window.blacklist.filter(id => id !== boxId);
+            } else {
+                blacklist = blacklist.filter(id => id !== boxId);
+            }
+            updateBlacklistUI();
+            // Also reload the SVG to reflect the change
+            if (typeof reloadSvgFromBadges === "function") reloadSvgFromBadges();
+        };
+        list.appendChild(badge);
+    });
+}
+
+// Space key enables temporary pan + NEW: Ctrl/Cmd+Z undo
+function onKeyDown(e) {
+    // NEW: Ctrl/Cmd+Z -> undo last click action
+    if (
+        (e.ctrlKey || e.metaKey) &&
+        !e.shiftKey &&
+        (e.key === "z" || e.code === "KeyZ")
+    ) {
+        performUndo();
+        e.preventDefault();
+        return;
+    }
+    if (e.code === "Space" && !spacePressed) {
+        spacePressed = true;
+        applyTransform();
+        // Prevent page scroll when space is pressed
+        e.preventDefault();
+    }
+}
+function onKeyUp(e) {
+    if (e.code === "Space") {
+        spacePressed = false;
+        // If releasing Space while dragging, end drag
+        if (isDragging) onWindowMouseUp();
+        applyTransform();
+    }
+}

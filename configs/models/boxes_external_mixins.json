@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Boxes file mixings",
+  "description": "Model to inject additional things in a boxes layout definition",
+  "version": "0.3.0",
+  "type": "object",
+  "x-domain": "external",
+  "$comment": "the IDs of the boxes to connect are the keys of the dictionary",
+  "properties": {
+    "title": {
+      "description": "optional title, that's appended to the original layout title",
+      "type": "string"
+    },
+    "legend": {
+      "description": "Legend definition used in this diagram",
+      "$ref": "./boxes.json#/definitions/Legend"
+    },
+    "connections": {
+      "description": "dictionary of connection objects",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ConnectionCont"
+      }
+    },
+    "formats": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./boxes.json#/definitions/Format"
+      }
+    },
+    "formatVariations": {
+      "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
+      "$ref": "./boxes.json#/definitions/FormatVariations"
+    },
+    "images": {
+      "description": "optional map of images used in the generated graphic",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./formats.json#/definitions/ImageDef"
+      }
+    }
+  },
+  "definitions": {
+    "ConnectionCont": {
+      "type": "object",
+      "properties": {
+        "connections": {
+          "type": "array",
+          "items": {
+            "$ref": "./boxes.json#/definitions/Connection"
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "connections": {
+        "r1_1": {
+          "connections": [
+            {
+              "destId": "r5_1_2"
+            },
+            {
+              "destId": "r1_1",
+              "format": "dummy"
+            }
+          ]
+        },
+        "r1_2": {
+          "connections": [
+            {
+              "destId": "r4_1"
+            }
+          ]
+        }
+      },
+      "formats": {
+        "connLines": {
+          "line": {
+            "width": 2,
+            "color": "pink"
+          }
+        }
+      }
+    },
+    {
+      "formats": {
+        "b_core": {
+          "fontCaption": {
+            "size": 0,
+            "lineHeight": 0,
+            "maxLenBeforeBreak": 300
+          }
+        },
+        "b_ext": {
+          "fill": {
+            "color": "#f9bc85"
+          }
+        }
+      }
+    },
+    {
+      "images": {
+        "smilie_01": {
+          "width": 16,
+          "height": 16,
+          "base64": "iVBORw0KGgo...Jggg=="
+        },
+        "smilie_02": {
+          "width": 32,
+          "height": 32,
+          "base64Src": "../../resources/pngs/smilie_02_80x80_base64.txt"
+        }
+      }
+    }
+  ]
+}

@@ -355,9 +355,6 @@ func CopyFillDef(src *FillDef) *FillDef {
 */
 type ImageDef struct {
 
-    // unique identifier to reference this image later in the document
-    Id string  `yaml:"id"`
-
     // some words to explain what this image is about
     Description *string  `yaml:"description,omitempty"`
 
@@ -370,6 +367,12 @@ type ImageDef struct {
     // base64 string of the image to use
     Base64 *string  `yaml:"base64,omitempty"`
 
+    // distance top and bottom of the image
+    MarginTopBottom *int  `yaml:"marginTopBottom,omitempty"`
+
+    // distance left and right of the image
+    MarginLeftRight *int  `yaml:"marginLeftRight,omitempty"`
+
     // file path to a text file that contains the base64 of the png
     Base64Src *string  `yaml:"base64Src,omitempty"`
 }
@@ -380,11 +383,12 @@ func CopyImageDef(src *ImageDef) *ImageDef {
         return nil
     }
     var ret ImageDef
-    ret.Id = src.Id
     ret.Description = src.Description
     ret.Width = src.Width
     ret.Height = src.Height
     ret.Base64 = src.Base64
+    ret.MarginTopBottom = src.MarginTopBottom
+    ret.MarginLeftRight = src.MarginLeftRight
     ret.Base64Src = src.Base64Src
 
     return &ret

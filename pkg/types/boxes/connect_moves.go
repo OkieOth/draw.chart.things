@@ -4,9 +4,9 @@ func (doc *BoxesDocument) moveBoxContHorizontal(cont *LayoutElemContainer, start
 	if cont == nil {
 		return
 	}
-	if cont.X < startX && (cont.X+cont.Width) > startX {
+	if cont.X < startX && (cont.X+cont.Width) >= startX {
 		cont.Width += offset
-	} else if cont.X >= startX {
+	} else if cont.X > startX {
 		cont.X += offset
 	}
 	for i := range len(cont.Elems) {
@@ -17,8 +17,14 @@ func (doc *BoxesDocument) moveBoxContHorizontal(cont *LayoutElemContainer, start
 func (doc *BoxesDocument) moveBoxHorizontal(box *LayoutElement, startX, offset int) {
 	if box.X < startX && (box.X+box.Width) > startX {
 		box.Width += offset
-	} else if box.X > startX {
+		if box.Image != nil {
+			box.Image.X += offset / 2
+		}
+	} else if box.X >= startX {
 		box.X += offset
+		if box.Image != nil {
+			box.Image.X += offset
+		}
 	}
 	doc.moveBoxContHorizontal(box.Horizontal, startX, offset)
 	doc.moveBoxContHorizontal(box.Vertical, startX, offset)
@@ -32,9 +38,9 @@ func (doc *BoxesDocument) moveBoxContVertical(cont *LayoutElemContainer, startY,
 	if cont == nil {
 		return
 	}
-	if cont.Y < startY && (cont.Y+cont.Height) > startY {
+	if cont.Y < startY && (cont.Y+cont.Height) >= startY {
 		cont.Height += offset
-	} else if cont.Y >= startY {
+	} else if cont.Y > startY {
 		cont.Y += offset
 	}
 	for i := range len(cont.Elems) {
@@ -43,10 +49,14 @@ func (doc *BoxesDocument) moveBoxContVertical(cont *LayoutElemContainer, startY,
 }
 
 func (doc *BoxesDocument) moveBoxVertical(box *LayoutElement, startY, offset int) {
-	if box.Y < startY && (box.Y+box.Height) > startY {
+	if box.Y < startY && (box.Y+box.Height) >= startY {
 		box.Height += offset
 	} else if box.Y > startY {
 		box.Y += offset
+		// TODO: don't know why this needs to be removed. I picture have a wrong Y .. review this
+		if box.Image != nil {
+			box.Image.Y += offset
+		}
 	}
 	doc.moveBoxContVertical(box.Horizontal, startY, offset)
 	doc.moveBoxContVertical(box.Vertical, startY, offset)

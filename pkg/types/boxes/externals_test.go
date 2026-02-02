@@ -13,40 +13,32 @@ func TestLoadExternalFormats(t *testing.T) {
 	inputLayout := "../../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml"
 	inputLayout2 := "../../../resources/examples_boxes/complex_horizontal_connected_pics.yaml"
 
-	additionalFormats, err := types.LoadInputFromFile[boxes.AdditionalFormats](inputFormat)
+	additionalFormats, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputFormat)
 	require.Nil(t, err)
 	require.NotNil(t, additionalFormats)
 
-	require.Len(t, additionalFormats.Formats, 3)
+	require.Len(t, additionalFormats.Formats, 0)
+	require.Len(t, additionalFormats.Images, 1)
 
-	_, ok := additionalFormats.Formats["img1"]
-	require.True(t, ok)
-
-	_, ok = additionalFormats.Formats["img2"]
-	require.True(t, ok)
-
-	_, ok = additionalFormats.Formats["img3"]
+	img, ok := additionalFormats.Images["smilie_01_43"]
 	require.True(t, ok)
 
 	b, err := types.LoadInputFromFile[boxes.Boxes](inputLayout)
 	require.Nil(t, err)
 	require.NotNil(t, b)
 
-	require.Len(t, additionalFormats.Images, 1)
-	require.NotNil(t, additionalFormats.Images[0].Base64)
-	require.Nil(t, additionalFormats.Images[0].Base64Src)
+	require.NotNil(t, img.Base64)
+	require.Nil(t, img.Base64Src)
 
 	b2, err := types.LoadInputFromFile[boxes.Boxes](inputLayout2)
 	require.Nil(t, err)
 	require.NotNil(t, b2)
 
-	require.NotEqual(t, len(b2.Formats), len(b.Formats))
-	require.NotEqual(t, len(b2.Formats), len(b.Formats))
+	require.NotEqual(t, len(b2.Images), len(b.Formats))
 
-	b.MixinFormats(*additionalFormats)
+	b.MixinThings(*additionalFormats)
 
-	require.Equal(t, len(b2.Formats), len(b.Formats))
-	require.Equal(t, len(b2.Formats), len(b.Formats))
+	require.Equal(t, len(b2.Images), len(b.Images))
 }
 
 func TestLoadExternalConnections(t *testing.T) {
@@ -57,7 +49,7 @@ func TestLoadExternalConnections(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, b)
 
-	c, err := types.LoadInputFromFile[map[string]boxes.ConnectionCont](inputConnections)
+	c, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputConnections)
 	require.Nil(t, err)
 	require.NotNil(t, c)
 
@@ -66,7 +58,38 @@ func TestLoadExternalConnections(t *testing.T) {
 	// r5_2
 	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 0)
 
-	b.MixinConnections(*c)
+	b.MixinThings(*c)
+
+	// r4_1
+	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 4)
+	// r5_2
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 1)
+
+	cl, ok := b.Formats["connLines"]
+	require.True(t, ok)
+	require.NotNil(t, cl.Line)
+	require.Equal(t, 2.0, *cl.Line.Width)
+	require.Equal(t, "pink", *cl.Line.Color)
+}
+
+func TestLoadExternalConnections2(t *testing.T) {
+	input := "../../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml"
+	inputConnections := "../../../resources/examples_boxes/ext_connections2.yaml"
+
+	b, err := types.LoadInputFromFile[boxes.Boxes](input)
+	require.Nil(t, err)
+	require.NotNil(t, b)
+
+	c, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputConnections)
+	require.Nil(t, err)
+	require.NotNil(t, c)
+
+	// r4_1
+	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 2)
+	// r5_2
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 0)
+
+	b.MixinThings(*c)
 
 	// r4_1
 	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 4)

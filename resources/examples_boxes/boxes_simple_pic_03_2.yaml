@@ -1,0 +1,12 @@
+title: Simple Pic Example (2)
+boxes:
+  vertical:
+    - id: id1
+      caption: "Only one Box"
+      text1: "You should see one picture here"
+      text2: "Btw, the source of the picture is loaded from another file :)"
+      image: img1
+    - id: id2
+      caption: "Only one Box"
+      text1: "You should see one picture here"
+      text2: "Btw, the source of the picture is loaded from another file :)"

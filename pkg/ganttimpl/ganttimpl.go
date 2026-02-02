@@ -195,7 +195,7 @@ func drawGroupEntries(doc *gantt.GanttDocument, drawing *svgdrawing.SvgDrawing, 
 				Border:      &f,
 				Fill:        &fill,
 			}
-			drawing.DrawRectWithText("", entry.Name, "", "", *doc.GroupNameWidth+xOffset, entry.Y+yOffset, width, types.GlobalGanttEntryHeight, rf)
+			drawing.DrawRectWithText("", entry.Name, "", "", *doc.GroupNameWidth+xOffset, entry.Y+yOffset, width, 0, types.GlobalGanttEntryHeight, rf)
 		}
 	}
 }
@@ -333,7 +333,7 @@ func DrawCalendar(startDate, endDate time.Time, drawing *svgdrawing.SvgDrawing, 
 
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		if d.Weekday() == time.Sunday || d.Weekday() == time.Saturday {
-			drawing.DrawSolidRect(currentX, yStart+monthStartOffset, dayWidth, length, weekendBoxFormat)
+			drawing.DrawSolidRect(currentX, yStart+monthStartOffset, dayWidth, length, nil, &weekendBoxFormat)
 		}
 		if d.Day() == 1 {
 			// new month

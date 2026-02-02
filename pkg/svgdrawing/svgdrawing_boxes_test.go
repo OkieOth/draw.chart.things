@@ -87,6 +87,7 @@ func TestSimpleSvg(t *testing.T) {
 		require.Nil(t, err)
 		svgdrawing := svgdrawing.NewDrawing(output)
 		svgdrawing.Start(doc.Title, doc.Height, doc.Width)
+		svgdrawing.InitImages(doc.Images)
 		svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
 		doc.DrawBoxes(svgdrawing)
 		svgdrawing.Done()
@@ -117,11 +118,12 @@ func TestSvgWithConnections(t *testing.T) {
 			svgdrawing.Start(doc.Title, doc.Height, doc.Width)
 			svgdrawing.InitImages(doc.Images)
 			doc.DrawBoxes(svgdrawing)
-			// DEBUG
-			// svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
-			// doc.DrawRoads(svgdrawing)
-			// doc.DrawStartPositions(svgdrawing)
-			// doc.DrawConnectionNodes(svgdrawing)
+			// DEBUG - Start
+			svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+			doc.DrawRoads(svgdrawing)
+			doc.DrawStartPositions(svgdrawing)
+			doc.DrawConnectionNodes(svgdrawing)
+			// DEBUG - End
 			doc.DrawConnections(svgdrawing)
 
 			svgdrawing.Done()
@@ -244,6 +246,39 @@ func TestSvgWithConnections(t *testing.T) {
 			outputFile: "../../temp/boxes_random_truncated3.svg",
 			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
 				require.NotNil(t, doc.Connections)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics2.yaml",
+			outputFile: "../../temp/complex_horizontal_connected_pics2.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+				require.Equal(t, "r5_1", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Caption)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text1)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text2)
+
+				require.Equal(t, "r5_2", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Caption)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text1)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text2)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics3.yaml",
+			outputFile: "../../temp/complex_horizontal_connected_pics3.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+
+				require.Equal(t, "r5_1", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Caption)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text1)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text2)
+
+				require.Equal(t, "r5_2", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Caption)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text1)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text2)
 			},
 		},
 	}

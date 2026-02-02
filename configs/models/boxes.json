@@ -6,8 +6,16 @@
   "type": "object",
   "properties": {
     "title": {
-      "type": "string",
-      "description": "Title of the document"
+      "description": "Title of the document",
+      "type": "string"
+    },
+    "titleFormat": {
+      "description": "format reference used for the title",
+      "type": "string"
+    },
+    "legend": {
+      "description": "Legend definition used in this diagram",
+      "$ref": "#/definitions/Legend"
     },
     "boxes": {
       "$ref": "#/definitions/Layout"
@@ -20,12 +28,21 @@
         "$ref": "#/definitions/Format"
       }
     },
+    "formatVariations": {
+      "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
+      "$ref": "#/definitions/FormatVariations"
+    },
     "images": {
-      "description": "optional list of images used in the generated graphic",
-      "type": "array",
-      "items": {
+      "description": "optional map of images used in the generated graphic",
+      "type": "object",
+      "additionalProperties": {
         "$ref": "./formats.json#/definitions/ImageDef"
       }
+    },
+    "hideTextsForParents": {
+      "type": "boolean",
+      "description": "If that is set, then the additional texts are only visible when the box has no visible children",
+      "default": false
     },
     "lineDist": {
       "type": "integer",
@@ -48,8 +65,38 @@
       "default": 10
     }
   },
-  "required": ["title", "boxes"],
+  "required": ["title", "boxes", "hideTextsForParents"],
   "definitions": {
+    "Legend": {
+      "description": "Definition of the output for the legend",
+      "type": "object",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegendEntry"
+          }
+        },
+        "format": {
+          "description": "format reference used for the legend texts",
+          "type": "string"
+        }
+      }
+    },
+    "LegendEntry": {
+      "description": "Definition of one legend entry",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "format": {
+          "description": "this format reference used to identify how the here described object is in the picture displayed.",
+          "type": "string"
+        }
+      },
+      "required": ["text", "format"]
+    },
     "Layout": {
       "type": "object",
       "properties": {
@@ -68,6 +115,14 @@
         "text2": {
           "description": "Second additional text",
           "type": "string"
+        },
+        "image": {
+          "description": "Reference to an image that should be displayed, needs to be declared in the global image section",
+          "type": "string"
+        },
+        "expand": {
+          "description": "in case the picture is rendered with given expanded IDs, and maxDepth, then if this flag is true, the box is still displayed expanded",
+          "type": "boolean"
         },
         "extVertical": {
           "description": "If set, then the content for 'vertical' attrib is loaded from an external file",
@@ -102,9 +157,17 @@
         "format": {
           "description": "reference to the format to use for this box",
           "type": "string"
+        },
+        "dontBlockConPaths": {
+          "description": "if that is set then connections can run through the box, as long as they don't cross the text",
+          "type": "boolean"
+        },
+        "dataLink": {
+          "description": "Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.",
+          "type": "string"
         }
       },
-      "required": ["type", "id", "caption", "text1", "text2"]
+      "required": ["type", "id", "caption", "text1", "text2", "expand"]
     },
     "LayoutArray": {
       "type": "array",
@@ -115,6 +178,10 @@
     "Connection": {
       "type": "object",
       "properties": {
+        "dest": {
+          "description": "Caption text of the destination box, can be used as alternative to 'destId'",
+          "type": "string"
+        },
         "destId": {
           "description": "box id of the destination",
           "type": "string"
@@ -139,11 +206,15 @@
           }
         }
       },
-      "required": ["destId", "sourceArrow", "destArrow", "tags"]
+      "required": ["dest", "destId", "sourceArrow", "destArrow", "tags"]
     },
     "Format": {
       "type": "object",
       "properties": {
+        "widthOfParent": {
+          "description": "sets the width of the object to the width of the parent",
+          "type": "boolean"
+        },
         "fixedWidth": {
           "type": "integer",
           "description": "optional fixed width that will be applied on the box"
@@ -185,11 +256,19 @@
         "cornerRadius": {
           "description": "radius of the box corners in pixel",
           "type": "integer"
-        },
-        "image": {
-          "$comment": "the used images needs to be declared before in the images section",
-          "description": "ID of an image to use",
-          "type": "string"
+        }
+      }
+    },
+    "FormatVariations": {
+      "type": "object",
+      "properties": {
+        "hasTag": {
+          "description": "dictionary with tag values as key, that contains format definitions.",
+          "$comment": "when an object contains a specific tag, then it originally format, will be overwritten with the here defined values",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Format"
+          }
         }
       }
     }

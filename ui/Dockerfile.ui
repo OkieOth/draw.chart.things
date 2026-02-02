@@ -1,0 +1,25 @@
+FROM golang:1.24 AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+RUN mkdir temp
+
+COPY cmd ./cmd
+COPY pkg ./pkg
+COPY wasm ./wasm
+COPY ui ./ui
+COPY resources ./resources
+
+RUN go test -v ./...
+
+RUN GOOS=js GOARCH=wasm go build -o ui/wasm/boxes.wasm wasm/main.go
+
+FROM nginx:stable-alpine
+
+COPY --from=builder /app/ui/html /usr/share/nginx/html
+COPY --from=builder /app/ui/data /usr/share/nginx/html/data
+COPY --from=builder /app/ui/wasm /usr/share/nginx/html/wasm
+COPY --from=builder /app/ui/docker/nginx/dynsvg.conf /etc/nginx/conf.d/

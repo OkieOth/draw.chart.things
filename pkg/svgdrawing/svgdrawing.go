@@ -217,7 +217,7 @@ func (d *SvgDrawing) Start(title string, height, width int) error {
 	return nil
 }
 
-func (d *SvgDrawing) InitImages(imageDefs []types.ImageDef) error {
+func (d *SvgDrawing) InitImages(imageDefs map[string]types.ImageDef) error {
 	if len(imageDefs) == 0 {
 		return nil
 	}
@@ -231,8 +231,8 @@ func (d *SvgDrawing) InitImages(imageDefs []types.ImageDef) error {
 	//   />
 	// </defs>
 	d.canvas.Def()
-	for _, imgDef := range imageDefs {
-		d.canvas.PngWithIdBase64(0, 0, imgDef.Width, imgDef.Height, imgDef.Id, *imgDef.Base64)
+	for key, imgDef := range imageDefs {
+		d.canvas.PngWithIdBase64(0, 0, imgDef.Width, imgDef.Height, key, *imgDef.Base64)
 	}
 	defer d.canvas.DefEnd()
 	return nil
@@ -378,8 +378,15 @@ func (d *SvgDrawing) DrawPng(x, y int, pngId string) error {
 	return nil
 }
 
+const ADDITIONAL_LINK string = "additionalLink"
+
+func (d *SvgDrawing) DrawPngWithAdditionalLink(x, y int, pngId, link string) error {
+	d.canvas.UseWithAdditionalDataLink(x, y, "#"+pngId, ADDITIONAL_LINK, link)
+	return nil
+}
+
 // Draw renders a box with text elements
-func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int, width, height int, format types.RectWithTextFormat) error {
+func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.RectWithTextFormat) error {
 	const onclickClass = "svg-clickable" // "onclick=\"window.shapeClick(event)\""
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
@@ -437,6 +444,9 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y int
 		currentX = d.DrawVerticalText(text2, currentX, currentY, width, &format.FontText2)
 	} else {
 		currentY := y + format.Padding
+		if textYOffset > 0 {
+			currentY = y + textYOffset
+		}
 		currentY = d.DrawTextWithIdAndClass(caption, x, currentY, width, &format.FontCaption, idStr, onclickClass)
 		currentY = d.DrawText(text1, x, currentY, width, &format.FontText1)
 		currentY = d.DrawText(text2, x, currentY, width, &format.FontText2)
@@ -457,18 +467,38 @@ func (d *SvgDrawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 	return nil
 }
 
+func (d *SvgDrawing) DrawLineWithClass(x1, y1, x2, y2 int, format types.LineDef, className string) error {
+	color := "black"
+	if (format.Color != nil) && (*format.Color != "") {
+		color = *format.Color
+	}
+	width := 1.0
+	if (format.Width != nil) && (*format.Width != 0) {
+		width = *format.Width
+	}
+	d.canvas.LineWithClass(x1, y1, x2, y2, className, fmt.Sprintf("stroke:%s;stroke-width:%f", color, width))
+	return nil
+}
+
 func (d *SvgDrawing) DrawArrow(x, y, angle int, format types.LineDef) error {
 	// TODO
 	return nil
 }
 
-func (d *SvgDrawing) DrawSolidRect(x, y, width, height int, format types.LineDef) error {
+func (d *SvgDrawing) DrawSolidRect(x, y, width, height int, fill *types.FillDef, line *types.LineDef) error {
 	attr := ""
-	if format.Color != nil {
-		attr = fmt.Sprintf("fill: %s", *format.Color)
-		if format.Opacity != nil {
-			attr += fmt.Sprintf(";opacity: %f", *format.Opacity)
+	if fill != nil && fill.Color != nil {
+		attr = fmt.Sprintf("fill: %s", *fill.Color)
+		if fill.Opacity != nil {
+			attr += fmt.Sprintf(";opacity: %f", *fill.Opacity)
 		}
+	}
+	if line != nil && line.Color != nil {
+		sep := ""
+		if attr != "" {
+			sep = ";"
+		}
+		attr = fmt.Sprintf("%s%sstroke: %s", attr, sep, *line.Color)
 	}
 	d.canvas.Rect(x, y, width, height, attr)
 	return nil

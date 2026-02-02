@@ -1,0 +1,20 @@
+title: Simple Pic Example (2)
+boxes:
+  horizontal:
+    - id: id1
+      caption: "Only one Box"
+      text1: "You should see one picture here"
+      text2: "Btw, the source of the picture is loaded from another file :)"
+      horizontal:
+        - image: img1
+        - image: img1
+        - image: img1
+        - image: img1
+        - image: img1
+    - id: id2
+      caption: "Only one Box"
+      text1: "You should see one picture here"
+      text2: "Btw, the source of the picture is loaded from another file :)"
+      horizontal:
+        - image: img1
+        - image: img1

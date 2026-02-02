@@ -1,0 +1,105 @@
+title: Simple Pic Example (2)
+titleFormat: title
+formats:
+  title:
+    fontCaption:
+      maxLenBeforeBreak: 300
+      size: 6
+      color: blue
+  default:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: white
+    padding: 5
+  test1:
+    line:
+      width: 1
+      color: black
+    fill:
+      color: "#efefef"
+    cornerRadius: 2
+    padding: 5
+    boxMargin: 3
+    fontCaption:
+      size: 8
+      maxLenBeforeBreak: 300
+formatVariations:
+  hasTag:
+    test2:
+      fill:
+        color: "#5e35b1"
+boxes:
+  vertical:
+    - id: id1
+      caption: Line 1
+      horizontal:
+        - id: id1_1
+          caption: "Only one Box"
+          horizontal:
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+        - id: id1_2
+          caption: "Only one Box"
+          vertical:
+            - id: id1_2_1
+              caption: "Only one Box (1)"
+              format: test1
+            - id: id1_2_2
+              caption: "Only one Box (2)"
+              format: test1
+              tags:
+                - test2
+              horizontal:
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+                - image: img1
+            - id: id1_2_3
+              format: test1
+              caption: "Only one Box (3)"
+        - id: id1_3
+          caption: "Only one Box"
+          horizontal:
+            - image: img1
+            - image: img1
+    - id: id2
+      caption: Line 2
+      horizontal:
+        - id: id2_1
+          caption: "Only one Box"
+          format: test1
+          horizontal:
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+            - image: img1
+        - id: id2_2
+          caption: "Only one Box"
+          horizontal:
+            - image: img1
+            - image: img1

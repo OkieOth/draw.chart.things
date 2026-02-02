@@ -16,13 +16,25 @@ type Boxes struct {
     // Title of the document
     Title string  `yaml:"title"`
 
+    // format reference used for the title
+    TitleFormat *string  `yaml:"titleFormat,omitempty"`
+
+    // Legend definition used in this diagram
+    Legend *Legend  `yaml:"legend,omitempty"`
+
     Boxes Layout  `yaml:"boxes"`
 
     // Map of formats available to be used in the boxes
     Formats map[string]Format  `yaml:"formats,omitempty"`
 
-    // optional list of images used in the generated graphic
-    Images []types.ImageDef  `yaml:"images,omitempty"`
+    // Set of formats that overwrites the style of boxes, if specific conditions are met
+    FormatVariations *FormatVariations  `yaml:"formatVariations,omitempty"`
+
+    // optional map of images used in the generated graphic
+    Images map[string]types.ImageDef  `yaml:"images,omitempty"`
+
+    // If that is set, then the additional texts are only visible when the box has no visible children
+    HideTextsForParents bool  `yaml:"hideTextsForParents"`
 
     // minimal distance between overlapping lines
     LineDist *int  `yaml:"lineDist,omitempty"`
@@ -39,9 +51,11 @@ type Boxes struct {
 
 func NewBoxes() *Boxes {
     return &Boxes{
+        Legend: NewLegend(),
         Boxes: *NewLayout(),
         Formats: make(map[string]Format, 0),
-        Images: make([]types.ImageDef, 0),
+        FormatVariations: NewFormatVariations(),
+        Images: make(map[string]types.ImageDef, 0),
     }
 }
 
@@ -51,19 +65,57 @@ func CopyBoxes(src *Boxes) *Boxes {
     }
     var ret Boxes
     ret.Title = src.Title
+    ret.TitleFormat = src.TitleFormat
+    ret.Legend = CopyLegend(src.Legend)
     ret.Boxes = *CopyLayout(&src.Boxes)
     ret.Formats = make(map[string]Format, 0)
     for k, v := range src.Formats {
         ret.Formats[k] = v
     }
-    ret.Images = make([]types.ImageDef, 0)
-    for _, e := range src.Images {
-        ret.Images = append(ret.Images, e)
+    ret.FormatVariations = CopyFormatVariations(src.FormatVariations)
+    ret.Images = make(map[string]types.ImageDef, 0)
+    for k, v := range src.Images {
+        ret.Images[k] = v
     }
+    ret.HideTextsForParents = src.HideTextsForParents
     ret.LineDist = src.LineDist
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin
     ret.MinConnectorMargin = src.MinConnectorMargin
+
+    return &ret
+}
+
+
+
+
+
+/* Definition of the output for the legend
+*/
+type Legend struct {
+
+    Entries []LegendEntry  `yaml:"entries,omitempty"`
+
+    // format reference used for the legend texts
+    Format *string  `yaml:"format,omitempty"`
+}
+
+func NewLegend() *Legend {
+    return &Legend{
+        Entries: make([]LegendEntry, 0),
+    }
+}
+
+func CopyLegend(src *Legend) *Legend {
+    if src == nil {
+        return nil
+    }
+    var ret Legend
+    ret.Entries = make([]LegendEntry, 0)
+    for _, e := range src.Entries {
+        ret.Entries = append(ret.Entries, e)
+    }
+    ret.Format = src.Format
 
     return &ret
 }
@@ -86,6 +138,12 @@ type Layout struct {
     // Second additional text
     Text2 string  `yaml:"text2"`
 
+    // Reference to an image that should be displayed, needs to be declared in the global image section
+    Image *string  `yaml:"image,omitempty"`
+
+    // in case the picture is rendered with given expanded IDs, and maxDepth, then if this flag is true, the box is still displayed expanded
+    Expand bool  `yaml:"expand"`
+
     // If set, then the content for 'vertical' attrib is loaded from an external file
     ExtVertical *string  `yaml:"extVertical,omitempty"`
 
@@ -104,6 +162,12 @@ type Layout struct {
 
     // reference to the format to use for this box
     Format *string  `yaml:"format,omitempty"`
+
+    // if that is set then connections can run through the box, as long as they don't cross the text
+    DontBlockConPaths *bool  `yaml:"dontBlockConPaths,omitempty"`
+
+    // Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.
+    DataLink *string  `yaml:"dataLink,omitempty"`
 }
 
 func NewLayout() *Layout {
@@ -124,6 +188,8 @@ func CopyLayout(src *Layout) *Layout {
     ret.Caption = src.Caption
     ret.Text1 = src.Text1
     ret.Text2 = src.Text2
+    ret.Image = src.Image
+    ret.Expand = src.Expand
     ret.ExtVertical = src.ExtVertical
     ret.Vertical = make([]Layout, 0)
     for _, e := range src.Vertical {
@@ -143,6 +209,8 @@ func CopyLayout(src *Layout) *Layout {
         ret.Connections = append(ret.Connections, e)
     }
     ret.Format = src.Format
+    ret.DontBlockConPaths = src.DontBlockConPaths
+    ret.DataLink = src.DataLink
 
     return &ret
 }
@@ -155,6 +223,9 @@ func CopyLayout(src *Layout) *Layout {
 
 
 type Format struct {
+
+    // sets the width of the object to the width of the parent
+    WidthOfParent *bool  `yaml:"widthOfParent,omitempty"`
 
     // optional fixed width that will be applied on the box
     FixedWidth *int  `yaml:"fixedWidth,omitempty"`
@@ -183,9 +254,6 @@ type Format struct {
 
     // radius of the box corners in pixel
     CornerRadius *int  `yaml:"cornerRadius,omitempty"`
-
-    // ID of an image to use
-    Image *string  `yaml:"image,omitempty"`
 }
 
 
@@ -194,6 +262,7 @@ func CopyFormat(src *Format) *Format {
         return nil
     }
     var ret Format
+    ret.WidthOfParent = src.WidthOfParent
     ret.FixedWidth = src.FixedWidth
     ret.FixedHeight = src.FixedHeight
     ret.VerticalTxt = src.VerticalTxt
@@ -205,7 +274,64 @@ func CopyFormat(src *Format) *Format {
     ret.Padding = src.Padding
     ret.BoxMargin = src.BoxMargin
     ret.CornerRadius = src.CornerRadius
-    ret.Image = src.Image
+
+    return &ret
+}
+
+
+
+
+
+type FormatVariations struct {
+
+    // dictionary with tag values as key, that contains format definitions.
+    HasTag map[string]Format  `yaml:"hasTag,omitempty"`
+}
+
+func NewFormatVariations() *FormatVariations {
+    return &FormatVariations{
+        HasTag: make(map[string]Format, 0),
+    }
+}
+
+func CopyFormatVariations(src *FormatVariations) *FormatVariations {
+    if src == nil {
+        return nil
+    }
+    var ret FormatVariations
+    ret.HasTag = make(map[string]Format, 0)
+    for k, v := range src.HasTag {
+        ret.HasTag[k] = v
+    }
+
+    return &ret
+}
+
+
+
+
+
+
+
+
+/* Definition of one legend entry
+*/
+type LegendEntry struct {
+
+    Text string  `yaml:"text"`
+
+    // this format reference used to identify how the here described object is in the picture displayed.
+    Format string  `yaml:"format"`
+}
+
+
+func CopyLegendEntry(src *LegendEntry) *LegendEntry {
+    if src == nil {
+        return nil
+    }
+    var ret LegendEntry
+    ret.Text = src.Text
+    ret.Format = src.Format
 
     return &ret
 }
@@ -218,6 +344,9 @@ func CopyFormat(src *Format) *Format {
 
 
 type Connection struct {
+
+    // Caption text of the destination box, can be used as alternative to 'destId'
+    Dest string  `yaml:"dest"`
 
     // box id of the destination
     DestId string  `yaml:"destId"`
@@ -246,6 +375,7 @@ func CopyConnection(src *Connection) *Connection {
         return nil
     }
     var ret Connection
+    ret.Dest = src.Dest
     ret.DestId = src.DestId
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
@@ -257,6 +387,9 @@ func CopyConnection(src *Connection) *Connection {
 
     return &ret
 }
+
+
+
 
 
 

@@ -38,11 +38,13 @@ type RectWithTextFormat struct {
 
 type Drawing interface {
 	Start(title string, height, width int) error
-	DrawRectWithText(id, caption, text1, text2 string, x, y, width, height int, format RectWithTextFormat) error
+	DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format RectWithTextFormat) error
 	DrawPng(x, y int, pngId string) error
+	DrawPngWithAdditionalLink(x, y int, pngId, link string) error
 	DrawLine(x1, y1, x2, y2 int, format LineDef) error
+	DrawLineWithClass(x1, y1, x2, y2 int, format LineDef, className string) error
 	DrawArrow(x, y, angle int, format LineDef) error
-	DrawSolidRect(x, y, width, height int, format LineDef) error
+	DrawSolidRect(x, y, width, height int, fill *FillDef, line *LineDef) error
 	DrawSolidCircle(x, y, radius int, color string) error
 	DrawText(text string, x, y, width int, fontDef *FontDef) int
 	DrawVerticalText(text string, currentX, y, height int, fontDef *FontDef) int
