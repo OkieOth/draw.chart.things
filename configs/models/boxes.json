@@ -13,6 +13,10 @@
       "description": "format reference used for the title",
       "type": "string"
     },
+    "version": {
+      "description": "allows to include a version for the layout description",
+      "type": "string"
+    },
     "legend": {
       "description": "Legend definition used in this diagram",
       "$ref": "#/definitions/Legend"

@@ -11,6 +11,10 @@
       "description": "optional title, that's appended to the original layout title",
       "type": "string"
     },
+    "version": {
+      "description": "allows to include a version for the layout description",
+      "type": "string"
+    },
     "legend": {
       "description": "Legend definition used in this diagram",
       "$ref": "./boxes.json#/definitions/Legend"

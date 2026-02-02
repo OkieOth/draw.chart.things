@@ -158,26 +158,26 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	}
 	if line.StartY == line.EndY {
 		// horizontal line
-		diffXStart := absInt((box.X + box.Width) - line.StartX)
+		diffXStart := absInt(box.X - line.StartX)
 		diffXEnd := absInt(box.X - line.EndX)
-		if diffXStart < diffXEnd {
-			// line to right
-			line.StartX = box.X + box.Width
-		} else {
+		if diffXStart > diffXEnd {
 			// line form left
 			line.EndX = box.X
+		} else {
+			// line to right
+			line.StartX = box.X + box.Width
 		}
 
 	} else {
 		// vertical line
-		diffYStart := absInt((box.Y + box.Height) - line.StartY)
-		diffYEnd := absInt(box.Y - line.EndY)
+		diffYStart := absInt(box.Y - line.StartY)
+		diffYEnd := absInt((box.Y + box.Height) - line.StartY)
 		if diffYStart < diffYEnd {
 			// line down
-			line.StartY = box.Y + box.Height
+			line.EndY = box.Y
 		} else {
 			// line up
-			line.EndY = box.Y
+			line.StartY = box.Y + box.Height
 		}
 	}
 }

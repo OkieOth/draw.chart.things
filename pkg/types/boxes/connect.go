@@ -111,7 +111,7 @@ func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *L
 		if currentElemIsParentToStart {
 			// check if there is a collision with the text
 			if currentElem.WidthTextBox != nil {
-				if (x <= (*currentElem.XTextBox + *currentElem.WidthTextBox)) && (x >= *currentElem.XTextBox) &&
+				if (x <= (*currentElem.XTextBox + *currentElem.WidthTextBox + 5)) && (x >= (*currentElem.XTextBox - 5)) &&
 					(y >= *currentElem.YTextBox) && (y <= (*currentElem.YTextBox + *currentElem.HeightTextBox)) {
 					return CollisionType_WithElem
 				}

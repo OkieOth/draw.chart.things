@@ -184,8 +184,10 @@ func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]
 					destIdToUse = obj.newId
 				}
 				if !connectionExistsByDestId(layout.Connections, destIdToUse) {
-					c.DestId = destIdToUse
-					(*layout).Connections = append(layout.Connections, c)
+					if destIdToUse != layout.Id {
+						c.DestId = destIdToUse
+						(*layout).Connections = append(layout.Connections, c)
+					}
 				}
 			}
 		}
