@@ -18,6 +18,14 @@ build-docker-ui:
 build-wasm:
 	GOOS=js GOARCH=wasm go build -o ui/wasm/boxes.wasm wasm/main.go
 
+docker-push:
+	docker push ghcr.io/okieoth/draw.chart.things:$(VERSION)
+	docker push ghcr.io/okieoth/draw.chart.things
+
+docker-ui-push:
+	docker push ghcr.io/okieoth/draw.chart.things.ui:$(VERSION)
+	docker push ghcr.io/okieoth/draw.chart.things.ui
+
 generate-all:
 	bash -c scripts/generateAll.sh
 
