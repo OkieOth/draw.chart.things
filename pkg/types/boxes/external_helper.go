@@ -53,6 +53,43 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 	b.mixInConnectionsImplCont(l.Vertical, additional)
 }
 
+func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
+	if mixin == nil {
+		return
+	}
+	if len(mixin.Horizontal) > 0 {
+		// mix in horizontal elements
+		l.Horizontal = append(l.Horizontal, mixin.Horizontal...)
+	}
+	if len(mixin.Vertical) > 0 {
+		// mix in vertical elements
+		l.Vertical = append(l.Vertical, mixin.Vertical...)
+	}
+}
+
+func (b *Boxes) mixInLayoutsImplCont(cont []Layout, additional *map[string]LayoutMixin) {
+	for i := range cont {
+		if len(*additional) == 0 {
+			return
+		}
+		b.mixInLayoutsImpl(&cont[i], additional)
+	}
+}
+
+func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) {
+	if len(*additional) == 0 {
+		return
+	}
+	if l.Caption != "" {
+		if mixin, ok := (*additional)[l.Caption]; ok {
+			b.mixInLayoutNow(l, &mixin)
+			delete(*additional, l.Caption)
+		}
+	}
+	b.mixInLayoutsImplCont(l.Horizontal, additional)
+	b.mixInLayoutsImplCont(l.Vertical, additional)
+}
+
 func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	if additional.Title != nil {
 		b.Title += ": " + *additional.Title
@@ -71,6 +108,7 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 		}
 		maps.Copy(b.Formats, additional.Formats)
 	}
+	b.mixInLayoutsImpl(&b.Boxes, &additional.LayoutMixins)
 	b.mixInConnectionsImpl(&b.Boxes, additional.Connections)
 	if len(additional.Formats) > 0 {
 		if b.Formats == nil {

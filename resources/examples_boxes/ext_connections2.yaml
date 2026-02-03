@@ -1,3 +1,16 @@
+layoutMixins:
+  Most Left Element:
+    horizontal:
+      - id: id_6_1_1
+        caption: Horizontal 1
+      - id: id_6_1_2
+        caption: Horizontal 2
+  Center Element 1:
+    vertical:
+      - id: id_6_1_1
+        caption: Vertical 1
+      - id: id_6_1_2
+        caption: Vertical 2
 connections:
   Ferdows:
     connections:

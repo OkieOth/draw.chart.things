@@ -16,8 +16,14 @@ type BoxesFileMixings struct {
     // optional title, that's appended to the original layout title
     Title *string  `yaml:"title,omitempty"`
 
+    // allows to include a version for the layout description
+    Version *string  `yaml:"version,omitempty"`
+
     // Legend definition used in this diagram
     Legend *Legend  `yaml:"legend,omitempty"`
+
+    // dictionary for layout mixins. key of the dictionary is the caption of the box that will take the additional content
+    LayoutMixins map[string]LayoutMixin  `yaml:"layoutMixins,omitempty"`
 
     // dictionary of connection objects
     Connections map[string]ConnectionCont  `yaml:"connections,omitempty"`
@@ -34,6 +40,7 @@ type BoxesFileMixings struct {
 func NewBoxesFileMixings() *BoxesFileMixings {
     return &BoxesFileMixings{
         Legend: NewLegend(),
+        LayoutMixins: make(map[string]LayoutMixin, 0),
         Connections: make(map[string]ConnectionCont, 0),
         Formats: make(map[string]Format, 0),
         FormatVariations: NewFormatVariations(),
@@ -47,7 +54,12 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
     }
     var ret BoxesFileMixings
     ret.Title = src.Title
+    ret.Version = src.Version
     ret.Legend = CopyLegend(src.Legend)
+    ret.LayoutMixins = make(map[string]LayoutMixin, 0)
+    for k, v := range src.LayoutMixins {
+        ret.LayoutMixins[k] = v
+    }
     ret.Connections = make(map[string]ConnectionCont, 0)
     for k, v := range src.Connections {
         ret.Connections[k] = v
@@ -64,6 +76,9 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
 
     return &ret
 }
+
+
+
 
 
 

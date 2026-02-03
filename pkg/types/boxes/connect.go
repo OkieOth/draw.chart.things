@@ -17,8 +17,7 @@ type checkForCollFunc2 func(x, y int, currentElem, startElem, endElem *LayoutEle
 
 func (doc *BoxesDocument) checkForCollInContainer2(cont *LayoutElemContainer, f checkForCollFunc2, x, y int, startElem, endElem *LayoutElement, isForHorizontalLine bool) CollisionType {
 	if cont != nil {
-		l := len(cont.Elems)
-		for i := range l {
+		for i := range cont.Elems {
 			e := &cont.Elems[i]
 			if e == startElem || e == endElem {
 				continue
@@ -111,7 +110,7 @@ func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem, endElem *L
 		if currentElemIsParentToStart {
 			// check if there is a collision with the text
 			if currentElem.WidthTextBox != nil {
-				if (x <= (*currentElem.XTextBox + *currentElem.WidthTextBox)) && (x >= *currentElem.XTextBox) &&
+				if (x <= (*currentElem.XTextBox + *currentElem.WidthTextBox + 5)) && (x >= (*currentElem.XTextBox - 5)) &&
 					(y >= *currentElem.YTextBox) && (y <= (*currentElem.YTextBox + *currentElem.HeightTextBox)) {
 					return CollisionType_WithElem
 				}
@@ -148,7 +147,7 @@ func newConnectionLine(x1, y1, x2, y2 int) ConnectionLine {
 }
 
 func (doc *BoxesDocument) connectContImpl(layoutCont []LayoutElement) {
-	for i := range len(layoutCont) {
+	for i := range layoutCont {
 		doc.connectImpl(&layoutCont[i])
 	}
 }
@@ -290,7 +289,7 @@ func (doc *BoxesDocument) findBoxInContWithId(cont *LayoutElemContainer, id stri
 	if cont == nil {
 		return nil
 	}
-	for i := range len(cont.Elems) {
+	for i := range cont.Elems {
 		found := doc.findBoxWithId(&cont.Elems[i], id)
 		if found != nil {
 			return found
@@ -450,7 +449,7 @@ func (doc *BoxesDocument) verticalEdges() {
 }
 
 func (doc *BoxesDocument) initEdgesForBoxConnections() {
-	for i := range len(doc.ConnectionNodes) {
+	for i := range doc.ConnectionNodes {
 		if doc.ConnectionNodes[i].BoxId != nil {
 			// node on a potential start point of a connected box found
 			// ... should currently have only one outbound edge!!!
@@ -551,12 +550,12 @@ func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 		}
 	}
 	if elem.Vertical != nil {
-		for i := 0; i < len(elem.Vertical.Elems); i++ {
+		for i := range elem.Vertical.Elems {
 			doc.initStartPositionsImpl(&elem.Vertical.Elems[i])
 		}
 	}
 	if elem.Horizontal != nil {
-		for i := 0; i < len(elem.Horizontal.Elems); i++ {
+		for i := range elem.Horizontal.Elems {
 			doc.initStartPositionsImpl(&elem.Horizontal.Elems[i])
 		}
 	}

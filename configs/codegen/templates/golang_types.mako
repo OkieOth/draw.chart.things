@@ -176,31 +176,14 @@ import (
 /* ${templateHelper.addLineBreakToDescription(type.description,4)}
 */
         % endif
-type ${type.name} int64
+type ${type.name} string
 
 const (
-    ${getEnumDefaultValue(type)} ${type.name} = iota
         % for value in type.values:
-            % if not isEnumDefaultValue(value, type):
-        ${secureEnumValues(value, type.name)}
-            % endif
+    ${secureEnumValues(value, type.name)} ${type.name} = "${value}"
         % endfor
 )
 
-func (s ${type.name}) String() string {
-	switch s {
-        % for value in type.values:
-	case ${secureEnumValues(value, type.name)}:
-		return "${value}"
-        % endfor
-    default:
-        return "???"
-	}
-}
-
-func (s ${type.name}) MarshalJSON() ([]byte, error) {
-    return json.Marshal(s.String())
-}
 
 func (s *${type.name}) UnmarshalJSON(data []byte) error {
     var value string

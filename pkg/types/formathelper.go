@@ -6,7 +6,7 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 	typeItalic := FontDefTypeEnum_italic
 	weightNormal := FontDefWeightEnum_normal
 	weightBold := FontDefWeightEnum_bold
-	alignedLeft := FontDefAlignedEnum_left
+	alignedCenter := FontDefAlignedEnum_center
 
 	if l != nil {
 		if l.Font != "" {
@@ -47,10 +47,15 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 		} else {
 			f.Color = "black"
 		}
+		if l.Anchor != "" {
+			f.Anchor = l.Anchor
+		} else {
+			f.Anchor = FontDefAnchorEnum_middle
+		}
 		if l.Aligned != nil {
 			f.Aligned = l.Aligned
 		} else {
-			f.Aligned = &alignedLeft
+			f.Aligned = &alignedCenter
 		}
 		f.SpaceTop = l.SpaceTop
 		if f.SpaceTop == 0 {
@@ -77,7 +82,8 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 		}
 		f.LineHeight = 1.5
 		f.Color = "black"
-		f.Aligned = &alignedLeft
+		f.Aligned = &alignedCenter
+		f.Anchor = FontDefAnchorEnum_middle
 		f.SpaceTop = spaceTop
 		f.SpaceBottom = 0
 		f.MaxLenBeforeBreak = 90

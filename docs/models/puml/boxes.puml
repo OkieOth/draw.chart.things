@@ -7,6 +7,7 @@ hide empty fields
 class "**Boxes**" as Boxes {
         StringType title
         StringType titleFormat
+        StringType version
         Legend legend
         Layout boxes
         Map<Format> formats
@@ -97,6 +98,14 @@ class "**Connection**" as Connection {
 
  
 
+class "**LayoutMixin**" as LayoutMixin {
+        Layout[] horizontal
+        Layout[] vertical
+}
+note top: container to extend the layouts\nof a given layout element\nvia mixins
+
+ 
+
 
 class "**FontDef**" as FontDef {
         IntegerType size
@@ -178,6 +187,7 @@ note top: parameters of an image to\nbe displayed in the SVG
     
 
 
+
 Boxes  *--  Legend
 
 Boxes  *--  Layout
@@ -247,6 +257,10 @@ FormatVariations  *--  Format
 
 
 
+
+
+    
+LayoutMixin "0" *-- "n" Layout
 
 
     

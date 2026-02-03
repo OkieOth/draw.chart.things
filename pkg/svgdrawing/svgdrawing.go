@@ -454,6 +454,17 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 	return nil
 }
 
+func lineStyleForType(style types.LineDefStyleEnum) string {
+	switch style {
+	case types.LineDefStyleEnum_dashed:
+		return `stroke-dasharray:10 6;`
+	case types.LineDefStyleEnum_dotted:
+		return `stroke-dasharray:"1 10;"`
+	default:
+		return ""
+	}
+}
+
 func (d *SvgDrawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 	color := "black"
 	if (format.Color != nil) && (*format.Color != "") {
@@ -463,7 +474,11 @@ func (d *SvgDrawing) DrawLine(x1, y1, x2, y2 int, format types.LineDef) error {
 	if (format.Width != nil) && (*format.Width != 0) {
 		width = *format.Width
 	}
-	d.canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:%f", color, width))
+	if format.Style != nil {
+		d.canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:%f;%s", color, width, lineStyleForType(*format.Style)))
+	} else {
+		d.canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:%f", color, width))
+	}
 	return nil
 }
 
@@ -476,7 +491,11 @@ func (d *SvgDrawing) DrawLineWithClass(x1, y1, x2, y2 int, format types.LineDef,
 	if (format.Width != nil) && (*format.Width != 0) {
 		width = *format.Width
 	}
-	d.canvas.LineWithClass(x1, y1, x2, y2, className, fmt.Sprintf("stroke:%s;stroke-width:%f", color, width))
+	if format.Style != nil {
+		d.canvas.LineWithClass(x1, y1, x2, y2, className, fmt.Sprintf("stroke:%s;stroke-width:%f;%s", color, width, lineStyleForType(*format.Style)))
+	} else {
+		d.canvas.LineWithClass(x1, y1, x2, y2, className, fmt.Sprintf("stroke:%s;stroke-width:%f", color, width))
+	}
 	return nil
 }
 
