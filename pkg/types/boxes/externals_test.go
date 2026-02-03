@@ -89,10 +89,18 @@ func TestLoadExternalConnections2(t *testing.T) {
 	// r5_2
 	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 0)
 
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Vertical, 0)
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Horizontal, 0)
+	require.Len(t, b.Boxes.Horizontal[2].Vertical[0].Vertical, 0)
+	require.Len(t, b.Boxes.Horizontal[2].Vertical[0].Horizontal, 0)
+
 	b.MixinThings(*c)
 
 	// r4_1
 	require.Len(t, b.Boxes.Horizontal[0].Vertical[0].Connections, 4)
 	// r5_2
-	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Connections, 1)
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Vertical, 2)
+	require.Len(t, b.Boxes.Horizontal[1].Vertical[1].Horizontal, 0)
+	require.Len(t, b.Boxes.Horizontal[2].Vertical[0].Vertical, 0)
+	require.Len(t, b.Boxes.Horizontal[2].Vertical[0].Horizontal, 2)
 }

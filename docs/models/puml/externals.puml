@@ -54,6 +54,14 @@ class "**Connection**" as Connection {
 
  
 
+class "**LayoutMixin**" as LayoutMixin {
+        Layout[] horizontal
+        Layout[] vertical
+}
+note top: container to extend the layouts\nof a given layout element\nvia mixins
+
+ 
+
 class "**Format**" as Format {
         BooleanType widthOfParent
         IntegerType fixedWidth
@@ -186,6 +194,10 @@ Layout "0" *-- "n" Connection
 
 
 
+
+
+    
+LayoutMixin "0" *-- "n" Layout
 
 
     

@@ -2,6 +2,7 @@
 ## Boxes
 * fix occacional layout issues for start- and end lines
 * enable styles for lines
+* add layout mixins
 
 # v0.1.0
 * boxes have an okayish state

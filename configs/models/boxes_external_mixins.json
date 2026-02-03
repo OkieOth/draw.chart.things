@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Boxes file mixings",
   "description": "Model to inject additional things in a boxes layout definition",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "object",
   "x-domain": "external",
   "$comment": "the IDs of the boxes to connect are the keys of the dictionary",
@@ -18,6 +18,14 @@
     "legend": {
       "description": "Legend definition used in this diagram",
       "$ref": "./boxes.json#/definitions/Legend"
+    },
+    "layoutMixins": {
+      "description": "dictionary for layout mixins. key of the dictionary is the caption of the box that will take the additional content",
+      "$comment": "attention, take care that the captions used are unique, without that the content my apprear in the wrong place",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./boxes.json#/definitions/LayoutMixin"
+      }
     },
     "connections": {
       "description": "dictionary of connection objects",

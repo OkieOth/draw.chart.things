@@ -396,5 +396,42 @@ func CopyConnection(src *Connection) *Connection {
 
 
 
+/* container to extend the layouts of a given layout element via mixins
+*/
+type LayoutMixin struct {
+
+    Horizontal []Layout  `yaml:"horizontal,omitempty"`
+
+    Vertical []Layout  `yaml:"vertical,omitempty"`
+}
+
+func NewLayoutMixin() *LayoutMixin {
+    return &LayoutMixin{
+        Horizontal: make([]Layout, 0),
+        Vertical: make([]Layout, 0),
+    }
+}
+
+func CopyLayoutMixin(src *LayoutMixin) *LayoutMixin {
+    if src == nil {
+        return nil
+    }
+    var ret LayoutMixin
+    ret.Horizontal = make([]Layout, 0)
+    for _, e := range src.Horizontal {
+        ret.Horizontal = append(ret.Horizontal, e)
+    }
+    ret.Vertical = make([]Layout, 0)
+    for _, e := range src.Vertical {
+        ret.Vertical = append(ret.Vertical, e)
+    }
+
+    return &ret
+}
+
+
+
+
+
 
 
