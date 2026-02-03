@@ -43,7 +43,7 @@
           "type": "integer",
           "description": "Maximum length of the text before it breaks"
         },
-        "anchor": {
+        "^": {
           "enum": ["middle", "left", "right"]
         }
       },

@@ -43,6 +43,14 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 	return ret
 }
 
+func initFontFormatAnchorInCase(f *types.FontDef) {
+	if f != nil {
+		if f.Anchor == "" {
+			f.Anchor = types.FontDefAnchorEnum_middle
+		}
+	}
+}
+
 func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	var border *types.LineDef
 	var fill *types.FillDef
@@ -56,6 +64,9 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	var fixedHeight, fixedWidth, cornerRadius *int
 	var widthOfParent *bool
 	if f != nil {
+		initFontFormatAnchorInCase(f.FontCaption)
+		initFontFormatAnchorInCase(f.FontText1)
+		initFontFormatAnchorInCase(f.FontText2)
 		fontCaption = f.FontCaption
 		fontText1 = f.FontText1
 		fontText2 = f.FontText2

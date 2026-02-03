@@ -64,27 +64,13 @@ func CopyFontDef(src *FontDef) *FontDef {
 
 
 
-type FontDefTypeEnum int64
+type FontDefTypeEnum string
 
 const (
-    FontDefTypeEnum_normal FontDefTypeEnum = iota
-        FontDefTypeEnum_italic
+    FontDefTypeEnum_normal FontDefTypeEnum = "normal"
+    FontDefTypeEnum_italic FontDefTypeEnum = "italic"
 )
 
-func (s FontDefTypeEnum) String() string {
-	switch s {
-	case FontDefTypeEnum_normal:
-		return "normal"
-	case FontDefTypeEnum_italic:
-		return "italic"
-    default:
-        return "???"
-	}
-}
-
-func (s FontDefTypeEnum) MarshalJSON() ([]byte, error) {
-    return json.Marshal(s.String())
-}
 
 func (s *FontDefTypeEnum) UnmarshalJSON(data []byte) error {
     var value string
@@ -107,27 +93,13 @@ func (s *FontDefTypeEnum) UnmarshalJSON(data []byte) error {
 
 
 
-type FontDefWeightEnum int64
+type FontDefWeightEnum string
 
 const (
-    FontDefWeightEnum_normal FontDefWeightEnum = iota
-        FontDefWeightEnum_bold
+    FontDefWeightEnum_normal FontDefWeightEnum = "normal"
+    FontDefWeightEnum_bold FontDefWeightEnum = "bold"
 )
 
-func (s FontDefWeightEnum) String() string {
-	switch s {
-	case FontDefWeightEnum_normal:
-		return "normal"
-	case FontDefWeightEnum_bold:
-		return "bold"
-    default:
-        return "???"
-	}
-}
-
-func (s FontDefWeightEnum) MarshalJSON() ([]byte, error) {
-    return json.Marshal(s.String())
-}
 
 func (s *FontDefWeightEnum) UnmarshalJSON(data []byte) error {
     var value string
@@ -150,30 +122,14 @@ func (s *FontDefWeightEnum) UnmarshalJSON(data []byte) error {
 
 
 
-type FontDefAlignedEnum int64
+type FontDefAlignedEnum string
 
 const (
-    FontDefAlignedEnum_left FontDefAlignedEnum = iota
-        FontDefAlignedEnum_center
-        FontDefAlignedEnum_right
+    FontDefAlignedEnum_left FontDefAlignedEnum = "left"
+    FontDefAlignedEnum_center FontDefAlignedEnum = "center"
+    FontDefAlignedEnum_right FontDefAlignedEnum = "right"
 )
 
-func (s FontDefAlignedEnum) String() string {
-	switch s {
-	case FontDefAlignedEnum_left:
-		return "left"
-	case FontDefAlignedEnum_center:
-		return "center"
-	case FontDefAlignedEnum_right:
-		return "right"
-    default:
-        return "???"
-	}
-}
-
-func (s FontDefAlignedEnum) MarshalJSON() ([]byte, error) {
-    return json.Marshal(s.String())
-}
 
 func (s *FontDefAlignedEnum) UnmarshalJSON(data []byte) error {
     var value string
@@ -198,30 +154,14 @@ func (s *FontDefAlignedEnum) UnmarshalJSON(data []byte) error {
 
 
 
-type FontDefAnchorEnum int64
+type FontDefAnchorEnum string
 
 const (
-    FontDefAnchorEnum_middle FontDefAnchorEnum = iota
-        FontDefAnchorEnum_left
-        FontDefAnchorEnum_right
+    FontDefAnchorEnum_middle FontDefAnchorEnum = "middle"
+    FontDefAnchorEnum_left FontDefAnchorEnum = "left"
+    FontDefAnchorEnum_right FontDefAnchorEnum = "right"
 )
 
-func (s FontDefAnchorEnum) String() string {
-	switch s {
-	case FontDefAnchorEnum_middle:
-		return "middle"
-	case FontDefAnchorEnum_left:
-		return "left"
-	case FontDefAnchorEnum_right:
-		return "right"
-    default:
-        return "???"
-	}
-}
-
-func (s FontDefAnchorEnum) MarshalJSON() ([]byte, error) {
-    return json.Marshal(s.String())
-}
 
 func (s *FontDefAnchorEnum) UnmarshalJSON(data []byte) error {
     var value string
@@ -277,30 +217,14 @@ func CopyLineDef(src *LineDef) *LineDef {
 
 
 
-type LineDefStyleEnum int64
+type LineDefStyleEnum string
 
 const (
-    LineDefStyleEnum_solid LineDefStyleEnum = iota
-        LineDefStyleEnum_dotted
-        LineDefStyleEnum_dashed
+    LineDefStyleEnum_solid LineDefStyleEnum = "solid"
+    LineDefStyleEnum_dotted LineDefStyleEnum = "dotted"
+    LineDefStyleEnum_dashed LineDefStyleEnum = "dashed"
 )
 
-func (s LineDefStyleEnum) String() string {
-	switch s {
-	case LineDefStyleEnum_solid:
-		return "solid"
-	case LineDefStyleEnum_dotted:
-		return "dotted"
-	case LineDefStyleEnum_dashed:
-		return "dashed"
-    default:
-        return "???"
-	}
-}
-
-func (s LineDefStyleEnum) MarshalJSON() ([]byte, error) {
-    return json.Marshal(s.String())
-}
 
 func (s *LineDefStyleEnum) UnmarshalJSON(data []byte) error {
     var value string

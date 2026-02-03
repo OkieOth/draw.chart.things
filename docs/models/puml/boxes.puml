@@ -7,6 +7,7 @@ hide empty fields
 class "**Boxes**" as Boxes {
         StringType title
         StringType titleFormat
+        StringType version
         Legend legend
         Layout boxes
         Map<Format> formats
@@ -176,6 +177,7 @@ note top: parameters of an image to\nbe displayed in the SVG
 
 
     
+
 
 
 Boxes  *--  Legend

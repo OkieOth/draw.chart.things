@@ -19,6 +19,9 @@ type Boxes struct {
     // format reference used for the title
     TitleFormat *string  `yaml:"titleFormat,omitempty"`
 
+    // allows to include a version for the layout description
+    Version *string  `yaml:"version,omitempty"`
+
     // Legend definition used in this diagram
     Legend *Legend  `yaml:"legend,omitempty"`
 
@@ -66,6 +69,7 @@ func CopyBoxes(src *Boxes) *Boxes {
     var ret Boxes
     ret.Title = src.Title
     ret.TitleFormat = src.TitleFormat
+    ret.Version = src.Version
     ret.Legend = CopyLegend(src.Legend)
     ret.Boxes = *CopyLayout(&src.Boxes)
     ret.Formats = make(map[string]Format, 0)

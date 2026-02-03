@@ -457,7 +457,7 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 func lineStyleForType(style types.LineDefStyleEnum) string {
 	switch style {
 	case types.LineDefStyleEnum_dashed:
-		return `stroke-dasharray:12 6;`
+		return `stroke-dasharray:10 6;`
 	case types.LineDefStyleEnum_dotted:
 		return `stroke-dasharray:"1 10;"`
 	default:
