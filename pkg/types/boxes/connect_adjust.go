@@ -170,8 +170,9 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 
 	} else {
 		// vertical line
-		diffYStart := absInt(box.Y - line.StartY)
-		diffYEnd := absInt((box.Y + box.Height) - line.StartY)
+		// the following line is fragile :-/
+		diffYStart := absInt(box.Y - line.EndY)
+		diffYEnd := absInt((box.Y + box.Height) - line.EndY)
 		if diffYStart < diffYEnd {
 			// line down
 			line.EndY = box.Y

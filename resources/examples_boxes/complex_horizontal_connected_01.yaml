@@ -4,6 +4,7 @@ formats:
     line:
       width: 2
       color: black
+      style: dashed
     fill:
       color: white
 boxes:
