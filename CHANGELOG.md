@@ -1,3 +1,7 @@
+# v0.3.0
+## Boxes
+* fix layout issues for boxes with text1 and text2 entries
+
 # v0.2.0
 ## Boxes
 * fix occacional layout issues for start- and end lines
