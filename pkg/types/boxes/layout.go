@@ -1,6 +1,8 @@
 package boxes
 
 import (
+	"fmt"
+
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
@@ -127,18 +129,13 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 		curY := l.Y + yInnerOffset
 		l.Vertical.Y = curY
 		var w int
-		var hasChilds bool
 		lv := len(l.Vertical.Elems)
 		margin := types.GlobalMinBoxMargin
 		if l.Format != nil {
 			margin = l.Format.MinBoxMargin
 		}
-		hasSubWithTxt := false
 		for i := range lv {
 			sub := &l.Vertical.Elems[i]
-			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
-				hasChilds = true
-			}
 			marginToUse := margin
 			if sub.Caption == "" && sub.Text1 == "" && sub.Text2 == "" && sub.Image != nil {
 				// in case sub contains only a picture, then the image margin overrides the format margin
@@ -149,9 +146,6 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 			sub.X = curX
 			sub.Y = curY
 			sub.InitDimensions(c)
-			if sub.Caption != "" || sub.Text1 != "" || sub.Text2 != "" || sub.Image != nil {
-				hasSubWithTxt = true
-			}
 			if marginToUse > 0 {
 				curY += (sub.Height + marginToUse)
 			} else {
@@ -164,11 +158,8 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 				l.Vertical.Width = sub.Width
 			}
 		}
-		if !hasChilds {
-			for i := 0; i < len(l.Vertical.Elems); i++ {
-				sub := &l.Vertical.Elems[i]
-				sub.Width = w
-			}
+		for i := range l.Vertical.Elems {
+			l.Vertical.Elems[i].Width = w
 		}
 
 		l.Vertical.Height = l.Vertical.Elems[lv-1].Y + l.Vertical.Elems[lv-1].Height - l.Vertical.Y
@@ -178,13 +169,7 @@ func (l *LayoutElement) initVertical(c types.TextDimensionCalculator, yInnerOffs
 			padding = l.Format.Padding
 		}
 		l.adjustDimensionsBasedOnNested(w, padding)
-		if hasSubWithTxt {
-			paddingToUse := types.GlobalPadding
-			if l.Format != nil && l.Format.Padding > 0 {
-				paddingToUse = l.Format.Padding
-			}
-			l.Height += paddingToUse
-		}
+		l.Height += types.GlobalPadding
 	}
 }
 
@@ -214,7 +199,6 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		if l.Format != nil {
 			margin = l.Format.MinBoxMargin
 		}
-		hasSubWithTxt := false
 		for i := 0; i < len(l.Horizontal.Elems); i++ {
 			sub := &l.Horizontal.Elems[i]
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
@@ -233,9 +217,6 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 			sub.X = curX
 			sub.Y = curY
 			sub.InitDimensions(c)
-			if sub.Caption != "" || sub.Text1 != "" || sub.Text2 != "" || sub.Image != nil {
-				hasSubWithTxt = true
-			}
 			curX += (sub.Width + marginToUse)
 			w += sub.Width
 			if sub.Height > h {
@@ -257,14 +238,7 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		l.Height += l.Horizontal.Height
 
 		l.adjustDimensionsBasedOnNested(w, margin)
-		// TODO: remove later if it proves as working
-		if hasSubWithTxt {
-			paddingToUse := types.GlobalPadding
-			if l.Format != nil && l.Format.Padding > 0 {
-				paddingToUse = l.Format.Padding
-			}
-			l.Height += paddingToUse
-		}
+		l.Height += types.GlobalPadding
 	}
 }
 
@@ -285,6 +259,9 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	var cW, cH, t1W, t1H, t2W, t2H, textWidth, textHeight int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
+	if l.Caption == "Right Element" {
+		fmt.Println("DEBUG")
+	}
 	padding := types.GlobalPadding
 	if l.Format != nil && l.Format.Padding > 0 {
 		padding = l.Format.Padding
@@ -314,16 +291,21 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			if !l.Format.VerticalTxt {
 				l.Height += cH
 				l.Height += l.Format.FontCaption.SpaceBottom
-				if l.Text1 == "" && l.Text2 == "" {
+				l.Height += p
+				if l.Text1 == "" && l.Text2 == "" && l.Vertical == nil && l.Horizontal == nil {
+					p := l.Format.Padding
+					if l.Format.FontCaption.SpaceBottom > 0 {
+						p = l.Format.FontCaption.SpaceBottom
+					}
 					l.Height += p
 				}
 			} else {
 				// vertical text
 				cW, cH = cH, cW
 				l.Width += cW + p + l.Format.FontCaption.SpaceBottom
-				if l.Text1 == "" && l.Text2 == "" {
-					l.Width += l.Format.Padding
-				}
+				// if l.Text1 == "" && l.Text2 == "" {
+				// 	l.Width += l.Format.Padding
+				// }
 			}
 			textWidth = cW
 			textHeight = cH
@@ -337,11 +319,17 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 			if !l.Format.VerticalTxt {
 				l.Height += t1H
 				l.Height += l.Format.FontText1.SpaceBottom
-				if l.Text2 == "" && l.Vertical == nil && l.Horizontal == nil {
-					l.Height += p
-				}
+				l.Height += p
+				textHeight += p
 				textWidth = getMax(textWidth, t1W)
 				textHeight += t1H
+				if l.Text2 == "" && l.Vertical == nil && l.Horizontal == nil {
+					p := l.Format.Padding
+					if l.Format.FontText1.SpaceBottom > 0 {
+						p = l.Format.FontText1.SpaceBottom
+					}
+					l.Height += p
+				}
 			} else {
 				t1W, t1H = t1H, t1W
 				l.Width += t1W + p + l.Format.FontText1.SpaceBottom
@@ -351,14 +339,26 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 				textWidth += t1W
 				textHeight = getMax(textHeight, t1H)
 			}
+
 		}
 		if l.Text2 != "" {
+			p := l.Format.Padding
+			if l.Format.FontText2.SpaceTop > 0 {
+				p = l.Format.FontText2.SpaceTop
+			}
 			t2W, t2H = c.Dimensions(l.Text2, &l.Format.FontText2)
 			if !l.Format.VerticalTxt {
 				l.Height += t2H
 				l.Height += p
 				textWidth = getMax(textWidth, t2W)
 				textHeight += t2H
+				if l.Vertical == nil && l.Horizontal == nil {
+					p := l.Format.Padding
+					if l.Format.FontText2.SpaceBottom > 0 {
+						p = l.Format.FontText2.SpaceBottom
+					}
+					l.Height += p
+				}
 			} else {
 				t2W, t2H = t2H, t2W
 				l.Width += t2W + p + l.Format.FontText2.SpaceBottom
@@ -374,7 +374,7 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 				h = *l.Format.FixedHeight
 			}
 			l.Height = l.adjustToRaster(h)
-			yInnerOffset = l.Height
+			yInnerOffset = l.Height + types.RasterSize
 			var w int
 			if l.Format.FixedWidth != nil {
 				w = *l.Format.FixedWidth

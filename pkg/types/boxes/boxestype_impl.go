@@ -18,12 +18,12 @@ func (doc *BoxesDocument) drawStartPositionsImpl(drawingImpl *types.Drawing, ele
 		(*drawingImpl).DrawLine(elem.X+elem.Width, *elem.RightYToStart, elem.X+elem.Width+2, *elem.RightYToStart, *f)
 	}
 	if elem.Vertical != nil {
-		for i := 0; i < len(elem.Vertical.Elems); i++ {
+		for i := range elem.Vertical.Elems {
 			doc.drawStartPositionsImpl(drawingImpl, &elem.Vertical.Elems[i], f)
 		}
 	}
 	if elem.Horizontal != nil {
-		for i := 0; i < len(elem.Horizontal.Elems); i++ {
+		for i := range elem.Horizontal.Elems {
 			doc.drawStartPositionsImpl(drawingImpl, &elem.Horizontal.Elems[i], f)
 		}
 	}
@@ -74,7 +74,8 @@ func (d *BoxesDocument) DrawConnectionNodes(drawingImpl types.Drawing) {
 		Color: &b1,
 	}
 	_ = f3
-	for _, n := range d.ConnectionNodes {
+	for i := range d.ConnectionNodes {
+		n := d.ConnectionNodes[i]
 		if n.NodeId != nil && *n.NodeId != "" {
 			drawingImpl.DrawLine(n.X, n.Y-2, n.X, n.Y+2, f2)
 			drawingImpl.DrawLine(n.X-2, n.Y, n.X+2, n.Y, f2)
@@ -123,10 +124,12 @@ func (d *BoxesDocument) DrawRoads(drawingImpl types.Drawing) {
 		Width: &w,
 		Color: &b,
 	}
-	for _, r := range d.VerticalRoads {
+	for i := range d.VerticalRoads {
+		r := d.VerticalRoads[i]
 		drawingImpl.DrawLine(r.StartX, r.StartY, r.EndX, r.EndY, f)
 	}
-	for _, r := range d.HorizontalRoads {
+	for i := range d.HorizontalRoads {
+		r := d.HorizontalRoads[i]
 		drawingImpl.DrawLine(r.StartX, r.StartY, r.EndX, r.EndY, f)
 	}
 }
@@ -222,7 +225,8 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		Color: &b,
 		Style: &s,
 	}
-	for _, l := range d.HorizontalLines {
+	for i := range d.HorizontalLines {
+		l := d.HorizontalLines[i]
 		lineFormat := format
 		if l.Format != nil {
 			lineFormat = *l.Format
@@ -303,7 +307,8 @@ func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensio
 			}
 			currentY := doc.Boxes.Y + doc.Boxes.Height + (2 * types.GlobalPadding)
 			drawing.DrawLine(currentX, currentY-5, currentX+doc.Boxes.Width, currentY, lineFormat)
-			for _, e := range doc.Legend.Entries {
+			for i := range doc.Legend.Entries {
+				e := doc.Legend.Entries[i]
 				if e.Format == "" {
 					// no format found - the entry isn't included in the legend
 					continue
@@ -362,7 +367,8 @@ func (doc *BoxesDocument) AdjustDocHeightTLegend(c types.TextDimensionCalculator
 			}
 			currentX := doc.GlobalPadding
 			currentY := doc.Boxes.Y + doc.Boxes.Height + (2 * types.GlobalPadding)
-			for _, e := range doc.Legend.Entries {
+			for i := range doc.Legend.Entries {
+				e := doc.Legend.Entries[i]
 				text := e.Text + ": "
 				w, _ := c.Dimensions(text, &format2Use)
 				if (currentX + w) >= (doc.Boxes.X + doc.Boxes.Width) {
@@ -414,20 +420,58 @@ func (b *LayoutElement) Draw(drawing types.Drawing) error {
 		}
 	}
 	if b.Vertical != nil {
-		for _, elem := range b.Vertical.Elems {
+		for i := range b.Vertical.Elems {
+			elem := b.Vertical.Elems[i]
 			if err := elem.Draw(drawing); err != nil {
 				return err
 			}
 		}
 	}
 	if b.Horizontal != nil {
-		for _, elem := range b.Horizontal.Elems {
+		// adjust here horizontal images, that are partial moved based on overlapping connections ...
+		// ... this is only a cosmetical correction
+		b.adjustHorizontalImagePositionsInCase()
+		for i := range b.Horizontal.Elems {
+			elem := b.Horizontal.Elems[i]
 			if err := elem.Draw(drawing); err != nil {
 				return err
 			}
 		}
 	}
 	return nil
+}
+
+func (b *LayoutElement) hasOnlyHorizontalImages() (bool, int) {
+	w := 0
+	for i := range b.Horizontal.Elems {
+		elem := b.Horizontal.Elems[i]
+		if elem.Vertical != nil || elem.Horizontal != nil {
+			return false, 0
+		}
+		if elem.Image == nil || elem.Caption != "" || elem.Text1 != "" || elem.Text2 != "" {
+			return false, 0
+		}
+		w += elem.Image.Width
+	}
+	return true, w
+}
+
+func (b *LayoutElement) adjustHorizontalImagePositionsInCase() {
+	if ok, width := b.hasOnlyHorizontalImages(); ok {
+		m := types.GlobalMinBoxMargin
+		if b.Format.MinBoxMargin > 0 {
+			m = b.Format.MinBoxMargin
+		}
+		width += (len(b.Horizontal.Elems) - 1) * m
+		xStart := b.X + ((b.Width - width) / 2)
+		for i := range b.Horizontal.Elems {
+			elem := b.Horizontal.Elems[i]
+			if elem.Image != nil {
+				elem.Image.X = xStart
+				xStart += elem.Image.Width + m
+			}
+		}
+	}
 }
 
 func (b *LayoutElement) DrawTextBoxes(drawing types.Drawing) error {
