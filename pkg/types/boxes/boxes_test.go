@@ -3,9 +3,11 @@ package boxes_test
 import (
 	"testing"
 
+	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
 	"github.com/okieoth/draw.chart.things/pkg/types"
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testFunc func(t *testing.T, b *boxes.Boxes, testNr int)
@@ -109,10 +111,28 @@ func TestLoadBoxes(t *testing.T) {
 				assert.Nil(t, b.Boxes.Horizontal[1].Vertical[1].Vertical[0].Comment.Label)
 				assert.Nil(t, b.Boxes.Horizontal[1].Vertical[1].Vertical[0].Comment.Format)
 
-				// assert.NotNil(t, b.Boxes.Horizontal[1].Vertical[1].Vertical[0].Connections[0].Comment)
-				// assert.Equal(t, "I am also a comment", b.Boxes.Horizontal[1].Vertical[1].Vertical[0].Connections[0].Comment.Text)
-				// assert.Nil(t, b.Boxes.Horizontal[1].Vertical[1].Vertical[0].Connections[0].Comment.Label)
-				// assert.Nil(t, b.Boxes.Horizontal[1].Vertical[1].Vertical[0].Connections[0].Comment.Format)
+				doc, err := boxesimpl.DocumentFromBoxes(b)
+				require.Nil(t, err)
+				require.NotNil(t, doc)
+
+				assert.NotNil(t, doc.Boxes.Horizontal.Elems[0].Comment)
+				assert.Equal(t, "I am a comment", doc.Boxes.Horizontal.Elems[0].Comment.Text)
+				assert.Equal(t, "1", *doc.Boxes.Horizontal.Elems[0].Comment.Label)
+				assert.Equal(t, "comment2", *doc.Boxes.Horizontal.Elems[0].Comment.Format)
+
+				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Comment)
+				assert.NotNil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment)
+				assert.Equal(t, "I am a connection comment", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment.Text)
+				assert.Equal(t, "2", *doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment.Label)
+				assert.Equal(t, "comment", *doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment.Format)
+
+				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[1].Comment)
+
+				assert.Nil(t, doc.Boxes.Horizontal.Elems[2].Connections[0].Comment)
+				assert.NotNil(t, doc.Boxes.Horizontal.Elems[2].Connections[1].Comment)
+				assert.Equal(t, "I am another connection comment", doc.Boxes.Horizontal.Elems[2].Connections[1].Comment.Text)
+				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Vertical.Elems[0].Comment.Label)
+				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Vertical.Elems[0].Comment.Format)
 			},
 		},
 	}

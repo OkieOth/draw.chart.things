@@ -28,6 +28,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 	for _, elem := range l {
 		var conn boxes.LayoutElemConnection
 		conn.DestId = elem.DestId
+		conn.Comment = elem.Comment
 		conn.SourceArrow = elem.SourceArrow
 		conn.DestArrow = elem.DestArrow
 		conn.Tags = elem.Tags
@@ -289,7 +290,7 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		Caption:           l.Caption,
 		Text1:             text1,
 		Text2:             text2,
-		Comment:           b.Boxes.Comment,
+		Comment:           l.Comment,
 		Image:             initImage(l, b.Images),
 		Vertical:          initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, b),
 		Horizontal:        initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, b),
