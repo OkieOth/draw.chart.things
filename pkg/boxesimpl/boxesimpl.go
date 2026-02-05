@@ -25,6 +25,9 @@ func LoadBoxesFromFile(inputFile string) (*boxes.Boxes, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while replacing relative paths: %w", err)
 	}
+	if layout != nil && layout.Version != nil && layout.Title != "" {
+		layout.Title += fmt.Sprintf(" [%s]", *layout.Version)
+	}
 	return layout, nil
 }
 
