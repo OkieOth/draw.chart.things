@@ -1,4 +1,43 @@
 // Return all box ids present in the current SVG (top-level boxes only, not blacklisted)
+// Base path detection: derive deployment base (e.g., "/xxx") at runtime
+function __detectBasePath() {
+    try {
+        // Prefer script src containing "/html/" to locate the app root sibling folders
+        const scripts = document.getElementsByTagName("script");
+        for (let i = 0; i < scripts.length; i++) {
+            const src = scripts[i].src || "";
+            if (!src) continue;
+            try {
+                const u = new URL(src, window.location.origin);
+                const p = u.pathname || "";
+                const idx = p.indexOf("/html/");
+                if (idx >= 0) {
+                    const bp = p.substring(0, idx) || "/";
+                    return bp.endsWith("/") ? bp.slice(0, -1) : bp;
+                }
+            } catch {}
+        }
+    } catch {}
+    try {
+        const p = window.location.pathname || "/";
+        const idx = p.indexOf("/html/");
+        if (idx >= 0) {
+            const bp = p.substring(0, idx) || "/";
+            return bp.endsWith("/") ? bp.slice(0, -1) : bp;
+        }
+        // Served directly from base (e.g., "/xxx/")
+        return p.replace(/\/$/, "");
+    } catch {}
+    return "";
+}
+
+window.getBasePath = function () {
+    if (typeof window.basePath === "string") return window.basePath;
+    const bp = __detectBasePath();
+    window.basePath = bp || "";
+    return window.basePath;
+};
+
 window.getAllBoxIds = function () {
     const svg = getSvg();
     if (!svg) return [];
@@ -106,7 +145,7 @@ function initPage() {
         let yamlContent = "";
         if (val) {
             try {
-                const resp = await fetch("./data/" + val, { cache: "no-cache" });
+                const resp = await fetch(window.getBasePath() + "/data/" + val, { cache: "no-cache" });
                 if (!resp.ok) throw new Error("HTTP " + resp.status);
                 yamlContent = await resp.text();
                 setPreviousYamlContent(yamlContent);
@@ -711,7 +750,7 @@ async function loadYamlInput() {
         }
         const yamlFile = window.queryInput;
         const p = (async () => {
-            const resp = await fetch("/data/" + yamlFile, {
+            const resp = await fetch(window.getBasePath() + "/data/" + yamlFile, {
                 cache: "no-cache",
             });
             if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -754,7 +793,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch("/wasm/boxes.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -948,7 +987,7 @@ window.loadComboOptionsFromYaml = async function () {
             console.error("Options YAML must be served over HTTP(S).");
             return;
         }
-        const resp = await fetch("/data/" + src, { cache: "no-cache" });
+        const resp = await fetch(window.getBasePath() + "/data/" + src, { cache: "no-cache" });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         const text = await resp.text();
         // Parse a simple YAML mapping: label: value (labels may be quoted)
