@@ -66,6 +66,8 @@ type BoxesDocument struct {
 
     // helper structure for resolving the collisions
     VerticalLines []ConnectionLine  `yaml:"verticalLines,omitempty"`
+
+    Comments []CommentContainer  `yaml:"comments,omitempty"`
 }
 
 func NewBoxesDocument() *BoxesDocument {
@@ -81,6 +83,7 @@ func NewBoxesDocument() *BoxesDocument {
         ConnectionNodes: make([]ConnectionNode, 0),
         HorizontalLines: make([]ConnectionLine, 0),
         VerticalLines: make([]ConnectionLine, 0),
+        Comments: make([]CommentContainer, 0),
     }
 }
 
@@ -135,6 +138,10 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     for _, e := range src.VerticalLines {
         ret.VerticalLines = append(ret.VerticalLines, e)
     }
+    ret.Comments = make([]CommentContainer, 0)
+    for _, e := range src.Comments {
+        ret.Comments = append(ret.Comments, e)
+    }
 
     return &ret
 }
@@ -156,6 +163,9 @@ type LayoutElement struct {
 
     // Second additional text
     Text2 string  `yaml:"text2"`
+
+    // additional comment, that can be then included in the created graphic
+    Comment *types.Comment  `yaml:"comment,omitempty"`
 
     Image *ImageContainer  `yaml:"image,omitempty"`
 
@@ -237,6 +247,7 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     ret.Caption = src.Caption
     ret.Text1 = src.Text1
     ret.Text2 = src.Text2
+    ret.Comment = types.CopyComment(src.Comment)
     ret.Image = CopyImageContainer(src.Image)
     ret.Vertical = CopyLayoutElemContainer(src.Vertical)
     ret.Horizontal = CopyLayoutElemContainer(src.Horizontal)
@@ -490,6 +501,45 @@ func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
 
 
 
+/* all parameters to render the comments in the graphic
+*/
+type CommentContainer struct {
+
+    // text of the comment
+    Text *string  `yaml:"text,omitempty"`
+
+    // displayed in the marker for that note
+    Label *string  `yaml:"label,omitempty"`
+
+    // format name to use to render this note
+    Format *string  `yaml:"format,omitempty"`
+
+    // x-coordinate of the marker for that comment
+    MarkerX *int  `yaml:"markerX,omitempty"`
+
+    // x-coordinate of the marker for that comment
+    MarkerY *int  `yaml:"markerY,omitempty"`
+}
+
+
+func CopyCommentContainer(src *CommentContainer) *CommentContainer {
+    if src == nil {
+        return nil
+    }
+    var ret CommentContainer
+    ret.Text = src.Text
+    ret.Label = src.Label
+    ret.Format = src.Format
+    ret.MarkerX = src.MarkerX
+    ret.MarkerY = src.MarkerY
+
+    return &ret
+}
+
+
+
+
+
 type ImageContainer struct {
 
     // X position of the element
@@ -584,6 +634,9 @@ type LayoutElemConnection struct {
     // box id of the destination
     DestId string  `yaml:"destId"`
 
+    // additional comment, that can be then included in the created graphic
+    Comment *types.Comment  `yaml:"comment,omitempty"`
+
     // Arrow at the source box
     SourceArrow bool  `yaml:"sourceArrow"`
 
@@ -608,6 +661,7 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     }
     var ret LayoutElemConnection
     ret.DestId = src.DestId
+    ret.Comment = types.CopyComment(src.Comment)
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = types.CopyLineDef(src.Format)

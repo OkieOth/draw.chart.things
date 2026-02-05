@@ -1,6 +1,6 @@
 [
   {
-    "name": "boxes",
+    "name": "formats",
     "description": "code gen configuration for boxes input types",
     "models": [
       {
@@ -13,6 +13,30 @@
         "singleFileTask": {
           "template": "/project/configs/codegen/templates/golang_types.mako",
           "destFile": "/project/pkg/types/formats.go",
+          "templateParams": [
+            {
+              "name": "modelPackage",
+              "value": "types"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "shared",
+    "description": "code gen configuration shared types",
+    "models": [
+      {
+        "schema": "/project/configs/models/shared.json"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "base",
+        "singleFileTask": {
+          "template": "/project/configs/codegen/templates/golang_types.mako",
+          "destFile": "/project/pkg/types/shared.go",
           "templateParams": [
             {
               "name": "modelPackage",

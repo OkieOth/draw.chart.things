@@ -142,6 +142,9 @@ type Layout struct {
     // Second additional text
     Text2 string  `yaml:"text2"`
 
+    // additional comment, that can be then included in the created graphic
+    Comment *types.Comment  `yaml:"comment,omitempty"`
+
     // Reference to an image that should be displayed, needs to be declared in the global image section
     Image *string  `yaml:"image,omitempty"`
 
@@ -192,6 +195,7 @@ func CopyLayout(src *Layout) *Layout {
     ret.Caption = src.Caption
     ret.Text1 = src.Text1
     ret.Text2 = src.Text2
+    ret.Comment = types.CopyComment(src.Comment)
     ret.Image = src.Image
     ret.Expand = src.Expand
     ret.ExtVertical = src.ExtVertical
@@ -355,6 +359,9 @@ type Connection struct {
     // box id of the destination
     DestId string  `yaml:"destId"`
 
+    // additional comment, that can be then included in the created graphic
+    Comment *types.Comment  `yaml:"comment,omitempty"`
+
     // Arrow at the source box
     SourceArrow bool  `yaml:"sourceArrow"`
 
@@ -381,6 +388,7 @@ func CopyConnection(src *Connection) *Connection {
     var ret Connection
     ret.Dest = src.Dest
     ret.DestId = src.DestId
+    ret.Comment = types.CopyComment(src.Comment)
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = src.Format

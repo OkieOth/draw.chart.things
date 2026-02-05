@@ -24,6 +24,7 @@ class "**BoxesDocument**" as BoxesDocument {
         ConnectionNode[] connectionNodes
         ConnectionLine[] horizontalLines
         ConnectionLine[] verticalLines
+        CommentContainer[] comments
 }
 note top: Internal model to describe the\nlayout if the boxes chart
 
@@ -34,6 +35,7 @@ class "**LayoutElement**" as LayoutElement {
         StringType caption
         StringType text1
         StringType text2
+        Comment comment
         ImageContainer image
         LayoutElemContainer vertical
         LayoutElemContainer horizontal
@@ -118,6 +120,17 @@ note top: helper type for calculating the\nconnections between elements
 
  
 
+class "**CommentContainer**" as CommentContainer {
+        StringType text
+        StringType label
+        StringType format
+        IntegerType markerX
+        IntegerType markerY
+}
+note top: all parameters to render the\ncomments in the graphic
+
+ 
+
 class "**ImageContainer**" as ImageContainer {
         IntegerType x
         IntegerType y
@@ -142,6 +155,7 @@ class "**LayoutElemContainer**" as LayoutElemContainer {
 
 class "**LayoutElemConnection**" as LayoutElemConnection {
         StringType destId
+        Comment comment
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
@@ -157,6 +171,15 @@ class "**ConnectionEdge**" as ConnectionEdge {
         IntegerType weight
 }
 note top: edge type to store edges\non a connection node
+
+ 
+
+class "**Comment**" as Comment {
+        StringType text
+        StringType label
+        StringType format
+}
+note top: Object to define comments in\nthe diagrams
 
  
 
@@ -267,10 +290,14 @@ BoxesDocument "0" *-- "n" ConnectionLine
 
 BoxesDocument "0" *-- "n" ConnectionLine
 
+BoxesDocument "0" *-- "n" CommentContainer
+
     
 
 
 
+
+LayoutElement  *--  Comment
 
 LayoutElement  *--  ImageContainer
 
@@ -355,6 +382,12 @@ ConnectionNode "0" *-- "n" ConnectionEdge
 
 
 
+    
+
+
+
+
+
 
 
     
@@ -366,6 +399,8 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
     
 
+LayoutElemConnection  *--  Comment
+
 
 
 LayoutElemConnection  *--  LineDef
@@ -373,6 +408,10 @@ LayoutElemConnection  *--  LineDef
 
     
 
+
+
+
+    
 
 
 
