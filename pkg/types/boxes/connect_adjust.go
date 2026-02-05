@@ -144,6 +144,8 @@ func absInt(x int) int {
 	return x
 }
 
+// that's the past variant before I separated both cases
+// remains only for "documentation" purposes
 func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	destId := line.DestLayoutId
 	if destId == nil {
@@ -183,15 +185,61 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	}
 }
 
+func (doc *BoxesDocument) adjustHorizontalEndLine(line *ConnectionLine) {
+	destId := line.DestLayoutId
+	if destId == nil {
+		destId = line.SrcLayoutId
+	}
+	if destId == nil {
+		return
+	}
+	box := doc.FindBoxWithId(*destId)
+	if box == nil {
+		return
+	}
+	diffXStart := absInt(box.X - line.StartX)
+	diffXEnd := absInt(box.X - line.EndX)
+	if diffXStart > diffXEnd {
+		// line form left
+		line.EndX = box.X
+	} else {
+		// line to right
+		line.StartX = box.X + box.Width
+	}
+}
+
+func (doc *BoxesDocument) adjustVerticalEndLine(line *ConnectionLine) {
+	destId := line.DestLayoutId
+	if destId == nil {
+		destId = line.SrcLayoutId
+	}
+	if destId == nil {
+		return
+	}
+	box := doc.FindBoxWithId(*destId)
+	if box == nil {
+		return
+	}
+	diffYStart := absInt(box.Y - line.EndY)
+	diffYEnd := absInt((box.Y + box.Height) - line.EndY)
+	if diffYStart < diffYEnd {
+		// line down
+		line.EndY = box.Y
+	} else {
+		// line up
+		line.StartY = box.Y + box.Height
+	}
+}
+
 func (doc *BoxesDocument) adjustHorizontalEndLines() {
 	for i := range len(doc.HorizontalLines) {
-		doc.adjustEndLine(&doc.HorizontalLines[i])
+		doc.adjustHorizontalEndLine(&doc.HorizontalLines[i])
 	}
 }
 
 func (doc *BoxesDocument) adjustVerticalEndLines() {
 	for i := range len(doc.VerticalLines) {
-		doc.adjustEndLine(&doc.VerticalLines[i])
+		doc.adjustVerticalEndLine(&doc.VerticalLines[i])
 	}
 }
 
