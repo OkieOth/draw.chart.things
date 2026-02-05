@@ -93,6 +93,9 @@ func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) 
 func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	if additional.Title != nil {
 		b.Title += ": " + *additional.Title
+		if additional.Version != nil {
+			b.Title += fmt.Sprintf(" [%s]", *additional.Version)
+		}
 	}
 	if additional.Legend != nil {
 		if b.Legend == nil {

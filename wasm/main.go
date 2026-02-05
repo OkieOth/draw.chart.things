@@ -26,7 +26,9 @@ func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []strin
 	if err := y.Unmarshal([]byte(boxesYaml), &boxes); err != nil {
 		return unknownSvg
 	}
-
+	if boxes.Version != nil {
+		boxes.Title += fmt.Sprintf(" [%s]", *boxes.Version)
+	}
 	ret := boxesimpl.DrawBoxesFiltered(boxes, defaultDepth, expanded, blacklisted, debug)
 	if ret.ErrorMsg != "" {
 		return unknownSvg
@@ -40,7 +42,9 @@ func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded,
 		fmt.Printf("error while unmarshalling boxes layout: %v", err)
 		return unknownSvg
 	}
-
+	if b.Version != nil {
+		b.Title += fmt.Sprintf(" [%s]", *b.Version)
+	}
 	for i, c := range mixins {
 		var m boxes.BoxesFileMixings
 		if err := y.Unmarshal([]byte(c), &m); err != nil {
