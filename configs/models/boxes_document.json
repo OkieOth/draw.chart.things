@@ -115,6 +115,14 @@
       "items": {
         "$ref": "#/definitions/CommentContainer"
       }
+    },
+    "commentMarkerRadius": {
+      "description": "hold the radius of the comment markers to use",
+      "type": "integer"
+    },
+    "commentCurrent": {
+      "description": "helper to align tne number of unspecified markers",
+      "type": "integer"
     }
   },
   "required": [
@@ -125,7 +133,9 @@
     "minBoxMargin",
     "minConnectorMargin",
     "globalPadding",
-    "lineDist"
+    "lineDist",
+    "commentMarkerRadius",
+    "commentCurrent"
   ],
   "definitions": {
     "LayoutElement": {
@@ -346,6 +356,9 @@
         "connectionIndex": {
           "description": "index of this connection, in the boxes_document object",
           "type": "integer"
+        },
+        "comment": {
+          "$ref": "./shared.json#/definitions/Comment"
         }
       },
       "required": ["parts", "connectionIndex"]
@@ -463,6 +476,12 @@
         "fontText2": {
           "$ref": "./formats.json#/definitions/FontDef"
         },
+        "fontComment": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontCommentMarker": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
         "line": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
@@ -501,9 +520,29 @@
         "fontCaption",
         "fontText1",
         "fontText2",
+        "fontComment",
+        "fontCommentMarker",
         "minBoxMargin",
         "verticalTxt"
       ]
+    },
+    "CommentFormat": {
+      "type": "object",
+      "properties": {
+        "fontText": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontMarker": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "line": {
+          "$ref": "./formats.json#/definitions/LineDef"
+        },
+        "fill": {
+          "$ref": "./formats.json#/definitions/FillDef"
+        }
+      },
+      "required": ["fontText", "fontMarker", "line", "fill"]
     },
     "ConnectionNode": {
       "description": "helper type for calculating the connections between elements",
@@ -571,7 +610,7 @@
         },
         "format": {
           "description": "format name to use to render this note",
-          "type": "string"
+          "$ref": "#/definitions/CommentFormat"
         },
         "markerX": {
           "description": "x-coordinate of the marker for that comment",
@@ -580,8 +619,35 @@
         "markerY": {
           "description": "x-coordinate of the marker for that comment",
           "type": "integer"
+        },
+        "markerTextWidth": {
+          "description": "calculated width of the marker text",
+          "type": "integer"
+        },
+        "markerTextHeight": {
+          "description": "calculated height of the marker text",
+          "type": "integer"
+        },
+        "textWidth": {
+          "description": "calculated width of the comment text",
+          "type": "integer"
+        },
+        "textHeight": {
+          "description": "calculated height of the comment text",
+          "type": "integer"
         }
-      }
+      },
+      "required": [
+        "text",
+        "markerX",
+        "markerY",
+        "label",
+        "markerTextWidth",
+        "markerTextHeight",
+        "textWidth",
+        "textHeight",
+        "format"
+      ]
     }
   }
 }

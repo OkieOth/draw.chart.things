@@ -250,6 +250,10 @@ type Format struct {
 
     FontText2 *types.FontDef  `yaml:"fontText2,omitempty"`
 
+    FontComment *types.FontDef  `yaml:"fontComment,omitempty"`
+
+    FontCommentMarker *types.FontDef  `yaml:"fontCommentMarker,omitempty"`
+
     Line *types.LineDef  `yaml:"line,omitempty"`
 
     Fill *types.FillDef  `yaml:"fill,omitempty"`
@@ -277,6 +281,8 @@ func CopyFormat(src *Format) *Format {
     ret.FontCaption = types.CopyFontDef(src.FontCaption)
     ret.FontText1 = types.CopyFontDef(src.FontText1)
     ret.FontText2 = types.CopyFontDef(src.FontText2)
+    ret.FontComment = types.CopyFontDef(src.FontComment)
+    ret.FontCommentMarker = types.CopyFontDef(src.FontCommentMarker)
     ret.Line = types.CopyLineDef(src.Line)
     ret.Fill = types.CopyFillDef(src.Fill)
     ret.Padding = src.Padding

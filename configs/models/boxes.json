@@ -261,6 +261,12 @@
         "fontText2": {
           "$ref": "./formats.json#/definitions/FontDef"
         },
+        "fontComment": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontCommentMarker": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
         "line": {
           "$ref": "./formats.json#/definitions/LineDef"
         },

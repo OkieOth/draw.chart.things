@@ -94,7 +94,7 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 func InitLineDef(l *LineDef) *LineDef {
 	wDef := 2.0
 	sDef := LineDefStyleEnum_solid
-	cDef := "orange"
+	cDef := "black"
 	oDef := 1.0
 
 	w := &wDef
@@ -120,6 +120,29 @@ func InitLineDef(l *LineDef) *LineDef {
 	return &LineDef{
 		Width:   w,
 		Style:   s,
+		Opacity: o,
+		Color:   c,
+	}
+
+}
+
+func InitFillDef(l *FillDef) *FillDef {
+	cDef := "#dfdfdf"
+	oDef := 1.0
+
+	o := &oDef
+	c := &cDef
+
+	if l != nil {
+		if l.Opacity != nil {
+			o = l.Opacity
+		}
+		if l.Color != nil {
+			c = l.Color
+		}
+	}
+
+	return &FillDef{
 		Opacity: o,
 		Color:   c,
 	}

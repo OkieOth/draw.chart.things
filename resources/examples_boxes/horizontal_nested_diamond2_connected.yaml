@@ -6,15 +6,21 @@ formats:
       color: blue
     fill:
       color: orange
+  defaultComment:
+    line:
+      width: 1
+      color: black
+    fill:
+      color: white
   comment:
     line:
-      width: 2
+      width: 1
       color: blue
     fill:
       color: orange
   comment2:
     line:
-      width: 2
+      width: 1
       color: blue
     fill:
       color: orange

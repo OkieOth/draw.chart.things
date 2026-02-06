@@ -506,3 +506,85 @@ func (b *LayoutElement) DrawTextBoxes(drawing types.Drawing) error {
 	}
 	return nil
 }
+
+func (doc *BoxesDocument) DrawComments(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	if len(doc.Comments) > 0 {
+		doc.drawCommentMarkers(drawing)
+		doc.drawCommentTexts(drawing, c)
+		// if len(doc.Legend.Entries) > 0 {
+		// 	format2Use := doc.Formats["default"].FontCaption // risky doesn't check if default exists
+		// 	if doc.Legend.Format != nil {
+		// 		if legendFormat, ok := doc.Formats[*doc.Legend.Format]; ok {
+		// 			format2Use = legendFormat.FontCaption
+		// 		}
+		// 	}
+		// 	format2Use.Anchor = types.FontDefAnchorEnum_left
+		// 	currentX := doc.GlobalPadding
+		// 	lineW := 0.5
+		// 	lineC := "#9a9a9a"
+		// 	lineFormat := types.LineDef{
+		// 		Width: &lineW,
+		// 		Color: &lineC,
+		// 	}
+		// 	currentY := doc.Boxes.Y + doc.Boxes.Height + (2 * types.GlobalPadding)
+		// 	drawing.DrawLine(currentX, currentY-5, currentX+doc.Boxes.Width, currentY, lineFormat)
+		// 	for i := range doc.Legend.Entries {
+		// 		e := doc.Legend.Entries[i]
+		// 		if e.Format == "" {
+		// 			// no format found - the entry isn't included in the legend
+		// 			continue
+		// 		}
+		// 		legendFormat, ok := doc.Formats[e.Format]
+		// 		if !ok {
+		// 			// no suitable format found - the entry isn't included in the legend
+		// 			continue
+		// 		}
+		// 		text := e.Text + ": "
+		// 		w, _ := c.Dimensions(text, &format2Use)
+		// 		if (currentX + w) >= (doc.Boxes.X + doc.Boxes.Width) {
+		// 			currentX = doc.GlobalPadding
+		// 			currentY += types.GlobalPadding
+		// 		}
+		// 		drawing.DrawText(text, currentX, currentY, 0, &format2Use)
+		// 		currentX += w
+		// 		if legendFormat.Fill != nil {
+		// 			// draw example box
+		// 			currentX += 5
+		// 			c := "#606060"
+		// 			line := types.LineDef{
+		// 				Color: &c,
+		// 			}
+		// 			drawing.DrawSolidRect(currentX, currentY, 6, 10, legendFormat.Fill, &line)
+		// 			currentX += 8
+		// 		} else if legendFormat.Line != nil {
+		// 			// draw line example
+		// 			currentX += 5
+		// 			drawing.DrawLine(currentX, currentY+2, currentX+6, currentY+2, *legendFormat.Line)
+		// 			drawing.DrawLine(currentX+6, currentY+2, currentX+6, currentY+6, *legendFormat.Line)
+		// 			drawing.DrawLine(currentX+6, currentY+6, currentX+12, currentY+6, *legendFormat.Line)
+		// 			currentX += 14
+		// 		} else {
+		// 			// dummy output
+		// 			currentX += 5
+		// 			drawing.DrawText("?", currentX, currentY, 0, &format2Use) // Dummy
+		// 			currentX += 6
+		// 		}
+		// 		drawing.DrawText(",", currentX, currentY, 0, &format2Use)
+		// 		currentX += doc.GlobalPadding
+		// 	}
+		// }
+	}
+	return nil
+}
+
+func (doc *BoxesDocument) drawCommentMarkers(drawing types.Drawing) error {
+	for i := range doc.Comments {
+		c := doc.Comments[i]
+		drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+	}
+	return nil
+}
+
+func (doc *BoxesDocument) drawCommentTexts(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	return nil
+}

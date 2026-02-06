@@ -61,6 +61,8 @@ class "**Format**" as Format {
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
+        FontDef fontComment
+        FontDef fontCommentMarker
         LineDef line
         FillDef fill
         IntegerType padding
@@ -243,6 +245,10 @@ Layout "0" *-- "n" Connection
 
 
 
+
+Format  *--  FontDef
+
+Format  *--  FontDef
 
 Format  *--  FontDef
 

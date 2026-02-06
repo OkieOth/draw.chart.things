@@ -68,6 +68,12 @@ type BoxesDocument struct {
     VerticalLines []ConnectionLine  `yaml:"verticalLines,omitempty"`
 
     Comments []CommentContainer  `yaml:"comments,omitempty"`
+
+    // hold the radius of the comment markers to use
+    CommentMarkerRadius int  `yaml:"commentMarkerRadius"`
+
+    // helper to align tne number of unspecified markers
+    CommentCurrent int  `yaml:"commentCurrent"`
 }
 
 func NewBoxesDocument() *BoxesDocument {
@@ -142,6 +148,8 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     for _, e := range src.Comments {
         ret.Comments = append(ret.Comments, e)
     }
+    ret.CommentMarkerRadius = src.CommentMarkerRadius
+    ret.CommentCurrent = src.CommentCurrent
 
     return &ret
 }
@@ -304,6 +312,8 @@ type ConnectionElem struct {
 
     // index of this connection, in the boxes_document object
     ConnectionIndex int  `yaml:"connectionIndex"`
+
+    Comment *types.Comment  `yaml:"comment,omitempty"`
 }
 
 func NewConnectionElem() *ConnectionElem {
@@ -327,6 +337,7 @@ func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
         ret.Parts = append(ret.Parts, e)
     }
     ret.ConnectionIndex = src.ConnectionIndex
+    ret.Comment = types.CopyComment(src.Comment)
 
     return &ret
 }
@@ -348,6 +359,10 @@ type BoxFormat struct {
     FontText1 types.FontDef  `yaml:"fontText1"`
 
     FontText2 types.FontDef  `yaml:"fontText2"`
+
+    FontComment types.FontDef  `yaml:"fontComment"`
+
+    FontCommentMarker types.FontDef  `yaml:"fontCommentMarker"`
 
     Line *types.LineDef  `yaml:"line,omitempty"`
 
@@ -382,6 +397,8 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     ret.FontCaption = *types.CopyFontDef(&src.FontCaption)
     ret.FontText1 = *types.CopyFontDef(&src.FontText1)
     ret.FontText2 = *types.CopyFontDef(&src.FontText2)
+    ret.FontComment = *types.CopyFontDef(&src.FontComment)
+    ret.FontCommentMarker = *types.CopyFontDef(&src.FontCommentMarker)
     ret.Line = types.CopyLineDef(src.Line)
     ret.CornerRadius = src.CornerRadius
     ret.Fill = types.CopyFillDef(src.Fill)
@@ -506,19 +523,31 @@ func CopyConnectionNode(src *ConnectionNode) *ConnectionNode {
 type CommentContainer struct {
 
     // text of the comment
-    Text *string  `yaml:"text,omitempty"`
+    Text string  `yaml:"text"`
 
     // displayed in the marker for that note
-    Label *string  `yaml:"label,omitempty"`
+    Label string  `yaml:"label"`
 
     // format name to use to render this note
-    Format *string  `yaml:"format,omitempty"`
+    Format CommentFormat  `yaml:"format"`
 
     // x-coordinate of the marker for that comment
-    MarkerX *int  `yaml:"markerX,omitempty"`
+    MarkerX int  `yaml:"markerX"`
 
     // x-coordinate of the marker for that comment
-    MarkerY *int  `yaml:"markerY,omitempty"`
+    MarkerY int  `yaml:"markerY"`
+
+    // calculated width of the marker text
+    MarkerTextWidth int  `yaml:"markerTextWidth"`
+
+    // calculated height of the marker text
+    MarkerTextHeight int  `yaml:"markerTextHeight"`
+
+    // calculated width of the comment text
+    TextWidth int  `yaml:"textWidth"`
+
+    // calculated height of the comment text
+    TextHeight int  `yaml:"textHeight"`
 }
 
 
@@ -529,9 +558,13 @@ func CopyCommentContainer(src *CommentContainer) *CommentContainer {
     var ret CommentContainer
     ret.Text = src.Text
     ret.Label = src.Label
-    ret.Format = src.Format
+    ret.Format = *CopyCommentFormat(&src.Format)
     ret.MarkerX = src.MarkerX
     ret.MarkerY = src.MarkerY
+    ret.MarkerTextWidth = src.MarkerTextWidth
+    ret.MarkerTextHeight = src.MarkerTextHeight
+    ret.TextWidth = src.TextWidth
+    ret.TextHeight = src.TextHeight
 
     return &ret
 }
@@ -669,6 +702,35 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
     }
+
+    return &ret
+}
+
+
+
+
+
+type CommentFormat struct {
+
+    FontText types.FontDef  `yaml:"fontText"`
+
+    FontMarker types.FontDef  `yaml:"fontMarker"`
+
+    Line types.LineDef  `yaml:"line"`
+
+    Fill types.FillDef  `yaml:"fill"`
+}
+
+
+func CopyCommentFormat(src *CommentFormat) *CommentFormat {
+    if src == nil {
+        return nil
+    }
+    var ret CommentFormat
+    ret.FontText = *types.CopyFontDef(&src.FontText)
+    ret.FontMarker = *types.CopyFontDef(&src.FontMarker)
+    ret.Line = *types.CopyLineDef(&src.Line)
+    ret.Fill = *types.CopyFillDef(&src.Fill)
 
     return &ret
 }
