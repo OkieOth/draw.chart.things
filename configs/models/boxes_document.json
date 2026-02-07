@@ -120,6 +120,10 @@
       "description": "hold the radius of the comment markers to use",
       "type": "integer"
     },
+    "legendEndY": {
+      "description": "hold the radius of the comment markers to use",
+      "type": "integer"
+    },
     "commentCurrent": {
       "description": "helper to align tne number of unspecified markers",
       "type": "integer"
@@ -135,7 +139,8 @@
     "globalPadding",
     "lineDist",
     "commentMarkerRadius",
-    "commentCurrent"
+    "commentCurrent",
+    "legendEndY"
   ],
   "definitions": {
     "LayoutElement": {

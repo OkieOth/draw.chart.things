@@ -72,6 +72,9 @@ type BoxesDocument struct {
     // hold the radius of the comment markers to use
     CommentMarkerRadius int  `yaml:"commentMarkerRadius"`
 
+    // hold the radius of the comment markers to use
+    LegendEndY int  `yaml:"legendEndY"`
+
     // helper to align tne number of unspecified markers
     CommentCurrent int  `yaml:"commentCurrent"`
 }
@@ -149,6 +152,7 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
         ret.Comments = append(ret.Comments, e)
     }
     ret.CommentMarkerRadius = src.CommentMarkerRadius
+    ret.LegendEndY = src.LegendEndY
     ret.CommentCurrent = src.CommentCurrent
 
     return &ret
