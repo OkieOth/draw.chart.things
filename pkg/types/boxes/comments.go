@@ -12,9 +12,13 @@ func (doc *BoxesDocument) IncludeComments(c types.TextDimensionCalculator) error
 	doc.CommentMarkerRadius = (doc.CommentMarkerRadius / 2) + 4
 	// adjust the document height, based on the comments
 	if len(doc.Comments) > 0 {
+		neededMarkerSpace := doc.CommentMarkerRadius * 2
 		currentY := doc.Height + types.GlobalPadding
 		for i := range doc.Comments {
-			currentY += doc.Comments[i].TextHeight
+			if doc.Comments[i].Text == "" {
+				continue
+			}
+			currentY += getMax(doc.Comments[i].TextHeight, neededMarkerSpace)
 			currentY += types.GlobalPadding
 
 		}
@@ -33,12 +37,12 @@ CONNECTIONS:
 				// search for the start line of the connection in the horizontal lines
 				l := doc.HorizontalLines[li]
 				if l.ConnectionIndex == c.ConnectionIndex && l.IsStart {
-					diff, changed := absInt2(l.EndX - l.StartX)
+					_, changed := absInt2(l.EndX - l.StartX)
 					var x int
 					if changed {
-						x = l.EndX - (diff / 2)
+						x = l.EndX
 					} else {
-						x = l.StartX + (diff / 2)
+						x = l.StartX
 					}
 					y := l.StartY
 
@@ -53,12 +57,12 @@ CONNECTIONS:
 				if l.ConnectionIndex == c.ConnectionIndex && l.IsStart {
 					x := l.StartX
 
-					diff, changed := absInt2(l.EndY - l.StartY)
+					_, changed := absInt2(l.EndY - l.StartY)
 					var y int
 					if changed {
-						y = l.EndY - (diff / 2)
+						y = l.EndY
 					} else {
-						y = l.StartY + (diff / 2)
+						y = l.StartY
 					}
 					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc)
 					doc.Comments = append(doc.Comments, c)

@@ -34,7 +34,7 @@ boxes:
       text1: I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line
       comment:
         text: I am a comment
-        label: 1
+        label: a
         format: comment2
       vertical:
         - id: r1_1_1
@@ -57,7 +57,7 @@ boxes:
                 - destId: r2_3
                   comment:
                     text: I am a connection comment
-                    label: 2
+                    label: b
                     format: comment
                 - destId: r2_3_1
         - id: r2_2
@@ -74,6 +74,8 @@ boxes:
           vertical:
             - id: r2_3_1
               caption: I am inner Element four
+              comment:
+                label: b
     - id: r3_1
       caption: Right Element
       text1: I am in the first line
