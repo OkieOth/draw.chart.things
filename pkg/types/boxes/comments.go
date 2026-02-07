@@ -32,41 +32,40 @@ CONNECTIONS:
 	for i := range doc.Connections {
 		c := doc.Connections[i]
 		if c.Comment != nil {
-			label := doc.newLabel(c.Comment.Label)
-			for li := range doc.HorizontalLines {
-				// search for the start line of the connection in the horizontal lines
-				l := doc.HorizontalLines[li]
-				if l.ConnectionIndex == c.ConnectionIndex && l.IsStart {
-					_, changed := absInt2(l.EndX - l.StartX)
-					var x int
-					if changed {
-						x = l.EndX
-					} else {
-						x = l.StartX
-					}
-					y := l.StartY
+			label, customMarker := doc.newLabel(c.Comment.Label)
+			for li := range doc.VerticalLines {
+				// search for the start line of the connection in the vertical lines
+				l := doc.VerticalLines[li]
+				if l.ConnectionIndex == c.ConnectionIndex && (!l.IsStart) && (!l.IsEnd) {
+					x := l.StartX
 
-					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc)
+					diff, changed := absInt2(l.EndY - l.StartY)
+					var y int
+					if changed {
+						y = l.EndY - (diff / 4)
+					} else {
+						y = l.StartY + (diff / 4)
+					}
+					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker)
 					doc.Comments = append(doc.Comments, c)
 					continue CONNECTIONS
 				}
 			}
-			for li := range doc.VerticalLines {
-				// search for the start line of the connection in the vertical lines
-				l := doc.VerticalLines[li]
-				if l.ConnectionIndex == c.ConnectionIndex && l.IsStart {
-					x := l.StartX
-
-					_, changed := absInt2(l.EndY - l.StartY)
-					var y int
+			for li := range doc.HorizontalLines {
+				// search for the start line of the connection in the horizontal lines
+				l := doc.HorizontalLines[li]
+				if l.ConnectionIndex == c.ConnectionIndex && (!l.IsStart) && (!l.IsEnd) {
+					diff, changed := absInt2(l.EndX - l.StartX)
+					var x int
 					if changed {
-						y = l.EndY
+						x = l.EndX - (diff / 4)
 					} else {
-						y = l.StartY
+						x = l.StartX + (diff / 4)
 					}
-					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc)
+					y := l.StartY
+
+					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker)
 					doc.Comments = append(doc.Comments, c)
-					continue CONNECTIONS
 				}
 			}
 		}
@@ -97,7 +96,6 @@ func (doc *BoxesDocument) GetCommentFormat(format *string) CommentFormat {
 			Line:       *types.InitLineDef(nil),
 			Fill:       *types.InitFillDef(nil),
 		}
-
 	} else {
 		if boxFormat.Fill == nil {
 			boxFormat.Fill = types.InitFillDef(nil)
@@ -120,7 +118,8 @@ func (doc *BoxesDocument) newCommentContainer(
 	format *string,
 	x, y int,
 	moveMarker bool,
-	dimensionsCalc types.TextDimensionCalculator) CommentContainer {
+	dimensionsCalc types.TextDimensionCalculator,
+	customMarker bool) CommentContainer {
 	if moveMarker {
 		diff := doc.GlobalPadding + 2
 		x, y = x+diff, y+diff
@@ -147,22 +146,23 @@ func (doc *BoxesDocument) newCommentContainer(
 		TextHeight:       th,
 		MarkerTextWidth:  mw,
 		MarkerTextHeight: mh,
+		CustomMarker:     customMarker,
 	}
 }
 
-func (doc *BoxesDocument) newLabel(label *string) string {
+func (doc *BoxesDocument) newLabel(label *string) (string, bool) {
 	if label != nil {
-		return *label
+		return *label, true
 	} else {
 		doc.CommentCurrent += 1
-		return fmt.Sprintf("%d", doc.CommentCurrent)
+		return fmt.Sprintf("%d", doc.CommentCurrent), false
 	}
 }
 
 func (doc *BoxesDocument) collectCommentsFromLayout(l *LayoutElement, dimensionsCalc types.TextDimensionCalculator) {
 	if l.Comment != nil {
-		label := doc.newLabel(l.Comment.Label)
-		c := doc.newCommentContainer(l.Comment.Text, label, l.Comment.Format, l.X, l.Y, true, dimensionsCalc)
+		label, customMarker := doc.newLabel(l.Comment.Label)
+		c := doc.newCommentContainer(l.Comment.Text, label, l.Comment.Format, l.X, l.Y, true, dimensionsCalc, customMarker)
 		doc.Comments = append(doc.Comments, c)
 	}
 	doc.collectCommentsFromLayoutCont(l.Horizontal, dimensionsCalc)

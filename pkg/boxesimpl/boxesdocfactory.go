@@ -193,6 +193,15 @@ func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxForm
 	return ret
 }
 
+func getDefaultCommentFormat() boxes.BoxFormat {
+	return boxes.BoxFormat{
+		FontComment:       types.InitFontDef(nil, "serif", 10, false, false, 10),
+		FontCommentMarker: types.InitFontDef(nil, "serif", 10, false, false, 10),
+		Line:              types.InitLineDef(nil),
+		Fill:              types.InitFillDef(nil),
+	}
+}
+
 func getDefaultFormat() boxes.BoxFormat {
 	return boxes.BoxFormat{
 		Padding:           types.GlobalPadding,
@@ -219,7 +228,7 @@ func initFormats(inputFormat map[string]boxes.Format) map[string]boxes.BoxFormat
 		res["defaultConnection"] = getDefaultFormat()
 	}
 	if _, hasDefault := res["defaultComment"]; !hasDefault {
-		res["defaultComment"] = getDefaultFormat()
+		res["defaultComment"] = getDefaultCommentFormat()
 	}
 	return res
 }

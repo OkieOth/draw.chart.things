@@ -640,6 +640,10 @@
         "textHeight": {
           "description": "calculated height of the comment text",
           "type": "integer"
+        },
+        "customMarker": {
+          "description": "true if a custom marker is used for this comment",
+          "type": "boolean"
         }
       },
       "required": [
@@ -651,7 +655,8 @@
         "markerTextHeight",
         "textWidth",
         "textHeight",
-        "format"
+        "format",
+        "customMarker"
       ]
     }
   }

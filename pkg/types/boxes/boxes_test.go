@@ -95,7 +95,7 @@ func TestLoadBoxes(t *testing.T) {
 				assert.NotNil(t, b.Boxes.Horizontal[0].Comment)
 				assert.Equal(t, "I am a comment", b.Boxes.Horizontal[0].Comment.Text)
 				assert.Equal(t, "a", *b.Boxes.Horizontal[0].Comment.Label)
-				assert.Equal(t, "comment2", *b.Boxes.Horizontal[0].Comment.Format)
+				assert.Equal(t, "comment", *b.Boxes.Horizontal[0].Comment.Format)
 
 				assert.Nil(t, b.Boxes.Horizontal[1].Vertical[0].Comment)
 				assert.NotNil(t, b.Boxes.Horizontal[1].Vertical[0].Vertical[0].Connections[0].Comment)
@@ -118,7 +118,7 @@ func TestLoadBoxes(t *testing.T) {
 				assert.NotNil(t, doc.Boxes.Horizontal.Elems[0].Comment)
 				assert.Equal(t, "I am a comment", doc.Boxes.Horizontal.Elems[0].Comment.Text)
 				assert.Equal(t, "a", *doc.Boxes.Horizontal.Elems[0].Comment.Label)
-				assert.Equal(t, "comment2", *doc.Boxes.Horizontal.Elems[0].Comment.Format)
+				assert.Equal(t, "comment", *doc.Boxes.Horizontal.Elems[0].Comment.Format)
 
 				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Comment)
 				assert.NotNil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment)

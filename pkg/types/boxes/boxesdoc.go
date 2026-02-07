@@ -552,6 +552,9 @@ type CommentContainer struct {
 
     // calculated height of the comment text
     TextHeight int  `yaml:"textHeight"`
+
+    // true if a custom marker is used for this comment
+    CustomMarker bool  `yaml:"customMarker"`
 }
 
 
@@ -569,6 +572,7 @@ func CopyCommentContainer(src *CommentContainer) *CommentContainer {
     ret.MarkerTextHeight = src.MarkerTextHeight
     ret.TextWidth = src.TextWidth
     ret.TextHeight = src.TextHeight
+    ret.CustomMarker = src.CustomMarker
 
     return &ret
 }

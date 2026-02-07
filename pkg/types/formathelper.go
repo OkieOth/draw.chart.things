@@ -92,7 +92,7 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 }
 
 func InitLineDef(l *LineDef) *LineDef {
-	wDef := 2.0
+	wDef := 1.0
 	sDef := LineDefStyleEnum_solid
 	cDef := "black"
 	oDef := 1.0
@@ -127,7 +127,7 @@ func InitLineDef(l *LineDef) *LineDef {
 }
 
 func InitFillDef(l *FillDef) *FillDef {
-	cDef := "#dfdfdf"
+	cDef := "#efefef"
 	oDef := 1.0
 
 	o := &oDef

@@ -17,7 +17,7 @@ formats:
       width: 1
       color: blue
     fill:
-      color: orange
+      color: lightpink
   comment2:
     line:
       width: 1
@@ -35,7 +35,7 @@ boxes:
       comment:
         text: I am a comment
         label: a
-        format: comment2
+        format: comment
       vertical:
         - id: r1_1_1
           caption: I am a inner Element
@@ -76,6 +76,7 @@ boxes:
               caption: I am inner Element four
               comment:
                 label: b
+                format: comment
     - id: r3_1
       caption: Right Element
       text1: I am in the first line

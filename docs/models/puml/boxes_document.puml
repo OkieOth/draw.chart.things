@@ -136,6 +136,7 @@ class "**CommentContainer**" as CommentContainer {
         IntegerType markerTextHeight
         IntegerType textWidth
         IntegerType textHeight
+        BooleanType customMarker
 }
 note top: all parameters to render the\ncomments in the graphic
 
@@ -408,6 +409,7 @@ ConnectionNode "0" *-- "n" ConnectionEdge
 
 
 CommentContainer  *--  CommentFormat
+
 
 
 
