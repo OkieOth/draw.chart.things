@@ -10,6 +10,8 @@ type TextAndDimensions struct {
 type TextDimensionCalculator interface {
 	Dimensions(txt string, format *FontDef) (width, height int)
 	SplitTxt(txt string, format *FontDef) (width, height int, lines []TextAndDimensions)
+	DimensionsWithMaxWidth(txt string, format *FontDef, maxWidth int) (width, height int)
+	SplitTxtWithMaxWidth(txt string, format *FontDef, maxWidth int) (width, height int, lines []TextAndDimensions)
 }
 
 type RectWithTextFormat struct {
@@ -46,6 +48,8 @@ type Drawing interface {
 	DrawArrow(x, y, angle int, format LineDef) error
 	DrawSolidRect(x, y, width, height int, fill *FillDef, line *LineDef) error
 	DrawSolidCircle(x, y, radius int, color string) error
+	DrawCircleWithBorder(x, y, radius int, fill *FillDef, line *LineDef) error
+	DrawCircleWithBorderAndText(text string, x, y, radius int, fill *FillDef, line *LineDef, font *FontDef) error
 	DrawText(text string, x, y, width int, fontDef *FontDef) int
 	DrawVerticalText(text string, currentX, y, height int, fontDef *FontDef) int
 	Done() error

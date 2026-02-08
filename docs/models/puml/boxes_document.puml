@@ -24,6 +24,10 @@ class "**BoxesDocument**" as BoxesDocument {
         ConnectionNode[] connectionNodes
         ConnectionLine[] horizontalLines
         ConnectionLine[] verticalLines
+        CommentContainer[] comments
+        IntegerType commentMarkerRadius
+        IntegerType legendEndY
+        IntegerType commentCurrent
 }
 note top: Internal model to describe the\nlayout if the boxes chart
 
@@ -34,6 +38,7 @@ class "**LayoutElement**" as LayoutElement {
         StringType caption
         StringType text1
         StringType text2
+        Comment comment
         ImageContainer image
         LayoutElemContainer vertical
         LayoutElemContainer horizontal
@@ -68,6 +73,7 @@ class "**ConnectionElem**" as ConnectionElem {
         LineDef format
         ConnectionLine[] parts
         IntegerType connectionIndex
+        Comment comment
 }
 
  
@@ -78,6 +84,8 @@ class "**BoxFormat**" as BoxFormat {
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
+        FontDef fontComment
+        FontDef fontCommentMarker
         LineDef line
         IntegerType cornerRadius
         FillDef fill
@@ -118,6 +126,22 @@ note top: helper type for calculating the\nconnections between elements
 
  
 
+class "**CommentContainer**" as CommentContainer {
+        StringType text
+        StringType label
+        CommentFormat format
+        IntegerType markerX
+        IntegerType markerY
+        IntegerType markerTextWidth
+        IntegerType markerTextHeight
+        IntegerType textWidth
+        IntegerType textHeight
+        BooleanType customMarker
+}
+note top: all parameters to render the\ncomments in the graphic
+
+ 
+
 class "**ImageContainer**" as ImageContainer {
         IntegerType x
         IntegerType y
@@ -142,10 +166,20 @@ class "**LayoutElemContainer**" as LayoutElemContainer {
 
 class "**LayoutElemConnection**" as LayoutElemConnection {
         StringType destId
+        Comment comment
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
         StringType[] tags
+}
+
+ 
+
+class "**CommentFormat**" as CommentFormat {
+        FontDef fontText
+        FontDef fontMarker
+        LineDef line
+        FillDef fill
 }
 
  
@@ -157,6 +191,15 @@ class "**ConnectionEdge**" as ConnectionEdge {
         IntegerType weight
 }
 note top: edge type to store edges\non a connection node
+
+ 
+
+class "**Comment**" as Comment {
+        StringType text
+        StringType label
+        StringType format
+}
+note top: Object to define comments in\nthe diagrams
 
  
 
@@ -267,10 +310,17 @@ BoxesDocument "0" *-- "n" ConnectionLine
 
 BoxesDocument "0" *-- "n" ConnectionLine
 
+BoxesDocument "0" *-- "n" CommentContainer
+
+
+
+
     
 
 
 
+
+LayoutElement  *--  Comment
 
 LayoutElement  *--  ImageContainer
 
@@ -309,8 +359,14 @@ ConnectionElem  *--  LineDef
 ConnectionElem "0" *-- "n" ConnectionLine
 
 
+ConnectionElem  *--  Comment
+
     
     
+
+BoxFormat  *--  FontDef
+
+BoxFormat  *--  FontDef
 
 BoxFormat  *--  FontDef
 
@@ -352,6 +408,18 @@ ConnectionNode "0" *-- "n" ConnectionEdge
     
 
 
+CommentContainer  *--  CommentFormat
+
+
+
+
+
+
+
+
+    
+
+
 
 
 
@@ -366,13 +434,28 @@ LayoutElemContainer "0" *-- "n" LayoutElement
 
     
 
+LayoutElemConnection  *--  Comment
+
 
 
 LayoutElemConnection  *--  LineDef
 
 
     
+CommentFormat  *--  FontDef
 
+CommentFormat  *--  FontDef
+
+CommentFormat  *--  LineDef
+
+CommentFormat  *--  FillDef
+
+    
+
+
+
+
+    
 
 
 

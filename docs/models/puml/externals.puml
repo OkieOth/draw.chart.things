@@ -25,6 +25,7 @@ class "**Layout**" as Layout {
         StringType caption
         StringType text1
         StringType text2
+        Comment comment
         StringType image
         BooleanType expand
         StringType extVertical
@@ -46,6 +47,7 @@ class "**LayoutArray**" as LayoutArray extends List {
 class "**Connection**" as Connection {
         StringType dest
         StringType destId
+        Comment comment
         BooleanType sourceArrow
         BooleanType destArrow
         StringType format
@@ -70,6 +72,8 @@ class "**Format**" as Format {
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
+        FontDef fontComment
+        FontDef fontCommentMarker
         LineDef line
         FillDef fill
         IntegerType padding
@@ -85,6 +89,15 @@ class "**FormatVariations**" as FormatVariations {
 
  
 
+
+class "**Comment**" as Comment {
+        StringType text
+        StringType label
+        StringType format
+}
+note top: Object to define comments in\nthe diagrams
+
+ 
 
 class "**FontDef**" as FontDef {
         IntegerType size
@@ -175,6 +188,8 @@ Legend "0" *-- "n" LegendEntry
 
 
 
+Layout  *--  Comment
+
 
 
 
@@ -191,6 +206,8 @@ Layout "0" *-- "n" Connection
     
     
 
+
+Connection  *--  Comment
 
 
 
@@ -211,6 +228,10 @@ Format  *--  FontDef
 
 Format  *--  FontDef
 
+Format  *--  FontDef
+
+Format  *--  FontDef
+
 Format  *--  LineDef
 
 Format  *--  FillDef
@@ -222,6 +243,10 @@ Format  *--  FillDef
 FormatVariations  *--  Format
 
     
+    
+
+
+
     
 
 

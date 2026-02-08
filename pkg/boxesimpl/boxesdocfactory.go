@@ -28,6 +28,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 	for _, elem := range l {
 		var conn boxes.LayoutElemConnection
 		conn.DestId = elem.DestId
+		conn.Comment = elem.Comment
 		conn.SourceArrow = elem.SourceArrow
 		conn.DestArrow = elem.DestArrow
 		conn.Tags = elem.Tags
@@ -51,13 +52,19 @@ func initFontFormatAnchorInCase(f *types.FontDef) {
 	}
 }
 
+func initFontFormatAnchorLeftInCase(f *types.FontDef) {
+	if f != nil {
+		if f.Anchor == "" {
+			f.Anchor = types.FontDefAnchorEnum_left
+		}
+	}
+}
+
 func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	var border *types.LineDef
 	var fill *types.FillDef
 
-	var fontCaption *types.FontDef
-	var fontText1 *types.FontDef
-	var fontText2 *types.FontDef
+	var fontCaption, fontText1, fontText2, fontComment, fontCommentMarker *types.FontDef
 	var verticalTxt bool
 	padding := types.GlobalPadding
 	boxMargin := types.GlobalMinBoxMargin
@@ -67,6 +74,8 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		initFontFormatAnchorInCase(f.FontCaption)
 		initFontFormatAnchorInCase(f.FontText1)
 		initFontFormatAnchorInCase(f.FontText2)
+		initFontFormatAnchorLeftInCase(f.FontComment)
+		initFontFormatAnchorInCase(f.FontCommentMarker)
 		fontCaption = f.FontCaption
 		fontText1 = f.FontText1
 		fontText2 = f.FontText2
@@ -92,18 +101,20 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	}
 
 	return boxes.BoxFormat{
-		Padding:       padding,
-		MinBoxMargin:  boxMargin,
-		FontCaption:   types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
-		FontText1:     types.InitFontDef(fontText1, "serif", 8, false, false, 10),
-		FontText2:     types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
-		Line:          border,
-		Fill:          fill,
-		FixedWidth:    fixedWidth,
-		FixedHeight:   fixedHeight,
-		WidthOfParent: widthOfParent,
-		VerticalTxt:   verticalTxt,
-		CornerRadius:  cornerRadius,
+		Padding:           padding,
+		MinBoxMargin:      boxMargin,
+		FontCaption:       types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
+		FontText1:         types.InitFontDef(fontText1, "serif", 8, false, false, 10),
+		FontText2:         types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
+		FontComment:       types.InitFontDef(fontComment, "serif", 10, false, false, 10),
+		FontCommentMarker: types.InitFontDef(fontCommentMarker, "serif", 8, false, false, 10),
+		Line:              border,
+		Fill:              fill,
+		FixedWidth:        fixedWidth,
+		FixedHeight:       fixedHeight,
+		WidthOfParent:     widthOfParent,
+		VerticalTxt:       verticalTxt,
+		CornerRadius:      cornerRadius,
 	}
 }
 
@@ -111,9 +122,7 @@ func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxForm
 	var border *types.LineDef
 	var fill *types.FillDef
 
-	var fontCaption *types.FontDef
-	var fontText1 *types.FontDef
-	var fontText2 *types.FontDef
+	var fontCaption, fontText1, fontText2, fontComment, fontCommentMarker *types.FontDef
 	var verticalTxt bool
 	padding := types.GlobalPadding
 	boxMargin := types.GlobalMinBoxMargin
@@ -140,18 +149,20 @@ func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxForm
 	}
 
 	ret := boxes.BoxFormat{
-		Padding:       padding,
-		MinBoxMargin:  boxMargin,
-		FontCaption:   types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
-		FontText1:     types.InitFontDef(fontText1, "serif", 8, false, false, 10),
-		FontText2:     types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
-		Line:          border,
-		Fill:          fill,
-		FixedWidth:    fixedWidth,
-		FixedHeight:   fixedHeight,
-		WidthOfParent: widthOfParent,
-		VerticalTxt:   verticalTxt,
-		CornerRadius:  cornerRadius,
+		Padding:           padding,
+		MinBoxMargin:      boxMargin,
+		FontCaption:       types.InitFontDef(fontCaption, "sans-serif", 10, true, false, 0),
+		FontText1:         types.InitFontDef(fontText1, "serif", 8, false, false, 10),
+		FontText2:         types.InitFontDef(fontText2, "monospace", 8, false, true, 10),
+		FontComment:       types.InitFontDef(fontComment, "serif", 10, false, false, 10),
+		FontCommentMarker: types.InitFontDef(fontCommentMarker, "serif", 8, false, false, 10),
+		Line:              border,
+		Fill:              fill,
+		FixedWidth:        fixedWidth,
+		FixedHeight:       fixedHeight,
+		WidthOfParent:     widthOfParent,
+		VerticalTxt:       verticalTxt,
+		CornerRadius:      cornerRadius,
 	}
 
 	if adjustment != nil {
@@ -182,15 +193,26 @@ func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxForm
 	return ret
 }
 
+func getDefaultCommentFormat() boxes.BoxFormat {
+	return boxes.BoxFormat{
+		FontComment:       types.InitFontDef(nil, "serif", 10, false, false, 10),
+		FontCommentMarker: types.InitFontDef(nil, "serif", 10, false, false, 10),
+		Line:              types.InitLineDef(nil),
+		Fill:              types.InitFillDef(nil),
+	}
+}
+
 func getDefaultFormat() boxes.BoxFormat {
 	return boxes.BoxFormat{
-		Padding:      types.GlobalPadding,
-		MinBoxMargin: types.GlobalMinBoxMargin,
-		FontCaption:  types.InitFontDef(nil, "sans-serif", 10, true, false, 0),
-		FontText1:    types.InitFontDef(nil, "serif", 8, false, false, 10),
-		FontText2:    types.InitFontDef(nil, "monospace", 8, false, true, 10),
-		Line:         types.InitLineDef(nil),
-		Fill:         nil,
+		Padding:           types.GlobalPadding,
+		MinBoxMargin:      types.GlobalMinBoxMargin,
+		FontCaption:       types.InitFontDef(nil, "sans-serif", 10, true, false, 0),
+		FontText1:         types.InitFontDef(nil, "serif", 8, false, false, 10),
+		FontText2:         types.InitFontDef(nil, "monospace", 8, false, true, 10),
+		FontComment:       types.InitFontDef(nil, "serif", 10, false, false, 10),
+		FontCommentMarker: types.InitFontDef(nil, "serif", 10, false, false, 10),
+		Line:              types.InitLineDef(nil),
+		Fill:              nil,
 	}
 }
 
@@ -204,6 +226,9 @@ func initFormats(inputFormat map[string]boxes.Format) map[string]boxes.BoxFormat
 	}
 	if _, hasDefault := res["defaultConnection"]; !hasDefault {
 		res["defaultConnection"] = getDefaultFormat()
+	}
+	if _, hasDefault := res["defaultComment"]; !hasDefault {
+		res["defaultComment"] = getDefaultCommentFormat()
 	}
 	return res
 }
@@ -289,6 +314,7 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		Caption:           l.Caption,
 		Text1:             text1,
 		Text2:             text2,
+		Comment:           l.Comment,
 		Image:             initImage(l, b.Images),
 		Vertical:          initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, b),
 		Horizontal:        initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, b),

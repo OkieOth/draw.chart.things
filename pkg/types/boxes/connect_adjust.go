@@ -144,6 +144,13 @@ func absInt(x int) int {
 	return x
 }
 
+func absInt2(x int) (int, bool) {
+	if x < 0 {
+		return -x, true
+	}
+	return x, false
+}
+
 // that's the past variant before I separated both cases
 // remains only for "documentation" purposes
 func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {

@@ -83,6 +83,10 @@ func monospaceDimensions(runeCount int, fontSize int, bold bool) (width, height 
 
 // SplitTxt splits text and calculates dimensions based on font settings
 func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef) (width, height int, lines []types.TextAndDimensions) {
+	return s.SplitTxtWithMaxWidth(txt, format, 0)
+}
+
+func (s *SvgTextDimensionCalculator) SplitTxtWithMaxWidth(txt string, format *types.FontDef, maxWidth int) (width, height int, lines []types.TextAndDimensions) {
 	fontSize := format.Size
 	if fontSize == 0 {
 		fontSize = 10
@@ -108,17 +112,27 @@ func (s *SvgTextDimensionCalculator) SplitTxt(txt string, format *types.FontDef)
 
 	w, h := dimCalc(runeCount, fontSize, bold)
 
-	if w <= format.MaxLenBeforeBreak {
+	if maxWidth == 0 {
+		maxWidth = format.MaxLenBeforeBreak
+	}
+	if w < maxWidth {
 		lines = []types.TextAndDimensions{{Text: txt, Width: w, Height: h}}
 		return w, h, lines
 	}
-
-	return splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, format.MaxLenBeforeBreak, dimCalc)
+	return splitTxtDimensions(w, runeCount, fontSize, bold, lineHeight, txt, maxWidth, dimCalc)
 }
 
 // Dimensions calculates text dimensions
 func (s *SvgTextDimensionCalculator) Dimensions(txt string, format *types.FontDef) (width, height int) {
 	w, h, lines := s.SplitTxt(txt, format)
+	if len(lines) == 1 {
+		return w, h //+ types.GlobalPadding // Eiko: removed for tighter layout
+	}
+	return w, h
+}
+
+func (s *SvgTextDimensionCalculator) DimensionsWithMaxWidth(txt string, format *types.FontDef, maxWidth int) (width, height int) {
+	w, h, lines := s.SplitTxtWithMaxWidth(txt, format, maxWidth)
 	if len(lines) == 1 {
 		return w, h //+ types.GlobalPadding // Eiko: removed for tighter layout
 	}
@@ -527,6 +541,45 @@ func (d *SvgDrawing) DrawSolidCircle(x, y, radius int, color string) error {
 	// Draw a solid circle at (x, y) with the specified color and radius
 	attr := fmt.Sprintf("fill: %s", color)
 	d.canvas.Circle(x, y, radius, attr)
+	return nil
+}
+
+func strOrDefault(s *string, d string) string {
+	if s != nil {
+		return *s
+	}
+	return d
+}
+
+func floatOrDefault(s *float64, d float64) float64 {
+	if s != nil {
+		return *s
+	}
+	return d
+}
+
+func (d *SvgDrawing) getCircleStyle(fill *types.FillDef, line *types.LineDef) string {
+	fc := strOrDefault(fill.Color, "white")
+	fo := floatOrDefault(fill.Opacity, 1.0)
+	lc := strOrDefault(line.Color, "black")
+	lo := floatOrDefault(line.Opacity, 1.0)
+	lw := floatOrDefault(line.Width, 0.5)
+	return fmt.Sprintf("fill: %s;fill-opacity: %f; stroke: %s; stroke-width: %f; stroke-opacity: %f;", fc, fo, lc, lw, lo)
+
+}
+
+func (d *SvgDrawing) DrawCircleWithBorder(x, y, radius int, fill *types.FillDef, line *types.LineDef) error {
+	attr := d.getCircleStyle(fill, line)
+	d.canvas.Circle(x, y, radius, attr)
+	return nil
+}
+
+func (d *SvgDrawing) DrawCircleWithBorderAndText(text string, x, y, radius int, fill *types.FillDef, line *types.LineDef, font *types.FontDef) error {
+	attr := d.getCircleStyle(fill, line)
+	d.canvas.Circle(x, y, radius, attr)
+	textFormat := d.textFormat(font)
+	textFormat += ";dominant-baseline: middle;"
+	d.canvas.Text(x, y, text, textFormat)
 	return nil
 }
 

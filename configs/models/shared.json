@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Shared Types",
+  "description": "Types that are shared between different models",
+  "type": "object",
+  "x-domain": "base",
+  "definitions": {
+    "Comment": {
+      "type": "object",
+      "description": "Object to define comments in the diagrams",
+      "properties": {
+        "text": {
+          "description": "text of the comment",
+          "type": "string"
+        },
+        "label": {
+          "description": "optional number or a short text, displayed in the marker of that comment",
+          "type": "string"
+        },
+        "format": {
+          "description": "format to use to render this comment",
+          "type": "string"
+        }
+      },
+      "required": ["text"]
+    }
+  }
+}

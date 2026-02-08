@@ -120,6 +120,10 @@
           "description": "Second additional text",
           "type": "string"
         },
+        "comment": {
+          "description": "additional comment, that can be then included in the created graphic",
+          "$ref": "./shared.json#/definitions/Comment"
+        },
         "image": {
           "description": "Reference to an image that should be displayed, needs to be declared in the global image section",
           "type": "string"
@@ -202,6 +206,10 @@
           "description": "box id of the destination",
           "type": "string"
         },
+        "comment": {
+          "description": "additional comment, that can be then included in the created graphic",
+          "$ref": "./shared.json#/definitions/Comment"
+        },
         "sourceArrow": {
           "description": "Arrow at the source box",
           "type": "boolean"
@@ -251,6 +259,12 @@
           "$ref": "./formats.json#/definitions/FontDef"
         },
         "fontText2": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontComment": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontCommentMarker": {
           "$ref": "./formats.json#/definitions/FontDef"
         },
         "line": {

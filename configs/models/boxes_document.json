@@ -109,6 +109,24 @@
       "items": {
         "$ref": "#/definitions/ConnectionLine"
       }
+    },
+    "comments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/CommentContainer"
+      }
+    },
+    "commentMarkerRadius": {
+      "description": "hold the radius of the comment markers to use",
+      "type": "integer"
+    },
+    "legendEndY": {
+      "description": "hold the radius of the comment markers to use",
+      "type": "integer"
+    },
+    "commentCurrent": {
+      "description": "helper to align tne number of unspecified markers",
+      "type": "integer"
     }
   },
   "required": [
@@ -119,7 +137,10 @@
     "minBoxMargin",
     "minConnectorMargin",
     "globalPadding",
-    "lineDist"
+    "lineDist",
+    "commentMarkerRadius",
+    "commentCurrent",
+    "legendEndY"
   ],
   "definitions": {
     "LayoutElement": {
@@ -140,6 +161,10 @@
         "text2": {
           "description": "Second additional text",
           "type": "string"
+        },
+        "comment": {
+          "description": "additional comment, that can be then included in the created graphic",
+          "$ref": "./shared.json#/definitions/Comment"
         },
         "image": {
           "discription": "image to be displayed",
@@ -280,6 +305,10 @@
           "description": "box id of the destination",
           "type": "string"
         },
+        "comment": {
+          "description": "additional comment, that can be then included in the created graphic",
+          "$ref": "./shared.json#/definitions/Comment"
+        },
         "sourceArrow": {
           "description": "Arrow at the source box",
           "type": "boolean"
@@ -332,6 +361,9 @@
         "connectionIndex": {
           "description": "index of this connection, in the boxes_document object",
           "type": "integer"
+        },
+        "comment": {
+          "$ref": "./shared.json#/definitions/Comment"
         }
       },
       "required": ["parts", "connectionIndex"]
@@ -449,6 +481,12 @@
         "fontText2": {
           "$ref": "./formats.json#/definitions/FontDef"
         },
+        "fontComment": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontCommentMarker": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
         "line": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
@@ -487,9 +525,29 @@
         "fontCaption",
         "fontText1",
         "fontText2",
+        "fontComment",
+        "fontCommentMarker",
         "minBoxMargin",
         "verticalTxt"
       ]
+    },
+    "CommentFormat": {
+      "type": "object",
+      "properties": {
+        "fontText": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "fontMarker": {
+          "$ref": "./formats.json#/definitions/FontDef"
+        },
+        "line": {
+          "$ref": "./formats.json#/definitions/LineDef"
+        },
+        "fill": {
+          "$ref": "./formats.json#/definitions/FillDef"
+        }
+      },
+      "required": ["fontText", "fontMarker", "line", "fill"]
     },
     "ConnectionNode": {
       "description": "helper type for calculating the connections between elements",
@@ -542,6 +600,64 @@
         }
       },
       "required": ["x", "y", "weight"]
+    },
+    "CommentContainer": {
+      "type": "object",
+      "description": "all parameters to render the comments in the graphic",
+      "properties": {
+        "text": {
+          "description": "text of the comment",
+          "type": "string"
+        },
+        "label": {
+          "description": "displayed in the marker for that note",
+          "type": "string"
+        },
+        "format": {
+          "description": "format name to use to render this note",
+          "$ref": "#/definitions/CommentFormat"
+        },
+        "markerX": {
+          "description": "x-coordinate of the marker for that comment",
+          "type": "integer"
+        },
+        "markerY": {
+          "description": "x-coordinate of the marker for that comment",
+          "type": "integer"
+        },
+        "markerTextWidth": {
+          "description": "calculated width of the marker text",
+          "type": "integer"
+        },
+        "markerTextHeight": {
+          "description": "calculated height of the marker text",
+          "type": "integer"
+        },
+        "textWidth": {
+          "description": "calculated width of the comment text",
+          "type": "integer"
+        },
+        "textHeight": {
+          "description": "calculated height of the comment text",
+          "type": "integer"
+        },
+        "customMarker": {
+          "description": "true if a custom marker is used for this comment",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "text",
+        "markerX",
+        "markerY",
+        "label",
+        "markerTextWidth",
+        "markerTextHeight",
+        "textWidth",
+        "textHeight",
+        "format",
+        "customMarker"
+      ]
     }
   }
 }

@@ -27,6 +27,14 @@ func (d *DummyDimensionCalculator) SplitTxt(txt string, format *types.FontDef) (
 	return 0, 0, make([]types.TextAndDimensions, 0)
 }
 
+func (d *DummyDimensionCalculator) DimensionsWithMaxWidth(txt string, format *types.FontDef, maxWidth int) (width, height int) {
+	return d.width, d.height
+}
+
+func (d *DummyDimensionCalculator) SplitTxtWithMaxWidth(txt string, format *types.FontDef, maxWidth int) (width, height int, lines []types.TextAndDimensions) {
+	return 0, 0, make([]types.TextAndDimensions, 0)
+}
+
 func NewDummyDimensionCalculator(width, height int) *DummyDimensionCalculator {
 	return &DummyDimensionCalculator{
 		width:  width,

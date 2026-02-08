@@ -45,6 +45,7 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 
 	doc.ConnectBoxes()
 	doc.AdjustDocHeightTLegend(textDimensionCalulator)
+	doc.IncludeComments(textDimensionCalulator)
 	output, err := os.Create(outputFile)
 	svgdrawing := svgdrawing.NewDrawing(output)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
@@ -54,6 +55,7 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	doc.DrawConnections(svgdrawing)
 	doc.DrawTitle(svgdrawing, textDimensionCalulator)
 	doc.DrawLegend(svgdrawing, textDimensionCalulator)
+	doc.DrawComments(svgdrawing, textDimensionCalulator)
 	svgdrawing.Done()
 	output.Close()
 	return nil
@@ -258,6 +260,7 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 	}
 	doc.ConnectBoxes()
 	doc.AdjustDocHeightTLegend(textDimensionCalulator)
+	doc.IncludeComments(textDimensionCalulator)
 	var svgBuilder strings.Builder
 	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
@@ -277,6 +280,7 @@ func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklist
 	doc.DrawConnections(svgdrawing)
 	doc.DrawTitle(svgdrawing, textDimensionCalulator)
 	doc.DrawLegend(svgdrawing, textDimensionCalulator)
+	doc.DrawComments(svgdrawing, textDimensionCalulator)
 	svgdrawing.Done()
 	return UIReturn{SVG: svgBuilder.String()}
 }

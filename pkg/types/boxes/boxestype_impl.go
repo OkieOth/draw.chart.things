@@ -2,6 +2,7 @@ package boxes
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
@@ -290,6 +291,7 @@ func (doc *BoxesDocument) DrawTitle(drawing types.Drawing, c types.TextDimension
 }
 func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensionCalculator) error {
 	if doc.Legend != nil {
+		currentY := doc.Boxes.Y + doc.Boxes.Height
 		if len(doc.Legend.Entries) > 0 {
 			format2Use := doc.Formats["default"].FontCaption // risky doesn't check if default exists
 			if doc.Legend.Format != nil {
@@ -305,7 +307,7 @@ func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensio
 				Width: &lineW,
 				Color: &lineC,
 			}
-			currentY := doc.Boxes.Y + doc.Boxes.Height + (2 * types.GlobalPadding)
+			currentY += (2 * types.GlobalPadding)
 			drawing.DrawLine(currentX, currentY-5, currentX+doc.Boxes.Width, currentY, lineFormat)
 			for i := range doc.Legend.Entries {
 				e := doc.Legend.Entries[i]
@@ -351,6 +353,7 @@ func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensio
 				drawing.DrawText(",", currentX, currentY, 0, &format2Use)
 				currentX += doc.GlobalPadding
 			}
+			doc.LegendEndY = currentY + doc.GlobalPadding
 		}
 	}
 	return nil
@@ -505,4 +508,98 @@ func (b *LayoutElement) DrawTextBoxes(drawing types.Drawing) error {
 		}
 	}
 	return nil
+}
+
+func (doc *BoxesDocument) DrawComments(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	if len(doc.Comments) > 0 {
+		doc.drawCommentMarkers(drawing)
+		currentY, _ := doc.drawCommentTextsCustomLabels(drawing, c)
+		_ = currentY
+		doc.drawCommentTextsStdLabels(currentY, drawing, c)
+	}
+	return nil
+}
+
+func (doc *BoxesDocument) drawCommentMarkers(drawing types.Drawing) error {
+	for i := range doc.Comments {
+		c := doc.Comments[i]
+		drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+	}
+	return nil
+}
+
+func (doc *BoxesDocument) drawCommentTextsCustomLabels(drawing types.Drawing, c types.TextDimensionCalculator) (int, error) {
+	markerX := doc.GlobalPadding + doc.CommentMarkerRadius
+	textX := markerX + (2 * doc.CommentMarkerRadius)
+	currentY := doc.LegendEndY
+	if currentY == 0 {
+		currentY = doc.Boxes.Y + doc.Boxes.Height
+	}
+	currentY += doc.CommentMarkerRadius
+	neededMarkerSpace := doc.CommentMarkerRadius + doc.GlobalPadding + 3
+	customLabeledComments := make([]*CommentContainer, 0)
+	for i := range doc.Comments {
+		c := doc.Comments[i]
+		if c.CustomMarker {
+			customLabeledComments = append(customLabeledComments, &c)
+		}
+	}
+	slices.SortFunc(customLabeledComments, func(c1, c2 *CommentContainer) int {
+		if c1.Label == c2.Label {
+			return 0
+		} else if c1.Label < c2.Label {
+			return -1
+		} else {
+			return 1
+		}
+	})
+
+	for i := range customLabeledComments {
+		c := customLabeledComments[i]
+		if c.Text == "" {
+			continue
+		}
+		drawing.DrawCircleWithBorderAndText(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
+		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
+		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)
+		currentY += getMax(c.TextHeight, neededMarkerSpace)
+	}
+	return currentY, nil
+}
+
+func (doc *BoxesDocument) drawCommentTextsStdLabels(currentY int, drawing types.Drawing, c types.TextDimensionCalculator) (int, error) {
+	markerX := doc.GlobalPadding + doc.CommentMarkerRadius
+	textX := markerX + (2 * doc.CommentMarkerRadius)
+	currentY += doc.CommentMarkerRadius
+	neededMarkerSpace := doc.CommentMarkerRadius + doc.GlobalPadding + 3
+	stdLabeledComments := make([]*CommentContainer, 0)
+	for i := range doc.Comments {
+		c := doc.Comments[i]
+		if !c.CustomMarker {
+			stdLabeledComments = append(stdLabeledComments, &c)
+		}
+	}
+	slices.SortFunc(stdLabeledComments, func(c1, c2 *CommentContainer) int {
+		if c1.Label == c2.Label {
+			return 0
+		} else if c1.Label < c2.Label {
+			return -1
+		} else {
+			return 1
+		}
+	})
+
+	for i := range stdLabeledComments {
+		c := stdLabeledComments[i]
+		if c.Text == "" {
+			continue
+		}
+		drawing.DrawCircleWithBorderAndText(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
+		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
+		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)
+		currentY += getMax(c.TextHeight, neededMarkerSpace)
+	}
+	return currentY, nil
 }

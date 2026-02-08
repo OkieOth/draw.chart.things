@@ -36,6 +36,7 @@ class "**Layout**" as Layout {
         StringType caption
         StringType text1
         StringType text2
+        Comment comment
         StringType image
         BooleanType expand
         StringType extVertical
@@ -60,6 +61,8 @@ class "**Format**" as Format {
         FontDef fontCaption
         FontDef fontText1
         FontDef fontText2
+        FontDef fontComment
+        FontDef fontCommentMarker
         LineDef line
         FillDef fill
         IntegerType padding
@@ -90,6 +93,7 @@ class "**LayoutArray**" as LayoutArray extends List {
 class "**Connection**" as Connection {
         StringType dest
         StringType destId
+        Comment comment
         BooleanType sourceArrow
         BooleanType destArrow
         StringType format
@@ -183,6 +187,15 @@ note top: parameters of an image to\nbe displayed in the SVG
 
  
 
+class "**Comment**" as Comment {
+        StringType text
+        StringType label
+        StringType format
+}
+note top: Object to define comments in\nthe diagrams
+
+ 
+
 
     
 
@@ -212,6 +225,8 @@ Legend "0" *-- "n" LegendEntry
 
 
 
+Layout  *--  Comment
+
 
 
 
@@ -237,6 +252,10 @@ Format  *--  FontDef
 
 Format  *--  FontDef
 
+Format  *--  FontDef
+
+Format  *--  FontDef
+
 Format  *--  LineDef
 
 Format  *--  FillDef
@@ -254,6 +273,8 @@ FormatVariations  *--  Format
     
     
 
+
+Connection  *--  Comment
 
 
 
@@ -294,6 +315,10 @@ LayoutMixin "0" *-- "n" Layout
 
 
 
+
+
+
+    
 
 
 

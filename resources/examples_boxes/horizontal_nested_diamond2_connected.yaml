@@ -6,6 +6,24 @@ formats:
       color: blue
     fill:
       color: orange
+  defaultComment:
+    line:
+      width: 1
+      color: black
+    fill:
+      color: white
+  comment:
+    line:
+      width: 1
+      color: blue
+    fill:
+      color: lightpink
+  comment2:
+    line:
+      width: 1
+      color: blue
+    fill:
+      color: orange
     cornerRadius: 5
 globalPadding: 10
 minBoxMargin: 20
@@ -14,6 +32,10 @@ boxes:
     - id: r1_1
       caption: Left Element
       text1: I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line I am in the first line
+      comment:
+        text: I am a comment
+        label: a
+        format: comment
       vertical:
         - id: r1_1_1
           caption: I am a inner Element
@@ -33,6 +55,10 @@ boxes:
               text1:
               connections:
                 - destId: r2_3
+                  comment:
+                    text: I am a connection comment
+                    label: b
+                    format: comment
                 - destId: r2_3_1
         - id: r2_2
           caption: Center Element
@@ -40,15 +66,22 @@ boxes:
           vertical:
             - id: r2_2_1
               caption: I am inner Element three
+              comment:
+                text: I am also a comment
         - id: r2_3
           caption: Bottom Element
           text1: I am in the second line
           vertical:
             - id: r2_3_1
               caption: I am inner Element four
+              comment:
+                label: b
+                format: comment
     - id: r3_1
       caption: Right Element
       text1: I am in the first line
       connections:
         - destId: r2_3
         - destId: r2_3_1
+          comment:
+            text: I am another connection comment
