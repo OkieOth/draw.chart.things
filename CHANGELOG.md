@@ -1,3 +1,14 @@
+# v0.5.0
+## Boxes
+* introduce comments instead of one comment to document layout elements ...
+    ... (number of comments per object is currently limited to 5 entries)
+* aggregation of comments in case of not expanded layouts
+
+
+# v0.4.0
+## Boxes
+* enable comment on layout elements and connections
+
 # v0.3.0
 ## Boxes
 * fix layout issues for boxes with text1 and text2 entries

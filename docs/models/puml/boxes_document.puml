@@ -25,6 +25,7 @@ class "**BoxesDocument**" as BoxesDocument {
         ConnectionLine[] horizontalLines
         ConnectionLine[] verticalLines
         CommentContainer[] comments
+        BooleanType hasHiddenComments
         IntegerType commentMarkerRadius
         IntegerType legendEndY
         IntegerType commentCurrent
@@ -38,7 +39,8 @@ class "**LayoutElement**" as LayoutElement {
         StringType caption
         StringType text1
         StringType text2
-        Comment comment
+        Comment[] comments
+        BooleanType hiddenComments
         ImageContainer image
         LayoutElemContainer vertical
         LayoutElemContainer horizontal
@@ -315,12 +317,14 @@ BoxesDocument "0" *-- "n" CommentContainer
 
 
 
+
     
 
 
 
 
-LayoutElement  *--  Comment
+LayoutElement "0" *-- "n" Comment
+
 
 LayoutElement  *--  ImageContainer
 

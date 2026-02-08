@@ -115,12 +115,12 @@ func TestLoadBoxes(t *testing.T) {
 				require.Nil(t, err)
 				require.NotNil(t, doc)
 
-				assert.NotNil(t, doc.Boxes.Horizontal.Elems[0].Comment)
-				assert.Equal(t, "I am a comment", doc.Boxes.Horizontal.Elems[0].Comment.Text)
-				assert.Equal(t, "a", *doc.Boxes.Horizontal.Elems[0].Comment.Label)
-				assert.Equal(t, "comment", *doc.Boxes.Horizontal.Elems[0].Comment.Format)
+				assert.Len(t, doc.Boxes.Horizontal.Elems[0].Comments, 1)
+				assert.Equal(t, "I am a comment", doc.Boxes.Horizontal.Elems[0].Comments[0].Text)
+				assert.Equal(t, "a", *doc.Boxes.Horizontal.Elems[0].Comments[0].Label)
+				assert.Equal(t, "comment", *doc.Boxes.Horizontal.Elems[0].Comments[0].Format)
 
-				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Comment)
+				assert.Len(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Comments, 0)
 				assert.NotNil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment)
 				assert.Equal(t, "I am a connection comment", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment.Text)
 				assert.Equal(t, "b", *doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Vertical.Elems[0].Connections[0].Comment.Label)
@@ -131,8 +131,8 @@ func TestLoadBoxes(t *testing.T) {
 				assert.Nil(t, doc.Boxes.Horizontal.Elems[2].Connections[0].Comment)
 				assert.NotNil(t, doc.Boxes.Horizontal.Elems[2].Connections[1].Comment)
 				assert.Equal(t, "I am another connection comment", doc.Boxes.Horizontal.Elems[2].Connections[1].Comment.Text)
-				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Vertical.Elems[0].Comment.Label)
-				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Vertical.Elems[0].Comment.Format)
+				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Vertical.Elems[0].Comments[0].Label)
+				assert.Nil(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Vertical.Elems[0].Comments[0].Format)
 			},
 		},
 	}

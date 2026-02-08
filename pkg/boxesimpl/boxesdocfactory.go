@@ -10,14 +10,14 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
-func initLayoutElemContainer(l []boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedElems *[]string, b *boxes.Boxes) *boxes.LayoutElemContainer {
+func initLayoutElemContainer(l []boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes) *boxes.LayoutElemContainer {
 	if len(l) == 0 {
 		return nil
 	}
 	var ret boxes.LayoutElemContainer
 	ret.Elems = make([]boxes.LayoutElement, 0)
 	for _, elem := range l {
-		ret.Elems = append(ret.Elems, initLayoutElement(&elem, inputFormats, connectedElems, b))
+		ret.Elems = append(ret.Elems, initLayoutElement(&elem, doc, b))
 	}
 	return &ret
 }
@@ -260,7 +260,7 @@ func initImage(l *boxes.Layout, definedImages map[string]types.ImageDef) *boxes.
 }
 
 // func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) boxes.LayoutElement {
-func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, b *boxes.Boxes) boxes.LayoutElement {
+func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes) boxes.LayoutElement {
 	var f *boxes.BoxFormat
 	// for _, tag := range l.Tags {
 	// 	if val, ok := inputFormats[tag]; ok {
@@ -269,17 +269,17 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 	// 	}
 	// }
 	if l.Format != nil {
-		if val, ok := inputFormats[*l.Format]; ok {
+		if val, ok := doc.Formats[*l.Format]; ok {
 			f = &val
 		}
 	}
 	if len(l.Connections) > 0 && l.Id != "" {
-		if !slices.Contains(*connectedIds, l.Id) {
-			*connectedIds = append(*connectedIds, l.Id)
+		if !slices.Contains(doc.ConnectedElems, l.Id) {
+			doc.ConnectedElems = append(doc.ConnectedElems, l.Id)
 		}
 		for _, c := range l.Connections {
-			if !slices.Contains(*connectedIds, c.DestId) {
-				*connectedIds = append(*connectedIds, c.DestId)
+			if !slices.Contains(doc.ConnectedElems, c.DestId) {
+				doc.ConnectedElems = append(doc.ConnectedElems, c.DestId)
 			}
 		}
 	}
@@ -288,7 +288,7 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		if l.Format != nil {
 			formatKey = *l.Format
 		}
-		for key, format := range inputFormats {
+		for key, format := range doc.Formats {
 			if key == formatKey {
 				f = &format
 				break
@@ -309,19 +309,24 @@ func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat,
 		text1 = l.Text1
 		text2 = l.Text2
 	}
+	comments := make([]types.Comment, 0)
+	if l.Comment != nil {
+		comments = append(comments, *l.Comment)
+	}
 	return boxes.LayoutElement{
 		Id:                l.Id,
 		Caption:           l.Caption,
 		Text1:             text1,
 		Text2:             text2,
-		Comment:           l.Comment,
+		Comments:          comments,
+		HiddenComments:    l.HiddenComments,
 		Image:             initImage(l, b.Images),
-		Vertical:          initLayoutElemContainer(l.Vertical, inputFormats, connectedIds, b),
-		Horizontal:        initLayoutElemContainer(l.Horizontal, inputFormats, connectedIds, b),
+		Vertical:          initLayoutElemContainer(l.Vertical, doc, b),
+		Horizontal:        initLayoutElemContainer(l.Horizontal, doc, b),
 		Format:            adjustFormatBasedOnVariations(l, b, f),
 		DontBlockConPaths: l.DontBlockConPaths,
 		DataLink:          l.DataLink,
-		Connections:       initConnections(l.Connections, inputFormats),
+		Connections:       initConnections(l.Connections, doc.Formats),
 	}
 }
 
@@ -381,7 +386,7 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 		return nil, err
 	}
 
-	doc.Boxes = initLayoutElement(&b.Boxes, doc.Formats, &doc.ConnectedElems, b)
+	doc.Boxes = initLayoutElement(&b.Boxes, doc, b)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin
 	}

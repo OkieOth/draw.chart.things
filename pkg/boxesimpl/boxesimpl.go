@@ -174,6 +174,22 @@ func connectionExistsByDestId(connections []boxes.Connection, destId string) boo
 	})
 }
 
+func copyTruncatedComments(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+	// find comments from truncated objects to the annotate current object
+	found := false
+	for _, v := range truncatedObjects {
+		if v.newId == layout.Id {
+			if v.truncated.Comment != nil && (v.truncated.Comment.Text != "" || v.truncated.Comment.Label != nil) {
+				found = true
+				break
+			}
+		}
+	}
+	if found {
+		layout.HiddenComments = true
+	}
+}
+
 func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
 	// copy all needed connections from truncated objects to the current object
 	for _, v := range truncatedObjects {
@@ -214,6 +230,7 @@ func adjustDestIdInRespectOfTruncated(layout *boxes.Layout, truncatedObjects map
 
 func adjustTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
 	copyTruncatedConnections(layout, truncatedObjects)
+	copyTruncatedComments(layout, truncatedObjects)
 	adjustDestIdInRespectOfTruncated(layout, truncatedObjects)
 	if len(layout.Horizontal) > 0 {
 		adjustTruncatedForCont(&layout.Horizontal, truncatedObjects)

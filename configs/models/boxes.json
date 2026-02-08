@@ -173,9 +173,21 @@
         "dataLink": {
           "description": "Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.",
           "type": "string"
+        },
+        "hiddenComments": {
+          "description": "is only set by while the layout is processed, don't set it in the definition",
+          "type": "boolean"
         }
       },
-      "required": ["type", "id", "caption", "text1", "text2", "expand"]
+      "required": [
+        "type",
+        "id",
+        "caption",
+        "text1",
+        "text2",
+        "expand",
+        "hiddenComments"
+      ]
     },
     "LayoutArray": {
       "type": "array",

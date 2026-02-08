@@ -175,6 +175,9 @@ type Layout struct {
 
     // Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.
     DataLink *string  `yaml:"dataLink,omitempty"`
+
+    // is only set by while the layout is processed, don't set it in the definition
+    HiddenComments bool  `yaml:"hiddenComments"`
 }
 
 func NewLayout() *Layout {
@@ -219,6 +222,7 @@ func CopyLayout(src *Layout) *Layout {
     ret.Format = src.Format
     ret.DontBlockConPaths = src.DontBlockConPaths
     ret.DataLink = src.DataLink
+    ret.HiddenComments = src.HiddenComments
 
     return &ret
 }

@@ -143,11 +143,10 @@ func TestInitDimensions(t *testing.T) {
 	}
 
 	dc := NewDummyDimensionCalculator(100, 50)
-	emptyFormats := map[string]boxes.BoxFormat{}
+	doc := boxes.NewBoxesDocument()
 	for _, test := range tests {
-		dummy := make([]string, 0)
 		b := boxes.NewBoxes()
-		le := boxesimpl.ExpInitLayoutElement(&test.layout, emptyFormats, &dummy, b)
+		le := boxesimpl.ExpInitLayoutElement(&test.layout, doc, b)
 		le.InitDimensions(dc)
 		assert.Equal(t, test.expectedHeight, le.Height)
 		assert.Equal(t, test.expectedWidth, le.Width)
@@ -358,6 +357,15 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
 			outputFile:          "../../temp/boxes_simple_pic_00_4.svg",
 			depth:               10,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
+		{
+			inputFile:           "../../resources/examples_boxes/boxes_random.yaml",
+			inputExtConnections: "",
+			inputExtFormats:     "",
+			outputFile:          "../../temp/boxes_random.svg",
+			depth:               2,
 			expanded:            []string{},
 			blacklisted:         []string{},
 		},
