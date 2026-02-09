@@ -33,6 +33,9 @@ type BoxesFileMixings struct {
     // Set of formats that overwrites the style of boxes, if specific conditions are met
     FormatVariations *FormatVariations  `yaml:"formatVariations,omitempty"`
 
+    // dictionary of comment objects
+    Comments map[string]types.Comment  `yaml:"comments,omitempty"`
+
     // optional map of images used in the generated graphic
     Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 }
@@ -44,6 +47,7 @@ func NewBoxesFileMixings() *BoxesFileMixings {
         Connections: make(map[string]ConnectionCont, 0),
         Formats: make(map[string]Format, 0),
         FormatVariations: NewFormatVariations(),
+        Comments: make(map[string]types.Comment, 0),
         Images: make(map[string]types.ImageDef, 0),
     }
 }
@@ -69,6 +73,10 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
         ret.Formats[k] = v
     }
     ret.FormatVariations = CopyFormatVariations(src.FormatVariations)
+    ret.Comments = make(map[string]types.Comment, 0)
+    for k, v := range src.Comments {
+        ret.Comments[k] = v
+    }
     ret.Images = make(map[string]types.ImageDef, 0)
     for k, v := range src.Images {
         ret.Images[k] = v
@@ -110,6 +118,9 @@ func CopyConnectionCont(src *ConnectionCont) *ConnectionCont {
 
     return &ret
 }
+
+
+
 
 
 

@@ -44,6 +44,13 @@
       "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
       "$ref": "./boxes.json#/definitions/FormatVariations"
     },
+    "comments": {
+      "description": "dictionary of comment objects, this comment will applied on layout objects and replace existing comments there",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./shared.json#/definitions/Comment"
+      }
+    },
     "images": {
       "description": "optional map of images used in the generated graphic",
       "type": "object",
