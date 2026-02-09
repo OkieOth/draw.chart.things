@@ -69,6 +69,9 @@ type BoxesDocument struct {
 
     Comments []CommentContainer  `yaml:"comments,omitempty"`
 
+    // is set to true, if there are some comments truncated from the original layout
+    HasHiddenComments bool  `yaml:"hasHiddenComments"`
+
     // hold the radius of the comment markers to use
     CommentMarkerRadius int  `yaml:"commentMarkerRadius"`
 
@@ -151,6 +154,7 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     for _, e := range src.Comments {
         ret.Comments = append(ret.Comments, e)
     }
+    ret.HasHiddenComments = src.HasHiddenComments
     ret.CommentMarkerRadius = src.CommentMarkerRadius
     ret.LegendEndY = src.LegendEndY
     ret.CommentCurrent = src.CommentCurrent
@@ -176,8 +180,11 @@ type LayoutElement struct {
     // Second additional text
     Text2 string  `yaml:"text2"`
 
-    // additional comment, that can be then included in the created graphic
-    Comment *types.Comment  `yaml:"comment,omitempty"`
+    // additional comments, that can be then included in the created graphic
+    Comments []types.Comment  `yaml:"comments,omitempty"`
+
+    // true if in the proccessing some comments where truncated with removed child elemens
+    HiddenComments bool  `yaml:"hiddenComments"`
 
     Image *ImageContainer  `yaml:"image,omitempty"`
 
@@ -243,6 +250,7 @@ type LayoutElement struct {
 
 func NewLayoutElement() *LayoutElement {
     return &LayoutElement{
+        Comments: make([]types.Comment, 0),
         Vertical: NewLayoutElemContainer(),
         Horizontal: NewLayoutElemContainer(),
         Connections: make([]LayoutElemConnection, 0),
@@ -259,7 +267,11 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
     ret.Caption = src.Caption
     ret.Text1 = src.Text1
     ret.Text2 = src.Text2
-    ret.Comment = types.CopyComment(src.Comment)
+    ret.Comments = make([]types.Comment, 0)
+    for _, e := range src.Comments {
+        ret.Comments = append(ret.Comments, e)
+    }
+    ret.HiddenComments = src.HiddenComments
     ret.Image = CopyImageContainer(src.Image)
     ret.Vertical = CopyLayoutElemContainer(src.Vertical)
     ret.Horizontal = CopyLayoutElemContainer(src.Horizontal)

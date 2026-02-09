@@ -116,6 +116,10 @@
         "$ref": "#/definitions/CommentContainer"
       }
     },
+    "hasHiddenComments": {
+      "description": "is set to true, if there are some comments truncated from the original layout",
+      "type": "boolean"
+    },
     "commentMarkerRadius": {
       "description": "hold the radius of the comment markers to use",
       "type": "integer"
@@ -140,7 +144,8 @@
     "lineDist",
     "commentMarkerRadius",
     "commentCurrent",
-    "legendEndY"
+    "legendEndY",
+    "hasHiddenComments"
   ],
   "definitions": {
     "LayoutElement": {
@@ -162,9 +167,16 @@
           "description": "Second additional text",
           "type": "string"
         },
-        "comment": {
-          "description": "additional comment, that can be then included in the created graphic",
-          "$ref": "./shared.json#/definitions/Comment"
+        "comments": {
+          "description": "additional comments, that can be then included in the created graphic",
+          "type": "array",
+          "items": {
+            "$ref": "./shared.json#/definitions/Comment"
+          }
+        },
+        "hiddenComments": {
+          "description": "true if in the proccessing some comments where truncated with removed child elemens",
+          "type": "boolean"
         },
         "image": {
           "discription": "image to be displayed",
@@ -267,7 +279,8 @@
         "height",
         "caption",
         "text1",
-        "text2"
+        "text2",
+        "hiddenComments"
       ]
     },
     "LayoutElemContainer": {

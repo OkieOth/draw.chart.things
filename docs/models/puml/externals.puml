@@ -37,6 +37,7 @@ class "**Layout**" as Layout {
         StringType format
         BooleanType dontBlockConPaths
         StringType dataLink
+        BooleanType hiddenComments
 }
 
  
@@ -199,6 +200,7 @@ Layout "0" *-- "n" Layout
 
 
 Layout "0" *-- "n" Connection
+
 
 
 

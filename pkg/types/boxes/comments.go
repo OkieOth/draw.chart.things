@@ -160,9 +160,24 @@ func (doc *BoxesDocument) newLabel(label *string) (string, bool) {
 }
 
 func (doc *BoxesDocument) collectCommentsFromLayout(l *LayoutElement, dimensionsCalc types.TextDimensionCalculator) {
-	if l.Comment != nil {
-		label, customMarker := doc.newLabel(l.Comment.Label)
-		c := doc.newCommentContainer(l.Comment.Text, label, l.Comment.Format, l.X, l.Y, true, dimensionsCalc, customMarker)
+	currentX := l.X + l.Width - 4
+	for i := range l.Comments {
+		comment := l.Comments[i]
+		label, customMarker := doc.newLabel(comment.Label)
+		c := doc.newCommentContainer(comment.Text, label, comment.Format, currentX, l.Y+4, false, dimensionsCalc, customMarker)
+		doc.Comments = append(doc.Comments, c)
+		currentX -= (2 * c.MarkerTextWidth) + doc.GlobalPadding + 2
+		if i > 7 {
+			break
+		}
+	}
+	if l.HiddenComments {
+		var text string
+		if !doc.HasHiddenComments {
+			text = "Has comments in hidden childs"
+			doc.HasHiddenComments = true
+		}
+		c := doc.newCommentContainer(text, "...", nil, l.X, l.Y, false, dimensionsCalc, true)
 		doc.Comments = append(doc.Comments, c)
 	}
 	doc.collectCommentsFromLayoutCont(l.Horizontal, dimensionsCalc)

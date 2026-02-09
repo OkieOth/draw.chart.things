@@ -216,13 +216,13 @@ func TestSvgWithConnections(t *testing.T) {
 		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
 		// 	},
 		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/boxes_random_truncated.yaml",
-		// 	outputFile: "../../temp/boxes_random_truncated.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 	},
-		// },
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_random_truncated.yaml",
+			outputFile: "../../temp/boxes_random_truncated.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
 		// {
 		// 	inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
 		// 	outputFile: "../../temp/TestSimpleSvg_vcomplex_connected.svg",
