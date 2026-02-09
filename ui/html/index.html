@@ -90,6 +90,15 @@
                 <option value="conn1.yaml">Additional Connections 1</option>
                 <option value="conn2.yaml">Additional Connections 2</option>
             </select>
+            <!-- Manage uploads button -->
+            <button
+                id="btn-manage-uploads"
+                class="tool-btn"
+                title="Manage Uploaded Mixins"
+                style="margin-left: 8px"
+            >
+                <i class="fa-solid fa-folder-open"></i>
+            </button>
             <!-- Hide Comments toggle button -->
             <button
                 id="btn-hide-comments"
@@ -218,6 +227,46 @@
             <button id="permalink-copy-btn" style="width: 100%">
                 <i class="fa-solid fa-copy"></i> Copy Link
             </button>
+        </div>
+
+        <!-- Manage Uploads popup -->
+        <div
+            id="uploads-popup"
+            class="hidden"
+            tabindex="-1"
+            aria-modal="true"
+            role="dialog"
+            style="
+                position: fixed;
+                top: 30%;
+                left: 50%;
+                transform: translate(-50%, -30%);
+                background: #fff;
+                border: 1px solid #888;
+                padding: 1.5em;
+                z-index: 1000;
+                box-shadow: 0 2px 16px #0002;
+                min-width: 360px;
+                display: none;
+            "
+        >
+            <div style="margin-bottom: 0.75em; font-weight: bold; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <span>Manage Uploaded Mixins</span>
+                <button id="uploads-close-btn" class="tool-btn" title="Close" style="padding: 4px 8px">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="uploads-list" style="max-height: 40vh; overflow: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
+                <!-- populated dynamically -->
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 10px; gap: 8px;">
+                <button id="uploads-clear-all" class="tool-btn" title="Remove all">
+                    <i class="fa-solid fa-trash"></i> Remove all
+                </button>
+                <button id="uploads-done" class="tool-btn" title="Done">
+                    <i class="fa-solid fa-check"></i> Done
+                </button>
+            </div>
         </div>
 
         <script>

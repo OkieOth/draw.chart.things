@@ -69,6 +69,102 @@ let blacklist = [];
 // NEW: global additional mixins for persistence
 let mixins = [];
 
+// --- Uploaded mixins persistence helpers ---
+// Stored in localStorage under 'uploadedMixins' as [{ id, title, content }]
+function getUploadedMixins() {
+    try {
+        const raw = localStorage.getItem("uploadedMixins");
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+    } catch {
+        return [];
+    }
+}
+
+function setUploadedMixins(list) {
+    try {
+        localStorage.setItem("uploadedMixins", JSON.stringify(list || []));
+    } catch {
+        // ignore storage errors
+    }
+}
+
+function upsertUploadedMixin(id, title, content) {
+    const list = getUploadedMixins();
+    const idx = list.findIndex((x) => x && x.id === id);
+    const entry = { id, title: title || id, content: content || "" };
+    if (idx >= 0) list[idx] = entry; else list.push(entry);
+    setUploadedMixins(list);
+    return entry;
+}
+
+function parseTitleFromYaml(text, fallback) {
+    try {
+        const lines = String(text).split(/\r?\n/);
+        for (let line of lines) {
+            const clean = line.replace(/#.*/, "").trim();
+            if (!clean) continue;
+            const m = clean.match(/^title\s*:\s*(.+)$/i);
+            if (m) {
+                let val = m[1].trim();
+                if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                    val = val.slice(1, -1);
+                }
+                return val || fallback || "Uploaded";
+            }
+        }
+    } catch {
+        /* ignore */
+    }
+    return fallback || "Uploaded";
+}
+
+function ensureUploadOptionsInCombo(sel) {
+    if (!sel) return;
+    // Remove stale uploaded options that are no longer in storage
+    const current = new Set(getUploadedMixins().map((u) => `uploaded::${u.id}`));
+    Array.from(sel.querySelectorAll("option")).forEach((opt) => {
+        if (opt && typeof opt.value === "string" && opt.value.startsWith("uploaded::")) {
+            if (!current.has(opt.value)) opt.remove();
+        }
+    });
+    // Append existing uploaded mixins as options
+    const uploaded = getUploadedMixins();
+    for (const u of uploaded) {
+        const val = `uploaded::${u.id}`;
+        const existing = sel.querySelector(`option[value='${CSS.escape(val)}']`);
+        if (!existing) {
+            const opt = document.createElement("option");
+            opt.value = val;
+            opt.textContent = u.title || u.id;
+            sel.appendChild(opt);
+        } else {
+            const label = u.title || u.id;
+            if (existing.textContent !== label) existing.textContent = label;
+        }
+    }
+    // Always ensure the upload sentinel exists as last option
+    const sentinelVal = "__upload__";
+    let sentinel = sel.querySelector(`option[value='${CSS.escape(sentinelVal)}']`);
+    if (!sentinel) {
+        sentinel = document.createElement("option");
+        sentinel.value = sentinelVal;
+        sentinel.textContent = "Upload file…";
+        sel.appendChild(sentinel);
+    }
+}
+
+function removeUploadedMixin(id) {
+    const list = getUploadedMixins();
+    const next = list.filter((x) => x && x.id !== id);
+    setUploadedMixins(next);
+}
+
+function clearUploadedMixins() {
+    setUploadedMixins([]);
+}
+
 // Spinner helpers
 window.showSpinner = function () {
     const el = document.getElementById("spinner");
@@ -139,11 +235,181 @@ function initPage() {
                 });
             });
         }
+
+        // Manage Uploads UI wiring
+        const manageBtn = document.getElementById("btn-manage-uploads");
+        const popup = document.getElementById("uploads-popup");
+        const listEl = document.getElementById("uploads-list");
+        const closeBtn = document.getElementById("uploads-close-btn");
+        const doneBtn = document.getElementById("uploads-done");
+        const clearAllBtn = document.getElementById("uploads-clear-all");
+
+        function refreshComboAfterStorageChange(removedId) {
+            const sel = document.getElementById("toolbar-combo");
+            if (!sel) return;
+            // Update options to reflect storage
+            ensureUploadOptionsInCombo(sel);
+            // If removed was selected, choose a fallback
+            const removedVal = removedId ? `uploaded::${removedId}` : null;
+            const currentVal = sel.value;
+            const hasCurrent = currentVal && sel.querySelector(`option[value='${CSS.escape(currentVal)}']`);
+            if (removedVal && currentVal === removedVal || !hasCurrent) {
+                // Pick first non-sentinel option if available
+                const opts = Array.from(sel.options).filter(o => o.value !== "__upload__");
+                if (opts.length) {
+                    sel.value = opts[0].value;
+                } else {
+                    // Nothing left, clear selection
+                    sel.selectedIndex = -1;
+                }
+                // Trigger change to refresh SVG/mixins
+                sel.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        }
+
+        function populateUploadsPopup() {
+            if (!listEl) return;
+            const items = getUploadedMixins();
+            listEl.innerHTML = "";
+            if (!items.length) {
+                const empty = document.createElement("div");
+                empty.textContent = "No uploaded mixins stored.";
+                empty.style.color = "#666";
+                listEl.appendChild(empty);
+                return;
+            }
+            items.forEach((it) => {
+                const row = document.createElement("div");
+                row.style.display = "flex";
+                row.style.alignItems = "center";
+                row.style.justifyContent = "space-between";
+                row.style.gap = "8px";
+                row.style.padding = "4px 0";
+
+                const info = document.createElement("div");
+                info.style.display = "flex";
+                info.style.flexDirection = "column";
+                const title = document.createElement("span");
+                title.textContent = it.title || it.id;
+                title.style.fontWeight = "600";
+                const sub = document.createElement("span");
+                sub.textContent = it.id;
+                sub.style.fontSize = "0.85em";
+                sub.style.color = "#666";
+                info.appendChild(title);
+                info.appendChild(sub);
+
+                const actions = document.createElement("div");
+                const del = document.createElement("button");
+                del.className = "tool-btn";
+                del.title = "Remove";
+                del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                del.addEventListener("click", () => {
+                    removeUploadedMixin(it.id);
+                    populateUploadsPopup();
+                    refreshComboAfterStorageChange(it.id);
+                });
+                actions.appendChild(del);
+
+                row.appendChild(info);
+                row.appendChild(actions);
+                listEl.appendChild(row);
+            });
+        }
+
+        function showUploadsPopup() {
+            if (!popup) return;
+            populateUploadsPopup();
+            popup.classList.remove("hidden");
+            popup.style.display = "block";
+            popup.focus();
+        }
+        function hideUploadsPopup() {
+            if (!popup) return;
+            popup.classList.add("hidden");
+            popup.style.display = "none";
+        }
+
+        if (manageBtn) manageBtn.addEventListener("click", showUploadsPopup);
+        if (closeBtn) closeBtn.addEventListener("click", hideUploadsPopup);
+        if (doneBtn) doneBtn.addEventListener("click", hideUploadsPopup);
+        if (clearAllBtn) clearAllBtn.addEventListener("click", () => {
+            clearUploadedMixins();
+            populateUploadsPopup();
+            refreshComboAfterStorageChange(null);
+        });
+        // Dismiss on ESC and outside click
+        if (popup) {
+            popup.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") hideUploadsPopup();
+            });
+            document.addEventListener("mousedown", function (e) {
+                if (!popup.classList.contains("hidden") && !popup.contains(e.target) && e.target !== manageBtn) {
+                    hideUploadsPopup();
+                }
+            });
+        }
     // Production-ready: handle combo box change logic in a separate function
     async function handleComboBoxChange(combo, previousYamlContent, setPreviousYamlContent) {
         const val = combo.value;
         let yamlContent = "";
-        if (val) {
+
+        // Handle uploaded mixin sentinel: open file picker
+        if (val === "__upload__") {
+            try {
+                const upload = await new Promise((resolve, reject) => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = ".yaml,.yml";
+                    input.style.display = "none";
+                    document.body.appendChild(input);
+                    input.addEventListener("change", async () => {
+                        const f = input.files && input.files[0];
+                        document.body.removeChild(input);
+                        if (!f) return reject(new Error("No file selected"));
+                        try {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve({ content: String(reader.result || ""), fileName: f.name || `mixin_${Date.now()}` });
+                            reader.onerror = (e) => reject(e);
+                            reader.readAsText(f);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                    // Trigger the picker
+                    input.click();
+                });
+                const { content, fileName } = upload;
+                const uploadedName = fileName || `mixin_${Date.now()}`;
+                const title = parseTitleFromYaml(content, uploadedName);
+                const entry = upsertUploadedMixin(uploadedName, title, content);
+                // Insert or update option and select it
+                ensureUploadOptionsInCombo(combo);
+                const uploadedVal = `uploaded::${entry.id}`;
+                combo.value = uploadedVal;
+                yamlContent = content;
+                setPreviousYamlContent(yamlContent);
+                console.log("Uploaded mixin added:", entry);
+            } catch (err) {
+                console.error("Upload cancelled or failed:", err);
+                // Restore previous selection if any (avoid staying on sentinel)
+                const restoreVal = previousYamlContent ? combo.value : "";
+                if (restoreVal) combo.value = restoreVal; else combo.selectedIndex = 0;
+                setPreviousYamlContent(previousYamlContent);
+            }
+        } else if (val && val.startsWith("uploaded::")) {
+            const id = val.slice("uploaded::".length);
+            const list = getUploadedMixins();
+            const found = list.find((x) => x && x.id === id);
+            if (found) {
+                yamlContent = String(found.content || "");
+                setPreviousYamlContent(yamlContent);
+                console.log("Selected uploaded mixin:", id);
+            } else {
+                console.warn("Uploaded mixin not found:", id);
+                setPreviousYamlContent("");
+            }
+        } else if (val) {
             try {
                 const resp = await fetch(window.getBasePath() + "/data/" + val, { cache: "no-cache" });
                 if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -1002,7 +1268,15 @@ window.loadComboOptionsFromYaml = async function () {
     try {
         // Only proceed if an 'options' param was provided
         const src = window.queryOptions;
-        if (!src) return;
+        if (!src) {
+            // Even if no remote options source, still ensure upload entries are present
+            const selNoSrc = document.getElementById("toolbar-combo");
+            if (selNoSrc) {
+                selNoSrc.style.display = "";
+                ensureUploadOptionsInCombo(selNoSrc);
+            }
+            return;
+        }
         if (location.protocol === "file:") {
             console.error("Options YAML must be served over HTTP(S).");
             return;
@@ -1024,6 +1298,8 @@ window.loadComboOptionsFromYaml = async function () {
             opt.textContent = label;
             sel.appendChild(opt);
         }
+        // Add uploaded mixins and the upload sentinel
+        ensureUploadOptionsInCombo(sel);
         // If a combo selection was provided via query param, apply it
         if (typeof window.queryCombo === "string" && sel.querySelector(`option[value='${CSS.escape(window.queryCombo)}']`)) {
             sel.value = window.queryCombo;
