@@ -83,21 +83,24 @@ func isRelatedToId(b boxes.Layout, filter []string) bool {
 	return false
 }
 
-func collectTruncatedFromCont(b []boxes.Layout, newId string, truncated *map[string]TruncatedInfo) {
+func collectTruncatedFromCont(b []boxes.Layout, newId string, truncated *map[string]TruncatedInfo, hideComments bool) {
 	for _, l := range b {
-		collectTruncated(l, newId, truncated)
+		collectTruncated(l, newId, truncated, hideComments)
 	}
 }
 
-func collectTruncated(b boxes.Layout, newId string, truncated *map[string]TruncatedInfo) {
+func collectTruncated(b boxes.Layout, newId string, truncated *map[string]TruncatedInfo, hideComments bool) {
 	if b.Id != "" {
+		if hideComments && b.Comment != nil {
+			b.Comment = nil
+		}
 		(*truncated)[b.Id] = TruncatedInfo{
 			truncated: b,
 			newId:     newId,
 		}
 	}
-	collectTruncatedFromCont(b.Horizontal, newId, truncated)
-	collectTruncatedFromCont(b.Vertical, newId, truncated)
+	collectTruncatedFromCont(b.Horizontal, newId, truncated, hideComments)
+	collectTruncatedFromCont(b.Vertical, newId, truncated, hideComments)
 }
 
 type TruncatedInfo struct {
@@ -116,15 +119,31 @@ func getNewId() string {
 	return fmt.Sprintf("xxx_%d", globalId)
 }
 
-func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blacklisted []string) (boxes.Layout, map[string]TruncatedInfo) {
+func removeCommentsInCase(b boxes.Layout, hideComments bool) boxes.Layout {
+	if hideComments {
+		if b.Comment != nil {
+			b.Comment = nil
+		}
+		for i := range b.Connections {
+			c := b.Connections[i]
+			if c.Comment != nil {
+				c.Comment = nil
+			}
+		}
+	}
+	return b
+}
+
+func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blacklisted []string, hideComments bool) (boxes.Layout, map[string]TruncatedInfo) {
 	truncatedBoxes := make(map[string]TruncatedInfo, 0)
+	b = removeCommentsInCase(b, hideComments)
 	if (currentDepth >= maxDepth) && (!b.Expand) && (!isRelatedToId(b, expanded)) {
 		// possible removed connections to this object
 		if b.Id == "" {
 			b.Id = getNewId()
 		}
-		collectTruncatedFromCont(b.Horizontal, b.Id, &truncatedBoxes)
-		collectTruncatedFromCont(b.Vertical, b.Id, &truncatedBoxes)
+		collectTruncatedFromCont(b.Horizontal, b.Id, &truncatedBoxes, hideComments)
+		collectTruncatedFromCont(b.Vertical, b.Id, &truncatedBoxes, hideComments)
 		b.Horizontal = make([]boxes.Layout, 0)
 		b.Vertical = make([]boxes.Layout, 0)
 	} else {
@@ -137,10 +156,10 @@ func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blackliste
 					if b.Id == "" {
 						b.Id = getNewId()
 					}
-					collectTruncated(b.Horizontal[i], b.Id, &truncatedBoxes)
+					collectTruncated(b.Horizontal[i], b.Id, &truncatedBoxes, hideComments)
 					continue
 				}
-				l, trunc := truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, expanded, blacklisted)
+				l, trunc := truncBoxes(b.Horizontal[i], currentDepth+1, maxDepth, expanded, blacklisted, hideComments)
 				addTruncated(trunc, &truncatedBoxes)
 				cont = append(cont, l)
 			}
@@ -155,10 +174,10 @@ func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blackliste
 					if b.Id == "" {
 						b.Id = getNewId()
 					}
-					collectTruncated(b.Vertical[i], b.Id, &truncatedBoxes)
+					collectTruncated(b.Vertical[i], b.Id, &truncatedBoxes, hideComments)
 					continue
 				}
-				l, trunc := truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, expanded, blacklisted)
+				l, trunc := truncBoxes(b.Vertical[i], currentDepth+1, maxDepth, expanded, blacklisted, hideComments)
 				addTruncated(trunc, &truncatedBoxes)
 				cont = append(cont, l)
 			}
@@ -190,7 +209,7 @@ func copyTruncatedComments(layout *boxes.Layout, truncatedObjects map[string]Tru
 	}
 }
 
-func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo, hideComments bool) {
 	// copy all needed connections from truncated objects to the current object
 	for _, v := range truncatedObjects {
 		if v.newId == layout.Id {
@@ -207,6 +226,9 @@ func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]
 				if !connectionExistsByDestId(layout.Connections, destIdToUse) {
 					if destIdToUse != layout.Id {
 						c.DestId = destIdToUse
+						if hideComments && c.Comment != nil {
+							c.Comment = nil
+						}
 						(*layout).Connections = append(layout.Connections, c)
 					}
 				}
@@ -228,30 +250,34 @@ func adjustDestIdInRespectOfTruncated(layout *boxes.Layout, truncatedObjects map
 	layout.Connections = normalizedConnections
 }
 
-func adjustTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
-	copyTruncatedConnections(layout, truncatedObjects)
+func adjustTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo, hideComments bool) {
+	copyTruncatedConnections(layout, truncatedObjects, hideComments)
 	copyTruncatedComments(layout, truncatedObjects)
 	adjustDestIdInRespectOfTruncated(layout, truncatedObjects)
 	if len(layout.Horizontal) > 0 {
-		adjustTruncatedForCont(&layout.Horizontal, truncatedObjects)
+		adjustTruncatedForCont(&layout.Horizontal, truncatedObjects, hideComments)
 	}
 	if len(layout.Vertical) > 0 {
-		adjustTruncatedForCont(&layout.Vertical, truncatedObjects)
+		adjustTruncatedForCont(&layout.Vertical, truncatedObjects, hideComments)
 	}
 }
 
-func adjustTruncatedForCont(cont *[]boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+func adjustTruncatedForCont(cont *[]boxes.Layout, truncatedObjects map[string]TruncatedInfo, hideComments bool) {
 	if cont != nil {
 		for i := range len(*cont) {
-			adjustTruncated(&(*cont)[i], truncatedObjects)
+			adjustTruncated(&(*cont)[i], truncatedObjects, hideComments)
 		}
 	}
 }
 
 func FilterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string) boxes.Boxes {
+	return FilterBoxesComments(layout, defaultDepth, expanded, blacklisted, false)
+}
+
+func FilterBoxesComments(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, hideComments bool) boxes.Boxes {
 	filteredBoxes := boxes.CopyBoxes(&layout)
-	b, truncatedObjects := truncBoxes(layout.Boxes, 0, defaultDepth, expanded, blacklisted)
-	adjustTruncated(&b, truncatedObjects)
+	b, truncatedObjects := truncBoxes(layout.Boxes, 0, defaultDepth, expanded, blacklisted, hideComments)
+	adjustTruncated(&b, truncatedObjects, hideComments)
 	filteredBoxes.Boxes = b
 	return *filteredBoxes
 }
@@ -269,8 +295,12 @@ func DrawBoxesFilteredExt(
 }
 
 func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, debug bool) UIReturn {
+	return DrawBoxesFilteredComments(layout, defaultDepth, expanded, blacklisted, false, debug)
+}
+
+func DrawBoxesFilteredComments(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, hideComments, debug bool) UIReturn {
 	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
-	filteredLayout := FilterBoxes(layout, defaultDepth, expanded, blacklisted)
+	filteredLayout := FilterBoxesComments(layout, defaultDepth, expanded, blacklisted, hideComments)
 	doc, err := InitialLayoutBoxes(&filteredLayout, textDimensionCalulator)
 	if err != nil {
 		return UIReturn{ErrorMsg: fmt.Sprintf("error while initialy layout: %v", err)}
