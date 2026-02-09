@@ -1,0 +1,27 @@
+title: My Local Mixin
+legend:
+  entries:
+    - text: REST
+      format: conn1
+    - text: Proxy forwarded
+      format: conn2
+connections:
+  core-ui-base:
+    connections:
+      - dest: kong-api-gw-kong
+        format: conn1
+  kong-api-gw-kong:
+    connections:
+      - dest: tms-central-object-rest
+        format: conn2
+      - dest: tms-service-generic-tlc-manager
+        format: conn2
+formats:
+  conn1:
+    line:
+      width: 3
+      color: pink
+  conn2:
+    line:
+      width: 1
+      color: purple
