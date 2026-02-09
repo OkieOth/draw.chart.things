@@ -1,3 +1,7 @@
+# v0.7.0
+## Boxes
+* Comment mixins
+
 # v0.6.0
 ## Boxes
 * Extend the UI and the rendering engine to hide comments. The comments are
