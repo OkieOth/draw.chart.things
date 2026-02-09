@@ -122,6 +122,13 @@ function parseTitleFromYaml(text, fallback) {
 
 function ensureUploadOptionsInCombo(sel) {
     if (!sel) return;
+    // Remove stale uploaded options that are no longer in storage
+    const current = new Set(getUploadedMixins().map((u) => `uploaded::${u.id}`));
+    Array.from(sel.querySelectorAll("option")).forEach((opt) => {
+        if (opt && typeof opt.value === "string" && opt.value.startsWith("uploaded::")) {
+            if (!current.has(opt.value)) opt.remove();
+        }
+    });
     // Append existing uploaded mixins as options
     const uploaded = getUploadedMixins();
     for (const u of uploaded) {
@@ -146,6 +153,16 @@ function ensureUploadOptionsInCombo(sel) {
         sentinel.textContent = "Upload file…";
         sel.appendChild(sentinel);
     }
+}
+
+function removeUploadedMixin(id) {
+    const list = getUploadedMixins();
+    const next = list.filter((x) => x && x.id !== id);
+    setUploadedMixins(next);
+}
+
+function clearUploadedMixins() {
+    setUploadedMixins([]);
 }
 
 // Spinner helpers
@@ -216,6 +233,120 @@ function initPage() {
                         window.currentYamlFile = combo.value;
                     }
                 });
+            });
+        }
+
+        // Manage Uploads UI wiring
+        const manageBtn = document.getElementById("btn-manage-uploads");
+        const popup = document.getElementById("uploads-popup");
+        const listEl = document.getElementById("uploads-list");
+        const closeBtn = document.getElementById("uploads-close-btn");
+        const doneBtn = document.getElementById("uploads-done");
+        const clearAllBtn = document.getElementById("uploads-clear-all");
+
+        function refreshComboAfterStorageChange(removedId) {
+            const sel = document.getElementById("toolbar-combo");
+            if (!sel) return;
+            // Update options to reflect storage
+            ensureUploadOptionsInCombo(sel);
+            // If removed was selected, choose a fallback
+            const removedVal = removedId ? `uploaded::${removedId}` : null;
+            const currentVal = sel.value;
+            const hasCurrent = currentVal && sel.querySelector(`option[value='${CSS.escape(currentVal)}']`);
+            if (removedVal && currentVal === removedVal || !hasCurrent) {
+                // Pick first non-sentinel option if available
+                const opts = Array.from(sel.options).filter(o => o.value !== "__upload__");
+                if (opts.length) {
+                    sel.value = opts[0].value;
+                } else {
+                    // Nothing left, clear selection
+                    sel.selectedIndex = -1;
+                }
+                // Trigger change to refresh SVG/mixins
+                sel.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        }
+
+        function populateUploadsPopup() {
+            if (!listEl) return;
+            const items = getUploadedMixins();
+            listEl.innerHTML = "";
+            if (!items.length) {
+                const empty = document.createElement("div");
+                empty.textContent = "No uploaded mixins stored.";
+                empty.style.color = "#666";
+                listEl.appendChild(empty);
+                return;
+            }
+            items.forEach((it) => {
+                const row = document.createElement("div");
+                row.style.display = "flex";
+                row.style.alignItems = "center";
+                row.style.justifyContent = "space-between";
+                row.style.gap = "8px";
+                row.style.padding = "4px 0";
+
+                const info = document.createElement("div");
+                info.style.display = "flex";
+                info.style.flexDirection = "column";
+                const title = document.createElement("span");
+                title.textContent = it.title || it.id;
+                title.style.fontWeight = "600";
+                const sub = document.createElement("span");
+                sub.textContent = it.id;
+                sub.style.fontSize = "0.85em";
+                sub.style.color = "#666";
+                info.appendChild(title);
+                info.appendChild(sub);
+
+                const actions = document.createElement("div");
+                const del = document.createElement("button");
+                del.className = "tool-btn";
+                del.title = "Remove";
+                del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                del.addEventListener("click", () => {
+                    removeUploadedMixin(it.id);
+                    populateUploadsPopup();
+                    refreshComboAfterStorageChange(it.id);
+                });
+                actions.appendChild(del);
+
+                row.appendChild(info);
+                row.appendChild(actions);
+                listEl.appendChild(row);
+            });
+        }
+
+        function showUploadsPopup() {
+            if (!popup) return;
+            populateUploadsPopup();
+            popup.classList.remove("hidden");
+            popup.style.display = "block";
+            popup.focus();
+        }
+        function hideUploadsPopup() {
+            if (!popup) return;
+            popup.classList.add("hidden");
+            popup.style.display = "none";
+        }
+
+        if (manageBtn) manageBtn.addEventListener("click", showUploadsPopup);
+        if (closeBtn) closeBtn.addEventListener("click", hideUploadsPopup);
+        if (doneBtn) doneBtn.addEventListener("click", hideUploadsPopup);
+        if (clearAllBtn) clearAllBtn.addEventListener("click", () => {
+            clearUploadedMixins();
+            populateUploadsPopup();
+            refreshComboAfterStorageChange(null);
+        });
+        // Dismiss on ESC and outside click
+        if (popup) {
+            popup.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") hideUploadsPopup();
+            });
+            document.addEventListener("mousedown", function (e) {
+                if (!popup.classList.contains("hidden") && !popup.contains(e.target) && e.target !== manageBtn) {
+                    hideUploadsPopup();
+                }
             });
         }
     // Production-ready: handle combo box change logic in a separate function
