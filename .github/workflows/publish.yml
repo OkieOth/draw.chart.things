@@ -17,18 +17,6 @@ jobs:
               run: |
                   TAG_NAME=v$(grep "const Version =" cmd/sub/version.go | grep "const Version =" | sed -e 's-.*= "--' -e 's-".*--')
                   echo "tag_name=$TAG_NAME" >> $GITHUB_ENV
-            - name: Create a tag
-              env:
-                  TAG_NAME: ${{ env.tag_name }}
-              uses: actions/github-script@v5
-              with:
-                  script: |
-                      github.rest.git.createRef({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      ref: `refs/tags/${process.env.TAG_NAME}`,
-                      sha: context.sha
-                      })
             - name: Checkout repository
               uses: actions/checkout@v4
             - name: build normal docker image
