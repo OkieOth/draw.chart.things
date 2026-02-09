@@ -175,12 +175,21 @@ function initPage() {
             // Use saved state for filterTexts and blacklistIds
             const filterTexts = savedBadgeState;
             const blacklistIds = savedBlacklistState;
+            console.log(
+                "Refreshing SVG: ",
+                filterTexts,
+                "blacklist ids: ",
+                blacklistIds,
+                "comments hidden: ",
+                window.hideCommentsEnabled
+            );
             let svgStr = createSvgExt(
                 arg,
                 mixins,
                 window.defaultDepth,
                 filterTexts,
                 blacklistIds,
+                window.hideCommentsEnabled,
                 window.debug
             );
             svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
@@ -469,7 +478,9 @@ function initPage() {
                         "Refreshing SVG: ",
                         filterTexts,
                         "blacklist ids: ",
-                        blacklistIds
+                        blacklistIds,
+                        "comments hidden: ",
+                        window.hideCommentsEnabled
                     );
                     let svgStr = createSvgExt(
                         arg,
@@ -477,6 +488,7 @@ function initPage() {
                         window.defaultDepth,
                         filterTexts,
                         blacklistIds,
+                        window.hideCommentsEnabled,
                         window.debug
                     );
                     svgStr =
@@ -866,13 +878,21 @@ async function loadSVGFromWasm() {
             typeof window.input === "string" && window.input.length > 0
                 ? window.input
                 : "";
-        console.log("Refreshing SVG:", filterTexts, "blacklist ids:", blacklistIds);
+        console.log(
+            "Refreshing SVG: ",
+            filterTexts,
+            "blacklist ids: ",
+            blacklistIds,
+            "comments hidden: ",
+            window.hideCommentsEnabled
+        );
         const res = window.createSvgExt(
             initialArg,
             mixins, // additional mixins to hone the layout input
             window.defaultDepth,
             filterTexts,
             blacklistIds,
+            window.hideCommentsEnabled,
             window.debug
         );
         svgStr = res && typeof res.then === "function" ? await res : res;
@@ -1274,12 +1294,21 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
         const blacklistIds = getAllBadgeCaptions("blacklist-list");
         // Use input YAML filename or fallback
         const arg = (typeof window.input === "string" && window.input.length > 0) ? window.input : "1";
+        console.log(
+            "Refreshing SVG: ",
+            expandedIds,
+            "blacklist ids: ",
+            blacklistIds,
+            "comments hidden: ",
+            window.hideCommentsEnabled
+        );
         let svgStr = window.createSvgExt(
             arg,
             mixins,
             maxDepth,
             expandedIds,
             blacklistIds,
+            window.hideCommentsEnabled,
             window.debug
         );
         svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
@@ -1485,7 +1514,9 @@ function observeCaptionAndRefresh(el) {
                     "Refreshing SVG: ",
                     filterTexts,
                     "blacklist ids: ",
-                    blacklistIds
+                    blacklistIds,
+                    "comments hidden: ",
+                    window.hideCommentsEnabled
                 );
                 let svgStr = createSvgExt(
                     arg,
@@ -1493,6 +1524,7 @@ function observeCaptionAndRefresh(el) {
                     window.defaultDepth,
                     filterTexts,
                     blacklistIds,
+                    window.hideCommentsEnabled,
                     window.debug
                 );
 
@@ -1911,6 +1943,7 @@ function updateToolButtons() {
     const btnCollector = document.getElementById("btn-collector");
     const btnBlacklist = document.getElementById("btn-blacklist");
     const btnDebug = document.getElementById("btn-debug");
+    const btnHideComments = document.getElementById("btn-hide-comments");
     if (btnPan)
         btnPan.classList.toggle("active", panToolActive || spacePressed);
     if (btnMinimap) btnMinimap.classList.toggle("active", minimapVisible);
@@ -1923,6 +1956,11 @@ function updateToolButtons() {
     // Blacklist is active when blacklistMode is true
     if (btnBlacklist) btnBlacklist.classList.toggle("active", blacklistMode);
     if (btnDebug) btnDebug.classList.toggle("active", !!window.debug);
+    // Reflect Hide Comments toggle
+    if (btnHideComments) {
+        const enabled = !!window.hideCommentsEnabled;
+        btnHideComments.classList.toggle("active", enabled);
+    }
 }
 
 // Blacklist tool toggle (moved to global svgControls below)
@@ -2024,3 +2062,19 @@ function onKeyUp(e) {
         applyTransform();
     }
 }
+
+// Stub: invoked when the Hide Comments toolbar toggle changes state.
+// Later, this can call into WASM or update rendering as needed.
+window.onHideCommentsChanged = function (enabled) {
+    try {
+        console.log("onHideCommentsChanged:", enabled);
+        // Keep toolbar state in sync
+        updateToolButtons();
+        // Re-render SVG with updated showComments flag
+        if (typeof window.reloadSvgFromBadges === "function") {
+            window.reloadSvgFromBadges();
+        }
+    } catch (err) {
+        // no-op
+    }
+};

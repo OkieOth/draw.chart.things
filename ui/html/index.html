@@ -22,7 +22,6 @@
     <body>
         <!-- Fixed menu (stays put during pan/zoom) -->
         <div id="menu">
-            <strong>SVG Controls:</strong>
             <button title="Zoom +" hx-on:click="window.svgControls.zoom(1.2)">
                 <i class="fa-solid fa-magnifying-glass-plus"></i>
             </button>
@@ -91,6 +90,15 @@
                 <option value="conn1.yaml">Additional Connections 1</option>
                 <option value="conn2.yaml">Additional Connections 2</option>
             </select>
+            <!-- Hide Comments toggle button -->
+            <button
+                id="btn-hide-comments"
+                class="tool-btn"
+                title="Toggle Hide Comments"
+                style="margin-left: 8px"
+            >
+                <i class="fa-solid fa-comment-slash"></i>
+            </button>
             <!-- Permalink button -->
             <button
                 id="btn-permalink"
@@ -431,6 +439,30 @@
                             grp &&
                             rt.classList.contains(grp);
                         if (!movingWithinGroup && grp) removeHighlight(grp);
+                    }
+                });
+            })();
+
+            // Hide Comments toggle: button logs current state to console and notifies stub
+            (function () {
+                const btn = document.getElementById("btn-hide-comments");
+                if (!btn) return;
+                // Global state for potential future use
+                window.hideCommentsEnabled = false;
+                btn.addEventListener("click", function () {
+                    window.hideCommentsEnabled = !window.hideCommentsEnabled;
+                    // Visual feedback using existing .tool-btn.active styling
+                    btn.classList.toggle("active", window.hideCommentsEnabled);
+                    console.log(
+                        `Hide Comments: ${window.hideCommentsEnabled ? "ON" : "OFF"}`,
+                    );
+                    // Notify optional stub for future WASM integration
+                    if (typeof window.onHideCommentsChanged === "function") {
+                        try {
+                            window.onHideCommentsChanged(window.hideCommentsEnabled);
+                        } catch (err) {
+                            console.warn("onHideCommentsChanged failed:", err);
+                        }
                     }
                 });
             })();

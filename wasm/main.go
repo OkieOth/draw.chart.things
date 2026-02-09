@@ -21,7 +21,8 @@ const unknownSvg string = `<svg xmlns="http://www.w3.org/2000/svg" width="800" h
 `
 
 // getSVG implements the requested signature
-func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []string, debug bool) string {
+func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []string, hideComments, debug bool) string {
+	fmt.Printf("createSvg: hideComments=%v, debug:=%v\n", hideComments, debug)
 	var boxes boxes.Boxes
 	if err := y.Unmarshal([]byte(boxesYaml), &boxes); err != nil {
 		return unknownSvg
@@ -29,15 +30,17 @@ func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []strin
 	if boxes.Version != nil {
 		boxes.Title += fmt.Sprintf(" [%s]", *boxes.Version)
 	}
-	ret := boxesimpl.DrawBoxesFiltered(boxes, defaultDepth, expanded, blacklisted, debug)
+	ret := boxesimpl.DrawBoxesFilteredComments(boxes, defaultDepth, expanded, blacklisted, hideComments, debug)
 	if ret.ErrorMsg != "" {
 		return unknownSvg
 	}
 	return ret.SVG
 }
 
-func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded, blacklisted []string, debug bool) string {
+func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded, blacklisted []string, hideComments, debug bool) string {
 	var b boxes.Boxes
+	fmt.Printf("createSvgExt: hideComments=%v, debug=%v\n", hideComments, debug)
+
 	if err := y.Unmarshal([]byte(boxesYaml), &b); err != nil {
 		fmt.Printf("error while unmarshalling boxes layout: %v", err)
 		return unknownSvg
@@ -54,7 +57,7 @@ func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded,
 		b.MixinThings(m)
 	}
 
-	ret := boxesimpl.DrawBoxesFiltered(b, defaultDepth, expanded, blacklisted, debug)
+	ret := boxesimpl.DrawBoxesFilteredComments(b, defaultDepth, expanded, blacklisted, hideComments, debug)
 	if ret.ErrorMsg != "" {
 		return unknownSvg
 	}
@@ -79,12 +82,13 @@ func getArrayFromJsValue(args []js.Value, index int) ([]string, error) {
 
 // JS wrapper: exposes getSvg to JavaScript
 func createSvgWrapper(this js.Value, args []js.Value) interface{} {
-	if len(args) < 5 {
-		return "error: expected (string, number, string[], string[], bool)"
+	if len(args) < 6 {
+		return "error: expected (string, number, string[], string[], bool, bool)"
 	}
 	input := args[0].String()
 	depth := args[1].Int()
-	debug := args[4].Bool()
+	hideComments := args[4].Bool()
+	debug := args[5].Bool()
 	expanded, err := getArrayFromJsValue(args, 2)
 	if err != nil {
 		return "error: expanded must be an array"
@@ -93,12 +97,12 @@ func createSvgWrapper(this js.Value, args []js.Value) interface{} {
 	if err != nil {
 		return "error: blacklisted must be an array"
 	}
-	return createSvg(input, depth, expanded, blacklisted, debug)
+	return createSvg(input, depth, expanded, blacklisted, hideComments, debug)
 }
 
 func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
-	if len(args) < 6 {
-		return "error: expected (string, string[], number, string[], string[], bool)"
+	if len(args) < 7 {
+		return "error: expected (string, string[], number, string[], string[], bool, bool)"
 	}
 	input := args[0].String()
 	mixins, err := getArrayFromJsValue(args, 1)
@@ -114,8 +118,9 @@ func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
 		return "error: blacklisted must be an array"
 	}
 	depth := args[2].Int()
-	debug := args[5].Bool()
-	return createSvgExt(input, mixins, depth, expanded, blacklisted, debug)
+	hideComments := args[5].Bool()
+	debug := args[6].Bool()
+	return createSvgExt(input, mixins, depth, expanded, blacklisted, hideComments, debug)
 }
 
 func main() {

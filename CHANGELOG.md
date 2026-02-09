@@ -1,3 +1,8 @@
+# v0.6.0
+## Boxes
+* Extend the UI and the rendering engine to hide comments. The comments are
+  hidden for layout elements and connections
+
 # v0.5.0
 ## Boxes
 * introduce comments instead of one comment to document layout elements ...
