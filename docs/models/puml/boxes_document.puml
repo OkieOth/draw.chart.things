@@ -140,6 +140,7 @@ class "**CommentContainer**" as CommentContainer {
         IntegerType textWidth
         IntegerType textHeight
         BooleanType customMarker
+        IntegerType connectionIndex
 }
 note top: all parameters to render the\ncomments in the graphic
 
@@ -151,7 +152,7 @@ class "**DocOverlay**" as DocOverlay {
         NumberType centerXOffset
         NumberType centerYOffset
         Map<OverlayEntry> layouts
-        OverlayRadiusDef radiusVariations
+        OverlayRadiusDef radiusDefs
         OverlayFormatDef formats
 }
 note top: Definition of a topic related\noverlay ... for instance for\nheatmaps
@@ -440,6 +441,7 @@ ConnectionNode "0" *-- "n" ConnectionEdge
 
 
 CommentContainer  *--  CommentFormat
+
 
 
 

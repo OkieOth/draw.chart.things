@@ -523,7 +523,12 @@ func (doc *BoxesDocument) DrawComments(drawing types.Drawing, c types.TextDimens
 func (doc *BoxesDocument) drawCommentMarkers(drawing types.Drawing) error {
 	for i := range doc.Comments {
 		c := doc.Comments[i]
-		drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		if c.ConnectionIndex != nil {
+			className := fmt.Sprintf("conLine_%d", *c.ConnectionIndex)
+			drawing.DrawCircleWithBorderTextAndClass(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
+		} else {
+			drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		}
 	}
 	return nil
 }

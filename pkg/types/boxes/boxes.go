@@ -349,6 +349,9 @@ type Overlay struct {
     // Optional reference value that defines the reference value for this type of overlay
     RefValue float64  `yaml:"refValue"`
 
+    // radius for having a value of refValue
+    RefRadius *float64  `yaml:"refRadius,omitempty"`
+
     // in case of multiple overlays existing, this allows to define a percentage offset from the center-x of the related layout object
     CenterXOffset float64  `yaml:"centerXOffset"`
 
@@ -359,7 +362,7 @@ type Overlay struct {
     Layouts map[string]float64  `yaml:"layouts,omitempty"`
 
     // if this is configured the the radius for the layouts is in a percentage of the refValue
-    RadiusVariations *OverlayRadiusDef  `yaml:"radiusVariations,omitempty"`
+    RadiusDefs *OverlayRadiusDef  `yaml:"radiusDefs,omitempty"`
 
     Formats *OverlayFormatDef  `yaml:"formats,omitempty"`
 }
@@ -378,13 +381,14 @@ func CopyOverlay(src *Overlay) *Overlay {
     var ret Overlay
     ret.Caption = src.Caption
     ret.RefValue = src.RefValue
+    ret.RefRadius = src.RefRadius
     ret.CenterXOffset = src.CenterXOffset
     ret.CenterYOffset = src.CenterYOffset
     ret.Layouts = make(map[string]float64, 0)
     for k, v := range src.Layouts {
         ret.Layouts[k] = v
     }
-    ret.RadiusVariations = CopyOverlayRadiusDef(src.RadiusVariations)
+    ret.RadiusDefs = CopyOverlayRadiusDef(src.RadiusDefs)
     ret.Formats = CopyOverlayFormatDef(src.Formats)
 
     return &ret
@@ -524,10 +528,10 @@ func CopyLayoutMixin(src *LayoutMixin) *LayoutMixin {
 type OverlayRadiusDef struct {
 
     // minimal radius to use for the display
-    MinRadius float64  `yaml:"minRadius"`
+    Min float64  `yaml:"min"`
 
     // maximal radius to use for the display
-    MaxRadius float64  `yaml:"maxRadius"`
+    Max float64  `yaml:"max"`
 }
 
 
@@ -536,8 +540,8 @@ func CopyOverlayRadiusDef(src *OverlayRadiusDef) *OverlayRadiusDef {
         return nil
     }
     var ret OverlayRadiusDef
-    ret.MinRadius = src.MinRadius
-    ret.MaxRadius = src.MaxRadius
+    ret.Min = src.Min
+    ret.Max = src.Max
 
     return &ret
 }

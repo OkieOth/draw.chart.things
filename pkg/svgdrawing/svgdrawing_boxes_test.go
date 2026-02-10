@@ -113,6 +113,7 @@ func TestSvgWithConnections(t *testing.T) {
 			require.Nil(t, err)
 			doc.ConnectBoxes()
 			doc.IncludeComments(textDimensionCalulator)
+			doc.IncludeOverlays(textDimensionCalulator)
 			output, err := os.Create(test.outputFile)
 			require.Nil(t, err)
 			svgdrawing := svgdrawing.NewDrawing(output)

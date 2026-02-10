@@ -663,6 +663,10 @@
         "customMarker": {
           "description": "true if a custom marker is used for this comment",
           "type": "boolean"
+        },
+        "connectionIndex": {
+          "description": "in case this comment belongs to a connection, is here the connectionId stored",
+          "type": "integer"
         }
       },
       "required": [
@@ -706,7 +710,7 @@
             "$ref": "#/definitions/OverlayEntry"
           }
         },
-        "radiusVariations": {
+        "radiusDefs": {
           "description": "if this is configured the the radius for the layouts is in a percentage of the refValue",
           "$ref": "./boxes.json#/definitions/OverlayRadiusDef"
         },
@@ -741,7 +745,7 @@
           "$ref": "#/definitions/BoxFormat"
         }
       },
-      "required": ["value", "x", "y", "format"]
+      "required": ["value", "x", "y", "format", "radius"]
     }
   }
 }

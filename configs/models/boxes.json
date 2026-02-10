@@ -332,6 +332,10 @@
           "description": "Optional reference value that defines the reference value for this type of overlay",
           "type": "number"
         },
+        "refRadius": {
+          "description": "radius for having a value of refValue",
+          "type": "number"
+        },
         "centerXOffset": {
           "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-x of the related layout object",
           "type": "number"
@@ -348,7 +352,7 @@
             "type": "number"
           }
         },
-        "radiusVariations": {
+        "radiusDefs": {
           "description": "if this is configured the the radius for the layouts is in a percentage of the refValue",
           "$ref": "#/definitions/OverlayRadiusDef"
         },
@@ -368,16 +372,16 @@
       "description": "definition how to calculate radius changes based on a reference value",
       "type": "object",
       "properties": {
-        "minRadius": {
+        "min": {
           "description": "minimal radius to use for the display",
           "type": "number"
         },
-        "maxRadius": {
+        "max": {
           "description": "maximal radius to use for the display",
           "type": "number"
         }
       },
-      "required": ["minRadius", "maxRadius"]
+      "required": ["min", "max"]
     },
     "OverlayFormatDef": {
       "description": "definition what format to use for a specific reference value",

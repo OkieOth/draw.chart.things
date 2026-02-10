@@ -46,6 +46,7 @@ func DrawBoxesFromFile(inputFile, outputFile string) error {
 	doc.ConnectBoxes()
 	doc.AdjustDocHeightTLegend(textDimensionCalulator)
 	doc.IncludeComments(textDimensionCalulator)
+	doc.IncludeOverlays(textDimensionCalulator)
 	output, err := os.Create(outputFile)
 	svgdrawing := svgdrawing.NewDrawing(output)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)
@@ -308,6 +309,7 @@ func DrawBoxesFilteredComments(layout boxes.Boxes, defaultDepth int, expanded, b
 	doc.ConnectBoxes()
 	doc.AdjustDocHeightTLegend(textDimensionCalulator)
 	doc.IncludeComments(textDimensionCalulator)
+	doc.IncludeOverlays(textDimensionCalulator)
 	var svgBuilder strings.Builder
 	svgdrawing := svgdrawing.NewDrawing(&svgBuilder)
 	svgdrawing.Start(doc.Title, doc.Height, doc.Width)

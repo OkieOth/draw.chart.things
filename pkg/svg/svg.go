@@ -310,6 +310,10 @@ func (svg *SVG) Circle(x int, y int, r int, s ...string) {
 	svg.printf(`<circle cx="%d" cy="%d" r="%d" %s`, x, y, r, endstyle(s, emptyclose))
 }
 
+func (svg *SVG) CircleWithClass(x int, y int, r int, className string, s ...string) {
+	svg.printf(`<circle class="%s" cx="%d" cy="%d" r="%d" %s`, className, x, y, r, endstyle(s, emptyclose))
+}
+
 // Ellipse centered at x,y, centered at x,y with radii w, and h, with optional style.
 // Standard Reference: http://www.w3.org/TR/SVG11/shapes.html#EllipseElement
 func (svg *SVG) Ellipse(x int, y int, w int, h int, s ...string) {
@@ -471,6 +475,12 @@ func (svg *SVG) TextWithId(id string, x int, y int, t string, s ...string) {
 
 func (svg *SVG) TextWithIdAndClass(id string, x int, y int, t, class string, s ...string) {
 	svg.printf(`<text id="%s" %s class="%s" %s`, id, loc(x, y), class, endstyle(s, ">"))
+	xml.Escape(svg.Writer, []byte(t))
+	svg.println(`</text>`)
+}
+
+func (svg *SVG) TextWithClass(x int, y int, t, class string, s ...string) {
+	svg.printf(`<text %s class="%s" %s`, loc(x, y), class, endstyle(s, ">"))
 	xml.Escape(svg.Writer, []byte(t))
 	svg.println(`</text>`)
 }

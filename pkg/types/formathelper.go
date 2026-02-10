@@ -126,6 +126,23 @@ func InitLineDef(l *LineDef) *LineDef {
 
 }
 
+func InitLineDef2(cDef string, oDef float64) *LineDef {
+	wDef := 0.5
+	sDef := LineDefStyleEnum_solid
+
+	w := &wDef
+	o := &oDef
+	s := &sDef
+	c := &cDef
+
+	return &LineDef{
+		Width:   w,
+		Style:   s,
+		Opacity: o,
+		Color:   c,
+	}
+}
+
 func InitFillDef(l *FillDef) *FillDef {
 	cDef := "white"
 	oDef := 1.0
@@ -141,10 +158,17 @@ func InitFillDef(l *FillDef) *FillDef {
 			c = l.Color
 		}
 	}
-
 	return &FillDef{
 		Opacity: o,
 		Color:   c,
 	}
+}
 
+func InitFillDef2(cDef string, oDef float64) *FillDef {
+	o := &oDef
+	c := &cDef
+	return &FillDef{
+		Opacity: o,
+		Color:   c,
+	}
 }

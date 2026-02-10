@@ -50,6 +50,7 @@ type Drawing interface {
 	DrawSolidCircle(x, y, radius int, color string) error
 	DrawCircleWithBorder(x, y, radius int, fill *FillDef, line *LineDef) error
 	DrawCircleWithBorderAndText(text string, x, y, radius int, fill *FillDef, line *LineDef, font *FontDef) error
+	DrawCircleWithBorderTextAndClass(text string, x, y, radius int, fill *FillDef, line *LineDef, font *FontDef, className string) error
 	DrawText(text string, x, y, width int, fontDef *FontDef) int
 	DrawVerticalText(text string, currentX, y, height int, fontDef *FontDef) int
 	Done() error

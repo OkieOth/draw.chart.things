@@ -415,8 +415,32 @@ func initOverlays(b *boxes.Boxes, doc *boxes.BoxesDocument) error {
 			newOverlay.RefValue = o.RefValue
 			newOverlay.CenterXOffset = o.CenterXOffset
 			newOverlay.CenterYOffset = o.CenterYOffset
-			newOverlay.Formats = o.Formats
-			newOverlay.RadiusVariations = o.RadiusVariations
+			if o.Formats != nil {
+				newOverlay.Formats = o.Formats
+				slices.SortFunc(newOverlay.Formats.Gradations, func(c1, c2 boxes.OverlayGradation) int {
+					if c1.Limit == c2.Limit {
+						return 0
+					} else if c1.Limit < c2.Limit {
+						return -1
+					} else {
+						return 1
+					}
+				})
+			} else {
+				newOverlay.Formats = boxes.NewOverlayFormatDef()
+			}
+			max := float64(doc.Width / 4)
+			min := float64(0)
+			if o.RadiusDefs != nil && o.RadiusDefs.Max > 0 {
+				max = o.RadiusDefs.Max
+			}
+			if o.RadiusDefs != nil && o.RadiusDefs.Min > 0 {
+				max = o.RadiusDefs.Min
+			}
+			newOverlay.RadiusDefs = &boxes.OverlayRadiusDef{
+				Min: min,
+				Max: max, // max radius is when not set one quarter of the document width
+			}
 			for k, v := range o.Layouts {
 				newOverlay.Layouts[k] = boxes.OverlayEntry{
 					Value: v,

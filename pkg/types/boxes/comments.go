@@ -46,7 +46,7 @@ CONNECTIONS:
 					} else {
 						y = l.StartY + (diff / 4)
 					}
-					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker)
+					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
 					doc.Comments = append(doc.Comments, c)
 					continue CONNECTIONS
 				}
@@ -64,7 +64,7 @@ CONNECTIONS:
 					}
 					y := l.StartY
 
-					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker)
+					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
 					doc.Comments = append(doc.Comments, c)
 				}
 			}
@@ -119,7 +119,8 @@ func (doc *BoxesDocument) newCommentContainer(
 	x, y int,
 	moveMarker bool,
 	dimensionsCalc types.TextDimensionCalculator,
-	customMarker bool) CommentContainer {
+	customMarker bool,
+	connectionIndex *int) CommentContainer {
 	if moveMarker {
 		diff := doc.GlobalPadding + 2
 		x, y = x+diff, y+diff
@@ -147,6 +148,7 @@ func (doc *BoxesDocument) newCommentContainer(
 		MarkerTextWidth:  mw,
 		MarkerTextHeight: mh,
 		CustomMarker:     customMarker,
+		ConnectionIndex:  connectionIndex,
 	}
 }
 
@@ -164,7 +166,7 @@ func (doc *BoxesDocument) collectCommentsFromLayout(l *LayoutElement, dimensions
 	for i := range l.Comments {
 		comment := l.Comments[i]
 		label, customMarker := doc.newLabel(comment.Label)
-		c := doc.newCommentContainer(comment.Text, label, comment.Format, currentX, l.Y+4, false, dimensionsCalc, customMarker)
+		c := doc.newCommentContainer(comment.Text, label, comment.Format, currentX, l.Y+4, false, dimensionsCalc, customMarker, nil)
 		doc.Comments = append(doc.Comments, c)
 		currentX -= (2 * c.MarkerTextWidth) + doc.GlobalPadding + 2
 		if i > 7 {
@@ -177,7 +179,7 @@ func (doc *BoxesDocument) collectCommentsFromLayout(l *LayoutElement, dimensions
 			text = "Has comments in hidden childs"
 			doc.HasHiddenComments = true
 		}
-		c := doc.newCommentContainer(text, "...", nil, l.X, l.Y, false, dimensionsCalc, true)
+		c := doc.newCommentContainer(text, "...", nil, l.X, l.Y, false, dimensionsCalc, true, nil)
 		doc.Comments = append(doc.Comments, c)
 	}
 	doc.collectCommentsFromLayoutCont(l.Horizontal, dimensionsCalc)

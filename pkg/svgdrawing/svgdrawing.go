@@ -575,11 +575,20 @@ func (d *SvgDrawing) DrawCircleWithBorder(x, y, radius int, fill *types.FillDef,
 }
 
 func (d *SvgDrawing) DrawCircleWithBorderAndText(text string, x, y, radius int, fill *types.FillDef, line *types.LineDef, font *types.FontDef) error {
+	return d.DrawCircleWithBorderTextAndClass(text, x, y, radius, fill, line, font, "")
+}
+
+func (d *SvgDrawing) DrawCircleWithBorderTextAndClass(text string, x, y, radius int, fill *types.FillDef, line *types.LineDef, font *types.FontDef, className string) error {
 	attr := d.getCircleStyle(fill, line)
-	d.canvas.Circle(x, y, radius, attr)
 	textFormat := d.textFormat(font)
 	textFormat += ";dominant-baseline: middle;"
-	d.canvas.Text(x, y, text, textFormat)
+	if className != "" {
+		d.canvas.CircleWithClass(x, y, radius, className, attr)
+		d.canvas.TextWithClass(x, y, text, className, textFormat)
+	} else {
+		d.canvas.Circle(x, y, radius, attr)
+		d.canvas.Text(x, y, text, textFormat)
+	}
 	return nil
 }
 

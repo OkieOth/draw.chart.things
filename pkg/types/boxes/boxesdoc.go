@@ -574,6 +574,9 @@ type CommentContainer struct {
 
     // true if a custom marker is used for this comment
     CustomMarker bool  `yaml:"customMarker"`
+
+    // in case this comment belongs to a connection, is here the connectionId stored
+    ConnectionIndex *int  `yaml:"connectionIndex,omitempty"`
 }
 
 
@@ -592,6 +595,7 @@ func CopyCommentContainer(src *CommentContainer) *CommentContainer {
     ret.TextWidth = src.TextWidth
     ret.TextHeight = src.TextHeight
     ret.CustomMarker = src.CustomMarker
+    ret.ConnectionIndex = src.ConnectionIndex
 
     return &ret
 }
@@ -620,7 +624,7 @@ type DocOverlay struct {
     Layouts map[string]OverlayEntry  `yaml:"layouts,omitempty"`
 
     // if this is configured the the radius for the layouts is in a percentage of the refValue
-    RadiusVariations *OverlayRadiusDef  `yaml:"radiusVariations,omitempty"`
+    RadiusDefs *OverlayRadiusDef  `yaml:"radiusDefs,omitempty"`
 
     Formats *OverlayFormatDef  `yaml:"formats,omitempty"`
 }
@@ -645,7 +649,7 @@ func CopyDocOverlay(src *DocOverlay) *DocOverlay {
     for k, v := range src.Layouts {
         ret.Layouts[k] = v
     }
-    ret.RadiusVariations = CopyOverlayRadiusDef(src.RadiusVariations)
+    ret.RadiusDefs = CopyOverlayRadiusDef(src.RadiusDefs)
     ret.Formats = CopyOverlayFormatDef(src.Formats)
 
     return &ret
@@ -863,7 +867,7 @@ type OverlayEntry struct {
 
     Value float64  `yaml:"value"`
 
-    Radius *float64  `yaml:"radius,omitempty"`
+    Radius float64  `yaml:"radius"`
 
     X int  `yaml:"x"`
 
