@@ -255,6 +255,14 @@ button.tool-btn.active {
 }
 
 /* Highlight for hovered connection line: increase stroke width only */
-.connection.highlight-group {
+line.highlight-group {
     stroke-width: 4 !important;
+}
+
+circle.highlight-group {
+    stroke-width: 2 !important;
+}
+
+text.highlight-group {
+    font-weight: 600;
 }
