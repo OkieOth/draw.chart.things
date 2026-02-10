@@ -67,6 +67,12 @@
       "type": "integer",
       "description": "Minimum margin between connectors",
       "default": 10
+    },
+    "overlays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Overlay"
+      }
     }
   },
   "required": ["title", "boxes", "hideTextsForParents"],
@@ -313,6 +319,98 @@
           }
         }
       }
+    },
+    "Overlay": {
+      "description": "Definition of a topic related overlay ... for instance for heatmaps",
+      "type": "object",
+      "properties": {
+        "caption": {
+          "description": "some catchy words to describe the displayed topc",
+          "type": "string"
+        },
+        "refValue": {
+          "description": "Optional reference value that defines the reference value for this type of overlay",
+          "type": "number"
+        },
+        "centerXOffset": {
+          "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-x of the related layout object",
+          "type": "number"
+        },
+        "centerYOffset": {
+          "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-y of the related layout object",
+          "type": "number"
+        },
+        "layouts": {
+          "description": "dictionary of layout elements, that contain this overlay. The dictionary stores the value for this specific object",
+          "type": "object",
+          "$comment": "keys of the dictionary are either IDs or captions of layout elements",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "radiusVariations": {
+          "description": "if this is configured the the radius for the layouts is in a percentage of the refValue",
+          "$ref": "#/definitions/OverlayRadiusDef"
+        },
+        "formats": {
+          "$ref": "#/definitions/OverlayFormatDef"
+        }
+      },
+      "required": [
+        "caption",
+        "refValue",
+        "layouts",
+        "centerXOffset",
+        "centerYOffset"
+      ]
+    },
+    "OverlayRadiusDef": {
+      "description": "definition how to calculate radius changes based on a reference value",
+      "type": "object",
+      "properties": {
+        "minRadius": {
+          "description": "minimal radius to use for the display",
+          "type": "number"
+        },
+        "maxRadius": {
+          "description": "maximal radius to use for the display",
+          "type": "number"
+        }
+      },
+      "required": ["minRadius", "maxRadius"]
+    },
+    "OverlayFormatDef": {
+      "description": "definition what format to use for a specific reference value",
+      "type": "object",
+      "properties": {
+        "default": {
+          "description": "default format to use to display the overlay",
+          "type": "string"
+        },
+        "gradations": {
+          "description": "grations considered for switching for formats to use",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OverlayGradation"
+          }
+        }
+      },
+      "required": ["default"]
+    },
+    "OverlayGradation": {
+      "description": "gradation entry for switching formats for overlays",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "description": "to what value should the here named format being used",
+          "type": "number"
+        },
+        "format": {
+          "description": "name of the defined format to use",
+          "type": "string"
+        }
+      },
+      "required": ["limit", "format"]
     }
   }
 }

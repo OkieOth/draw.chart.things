@@ -386,6 +386,10 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 		return nil, err
 	}
 
+	if err := initOverlays(b, doc); err != nil {
+		return nil, err
+	}
+
 	doc.Boxes = initLayoutElement(&b.Boxes, doc, b)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin
@@ -400,4 +404,25 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 		doc.LineDist = types.LineDist
 	}
 	return doc, nil
+}
+
+func initOverlays(b *boxes.Boxes, doc *boxes.BoxesDocument) error {
+	if len(b.Overlays) > 0 {
+		for i := range b.Overlays {
+			o := b.Overlays[i]
+			newOverlay := boxes.NewDocOverlay()
+			newOverlay.Caption = o.Caption
+			newOverlay.RefValue = o.RefValue
+			newOverlay.CenterXOffset = o.CenterXOffset
+			newOverlay.CenterYOffset = o.CenterYOffset
+			newOverlay.Formats = o.Formats
+			newOverlay.RadiusVariations = o.RadiusVariations
+			for k, v := range o.Layouts {
+				newOverlay.Layouts[k] = boxes.OverlayEntry{
+					Value: v,
+				}
+			}
+		}
+	}
+	return nil
 }

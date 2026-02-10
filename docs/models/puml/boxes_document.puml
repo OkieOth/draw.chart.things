@@ -25,6 +25,7 @@ class "**BoxesDocument**" as BoxesDocument {
         ConnectionLine[] horizontalLines
         ConnectionLine[] verticalLines
         CommentContainer[] comments
+        DocOverlay[] overlays
         BooleanType hasHiddenComments
         IntegerType commentMarkerRadius
         IntegerType legendEndY
@@ -144,6 +145,19 @@ note top: all parameters to render the\ncomments in the graphic
 
  
 
+class "**DocOverlay**" as DocOverlay {
+        StringType caption
+        NumberType refValue
+        NumberType centerXOffset
+        NumberType centerYOffset
+        Map<OverlayEntry> layouts
+        OverlayRadiusDef radiusVariations
+        OverlayFormatDef formats
+}
+note top: Definition of a topic related\noverlay ... for instance for\nheatmaps
+
+ 
+
 class "**ImageContainer**" as ImageContainer {
         IntegerType x
         IntegerType y
@@ -193,6 +207,17 @@ class "**ConnectionEdge**" as ConnectionEdge {
         IntegerType weight
 }
 note top: edge type to store edges\non a connection node
+
+ 
+
+
+class "**OverlayEntry**" as OverlayEntry {
+        NumberType value
+        NumberType radius
+        IntegerType x
+        IntegerType y
+        BoxFormat format
+}
 
  
 
@@ -314,6 +339,8 @@ BoxesDocument "0" *-- "n" ConnectionLine
 
 BoxesDocument "0" *-- "n" CommentContainer
 
+BoxesDocument "0" *-- "n" DocOverlay
+
 
 
 
@@ -426,6 +453,17 @@ CommentContainer  *--  CommentFormat
 
 
 
+DocOverlay  *--  OverlayEntry
+
+DocOverlay  *--  OverlayRadiusDef
+
+DocOverlay  *--  OverlayFormatDef
+
+    
+
+
+
+
 
 
 
@@ -458,6 +496,14 @@ CommentFormat  *--  FillDef
 
 
 
+
+    
+    
+
+
+
+
+OverlayEntry  *--  BoxFormat
 
     
 

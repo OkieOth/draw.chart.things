@@ -33,11 +33,13 @@ type BoxesFileMixings struct {
     // Set of formats that overwrites the style of boxes, if specific conditions are met
     FormatVariations *FormatVariations  `yaml:"formatVariations,omitempty"`
 
-    // dictionary of comment objects
+    // dictionary of comment objects, this comment will applied on layout objects and replace existing comments there
     Comments map[string]types.Comment  `yaml:"comments,omitempty"`
 
     // optional map of images used in the generated graphic
     Images map[string]types.ImageDef  `yaml:"images,omitempty"`
+
+    Overlays []Overlay  `yaml:"overlays,omitempty"`
 }
 
 func NewBoxesFileMixings() *BoxesFileMixings {
@@ -49,6 +51,7 @@ func NewBoxesFileMixings() *BoxesFileMixings {
         FormatVariations: NewFormatVariations(),
         Comments: make(map[string]types.Comment, 0),
         Images: make(map[string]types.ImageDef, 0),
+        Overlays: make([]Overlay, 0),
     }
 }
 
@@ -80,6 +83,10 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
     ret.Images = make(map[string]types.ImageDef, 0)
     for k, v := range src.Images {
         ret.Images[k] = v
+    }
+    ret.Overlays = make([]Overlay, 0)
+    for _, e := range src.Overlays {
+        ret.Overlays = append(ret.Overlays, e)
     }
 
     return &ret

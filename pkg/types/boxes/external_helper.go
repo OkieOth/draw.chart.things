@@ -132,6 +132,7 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	b.mixInLayoutsImpl(&b.Boxes, &additional.LayoutMixins)
 	b.mixInConnectionsImpl(&b.Boxes, additional.Connections)
 	b.mixInCommentsImpl(&b.Boxes, additional.Comments)
+	b.Overlays = append(b.Overlays, additional.Overlays...)
 	if len(additional.Formats) > 0 {
 		if b.Formats == nil {
 			b.Formats = make(map[string]Format)
