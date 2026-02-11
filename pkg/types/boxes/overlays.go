@@ -4,12 +4,41 @@ import "github.com/okieoth/draw.chart.things/pkg/types"
 
 func (doc *BoxesDocument) IncludeOverlays(c types.TextDimensionCalculator) error {
 	if len(doc.Overlays) > 0 {
+		minX, minY, maxX, maxY := 0, 0, doc.Width, doc.Height
 		for overlayIndex := range doc.Overlays {
 			overlay := doc.Overlays[overlayIndex]
 			for layoutKey, _ := range overlay.Layouts {
 				overlayEntry := overlay.Layouts[layoutKey]
 				doc.initOverlayForLayout(&doc.Boxes, &overlay, layoutKey, &overlayEntry)
+				radiusAsInt := int(overlayEntry.Radius)
+				minX = getMin(overlayEntry.X-radiusAsInt, minX)
+				minY = getMin(overlayEntry.Y-radiusAsInt, minY)
+				maxX = getMax(overlayEntry.X+radiusAsInt, maxX)
+				maxY = getMax(overlayEntry.Y+radiusAsInt, maxY)
 			}
+		}
+		// adjust in case the document size
+		if minX < 0 {
+			// extend the document to the right and move all elements to the right
+			diff := absInt(minX) + doc.GlobalPadding
+			doc.Width += diff
+			doc.MoveAllElementsToRight(diff)
+		}
+		if maxX < doc.Width {
+			// extend only the document to the right
+			diff := absInt(minX) + doc.GlobalPadding
+			doc.Boxes.Width += diff
+			doc.Width += diff
+		}
+		if minY < 0 {
+			diff := absInt(minY) + doc.GlobalPadding
+			doc.Height += diff
+			doc.MoveAllElementsDown(diff)
+		}
+		if maxY < 0 {
+			diff := absInt(maxY) + doc.GlobalPadding
+			doc.Height += diff
+			doc.Boxes.Height += diff
 		}
 	}
 	return nil
@@ -105,4 +134,94 @@ func (doc *BoxesDocument) initOverlaysFromLayoutCont(cont *LayoutElemContainer, 
 		}
 	}
 	return false
+}
+
+func (doc *BoxesDocument) MoveAllElementsToRight(diff int) {
+	doc.moveLayoutToRight(&doc.Boxes, diff)
+	for i := range doc.HorizontalLines {
+		l := doc.HorizontalLines[i]
+		l.StartX += diff
+		l.EndX += diff
+	}
+	for i := range doc.VerticalLines {
+		l := doc.VerticalLines[i]
+		l.StartX += diff
+		l.EndX += diff
+	}
+	for i := range doc.Comments {
+		c := doc.Comments[i]
+		c.MarkerX += diff
+	}
+	for i := range doc.Overlays {
+		for j := range doc.Overlays[i].Layouts {
+			oe := doc.Overlays[i].Layouts[j]
+			oe.X += diff
+		}
+	}
+}
+
+func addIntIfNotNil(v *int, i int) {
+	if v != nil {
+		*v += i
+	}
+}
+
+func (doc *BoxesDocument) moveLayoutToRight(l *LayoutElement, diff int) {
+	addIntIfNotNil(l.BottomXToStart, diff)
+	addIntIfNotNil(l.TopXToStart, diff)
+	addIntIfNotNil(l.XTextBox, diff)
+	l.CenterX += diff
+	l.X += diff
+	doc.moveLayoutContToRight(l.Horizontal, diff)
+	doc.moveLayoutContToRight(l.Vertical, diff)
+}
+
+func (doc *BoxesDocument) moveLayoutContToRight(cont *LayoutElemContainer, diff int) {
+	if cont != nil {
+		for i := range cont.Elems {
+			doc.moveLayoutToRight(&cont.Elems[i], diff)
+		}
+	}
+}
+
+func (doc *BoxesDocument) MoveAllElementsDown(diff int) {
+	doc.moveLayoutDown(&doc.Boxes, diff)
+	for i := range doc.HorizontalLines {
+		l := doc.HorizontalLines[i]
+		l.StartY += diff
+		l.EndY += diff
+	}
+	for i := range doc.VerticalLines {
+		l := doc.VerticalLines[i]
+		l.StartY += diff
+		l.EndY += diff
+	}
+	for i := range doc.Comments {
+		c := doc.Comments[i]
+		c.MarkerY += diff
+	}
+	for i := range doc.Overlays {
+		for j := range doc.Overlays[i].Layouts {
+			oe := doc.Overlays[i].Layouts[j]
+			oe.Y += diff
+		}
+	}
+}
+
+func (doc *BoxesDocument) moveLayoutDown(l *LayoutElement, diff int) {
+	addIntIfNotNil(l.LeftYToStart, diff)
+	addIntIfNotNil(l.RightYToStart, diff)
+	addIntIfNotNil(l.YTextBox, diff)
+	l.CenterY += diff
+	l.Y += diff
+	doc.moveLayoutContDown(l.Horizontal, diff)
+	doc.moveLayoutContDown(l.Vertical, diff)
+}
+
+func (doc *BoxesDocument) moveLayoutContDown(cont *LayoutElemContainer, diff int) {
+	if cont != nil {
+		for i := range cont.Elems {
+			doc.moveLayoutDown(&cont.Elems[i], diff)
+		}
+	}
 }

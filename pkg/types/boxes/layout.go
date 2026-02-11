@@ -255,6 +255,13 @@ func getMax(v1, v2 int) int {
 	return v1
 }
 
+func getMin(v1, v2 int) int {
+	if v2 < v1 {
+		return v2
+	}
+	return v1
+}
+
 func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	var cW, cH, t1W, t1H, t2W, t2H, textWidth, textHeight int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
