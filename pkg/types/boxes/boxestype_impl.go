@@ -520,6 +520,28 @@ func (doc *BoxesDocument) DrawComments(drawing types.Drawing, c types.TextDimens
 	return nil
 }
 
+func (doc *BoxesDocument) DrawOverlays(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	if len(doc.Overlays) > 0 {
+		for i := range doc.Overlays {
+			for j := range doc.Overlays[i].Layouts {
+				oe := doc.Overlays[i].Layouts[j]
+				drawing.DrawCircleWithBorder(oe.X, oe.Y, int(oe.Radius), oe.Format.Fill, oe.Format.Line)
+				label := fmt.Sprintf("%d", int(oe.Value))
+				size := int(oe.Radius / 5)
+				if size < 14 {
+					size = 14
+				}
+				labelFont := types.InitFontDef(nil, "sans", size, true, false, 0)
+				labelFont.Color = *oe.Format.Fill.Color
+				labelFont.Anchor = types.FontDefAnchorEnum_middle
+				_, h := c.Dimensions(label, &labelFont)
+				drawing.DrawText(label, oe.X, oe.Y-(h/2), 0, &labelFont)
+			}
+		}
+	}
+	return nil
+}
+
 func (doc *BoxesDocument) drawCommentMarkers(drawing types.Drawing) error {
 	for i := range doc.Comments {
 		c := doc.Comments[i]

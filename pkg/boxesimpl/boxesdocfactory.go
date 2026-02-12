@@ -31,6 +31,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 		conn.Comment = elem.Comment
 		conn.SourceArrow = elem.SourceArrow
 		conn.DestArrow = elem.DestArrow
+		conn.HiddenComments = elem.HiddenComments
 		conn.Tags = elem.Tags
 		if elem.Format != nil {
 			if formatInst, ok := inputFormats[*elem.Format]; ok {
@@ -435,7 +436,7 @@ func initOverlays(b *boxes.Boxes, doc *boxes.BoxesDocument) error {
 				max = o.RadiusDefs.Max
 			}
 			if o.RadiusDefs != nil && o.RadiusDefs.Min > 0 {
-				max = o.RadiusDefs.Min
+				min = o.RadiusDefs.Min
 			}
 			newOverlay.RadiusDefs = &boxes.OverlayRadiusDef{
 				Min: min,
@@ -446,6 +447,7 @@ func initOverlays(b *boxes.Boxes, doc *boxes.BoxesDocument) error {
 					Value: v,
 				}
 			}
+			doc.Overlays = append(doc.Overlays, *newOverlay)
 		}
 	}
 	return nil

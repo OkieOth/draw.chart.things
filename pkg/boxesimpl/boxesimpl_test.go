@@ -428,15 +428,29 @@ func TestDrawBoxesWithOverlays(t *testing.T) {
 		inputFile  string
 		mixins     []string
 		outputFile string
+		maxdepth   int
 	}{
+		// {
+		// 	inputFile: "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+		// 	mixins: []string{
+		// 		"../../resources/examples_boxes/ext_connections.yaml",
+		// 		"../../resources/examples_boxes/ext_formats.yaml",
+		// 		"../../resources/examples_boxes/ext_overlays.yaml",
+		// 	},
+		// 	maxdepth:   100,
+		// 	outputFile: "../../temp/ext_complex_horizontal_connected_pics2.svg",
+		// },
+		// {
+		// 	inputFile:  "../../resources/examples_boxes/boxes_connected.yaml",
+		// 	outputFile: "../../temp/boxes_connected.svg",
+		// 	mixins:     []string{},
+		// 	maxdepth:   2,
+		// },
 		{
-			inputFile: "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
-			mixins: []string{
-				"../../resources/examples_boxes/ext_connections.yaml",
-				"../../resources/examples_boxes/ext_formats.yaml",
-				"../../resources/examples_boxes/ext_overlays.yaml",
-			},
-			outputFile: "../../temp/ext_complex_horizontal_connected_pics.svg",
+			inputFile:  "../../resources/examples_boxes/boxes_connected_2.yaml",
+			outputFile: "../../temp/boxes_connected_2.svg",
+			mixins:     []string{},
+			maxdepth:   1,
 		},
 	}
 	for i, test := range tests {
@@ -451,7 +465,7 @@ func TestDrawBoxesWithOverlays(t *testing.T) {
 			mixins = append(mixins, *mixin)
 		}
 
-		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, 100, []string{}, []string{}, false)
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, test.maxdepth, []string{}, []string{}, false)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 

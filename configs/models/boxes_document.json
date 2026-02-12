@@ -339,6 +339,10 @@
         "format": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
+        "hiddenComments": {
+          "description": "is only set by while the layout is processed, don't set it in the definition",
+          "type": "boolean"
+        },
         "tags": {
           "description": "Tags to annotate the connection, tags are used to format",
           "type": "array",
@@ -347,7 +351,13 @@
           }
         }
       },
-      "required": ["destId", "sourceArrow", "destArrow", "tags"]
+      "required": [
+        "destId",
+        "sourceArrow",
+        "destArrow",
+        "tags",
+        "hiddenComments"
+      ]
     },
     "ConnectionElem": {
       "type": "object",
@@ -371,6 +381,10 @@
         "format": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
+        "hiddenComments": {
+          "description": "is only set by while the layout is processed, don't set it in the definition",
+          "type": "boolean"
+        },
         "parts": {
           "type": "array",
           "items": {
@@ -385,7 +399,7 @@
           "$ref": "./shared.json#/definitions/Comment"
         }
       },
-      "required": ["parts", "connectionIndex"]
+      "required": ["parts", "connectionIndex", "hiddenComments"]
     },
     "ConnectionLine": {
       "type": "object",

@@ -240,6 +240,10 @@
           "description": "optional format to style the connection",
           "type": "string"
         },
+        "hiddenComments": {
+          "description": "is only set by while the layout is processed, don't set it in the definition",
+          "type": "boolean"
+        },
         "tags": {
           "description": "Tags to annotate the connection, tags are used to format",
           "type": "array",
@@ -248,7 +252,14 @@
           }
         }
       },
-      "required": ["dest", "destId", "sourceArrow", "destArrow", "tags"]
+      "required": [
+        "dest",
+        "destId",
+        "sourceArrow",
+        "destArrow",
+        "tags",
+        "hiddenComments"
+      ]
     },
     "Format": {
       "type": "object",
@@ -338,7 +349,8 @@
         },
         "centerXOffset": {
           "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-x of the related layout object",
-          "type": "number"
+          "type": "number",
+          "example": -0.2
         },
         "centerYOffset": {
           "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-y of the related layout object",

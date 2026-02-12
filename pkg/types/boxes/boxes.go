@@ -447,6 +447,9 @@ type Connection struct {
     // optional format to style the connection
     Format *string  `yaml:"format,omitempty"`
 
+    // is only set by while the layout is processed, don't set it in the definition
+    HiddenComments bool  `yaml:"hiddenComments"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -468,6 +471,7 @@ func CopyConnection(src *Connection) *Connection {
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = src.Format
+    ret.HiddenComments = src.HiddenComments
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)

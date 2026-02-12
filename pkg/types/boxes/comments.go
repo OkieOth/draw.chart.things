@@ -27,46 +27,86 @@ func (doc *BoxesDocument) IncludeComments(c types.TextDimensionCalculator) error
 	return nil
 }
 
+func (doc *BoxesDocument) checkForOverlappingCommentMarkers(x, y int) bool {
+	overlapRange := doc.GlobalPadding * 2
+	for i := range doc.Comments {
+		c := doc.Comments[i]
+		diffX := absInt(c.MarkerX - x)
+		diffY := absInt(c.MarkerY - y)
+		if diffX <= overlapRange && diffY <= overlapRange {
+			return true
+		}
+	}
+	return false
+}
+
+func (doc *BoxesDocument) collectCommentFromConnectionsImpl(c *ConnectionElem, checkForOverlap bool, dimensionsCalc types.TextDimensionCalculator) bool {
+	for li := range doc.VerticalLines {
+		// search for the start line of the connection in the vertical lines
+		l := doc.VerticalLines[li]
+		if l.ConnectionIndex == c.ConnectionIndex {
+			x := l.StartX
+			diff, changed := absInt2(l.EndY - l.StartY)
+			if diff < 20 {
+				continue
+			}
+			var y int
+			if changed {
+				y = l.EndY - (diff / 2)
+			} else {
+				y = l.StartY + (diff / 2)
+			}
+			if !checkForOverlap || !doc.checkForOverlappingCommentMarkers(x, y) {
+				if c.HiddenComments {
+					cc := doc.createHiddenComment(x, y, dimensionsCalc)
+					doc.Comments = append(doc.Comments, cc)
+				} else {
+					label, customMarker := doc.newLabel(c.Comment.Label)
+					cc := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
+					doc.Comments = append(doc.Comments, cc)
+				}
+				return true
+			}
+		}
+	}
+	for li := range doc.HorizontalLines {
+		// search for the start line of the connection in the horizontal lines
+		l := doc.HorizontalLines[li]
+		if l.ConnectionIndex == c.ConnectionIndex {
+			diff, changed := absInt2(l.EndX - l.StartX)
+			if diff < 20 {
+				continue
+			}
+			var x int
+			if changed {
+				x = l.EndX - (diff / 2)
+			} else {
+				x = l.StartX + (diff / 2)
+			}
+			y := l.StartY
+			if !checkForOverlap || !doc.checkForOverlappingCommentMarkers(x, y) {
+				if c.HiddenComments {
+					cc := doc.createHiddenComment(x, y, dimensionsCalc)
+					doc.Comments = append(doc.Comments, cc)
+				} else {
+					label, customMarker := doc.newLabel(c.Comment.Label)
+					cc := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
+					doc.Comments = append(doc.Comments, cc)
+				}
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (doc *BoxesDocument) collectCommentsFromConnections(dimensionsCalc types.TextDimensionCalculator) {
-CONNECTIONS:
 	for i := range doc.Connections {
 		c := doc.Connections[i]
 		if c.Comment != nil {
-			label, customMarker := doc.newLabel(c.Comment.Label)
-			for li := range doc.VerticalLines {
-				// search for the start line of the connection in the vertical lines
-				l := doc.VerticalLines[li]
-				if l.ConnectionIndex == c.ConnectionIndex && (!l.IsStart) && (!l.IsEnd) {
-					x := l.StartX
-
-					diff, changed := absInt2(l.EndY - l.StartY)
-					var y int
-					if changed {
-						y = l.EndY - (diff / 4)
-					} else {
-						y = l.StartY + (diff / 4)
-					}
-					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
-					doc.Comments = append(doc.Comments, c)
-					continue CONNECTIONS
-				}
-			}
-			for li := range doc.HorizontalLines {
-				// search for the start line of the connection in the horizontal lines
-				l := doc.HorizontalLines[li]
-				if l.ConnectionIndex == c.ConnectionIndex && (!l.IsStart) && (!l.IsEnd) {
-					diff, changed := absInt2(l.EndX - l.StartX)
-					var x int
-					if changed {
-						x = l.EndX - (diff / 4)
-					} else {
-						x = l.StartX + (diff / 4)
-					}
-					y := l.StartY
-
-					c := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
-					doc.Comments = append(doc.Comments, c)
-				}
+			if !doc.collectCommentFromConnectionsImpl(&c, true, dimensionsCalc) {
+				// in case no marker could set without overlap ... then it's set with overlap
+				doc.collectCommentFromConnectionsImpl(&c, false, dimensionsCalc)
 			}
 		}
 	}
@@ -174,16 +214,20 @@ func (doc *BoxesDocument) collectCommentsFromLayout(l *LayoutElement, dimensions
 		}
 	}
 	if l.HiddenComments {
-		var text string
-		if !doc.HasHiddenComments {
-			text = "Has comments in hidden childs"
-			doc.HasHiddenComments = true
-		}
-		c := doc.newCommentContainer(text, "...", nil, l.X, l.Y, false, dimensionsCalc, true, nil)
+		c := doc.createHiddenComment(l.X, l.Y, dimensionsCalc)
 		doc.Comments = append(doc.Comments, c)
 	}
 	doc.collectCommentsFromLayoutCont(l.Horizontal, dimensionsCalc)
 	doc.collectCommentsFromLayoutCont(l.Vertical, dimensionsCalc)
+}
+
+func (doc *BoxesDocument) createHiddenComment(x, y int, dimensionsCalc types.TextDimensionCalculator) CommentContainer {
+	var text string
+	if !doc.HasHiddenComments {
+		text = "Has comments in hidden childs"
+		doc.HasHiddenComments = true
+	}
+	return doc.newCommentContainer(text, "...", nil, x, y, false, dimensionsCalc, true, nil)
 }
 
 func (doc *BoxesDocument) collectCommentsFromLayoutCont(cont *LayoutElemContainer, dimensionsCalc types.TextDimensionCalculator) {

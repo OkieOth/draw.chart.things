@@ -52,6 +52,7 @@ class "**Connection**" as Connection {
         BooleanType sourceArrow
         BooleanType destArrow
         StringType format
+        BooleanType hiddenComments
         StringType[] tags
 }
 
@@ -249,6 +250,7 @@ Layout "0" *-- "n" Connection
 
 
 Connection  *--  Comment
+
 
 
 

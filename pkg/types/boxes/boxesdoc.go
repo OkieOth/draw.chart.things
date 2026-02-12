@@ -331,6 +331,9 @@ type ConnectionElem struct {
 
     Format *types.LineDef  `yaml:"format,omitempty"`
 
+    // is only set by while the layout is processed, don't set it in the definition
+    HiddenComments bool  `yaml:"hiddenComments"`
+
     Parts []ConnectionLine  `yaml:"parts,omitempty"`
 
     // index of this connection, in the boxes_document object
@@ -355,6 +358,7 @@ func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = types.CopyLineDef(src.Format)
+    ret.HiddenComments = src.HiddenComments
     ret.Parts = make([]ConnectionLine, 0)
     for _, e := range src.Parts {
         ret.Parts = append(ret.Parts, e)
@@ -764,6 +768,9 @@ type LayoutElemConnection struct {
 
     Format *types.LineDef  `yaml:"format,omitempty"`
 
+    // is only set by while the layout is processed, don't set it in the definition
+    HiddenComments bool  `yaml:"hiddenComments"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -784,6 +791,7 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = types.CopyLineDef(src.Format)
+    ret.HiddenComments = src.HiddenComments
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)

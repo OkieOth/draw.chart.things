@@ -113,6 +113,7 @@ class "**Connection**" as Connection {
         BooleanType sourceArrow
         BooleanType destArrow
         StringType format
+        BooleanType hiddenComments
         StringType[] tags
 }
 
@@ -330,6 +331,7 @@ Overlay  *--  OverlayFormatDef
 
 
 Connection  *--  Comment
+
 
 
 

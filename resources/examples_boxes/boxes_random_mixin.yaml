@@ -1,0 +1,27 @@
+title: Remote Proxy Flow
+version: v2
+formats:
+  f1:
+    line:
+      width: 2
+      color: "#d9d9d9"
+      style: dashed
+  f2:
+    line:
+      width: 2
+      color: "purple"
+connections:
+  "Steady funny progress in Columbus being visible.":
+    connections:
+      - dest: Then the review, you use the day.
+        format: f2
+        comment:
+          text: A stupid test
+      - dest: Retire outdated man each quarter (2).
+        format: f2
+        comment:
+          text: don't know what to write
+      - dest: Share the decision record for the thing.
+        format: f2
+        comment:
+          text: another stupid test

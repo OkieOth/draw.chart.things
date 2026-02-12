@@ -15,31 +15,33 @@ func (doc *BoxesDocument) IncludeOverlays(c types.TextDimensionCalculator) error
 				minY = getMin(overlayEntry.Y-radiusAsInt, minY)
 				maxX = getMax(overlayEntry.X+radiusAsInt, maxX)
 				maxY = getMax(overlayEntry.Y+radiusAsInt, maxY)
+				overlay.Layouts[layoutKey] = overlayEntry
 			}
 		}
+		// maybe not needed for the general nice appearance
 		// adjust in case the document size
-		if minX < 0 {
-			// extend the document to the right and move all elements to the right
-			diff := absInt(minX) + doc.GlobalPadding
-			doc.Width += diff
-			doc.MoveAllElementsToRight(diff)
-		}
-		if maxX < doc.Width {
-			// extend only the document to the right
-			diff := absInt(minX) + doc.GlobalPadding
-			doc.Boxes.Width += diff
-			doc.Width += diff
-		}
-		if minY < 0 {
-			diff := absInt(minY) + doc.GlobalPadding
-			doc.Height += diff
-			doc.MoveAllElementsDown(diff)
-		}
-		if maxY < 0 {
-			diff := absInt(maxY) + doc.GlobalPadding
-			doc.Height += diff
-			doc.Boxes.Height += diff
-		}
+		// if minX < 0 {
+		// 	// extend the document to the right and move all elements to the right
+		// 	diff := absInt(minX) + doc.GlobalPadding
+		// 	doc.Width += diff
+		// 	doc.MoveAllElementsToRight(diff)
+		// }
+		// if maxX < doc.Width {
+		// 	// extend only the document to the right
+		// 	diff := absInt(minX) + doc.GlobalPadding
+		// 	doc.Boxes.Width += diff
+		// 	doc.Width += diff
+		// }
+		// if minY < 0 {
+		// 	diff := absInt(minY) + doc.GlobalPadding
+		// 	doc.Height += diff
+		// 	doc.MoveAllElementsDown(diff)
+		// }
+		// if maxY < 0 {
+		// 	diff := absInt(maxY) + doc.GlobalPadding
+		// 	doc.Height += diff
+		// 	doc.Boxes.Height += diff
+		// }
 	}
 	return nil
 }
@@ -59,8 +61,8 @@ func (doc *BoxesDocument) initOverlayForLayout(l *LayoutElement, overlay *DocOve
 }
 
 func (doc *BoxesDocument) initOverlayXY(l *LayoutElement, overlay *DocOverlay, overlayEntry *OverlayEntry) {
-	overlayEntry.X = l.CenterX
-	overlayEntry.Y = l.CenterY
+	overlayEntry.X = l.X + (l.Width / 2)
+	overlayEntry.Y = l.Y + (l.Height / 2)
 	if overlay.CenterXOffset != 0 {
 		diff := float64((l.CenterX - l.X)) * overlay.CenterXOffset
 		overlayEntry.X += int(diff)

@@ -74,6 +74,7 @@ class "**ConnectionElem**" as ConnectionElem {
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
+        BooleanType hiddenComments
         ConnectionLine[] parts
         IntegerType connectionIndex
         Comment comment
@@ -187,6 +188,7 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
+        BooleanType hiddenComments
         StringType[] tags
 }
 
@@ -388,6 +390,7 @@ LayoutElement "0" *-- "n" LayoutElemConnection
 
 ConnectionElem  *--  LineDef
 
+
 ConnectionElem "0" *-- "n" ConnectionLine
 
 
@@ -483,6 +486,7 @@ LayoutElemConnection  *--  Comment
 
 
 LayoutElemConnection  *--  LineDef
+
 
 
     
