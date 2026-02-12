@@ -1,3 +1,8 @@
+# v0.8.0
+## Boxes
+* improve comments on connections
+* add overlays
+
 # v0.7.0
 ## Boxes
 * Comment mixins
