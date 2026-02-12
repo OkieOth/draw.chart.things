@@ -248,7 +248,7 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 	connElem.Parts = reducedParts
 }
 
-func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *types.LineDef, srcId, destId string, comment *types.Comment) {
+func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, c *LayoutElemConnection, srcId, destId string) {
 	if len(path) < 2 {
 		return
 	}
@@ -257,11 +257,12 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, format *t
 	connElem := NewConnectionElem()
 	connElem.From = path[0].NodeId
 	connElem.To = path[pathLen-1].NodeId
+	connElem.HiddenComments = c.HiddenComments
 	connElem.ConnectionIndex = len(doc.Connections)
-	if format != nil {
-		connElem.Format = format
+	if c.Format != nil {
+		connElem.Format = c.Format
 	}
-	connElem.Comment = comment
+	connElem.Comment = c.Comment
 
 	var lastX, lastY int
 	pathElemCount := len(pathToDraw) - 1
@@ -321,7 +322,7 @@ func (doc *BoxesDocument) connectImpl(layout *LayoutElement) {
 			srcId, destId := layout.Id, c.DestId
 			if path, _, ok := doc.DijkstraPath(srcId, destId); ok {
 				//fmt.Printf("Found path: src=%s, dest=%s, dist=%d\n", srcId, destId, dist)
-				doc.createAConnectionPath(path, c.Format, srcId, destId, c.Comment)
+				doc.createAConnectionPath(path, &c, srcId, destId)
 			} else {
 				fmt.Printf("Couldn't calculate path: src=%s, dest=%s\n", srcId, destId)
 			}

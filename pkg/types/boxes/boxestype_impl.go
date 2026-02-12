@@ -520,10 +520,37 @@ func (doc *BoxesDocument) DrawComments(drawing types.Drawing, c types.TextDimens
 	return nil
 }
 
+func (doc *BoxesDocument) DrawOverlays(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	if len(doc.Overlays) > 0 {
+		for i := range doc.Overlays {
+			for j := range doc.Overlays[i].Layouts {
+				oe := doc.Overlays[i].Layouts[j]
+				drawing.DrawCircleWithBorder(oe.X, oe.Y, int(oe.Radius), oe.Format.Fill, oe.Format.Line)
+				label := fmt.Sprintf("%d", int(oe.Value))
+				size := int(oe.Radius / 5)
+				if size < 14 {
+					size = 14
+				}
+				labelFont := types.InitFontDef(nil, "sans", size, true, false, 0)
+				labelFont.Color = *oe.Format.Fill.Color
+				labelFont.Anchor = types.FontDefAnchorEnum_middle
+				_, h := c.Dimensions(label, &labelFont)
+				drawing.DrawText(label, oe.X, oe.Y-(h/2), 0, &labelFont)
+			}
+		}
+	}
+	return nil
+}
+
 func (doc *BoxesDocument) drawCommentMarkers(drawing types.Drawing) error {
 	for i := range doc.Comments {
 		c := doc.Comments[i]
-		drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		if c.ConnectionIndex != nil {
+			className := fmt.Sprintf("connection conLine_%d", *c.ConnectionIndex)
+			drawing.DrawCircleWithBorderTextAndClass(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
+		} else {
+			drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		}
 	}
 	return nil
 }
@@ -559,7 +586,12 @@ func (doc *BoxesDocument) drawCommentTextsCustomLabels(drawing types.Drawing, c 
 		if c.Text == "" {
 			continue
 		}
-		drawing.DrawCircleWithBorderAndText(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		if c.ConnectionIndex != nil {
+			className := fmt.Sprintf("connection conLine_%d", *c.ConnectionIndex)
+			drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
+		} else {
+			drawing.DrawCircleWithBorderAndText(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		}
 		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
 		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)
@@ -595,9 +627,14 @@ func (doc *BoxesDocument) drawCommentTextsStdLabels(currentY int, drawing types.
 		if c.Text == "" {
 			continue
 		}
-		drawing.DrawCircleWithBorderAndText(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
 		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
+		if c.ConnectionIndex != nil {
+			className := fmt.Sprintf("connection conLine_%d", *c.ConnectionIndex)
+			drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
+		} else {
+			drawing.DrawCircleWithBorderAndText(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
+		}
 		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)
 		currentY += getMax(c.TextHeight, neededMarkerSpace)
 	}

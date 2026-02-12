@@ -286,15 +286,6 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 			blacklisted:         []string{},
 		},
 		{
-			inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
-			inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
-			inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
-			outputFile:          "../../temp/ext_complex_horizontal_connected_pics.svg",
-			depth:               2,
-			expanded:            []string{},
-			blacklisted:         []string{},
-		},
-		{
 			inputFile:           "../../resources/examples_boxes/boxes_simple_pic_01.yaml",
 			inputExtConnections: "",
 			inputExtFormats:     "../../resources/examples_boxes/boxes_simple_pic_format.yaml",
@@ -423,6 +414,58 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		}
 
 		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, test.depth, test.expanded, test.blacklisted, false)
+
+		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
+
+		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+		require.Nil(t, err, "error while writing output file for test", i)
+		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+	}
+}
+
+func TestDrawBoxesWithOverlays(t *testing.T) {
+	tests := []struct {
+		inputFile  string
+		mixins     []string
+		outputFile string
+		maxdepth   int
+	}{
+		// {
+		// 	inputFile: "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+		// 	mixins: []string{
+		// 		"../../resources/examples_boxes/ext_connections.yaml",
+		// 		"../../resources/examples_boxes/ext_formats.yaml",
+		// 		"../../resources/examples_boxes/ext_overlays.yaml",
+		// 	},
+		// 	maxdepth:   100,
+		// 	outputFile: "../../temp/ext_complex_horizontal_connected_pics2.svg",
+		// },
+		// {
+		// 	inputFile:  "../../resources/examples_boxes/boxes_connected.yaml",
+		// 	outputFile: "../../temp/boxes_connected.svg",
+		// 	mixins:     []string{},
+		// 	maxdepth:   2,
+		// },
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_connected_2.yaml",
+			outputFile: "../../temp/boxes_connected_2.svg",
+			mixins:     []string{},
+			maxdepth:   1,
+		},
+	}
+	for i, test := range tests {
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
+		require.Nil(t, err, "error while loading input file for test", i)
+
+		mixins := make([]boxes.BoxesFileMixings, 0)
+		for i := range test.mixins {
+			mixin, err := types.LoadInputFromFile[boxes.BoxesFileMixings](test.mixins[i])
+			require.Nil(t, err)
+			require.NotNil(t, mixin)
+			mixins = append(mixins, *mixin)
+		}
+
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, test.maxdepth, []string{}, []string{}, false)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 

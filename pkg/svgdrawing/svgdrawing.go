@@ -205,7 +205,9 @@ func splitTxtDimensions(
 		lines = appendLineToOutput(line, lh)
 	}
 
-	lines[len(lines)-1].Height = fontSize // Eiko: adjustment to remove the lineHeight from the last line of the text
+	if len(lines) > 0 {
+		lines[len(lines)-1].Height = fontSize // Eiko: adjustment to remove the lineHeight from the last line of the text
+	}
 	heightSum = (heightSum - lh) + fontSize
 	return maxWidth, heightSum, lines
 }
@@ -330,15 +332,16 @@ func (d *SvgDrawing) DrawTextWithIdAndClass(text string, x, currentY, width int,
 		}
 	}
 
+	xTxt := x + width/2
 	for _, l := range lines {
 		yTxt := currentY + fontDef.Size
-		xTxt := x
-		switch fontDef.Anchor {
-		case types.FontDefAnchorEnum_middle:
-			xTxt = x + (width / 2)
-		case types.FontDefAnchorEnum_right:
-			xTxt = x + width - types.GlobalPadding - 5
-		}
+		// TODO remove
+		// switch fontDef.Anchor {
+		// case types.FontDefAnchorEnum_middle:
+		// 	xTxt = x + (width / 2)
+		// case types.FontDefAnchorEnum_right:
+		// 	xTxt = x + width - types.GlobalPadding - 5
+		// }
 		//d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
 		writeTxt(xTxt, yTxt, l.Text, txtFormat)
 		currentY += l.Height
@@ -471,7 +474,7 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 func lineStyleForType(style types.LineDefStyleEnum) string {
 	switch style {
 	case types.LineDefStyleEnum_dashed:
-		return `stroke-dasharray:10 6;`
+		return `stroke-dasharray:10 2;`
 	case types.LineDefStyleEnum_dotted:
 		return `stroke-dasharray:"1 10;"`
 	default:
@@ -575,11 +578,20 @@ func (d *SvgDrawing) DrawCircleWithBorder(x, y, radius int, fill *types.FillDef,
 }
 
 func (d *SvgDrawing) DrawCircleWithBorderAndText(text string, x, y, radius int, fill *types.FillDef, line *types.LineDef, font *types.FontDef) error {
+	return d.DrawCircleWithBorderTextAndClass(text, x, y, radius, fill, line, font, "")
+}
+
+func (d *SvgDrawing) DrawCircleWithBorderTextAndClass(text string, x, y, radius int, fill *types.FillDef, line *types.LineDef, font *types.FontDef, className string) error {
 	attr := d.getCircleStyle(fill, line)
-	d.canvas.Circle(x, y, radius, attr)
 	textFormat := d.textFormat(font)
 	textFormat += ";dominant-baseline: middle;"
-	d.canvas.Text(x, y, text, textFormat)
+	if className != "" {
+		d.canvas.CircleWithClass(x, y, radius, className, attr)
+		d.canvas.TextWithClass(x, y, text, className, textFormat)
+	} else {
+		d.canvas.Circle(x, y, radius, attr)
+		d.canvas.Text(x, y, text, textFormat)
+	}
 	return nil
 }
 

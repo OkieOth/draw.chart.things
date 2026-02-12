@@ -18,6 +18,7 @@ class "**Boxes**" as Boxes {
         IntegerType globalPadding
         IntegerType minBoxMargin
         IntegerType minConnectorMargin
+        Overlay[] overlays
 }
 note top: Model to describe the input\nof block diagrams
 
@@ -80,6 +81,20 @@ class "**FormatVariations**" as FormatVariations {
  
 
 
+class "**Overlay**" as Overlay {
+        StringType caption
+        NumberType refValue
+        NumberType refRadius
+        NumberType centerXOffset
+        NumberType centerYOffset
+        Map<NumberType> layouts
+        OverlayRadiusDef radiusDefs
+        OverlayFormatDef formats
+}
+note top: Definition of a topic related\noverlay ... for instance for\nheatmaps
+
+ 
+
 class "**LegendEntry**" as LegendEntry {
         StringType text
         StringType format
@@ -98,6 +113,7 @@ class "**Connection**" as Connection {
         BooleanType sourceArrow
         BooleanType destArrow
         StringType format
+        BooleanType hiddenComments
         StringType[] tags
 }
 
@@ -111,6 +127,31 @@ note top: container to extend the layouts\nof a given layout element\nvia mixins
 
  
 
+
+
+class "**OverlayRadiusDef**" as OverlayRadiusDef {
+        NumberType min
+        NumberType max
+}
+note top: definition how to calculate radius\nchanges based on a reference\nvalue
+
+ 
+
+class "**OverlayFormatDef**" as OverlayFormatDef {
+        StringType default
+        OverlayGradation[] gradations
+}
+note top: definition what format to use\nfor a specific reference value
+
+ 
+
+class "**OverlayGradation**" as OverlayGradation {
+        NumberType limit
+        StringType format
+}
+note top: gradation entry for switching formats\nfor overlays
+
+ 
 
 class "**FontDef**" as FontDef {
         IntegerType size
@@ -217,6 +258,8 @@ Boxes  *--  ImageDef
 
 
 
+Boxes "0" *-- "n" Overlay
+
     
 Legend "0" *-- "n" LegendEntry
 
@@ -272,6 +315,17 @@ FormatVariations  *--  Format
     
 
 
+
+
+
+
+Overlay  *--  OverlayRadiusDef
+
+Overlay  *--  OverlayFormatDef
+
+    
+
+
     
     
 
@@ -282,11 +336,23 @@ Connection  *--  Comment
 
 
 
+
     
 LayoutMixin "0" *-- "n" Layout
 
 
     
+    
+    
+
+
+    
+
+OverlayFormatDef "0" *-- "n" OverlayGradation
+
+    
+
+
     
 
 

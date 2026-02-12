@@ -50,6 +50,8 @@ type Boxes struct {
 
     // Minimum margin between connectors
     MinConnectorMargin *int  `yaml:"minConnectorMargin,omitempty"`
+
+    Overlays []Overlay  `yaml:"overlays,omitempty"`
 }
 
 func NewBoxes() *Boxes {
@@ -59,6 +61,7 @@ func NewBoxes() *Boxes {
         Formats: make(map[string]Format, 0),
         FormatVariations: NewFormatVariations(),
         Images: make(map[string]types.ImageDef, 0),
+        Overlays: make([]Overlay, 0),
     }
 }
 
@@ -86,6 +89,10 @@ func CopyBoxes(src *Boxes) *Boxes {
     ret.GlobalPadding = src.GlobalPadding
     ret.MinBoxMargin = src.MinBoxMargin
     ret.MinConnectorMargin = src.MinConnectorMargin
+    ret.Overlays = make([]Overlay, 0)
+    for _, e := range src.Overlays {
+        ret.Overlays = append(ret.Overlays, e)
+    }
 
     return &ret
 }
@@ -332,6 +339,65 @@ func CopyFormatVariations(src *FormatVariations) *FormatVariations {
 
 
 
+/* Definition of a topic related overlay ... for instance for heatmaps
+*/
+type Overlay struct {
+
+    // some catchy words to describe the displayed topc
+    Caption string  `yaml:"caption"`
+
+    // Optional reference value that defines the reference value for this type of overlay
+    RefValue float64  `yaml:"refValue"`
+
+    // radius for having a value of refValue
+    RefRadius *float64  `yaml:"refRadius,omitempty"`
+
+    // in case of multiple overlays existing, this allows to define a percentage offset from the center-x of the related layout object
+    CenterXOffset float64  `yaml:"centerXOffset"`
+
+    // in case of multiple overlays existing, this allows to define a percentage offset from the center-y of the related layout object
+    CenterYOffset float64  `yaml:"centerYOffset"`
+
+    // dictionary of layout elements, that contain this overlay. The dictionary stores the value for this specific object
+    Layouts map[string]float64  `yaml:"layouts,omitempty"`
+
+    // if this is configured the the radius for the layouts is in a percentage of the refValue
+    RadiusDefs *OverlayRadiusDef  `yaml:"radiusDefs,omitempty"`
+
+    Formats *OverlayFormatDef  `yaml:"formats,omitempty"`
+}
+
+func NewOverlay() *Overlay {
+    return &Overlay{
+        Layouts: make(map[string]float64, 0),
+        Formats: NewOverlayFormatDef(),
+    }
+}
+
+func CopyOverlay(src *Overlay) *Overlay {
+    if src == nil {
+        return nil
+    }
+    var ret Overlay
+    ret.Caption = src.Caption
+    ret.RefValue = src.RefValue
+    ret.RefRadius = src.RefRadius
+    ret.CenterXOffset = src.CenterXOffset
+    ret.CenterYOffset = src.CenterYOffset
+    ret.Layouts = make(map[string]float64, 0)
+    for k, v := range src.Layouts {
+        ret.Layouts[k] = v
+    }
+    ret.RadiusDefs = CopyOverlayRadiusDef(src.RadiusDefs)
+    ret.Formats = CopyOverlayFormatDef(src.Formats)
+
+    return &ret
+}
+
+
+
+
+
 /* Definition of one legend entry
 */
 type LegendEntry struct {
@@ -381,6 +447,9 @@ type Connection struct {
     // optional format to style the connection
     Format *string  `yaml:"format,omitempty"`
 
+    // is only set by while the layout is processed, don't set it in the definition
+    HiddenComments bool  `yaml:"hiddenComments"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -402,6 +471,7 @@ func CopyConnection(src *Connection) *Connection {
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = src.Format
+    ret.HiddenComments = src.HiddenComments
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
@@ -449,6 +519,98 @@ func CopyLayoutMixin(src *LayoutMixin) *LayoutMixin {
 
 
 
+
+
+
+
+
+
+
+
+/* definition how to calculate radius changes based on a reference value
+*/
+type OverlayRadiusDef struct {
+
+    // minimal radius to use for the display
+    Min float64  `yaml:"min"`
+
+    // maximal radius to use for the display
+    Max float64  `yaml:"max"`
+}
+
+
+func CopyOverlayRadiusDef(src *OverlayRadiusDef) *OverlayRadiusDef {
+    if src == nil {
+        return nil
+    }
+    var ret OverlayRadiusDef
+    ret.Min = src.Min
+    ret.Max = src.Max
+
+    return &ret
+}
+
+
+
+
+
+/* definition what format to use for a specific reference value
+*/
+type OverlayFormatDef struct {
+
+    // default format to use to display the overlay
+    Default string  `yaml:"default"`
+
+    // grations considered for switching for formats to use
+    Gradations []OverlayGradation  `yaml:"gradations,omitempty"`
+}
+
+func NewOverlayFormatDef() *OverlayFormatDef {
+    return &OverlayFormatDef{
+        Gradations: make([]OverlayGradation, 0),
+    }
+}
+
+func CopyOverlayFormatDef(src *OverlayFormatDef) *OverlayFormatDef {
+    if src == nil {
+        return nil
+    }
+    var ret OverlayFormatDef
+    ret.Default = src.Default
+    ret.Gradations = make([]OverlayGradation, 0)
+    for _, e := range src.Gradations {
+        ret.Gradations = append(ret.Gradations, e)
+    }
+
+    return &ret
+}
+
+
+
+
+
+/* gradation entry for switching formats for overlays
+*/
+type OverlayGradation struct {
+
+    // to what value should the here named format being used
+    Limit float64  `yaml:"limit"`
+
+    // name of the defined format to use
+    Format string  `yaml:"format"`
+}
+
+
+func CopyOverlayGradation(src *OverlayGradation) *OverlayGradation {
+    if src == nil {
+        return nil
+    }
+    var ret OverlayGradation
+    ret.Limit = src.Limit
+    ret.Format = src.Format
+
+    return &ret
+}
 
 
 

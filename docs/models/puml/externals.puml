@@ -52,6 +52,7 @@ class "**Connection**" as Connection {
         BooleanType sourceArrow
         BooleanType destArrow
         StringType format
+        BooleanType hiddenComments
         StringType[] tags
 }
 
@@ -90,6 +91,45 @@ class "**FormatVariations**" as FormatVariations {
 
  
 
+
+class "**Overlay**" as Overlay {
+        StringType caption
+        NumberType refValue
+        NumberType refRadius
+        NumberType centerXOffset
+        NumberType centerYOffset
+        Map<NumberType> layouts
+        OverlayRadiusDef radiusDefs
+        OverlayFormatDef formats
+}
+note top: Definition of a topic related\noverlay ... for instance for\nheatmaps
+
+ 
+
+
+class "**OverlayRadiusDef**" as OverlayRadiusDef {
+        NumberType min
+        NumberType max
+}
+note top: definition how to calculate radius\nchanges based on a reference\nvalue
+
+ 
+
+class "**OverlayFormatDef**" as OverlayFormatDef {
+        StringType default
+        OverlayGradation[] gradations
+}
+note top: definition what format to use\nfor a specific reference value
+
+ 
+
+class "**OverlayGradation**" as OverlayGradation {
+        NumberType limit
+        StringType format
+}
+note top: gradation entry for switching formats\nfor overlays
+
+ 
 
 class "**Comment**" as Comment {
         StringType text
@@ -215,6 +255,7 @@ Connection  *--  Comment
 
 
 
+
     
 LayoutMixin "0" *-- "n" Layout
 
@@ -245,6 +286,28 @@ Format  *--  FillDef
 FormatVariations  *--  Format
 
     
+    
+
+
+
+
+
+
+Overlay  *--  OverlayRadiusDef
+
+Overlay  *--  OverlayFormatDef
+
+    
+    
+
+
+    
+
+OverlayFormatDef "0" *-- "n" OverlayGradation
+
+    
+
+
     
 
 

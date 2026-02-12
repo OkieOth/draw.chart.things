@@ -11,7 +11,7 @@ boxes:
       text2: ""
       horizontal:
         - id: id_1_1
-          caption: Budget latency for point.
+          caption: Budget latency for point (2).
           text1: ""
           text2: ""
           horizontal:
@@ -170,7 +170,7 @@ boxes:
                       format: s_integr
                   format: b_integr
                 - id: id_1_2_2_2
-                  caption: Retire outdated man each quarter.
+                  caption: Retire outdated man each quarter (2).
                   text1: ""
                   text2: ""
                   vertical:

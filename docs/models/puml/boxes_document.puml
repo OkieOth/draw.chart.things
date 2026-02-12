@@ -25,6 +25,7 @@ class "**BoxesDocument**" as BoxesDocument {
         ConnectionLine[] horizontalLines
         ConnectionLine[] verticalLines
         CommentContainer[] comments
+        DocOverlay[] overlays
         BooleanType hasHiddenComments
         IntegerType commentMarkerRadius
         IntegerType legendEndY
@@ -73,6 +74,7 @@ class "**ConnectionElem**" as ConnectionElem {
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
+        BooleanType hiddenComments
         ConnectionLine[] parts
         IntegerType connectionIndex
         Comment comment
@@ -139,8 +141,22 @@ class "**CommentContainer**" as CommentContainer {
         IntegerType textWidth
         IntegerType textHeight
         BooleanType customMarker
+        IntegerType connectionIndex
 }
 note top: all parameters to render the\ncomments in the graphic
+
+ 
+
+class "**DocOverlay**" as DocOverlay {
+        StringType caption
+        NumberType refValue
+        NumberType centerXOffset
+        NumberType centerYOffset
+        Map<OverlayEntry> layouts
+        OverlayRadiusDef radiusDefs
+        OverlayFormatDef formats
+}
+note top: Definition of a topic related\noverlay ... for instance for\nheatmaps
 
  
 
@@ -172,6 +188,7 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         BooleanType sourceArrow
         BooleanType destArrow
         LineDef format
+        BooleanType hiddenComments
         StringType[] tags
 }
 
@@ -193,6 +210,17 @@ class "**ConnectionEdge**" as ConnectionEdge {
         IntegerType weight
 }
 note top: edge type to store edges\non a connection node
+
+ 
+
+
+class "**OverlayEntry**" as OverlayEntry {
+        NumberType value
+        NumberType radius
+        IntegerType x
+        IntegerType y
+        BoxFormat format
+}
 
  
 
@@ -314,6 +342,8 @@ BoxesDocument "0" *-- "n" ConnectionLine
 
 BoxesDocument "0" *-- "n" CommentContainer
 
+BoxesDocument "0" *-- "n" DocOverlay
+
 
 
 
@@ -359,6 +389,7 @@ LayoutElement "0" *-- "n" LayoutElemConnection
 
 
 ConnectionElem  *--  LineDef
+
 
 ConnectionElem "0" *-- "n" ConnectionLine
 
@@ -421,6 +452,18 @@ CommentContainer  *--  CommentFormat
 
 
 
+
+    
+
+
+
+
+DocOverlay  *--  OverlayEntry
+
+DocOverlay  *--  OverlayRadiusDef
+
+DocOverlay  *--  OverlayFormatDef
+
     
 
 
@@ -445,6 +488,7 @@ LayoutElemConnection  *--  Comment
 LayoutElemConnection  *--  LineDef
 
 
+
     
 CommentFormat  *--  FontDef
 
@@ -458,6 +502,14 @@ CommentFormat  *--  FillDef
 
 
 
+
+    
+    
+
+
+
+
+OverlayEntry  *--  BoxFormat
 
     
 

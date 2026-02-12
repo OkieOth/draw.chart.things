@@ -116,6 +116,12 @@
         "$ref": "#/definitions/CommentContainer"
       }
     },
+    "overlays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DocOverlay"
+      }
+    },
     "hasHiddenComments": {
       "description": "is set to true, if there are some comments truncated from the original layout",
       "type": "boolean"
@@ -333,6 +339,10 @@
         "format": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
+        "hiddenComments": {
+          "description": "is only set by while the layout is processed, don't set it in the definition",
+          "type": "boolean"
+        },
         "tags": {
           "description": "Tags to annotate the connection, tags are used to format",
           "type": "array",
@@ -341,7 +351,13 @@
           }
         }
       },
-      "required": ["destId", "sourceArrow", "destArrow", "tags"]
+      "required": [
+        "destId",
+        "sourceArrow",
+        "destArrow",
+        "tags",
+        "hiddenComments"
+      ]
     },
     "ConnectionElem": {
       "type": "object",
@@ -365,6 +381,10 @@
         "format": {
           "$ref": "./formats.json#/definitions/LineDef"
         },
+        "hiddenComments": {
+          "description": "is only set by while the layout is processed, don't set it in the definition",
+          "type": "boolean"
+        },
         "parts": {
           "type": "array",
           "items": {
@@ -379,7 +399,7 @@
           "$ref": "./shared.json#/definitions/Comment"
         }
       },
-      "required": ["parts", "connectionIndex"]
+      "required": ["parts", "connectionIndex", "hiddenComments"]
     },
     "ConnectionLine": {
       "type": "object",
@@ -657,6 +677,10 @@
         "customMarker": {
           "description": "true if a custom marker is used for this comment",
           "type": "boolean"
+        },
+        "connectionIndex": {
+          "description": "in case this comment belongs to a connection, is here the connectionId stored",
+          "type": "integer"
         }
       },
       "required": [
@@ -671,6 +695,71 @@
         "format",
         "customMarker"
       ]
+    },
+    "DocOverlay": {
+      "description": "Definition of a topic related overlay ... for instance for heatmaps",
+      "type": "object",
+      "properties": {
+        "caption": {
+          "description": "some catchy words to describe the displayed topc",
+          "type": "string"
+        },
+        "refValue": {
+          "description": "Optional reference value that defines the reference value for this type of overlay",
+          "type": "number"
+        },
+        "centerXOffset": {
+          "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-x of the related layout object",
+          "type": "number"
+        },
+        "centerYOffset": {
+          "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-y of the related layout object",
+          "type": "number"
+        },
+        "layouts": {
+          "description": "dictionary of layout elements, that contain this overlay. The dictionary stores the value for this specific object",
+          "type": "object",
+          "$comment": "keys of the dictionary are either IDs or captions of layout elements",
+          "additionalProperties": {
+            "$ref": "#/definitions/OverlayEntry"
+          }
+        },
+        "radiusDefs": {
+          "description": "if this is configured the the radius for the layouts is in a percentage of the refValue",
+          "$ref": "./boxes.json#/definitions/OverlayRadiusDef"
+        },
+        "formats": {
+          "$ref": "./boxes.json#/definitions/OverlayFormatDef"
+        }
+      },
+      "required": [
+        "caption",
+        "refValue",
+        "layouts",
+        "centerXOffset",
+        "centerYOffset"
+      ]
+    },
+    "OverlayEntry": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "format": {
+          "$ref": "#/definitions/BoxFormat"
+        }
+      },
+      "required": ["value", "x", "y", "format", "radius"]
     }
   }
 }

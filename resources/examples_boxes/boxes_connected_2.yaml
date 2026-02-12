@@ -1,0 +1,39 @@
+title: Nested connections
+formats:
+  default:
+    fill:
+      color: white
+    line:
+      color: black
+boxes:
+  horizontal:
+    - id: id1
+      caption: "H1"
+      vertical:
+        - id: id1_1
+          caption: H1_V1
+          comment:
+            text: This is H1_V1
+          connections:
+            - destId: id2_1
+              comment:
+                text: comment 1
+            - destId: id2_2
+              comment:
+                text: comment 2
+            - destId: id2_3
+              comment:
+                text: comment 3
+        - id: id1_2
+          caption: H1_V2
+        - id: id1_3
+          caption: H1_V3
+    - id: id2
+      caption: "H2"
+      vertical:
+        - id: id2_1
+          caption: H2_V1
+        - id: id2_2
+          caption: H2_V2
+        - id: id2_3
+          caption: H2_V3

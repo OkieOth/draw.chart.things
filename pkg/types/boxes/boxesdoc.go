@@ -69,6 +69,8 @@ type BoxesDocument struct {
 
     Comments []CommentContainer  `yaml:"comments,omitempty"`
 
+    Overlays []DocOverlay  `yaml:"overlays,omitempty"`
+
     // is set to true, if there are some comments truncated from the original layout
     HasHiddenComments bool  `yaml:"hasHiddenComments"`
 
@@ -96,6 +98,7 @@ func NewBoxesDocument() *BoxesDocument {
         HorizontalLines: make([]ConnectionLine, 0),
         VerticalLines: make([]ConnectionLine, 0),
         Comments: make([]CommentContainer, 0),
+        Overlays: make([]DocOverlay, 0),
     }
 }
 
@@ -153,6 +156,10 @@ func CopyBoxesDocument(src *BoxesDocument) *BoxesDocument {
     ret.Comments = make([]CommentContainer, 0)
     for _, e := range src.Comments {
         ret.Comments = append(ret.Comments, e)
+    }
+    ret.Overlays = make([]DocOverlay, 0)
+    for _, e := range src.Overlays {
+        ret.Overlays = append(ret.Overlays, e)
     }
     ret.HasHiddenComments = src.HasHiddenComments
     ret.CommentMarkerRadius = src.CommentMarkerRadius
@@ -324,6 +331,9 @@ type ConnectionElem struct {
 
     Format *types.LineDef  `yaml:"format,omitempty"`
 
+    // is only set by while the layout is processed, don't set it in the definition
+    HiddenComments bool  `yaml:"hiddenComments"`
+
     Parts []ConnectionLine  `yaml:"parts,omitempty"`
 
     // index of this connection, in the boxes_document object
@@ -348,6 +358,7 @@ func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = types.CopyLineDef(src.Format)
+    ret.HiddenComments = src.HiddenComments
     ret.Parts = make([]ConnectionLine, 0)
     for _, e := range src.Parts {
         ret.Parts = append(ret.Parts, e)
@@ -567,6 +578,9 @@ type CommentContainer struct {
 
     // true if a custom marker is used for this comment
     CustomMarker bool  `yaml:"customMarker"`
+
+    // in case this comment belongs to a connection, is here the connectionId stored
+    ConnectionIndex *int  `yaml:"connectionIndex,omitempty"`
 }
 
 
@@ -585,6 +599,62 @@ func CopyCommentContainer(src *CommentContainer) *CommentContainer {
     ret.TextWidth = src.TextWidth
     ret.TextHeight = src.TextHeight
     ret.CustomMarker = src.CustomMarker
+    ret.ConnectionIndex = src.ConnectionIndex
+
+    return &ret
+}
+
+
+
+
+
+/* Definition of a topic related overlay ... for instance for heatmaps
+*/
+type DocOverlay struct {
+
+    // some catchy words to describe the displayed topc
+    Caption string  `yaml:"caption"`
+
+    // Optional reference value that defines the reference value for this type of overlay
+    RefValue float64  `yaml:"refValue"`
+
+    // in case of multiple overlays existing, this allows to define a percentage offset from the center-x of the related layout object
+    CenterXOffset float64  `yaml:"centerXOffset"`
+
+    // in case of multiple overlays existing, this allows to define a percentage offset from the center-y of the related layout object
+    CenterYOffset float64  `yaml:"centerYOffset"`
+
+    // dictionary of layout elements, that contain this overlay. The dictionary stores the value for this specific object
+    Layouts map[string]OverlayEntry  `yaml:"layouts,omitempty"`
+
+    // if this is configured the the radius for the layouts is in a percentage of the refValue
+    RadiusDefs *OverlayRadiusDef  `yaml:"radiusDefs,omitempty"`
+
+    Formats *OverlayFormatDef  `yaml:"formats,omitempty"`
+}
+
+func NewDocOverlay() *DocOverlay {
+    return &DocOverlay{
+        Layouts: make(map[string]OverlayEntry, 0),
+        Formats: NewOverlayFormatDef(),
+    }
+}
+
+func CopyDocOverlay(src *DocOverlay) *DocOverlay {
+    if src == nil {
+        return nil
+    }
+    var ret DocOverlay
+    ret.Caption = src.Caption
+    ret.RefValue = src.RefValue
+    ret.CenterXOffset = src.CenterXOffset
+    ret.CenterYOffset = src.CenterYOffset
+    ret.Layouts = make(map[string]OverlayEntry, 0)
+    for k, v := range src.Layouts {
+        ret.Layouts[k] = v
+    }
+    ret.RadiusDefs = CopyOverlayRadiusDef(src.RadiusDefs)
+    ret.Formats = CopyOverlayFormatDef(src.Formats)
 
     return &ret
 }
@@ -698,6 +768,9 @@ type LayoutElemConnection struct {
 
     Format *types.LineDef  `yaml:"format,omitempty"`
 
+    // is only set by while the layout is processed, don't set it in the definition
+    HiddenComments bool  `yaml:"hiddenComments"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -718,6 +791,7 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     ret.SourceArrow = src.SourceArrow
     ret.DestArrow = src.DestArrow
     ret.Format = types.CopyLineDef(src.Format)
+    ret.HiddenComments = src.HiddenComments
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
@@ -786,6 +860,41 @@ func CopyConnectionEdge(src *ConnectionEdge) *ConnectionEdge {
     ret.Y = src.Y
     ret.DestNodeId = src.DestNodeId
     ret.Weight = src.Weight
+
+    return &ret
+}
+
+
+
+
+
+
+
+
+type OverlayEntry struct {
+
+    Value float64  `yaml:"value"`
+
+    Radius float64  `yaml:"radius"`
+
+    X int  `yaml:"x"`
+
+    Y int  `yaml:"y"`
+
+    Format BoxFormat  `yaml:"format"`
+}
+
+
+func CopyOverlayEntry(src *OverlayEntry) *OverlayEntry {
+    if src == nil {
+        return nil
+    }
+    var ret OverlayEntry
+    ret.Value = src.Value
+    ret.Radius = src.Radius
+    ret.X = src.X
+    ret.Y = src.Y
+    ret.Format = *CopyBoxFormat(&src.Format)
 
     return &ret
 }

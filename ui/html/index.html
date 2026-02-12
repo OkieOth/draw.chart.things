@@ -424,12 +424,37 @@
             (function () {
                 const canvas = document.getElementById("canvas");
                 if (!canvas) return;
+                const zRestoreMap = new WeakMap();
+                const highlightableTags = new Set(["line", "circle", "text"]);
 
                 function getGroupClass(classList) {
                     for (const c of classList) {
                         if (/^conLine_\d+$/.test(c)) return c;
                     }
                     return null;
+                }
+
+                function bringToFront(el) {
+                    if (!el || !el.parentNode || zRestoreMap.has(el)) return;
+                    zRestoreMap.set(el, {
+                        parent: el.parentNode,
+                        nextSibling: el.nextSibling,
+                    });
+                    el.parentNode.appendChild(el);
+                }
+
+                function restoreZOrder(el) {
+                    const info = zRestoreMap.get(el);
+                    if (!info) return;
+                    const { parent, nextSibling } = info;
+                    if (parent) {
+                        if (nextSibling && nextSibling.parentNode === parent) {
+                            parent.insertBefore(el, nextSibling);
+                        } else {
+                            parent.appendChild(el);
+                        }
+                    }
+                    zRestoreMap.delete(el);
                 }
 
                 function addHighlight(groupClass) {
@@ -440,6 +465,16 @@
                     );
                     for (const line of lines) {
                         line.classList.add("highlight-group");
+                    }
+                    const circles = svg.querySelectorAll(`circle.${groupClass}`);
+                    for (const circle of circles) {
+                        circle.classList.add("highlight-group");
+                        bringToFront(circle);
+                    }
+                    const texts = svg.querySelectorAll(`text.${groupClass}`);
+                    for (const text of texts) {
+                        text.classList.add("highlight-group");
+                        bringToFront(text);
                     }
                 }
 
@@ -452,43 +487,52 @@
                     for (const line of lines) {
                         line.classList.remove("highlight-group");
                     }
+                    const circles = svg.querySelectorAll(
+                        `circle.${groupClass}.highlight-group`,
+                    );
+                    for (const circle of circles) {
+                        circle.classList.remove("highlight-group");
+                        restoreZOrder(circle);
+                    }
+                    const texts = svg.querySelectorAll(
+                        `text.${groupClass}.highlight-group`,
+                    );
+                    for (const text of texts) {
+                        text.classList.remove("highlight-group");
+                        restoreZOrder(text);
+                    }
+                }
+
+                function isHighlightableTarget(el) {
+                    if (!el || !el.tagName) return false;
+                    const tag = el.tagName.toLowerCase();
+                    if (!highlightableTags.has(tag)) return false;
+                    if (tag === "line") {
+                        return el.classList.contains("connection");
+                    }
+                    return true;
                 }
 
                 // Use mouseover/mouseout with delegation; avoid flicker by checking relatedTarget
                 canvas.addEventListener("mouseover", function (e) {
                     const t = e.target;
-                    if (
-                        t &&
-                        t.tagName &&
-                        t.tagName.toLowerCase() === "line" &&
-                        t.classList.contains("connection")
-                    ) {
-                        const grp = getGroupClass(t.classList);
-                        if (grp) addHighlight(grp);
-                    }
+                    if (!isHighlightableTarget(t)) return;
+                    const grp = getGroupClass(t.classList);
+                    if (grp) addHighlight(grp);
                 });
 
                 canvas.addEventListener("mouseout", function (e) {
                     const t = e.target;
-                    if (
-                        t &&
-                        t.tagName &&
-                        t.tagName.toLowerCase() === "line" &&
-                        t.classList.contains("connection")
-                    ) {
-                        const grp = getGroupClass(t.classList);
-                        // Keep highlight if moving to another connection line in same group
-                        const rt = e.relatedTarget;
-                        const movingWithinGroup =
-                            rt &&
-                            rt.tagName &&
-                            rt.tagName.toLowerCase() === "line" &&
-                            rt.classList &&
-                            rt.classList.contains("connection") &&
-                            grp &&
-                            rt.classList.contains(grp);
-                        if (!movingWithinGroup && grp) removeHighlight(grp);
-                    }
+                    if (!isHighlightableTarget(t)) return;
+                    const grp = getGroupClass(t.classList);
+                    const rt = e.relatedTarget;
+                    const movingWithinGroup =
+                        rt &&
+                        isHighlightableTarget(rt) &&
+                        grp &&
+                        rt.classList &&
+                        rt.classList.contains(grp);
+                    if (!movingWithinGroup && grp) removeHighlight(grp);
                 });
             })();
 

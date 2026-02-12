@@ -104,3 +104,45 @@ func TestLoadExternalConnections2(t *testing.T) {
 	require.Len(t, b.Boxes.Horizontal[2].Vertical[0].Vertical, 0)
 	require.Len(t, b.Boxes.Horizontal[2].Vertical[0].Horizontal, 2)
 }
+
+func TestLoadExternalComments(t *testing.T) {
+	input := "../../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml"
+	inputConnections := "../../../resources/examples_boxes/ext_comments.yaml"
+
+	b, err := types.LoadInputFromFile[boxes.Boxes](input)
+	require.Nil(t, err)
+	require.NotNil(t, b)
+
+	c, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputConnections)
+	require.Nil(t, err)
+	require.NotNil(t, c)
+
+	// r5_3
+	require.Nil(t, b.Boxes.Horizontal[1].Vertical[0].Comment)
+	require.Nil(t, b.Boxes.Horizontal[1].Vertical[1].Comment)
+	require.Nil(t, b.Boxes.Horizontal[1].Vertical[2].Comment)
+
+	// Most Left Element
+	require.Nil(t, b.Boxes.Horizontal[2].Vertical[0].Comment)
+	require.Nil(t, b.Boxes.Horizontal[2].Vertical[1].Comment)
+	require.Nil(t, b.Boxes.Horizontal[2].Vertical[2].Comment)
+
+	b.MixinThings(*c)
+
+	// r5_3
+	require.Nil(t, b.Boxes.Horizontal[1].Vertical[0].Comment)
+	require.Nil(t, b.Boxes.Horizontal[1].Vertical[1].Comment)
+	require.NotNil(t, b.Boxes.Horizontal[1].Vertical[2].Comment)
+	require.Equal(t, "I am a comment", b.Boxes.Horizontal[1].Vertical[2].Comment.Text)
+	require.Nil(t, b.Boxes.Horizontal[1].Vertical[2].Comment.Label)
+	require.Nil(t, b.Boxes.Horizontal[1].Vertical[2].Comment.Format)
+
+	// Most Left Element
+	require.NotNil(t, b.Boxes.Horizontal[2].Vertical[0].Comment)
+	require.Equal(t, "Just another comment", b.Boxes.Horizontal[2].Vertical[0].Comment.Text)
+	require.Equal(t, "yyy", *b.Boxes.Horizontal[2].Vertical[0].Comment.Format)
+	require.Equal(t, "X", *b.Boxes.Horizontal[2].Vertical[0].Comment.Label)
+	require.Nil(t, b.Boxes.Horizontal[2].Vertical[1].Comment)
+	require.Nil(t, b.Boxes.Horizontal[2].Vertical[2].Comment)
+
+}

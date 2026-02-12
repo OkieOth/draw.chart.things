@@ -27,9 +27,6 @@ func (b *Boxes) mixInConnectionsImplCont(cont []Layout, additional map[string]Co
 }
 
 func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]ConnectionCont) {
-	if l.Caption == "mongodb4-shard0-data" {
-		fmt.Println("DEBUG")
-	}
 	if l.Id != "" {
 		if cc, ok := additional[l.Id]; ok {
 			for _, c := range cc.Connections {
@@ -51,6 +48,27 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 	}
 	b.mixInConnectionsImplCont(l.Horizontal, additional)
 	b.mixInConnectionsImplCont(l.Vertical, additional)
+}
+
+func (b *Boxes) mixInCommentImplCont(cont []Layout, additional map[string]types.Comment) {
+	for i := range len(cont) {
+		b.mixInCommentsImpl(&cont[i], additional)
+	}
+}
+
+func (b *Boxes) mixInCommentsImpl(l *Layout, additional map[string]types.Comment) {
+	if l.Id != "" {
+		if c, ok := additional[l.Id]; ok {
+			l.Comment = &c
+		}
+		if l.Caption != "" {
+			if c, ok := additional[l.Caption]; ok {
+				l.Comment = &c
+			}
+		}
+	}
+	b.mixInCommentImplCont(l.Horizontal, additional)
+	b.mixInCommentImplCont(l.Vertical, additional)
 }
 
 func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
@@ -113,6 +131,8 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	}
 	b.mixInLayoutsImpl(&b.Boxes, &additional.LayoutMixins)
 	b.mixInConnectionsImpl(&b.Boxes, additional.Connections)
+	b.mixInCommentsImpl(&b.Boxes, additional.Comments)
+	b.Overlays = append(b.Overlays, additional.Overlays...)
 	if len(additional.Formats) > 0 {
 		if b.Formats == nil {
 			b.Formats = make(map[string]Format)

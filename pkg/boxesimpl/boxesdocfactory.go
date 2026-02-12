@@ -31,6 +31,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 		conn.Comment = elem.Comment
 		conn.SourceArrow = elem.SourceArrow
 		conn.DestArrow = elem.DestArrow
+		conn.HiddenComments = elem.HiddenComments
 		conn.Tags = elem.Tags
 		if elem.Format != nil {
 			if formatInst, ok := inputFormats[*elem.Format]; ok {
@@ -386,6 +387,10 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 		return nil, err
 	}
 
+	if err := initOverlays(b, doc); err != nil {
+		return nil, err
+	}
+
 	doc.Boxes = initLayoutElement(&b.Boxes, doc, b)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin
@@ -400,4 +405,50 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 		doc.LineDist = types.LineDist
 	}
 	return doc, nil
+}
+
+func initOverlays(b *boxes.Boxes, doc *boxes.BoxesDocument) error {
+	if len(b.Overlays) > 0 {
+		for i := range b.Overlays {
+			o := b.Overlays[i]
+			newOverlay := boxes.NewDocOverlay()
+			newOverlay.Caption = o.Caption
+			newOverlay.RefValue = o.RefValue
+			newOverlay.CenterXOffset = o.CenterXOffset
+			newOverlay.CenterYOffset = o.CenterYOffset
+			if o.Formats != nil {
+				newOverlay.Formats = o.Formats
+				slices.SortFunc(newOverlay.Formats.Gradations, func(c1, c2 boxes.OverlayGradation) int {
+					if c1.Limit == c2.Limit {
+						return 0
+					} else if c1.Limit < c2.Limit {
+						return -1
+					} else {
+						return 1
+					}
+				})
+			} else {
+				newOverlay.Formats = boxes.NewOverlayFormatDef()
+			}
+			max := float64(doc.Width / 4)
+			min := float64(0)
+			if o.RadiusDefs != nil && o.RadiusDefs.Max > 0 {
+				max = o.RadiusDefs.Max
+			}
+			if o.RadiusDefs != nil && o.RadiusDefs.Min > 0 {
+				min = o.RadiusDefs.Min
+			}
+			newOverlay.RadiusDefs = &boxes.OverlayRadiusDef{
+				Min: min,
+				Max: max, // max radius is when not set one quarter of the document width
+			}
+			for k, v := range o.Layouts {
+				newOverlay.Layouts[k] = boxes.OverlayEntry{
+					Value: v,
+				}
+			}
+			doc.Overlays = append(doc.Overlays, *newOverlay)
+		}
+	}
+	return nil
 }
