@@ -1,0 +1,87 @@
+overlays:
+  - caption: Demo 1
+    refValue: 50
+    centerXOffset: -0.2
+    layouts:
+      r4_1: 5
+      Center Element 1: 20
+      Right Element 0: 10
+      Last Box: 8
+    radiusDefs:
+      min: 20
+      max: 200
+    formats:
+      default: o1Default
+  - caption: Demo 2
+    refValue: 1000
+    centerXOffset: 0.2
+    layouts:
+      Ferdows: 800.5
+      r5_3: 100
+      Most Left Element: 500
+      Last Box: 10
+    radiusDefs:
+      min: 20
+      max: 200
+    formats:
+      default: o2Default
+      gradations:
+        - limit: 100
+          format: o2Level1
+        - limit: 500
+          format: o2Level2
+        - limit: 800
+          format: o2Level3
+        - limit: 900
+          format: o2Level4
+formats:
+  o1Default:
+    line:
+      width: 1
+      color: pink
+      opacity: 0.5
+    fill:
+      color: pink
+      opacity: 0.5
+
+  o2Default:
+    line:
+      width: 1
+      color: green
+      opacity: 0.5
+    fill:
+      color: green
+      opacity: 0.5
+
+  o2Level1:
+    line:
+      width: 1
+      color: red
+      opacity: 0.5
+    fill:
+      color: red
+      opacity: 0.5
+  o2Level2:
+    line:
+      width: 1
+      color: orange
+      opacity: 0.5
+    fill:
+      color: orange
+      opacity: 0.5
+  o2Level3:
+    line:
+      width: 1
+      color: darkyellow
+      opacity: 0.5
+    fill:
+      color: darkyellow
+      opacity: 0.5
+  o2Level4:
+    line:
+      width: 1
+      color: lightgreen
+      opacity: 0.5
+    fill:
+      color: lightgreen
+      opacity: 0.5
