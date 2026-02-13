@@ -335,14 +335,6 @@ func (d *SvgDrawing) DrawTextWithIdAndClass(text string, x, currentY, width int,
 	xTxt := x + width/2
 	for _, l := range lines {
 		yTxt := currentY + fontDef.Size
-		// TODO remove
-		// switch fontDef.Anchor {
-		// case types.FontDefAnchorEnum_middle:
-		// 	xTxt = x + (width / 2)
-		// case types.FontDefAnchorEnum_right:
-		// 	xTxt = x + width - types.GlobalPadding - 5
-		// }
-		//d.canvas.Text(xTxt, yTxt, l.Text, txtFormat)
 		writeTxt(xTxt, yTxt, l.Text, txtFormat)
 		currentY += l.Height
 	}

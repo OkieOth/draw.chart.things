@@ -266,3 +266,16 @@ circle.highlight-group {
 text.highlight-group {
     font-weight: 600;
 }
+
+/* Dim non-highlighted connections/comments while a group is focused */
+line.connection.connection-dimmed {
+    stroke: #ddd !important;
+    stroke-width: 2 !important;
+}
+
+circle.connection-comment-dimmed {
+    stroke: #ddd !important;
+    stroke-width: 1 !important;
+    fill: #ddd !important;
+    color: #ddd !important;
+}

@@ -426,6 +426,32 @@
                 if (!canvas) return;
                 const zRestoreMap = new WeakMap();
                 const highlightableTags = new Set(["line", "circle", "text"]);
+                const activeGroupHighlights = new Set();
+
+                function updateNonHighlightedConnections() {
+                    const svg = canvas.querySelector("svg");
+                    if (!svg) return;
+                    const shouldDim = activeGroupHighlights.size > 0;
+                    const connectionLines = svg.querySelectorAll("line.connection");
+                    connectionLines.forEach((line) => {
+                        const isHighlighted = line.classList.contains("highlight-group");
+                        if (shouldDim && !isHighlighted) {
+                            line.classList.add("connection-dimmed");
+                        } else {
+                            line.classList.remove("connection-dimmed");
+                        }
+                    });
+                    const commentNodes = svg.querySelectorAll("circle, text");
+                    commentNodes.forEach((node) => {
+                        if (!getGroupClass(node.classList)) return;
+                        const isHighlighted = node.classList.contains("highlight-group");
+                        if (shouldDim && !isHighlighted) {
+                            node.classList.add("connection-comment-dimmed");
+                        } else {
+                            node.classList.remove("connection-comment-dimmed");
+                        }
+                    });
+                }
 
                 function getGroupClass(classList) {
                     for (const c of classList) {
@@ -476,6 +502,8 @@
                         text.classList.add("highlight-group");
                         bringToFront(text);
                     }
+                    activeGroupHighlights.add(groupClass);
+                    updateNonHighlightedConnections();
                 }
 
                 function removeHighlight(groupClass) {
@@ -501,6 +529,8 @@
                         text.classList.remove("highlight-group");
                         restoreZOrder(text);
                     }
+                    activeGroupHighlights.delete(groupClass);
+                    updateNonHighlightedConnections();
                 }
 
                 function isHighlightableTarget(el) {
@@ -533,6 +563,12 @@
                         rt.classList &&
                         rt.classList.contains(grp);
                     if (!movingWithinGroup && grp) removeHighlight(grp);
+                });
+
+                canvas.addEventListener("htmx:afterSwap", function (evt) {
+                    if (!evt || evt.target !== canvas) return;
+                    activeGroupHighlights.clear();
+                    updateNonHighlightedConnections();
                 });
             })();
 

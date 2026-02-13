@@ -240,8 +240,12 @@ func (doc *BoxesDocument) reduceConnectionLines(connElem *ConnectionElem) {
 		}
 	}
 	lastPart := connElem.Parts[len(connElem.Parts)-1]
-	lastE.DestLayoutId = lastPart.DestLayoutId
-	lastE.SrcLayoutId = lastPart.SrcLayoutId
+	if lastPart.DestLayoutId != nil {
+		lastE.DestLayoutId = lastPart.DestLayoutId
+	}
+	if lastPart.SrcLayoutId != nil {
+		lastE.SrcLayoutId = lastPart.SrcLayoutId
+	}
 	lastE.LineIndex = len(reducedParts)
 	lastE.IsEnd = true
 	reducedParts = append(reducedParts, *lastE)
@@ -270,10 +274,10 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, c *Layout
 		if i > 0 {
 			var line ConnectionLine
 			line = doc.createConnection(lastX, lastY, p.X, p.Y)
-			switch i {
-			case 1:
+			if i == 1 {
 				line.SrcLayoutId = &srcId
-			case pathElemCount:
+			}
+			if i == pathElemCount {
 				line.DestLayoutId = &destId
 			}
 			line.ConnectionIndex = connElem.ConnectionIndex
