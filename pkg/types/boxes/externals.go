@@ -36,6 +36,9 @@ type BoxesFileMixings struct {
     // dictionary of comment objects, this comment will applied on layout objects and replace existing comments there
     Comments map[string]types.Comment  `yaml:"comments,omitempty"`
 
+    // dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats
+    Tags map[string]Tags  `yaml:"tags,omitempty"`
+
     // optional map of images used in the generated graphic
     Images map[string]types.ImageDef  `yaml:"images,omitempty"`
 
@@ -50,6 +53,7 @@ func NewBoxesFileMixings() *BoxesFileMixings {
         Formats: make(map[string]Format, 0),
         FormatVariations: NewFormatVariations(),
         Comments: make(map[string]types.Comment, 0),
+        Tags: make(map[string]Tags, 0),
         Images: make(map[string]types.ImageDef, 0),
         Overlays: make([]Overlay, 0),
     }
@@ -79,6 +83,10 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
     ret.Comments = make(map[string]types.Comment, 0)
     for k, v := range src.Comments {
         ret.Comments[k] = v
+    }
+    ret.Tags = make(map[string]Tags, 0)
+    for k, v := range src.Tags {
+        ret.Tags[k] = v
     }
     ret.Images = make(map[string]types.ImageDef, 0)
     for k, v := range src.Images {
@@ -131,6 +139,37 @@ func CopyConnectionCont(src *ConnectionCont) *ConnectionCont {
 
 
 
+
+
+
+
+
+
+
+
+type Tags struct {
+
+    Tags []string  `yaml:"tags,omitempty"`
+}
+
+func NewTags() *Tags {
+    return &Tags{
+        Tags: make([]string, 0),
+    }
+}
+
+func CopyTags(src *Tags) *Tags {
+    if src == nil {
+        return nil
+    }
+    var ret Tags
+    ret.Tags = make([]string, 0)
+    for _, e := range src.Tags {
+        ret.Tags = append(ret.Tags, e)
+    }
+
+    return &ret
+}
 
 
 
