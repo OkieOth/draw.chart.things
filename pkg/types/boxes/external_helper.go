@@ -103,6 +103,11 @@ func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) 
 			b.mixInLayoutNow(l, &mixin)
 			delete(*additional, l.Caption)
 		}
+	} else if l.Id != "" {
+		if mixin, ok := (*additional)[l.Id]; ok {
+			b.mixInLayoutNow(l, &mixin)
+			delete(*additional, l.Id)
+		}
 	}
 	b.mixInLayoutsImplCont(l.Horizontal, additional)
 	b.mixInLayoutsImplCont(l.Vertical, additional)

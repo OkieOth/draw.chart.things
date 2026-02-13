@@ -1,3 +1,7 @@
+# v0.8.2
+## Boxes
+* enable layout mixins for ids
+
 # v0.8.1
 ## Boxes
 * UI: improved mouse-over for highlighting connections
