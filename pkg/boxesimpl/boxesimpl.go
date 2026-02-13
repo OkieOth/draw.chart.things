@@ -192,6 +192,32 @@ func copyTruncatedComments(layout *boxes.Layout, truncatedObjects map[string]Tru
 	}
 }
 
+func copyTruncatedTags(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
+	// find comments from truncated objects to the annotate current object
+	for _, v := range truncatedObjects {
+		if v.newId == layout.Id {
+			if layout.Caption == "TMS-Analytics" {
+				fmt.Println("DEBUG-1: layout.caption:", layout.Caption, "id:", layout.Id)
+			}
+			if len(v.truncated.Tags) > 0 {
+				for i := range v.truncated.Tags {
+					tag := v.truncated.Tags[i]
+					if layout.Caption == "TMS-Analytics" {
+						fmt.Println("DEBUG-2: tag:", tag)
+					}
+					if !slices.Contains(layout.Tags, tag) {
+						fmt.Println("DEBUG-3: copy tag: layout.id:", layout.Id, "tag:", tag)
+						layout.Tags = append(layout.Tags, tag)
+					}
+					if layout.Caption == "TMS-Analytics" {
+						fmt.Println("DEBUG-4: layout.tags:", layout.Tags)
+					}
+				}
+			}
+		}
+	}
+}
+
 func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
 	// copy all needed connections from truncated objects to the current object
 	for _, v := range truncatedObjects {
@@ -240,6 +266,7 @@ func adjustDestIdInRespectOfTruncated(layout *boxes.Layout, truncatedObjects map
 func adjustTruncated(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
 	copyTruncatedConnections(layout, truncatedObjects)
 	copyTruncatedComments(layout, truncatedObjects)
+	copyTruncatedTags(layout, truncatedObjects)
 	adjustDestIdInRespectOfTruncated(layout, truncatedObjects)
 	if len(layout.Horizontal) > 0 {
 		adjustTruncatedForCont(&layout.Horizontal, truncatedObjects)
