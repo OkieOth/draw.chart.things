@@ -1,3 +1,8 @@
+# v0.8.1
+## Boxes
+* UI: improved mouse-over for highlighting connections
+* fix connection issue, in case connection has only one line
+
 # v0.8.0
 ## Boxes
 * improve comments on connections

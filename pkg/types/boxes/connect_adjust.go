@@ -153,6 +153,7 @@ func absInt2(x int) (int, bool) {
 
 // that's the past variant before I separated both cases
 // remains only for "documentation" purposes
+// TODO remove
 func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	destId := line.DestLayoutId
 	if destId == nil {
@@ -192,15 +193,8 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	}
 }
 
-func (doc *BoxesDocument) adjustHorizontalEndLine(line *ConnectionLine) {
-	destId := line.DestLayoutId
-	if destId == nil {
-		destId = line.SrcLayoutId
-	}
-	if destId == nil {
-		return
-	}
-	box := doc.FindBoxWithId(*destId)
+func (doc *BoxesDocument) adjustHorizontalEndLineNow(line *ConnectionLine, boxId string) {
+	box := doc.FindBoxWithId(boxId)
 	if box == nil {
 		return
 	}
@@ -215,15 +209,17 @@ func (doc *BoxesDocument) adjustHorizontalEndLine(line *ConnectionLine) {
 	}
 }
 
-func (doc *BoxesDocument) adjustVerticalEndLine(line *ConnectionLine) {
-	destId := line.DestLayoutId
-	if destId == nil {
-		destId = line.SrcLayoutId
+func (doc *BoxesDocument) adjustHorizontalEndLine(line *ConnectionLine) {
+	if line.DestLayoutId != nil {
+		doc.adjustHorizontalEndLineNow(line, *line.DestLayoutId)
 	}
-	if destId == nil {
-		return
+	if line.SrcLayoutId != nil {
+		doc.adjustHorizontalEndLineNow(line, *line.SrcLayoutId)
 	}
-	box := doc.FindBoxWithId(*destId)
+}
+
+func (doc *BoxesDocument) adjustVerticalEndLineNow(line *ConnectionLine, boxId string) {
+	box := doc.FindBoxWithId(boxId)
 	if box == nil {
 		return
 	}
@@ -235,6 +231,15 @@ func (doc *BoxesDocument) adjustVerticalEndLine(line *ConnectionLine) {
 	} else {
 		// line up
 		line.StartY = box.Y + box.Height
+	}
+}
+
+func (doc *BoxesDocument) adjustVerticalEndLine(line *ConnectionLine) {
+	if line.DestLayoutId != nil {
+		doc.adjustVerticalEndLineNow(line, *line.DestLayoutId)
+	}
+	if line.SrcLayoutId != nil {
+		doc.adjustVerticalEndLineNow(line, *line.SrcLayoutId)
 	}
 }
 

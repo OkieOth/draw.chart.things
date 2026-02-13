@@ -7,21 +7,6 @@ formats:
       color: black
 boxes:
   horizontal:
-    - id: id1
-      caption: "H1"
-      vertical:
-        - id: id1_1
-          caption: H1_V1
-          comment:
-            text: This is H1_V1
-          connections:
-            - dest: H2_V1
-            - dest: H2_V2
-            - dest: H2_V3
-        - id: id1_2
-          caption: H1_V2
-        - id: id1_3
-          caption: H1_V3
     - id: id2
       caption: "H2"
       vertical:
@@ -31,3 +16,20 @@ boxes:
           caption: H2_V2
         - id: id2_3
           caption: H2_V3
+    - id: id1
+      caption: "H1"
+      vertical:
+        - id: id1_1
+          caption: H1_V1
+          comment:
+            text: This is H1_V1
+          connections:
+            - destId: id2
+        - id: id1_2
+          caption: H1_V2
+          connections:
+            - destId: id2
+        - id: id1_3
+          caption: H1_V3
+          connections:
+            - destId: id2
