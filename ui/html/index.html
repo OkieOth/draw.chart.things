@@ -85,11 +85,46 @@
                 <i class="fa-solid fa-bug"></i>
             </button>
             <!-- Combo box as last toolbar element -->
-            <select id="toolbar-combo" style="margin-left: 8px">
-                <option value="" selected>Default</option>
-                <option value="conn1.yaml">Additional Connections 1</option>
-                <option value="conn2.yaml">Additional Connections 2</option>
-            </select>
+            <div
+                id="toolbar-combobox"
+                class="toolbar-combobox"
+                style="margin-left: 8px"
+            >
+                <input
+                    id="toolbar-combo-input"
+                    class="toolbar-combo-input"
+                    type="text"
+                    placeholder="Filter mixins..."
+                    autocomplete="off"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-controls="toolbar-combo-dropdown"
+                />
+                <button
+                    type="button"
+                    id="toolbar-combo-toggle"
+                    class="tool-btn toolbar-combo-toggle"
+                    aria-label="Show mixin options"
+                >
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div
+                    id="toolbar-combo-dropdown"
+                    class="toolbar-combo-dropdown hidden"
+                    role="listbox"
+                    aria-label="Available mixins"
+                ></div>
+                <select
+                    id="toolbar-combo"
+                    class="toolbar-combo-select"
+                    style="display: none"
+                >
+                    <option value="" selected>Default</option>
+                    <option value="conn1.yaml">Additional Connections 1</option>
+                    <option value="conn2.yaml">Additional Connections 2</option>
+                </select>
+            </div>
             <!-- Manage uploads button -->
             <button
                 id="btn-manage-uploads"

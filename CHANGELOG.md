@@ -1,5 +1,6 @@
-# v0.8.2
+# v0.9.0
 ## Boxes
+* Changed the combobox in the UI to an editable version
 * enable layout mixins for ids
 
 # v0.8.1

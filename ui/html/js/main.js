@@ -69,6 +69,275 @@ let blacklist = [];
 // NEW: global additional mixins for persistence
 let mixins = [];
 
+// --- Editable toolbar combobox state ---
+const toolbarComboState = {
+    isOpen: false,
+    filterText: "",
+    highlightedIndex: -1,
+    filteredOptions: [],
+};
+
+function getToolbarComboElements() {
+    return {
+        root: document.getElementById("toolbar-combobox"),
+        input: document.getElementById("toolbar-combo-input"),
+        toggle: document.getElementById("toolbar-combo-toggle"),
+        dropdown: document.getElementById("toolbar-combo-dropdown"),
+        select: document.getElementById("toolbar-combo"),
+    };
+}
+
+function getToolbarComboOptions() {
+    const { select } = getToolbarComboElements();
+    if (!select) return [];
+    return Array.from(select.options || []).map((opt) => ({
+        value: opt.value,
+        label: opt.textContent || opt.value || "",
+    }));
+}
+
+function syncToolbarComboInputFromSelect() {
+    const { input, select } = getToolbarComboElements();
+    if (!input || !select) return;
+    const selected = select.options[select.selectedIndex];
+    input.value = selected ? selected.textContent : "";
+    input.setAttribute("aria-activedescendant", "");
+    toolbarComboState.filterText = "";
+}
+
+function renderToolbarComboDropdown() {
+    const { dropdown } = getToolbarComboElements();
+    if (!dropdown) return;
+    const filter = toolbarComboState.filterText.trim().toLowerCase();
+    const options = getToolbarComboOptions();
+    const filtered = filter
+        ? options.filter((opt) => {
+              const label = opt.label.toLowerCase();
+              const value = String(opt.value || "").toLowerCase();
+              return label.includes(filter) || value.includes(filter);
+          })
+        : options;
+    toolbarComboState.filteredOptions = filtered;
+    dropdown.innerHTML = "";
+
+    if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "toolbar-combo-empty";
+        empty.textContent = "No matches";
+        dropdown.appendChild(empty);
+        toolbarComboState.highlightedIndex = -1;
+        return;
+    }
+
+    if (
+        toolbarComboState.highlightedIndex < 0 ||
+        toolbarComboState.highlightedIndex >= filtered.length
+    ) {
+        toolbarComboState.highlightedIndex = 0;
+    }
+
+    filtered.forEach((opt, idx) => {
+        const row = document.createElement("div");
+        row.className = "toolbar-combo-option";
+        row.dataset.value = opt.value;
+        row.id = `toolbar-combo-option-${idx}`;
+        row.setAttribute("role", "option");
+        const displayLabel = opt.label || opt.value || "(unnamed)";
+        row.textContent = displayLabel;
+        row.title = displayLabel;
+        row.classList.toggle("active", idx === toolbarComboState.highlightedIndex);
+        row.addEventListener("mouseenter", () => {
+            toolbarComboState.highlightedIndex = idx;
+            updateToolbarComboActiveOption();
+        });
+        row.addEventListener("mousedown", (evt) => {
+            evt.preventDefault();
+            selectToolbarComboValue(opt.value);
+            closeToolbarComboDropdown();
+        });
+        dropdown.appendChild(row);
+    });
+
+    updateToolbarComboActiveOption();
+}
+
+function updateToolbarComboActiveOption() {
+    const { dropdown, input } = getToolbarComboElements();
+    if (!dropdown || !input) return;
+    const rows = dropdown.querySelectorAll(".toolbar-combo-option");
+    let activeId = "";
+    rows.forEach((row, idx) => {
+        const isActive = idx === toolbarComboState.highlightedIndex;
+        row.classList.toggle("active", isActive);
+        if (isActive) {
+            activeId = row.id;
+            ensureToolbarComboOptionVisible(row);
+        }
+    });
+    if (activeId) {
+        input.setAttribute("aria-activedescendant", activeId);
+    } else {
+        input.removeAttribute("aria-activedescendant");
+    }
+}
+
+function ensureToolbarComboOptionVisible(row) {
+    if (!row) return;
+    try {
+        row.scrollIntoView({ block: "nearest" });
+    } catch {
+        /* ignore */
+    }
+}
+
+function openToolbarComboDropdown(options = {}) {
+    const { dropdown, root, input, select } = getToolbarComboElements();
+    if (!dropdown || !root || !input || !select) return;
+    if (!select.options.length) return;
+    if (!options.preserveFilter) {
+        toolbarComboState.filterText = options.filterText || "";
+    }
+    toolbarComboState.isOpen = true;
+    dropdown.classList.remove("hidden");
+    root.classList.add("open");
+    input.setAttribute("aria-expanded", "true");
+    renderToolbarComboDropdown();
+}
+
+function closeToolbarComboDropdown(resetInput = true) {
+    const { dropdown, root, input } = getToolbarComboElements();
+    if (!dropdown || !root || !input) return;
+    toolbarComboState.isOpen = false;
+    toolbarComboState.highlightedIndex = -1;
+    dropdown.classList.add("hidden");
+    root.classList.remove("open");
+    input.setAttribute("aria-expanded", "false");
+    if (resetInput) {
+        syncToolbarComboInputFromSelect();
+    }
+}
+
+function moveToolbarComboHighlight(delta) {
+    const options = toolbarComboState.filteredOptions;
+    if (!options.length) return;
+    let idx = toolbarComboState.highlightedIndex;
+    if (idx < 0) idx = 0;
+    idx = (idx + delta + options.length) % options.length;
+    toolbarComboState.highlightedIndex = idx;
+    updateToolbarComboActiveOption();
+}
+
+function selectToolbarComboValue(value) {
+    const { select } = getToolbarComboElements();
+    if (!select) return;
+    const optionExists = Array.from(select.options).some((opt) => opt.value === value);
+    if (!optionExists) return;
+    select.value = value;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function handleToolbarComboKeydown(evt) {
+    switch (evt.key) {
+        case "ArrowDown":
+            evt.preventDefault();
+            if (!toolbarComboState.isOpen) {
+                openToolbarComboDropdown({ filterText: toolbarComboState.filterText });
+            }
+            moveToolbarComboHighlight(1);
+            break;
+        case "ArrowUp":
+            evt.preventDefault();
+            if (!toolbarComboState.isOpen) {
+                openToolbarComboDropdown({ filterText: toolbarComboState.filterText });
+            }
+            moveToolbarComboHighlight(-1);
+            break;
+        case "Enter": {
+            if (!toolbarComboState.isOpen) {
+                closeToolbarComboDropdown();
+                return;
+            }
+            evt.preventDefault();
+            const choice = toolbarComboState.filteredOptions[toolbarComboState.highlightedIndex];
+            if (choice) {
+                selectToolbarComboValue(choice.value);
+                closeToolbarComboDropdown();
+            }
+            break;
+        }
+        case "Escape":
+            evt.preventDefault();
+            closeToolbarComboDropdown();
+            break;
+        case "Tab":
+            closeToolbarComboDropdown();
+            break;
+        default:
+            break;
+    }
+}
+
+function handleToolbarComboDocumentClick(evt) {
+    const { root } = getToolbarComboElements();
+    if (!root) return;
+    if (!toolbarComboState.isOpen) return;
+    if (!root.contains(evt.target)) {
+        closeToolbarComboDropdown();
+    }
+}
+
+function initToolbarComboUI() {
+    const els = getToolbarComboElements();
+    const { select, input, toggle } = els;
+    if (!select || select.__comboInitialized) return;
+    select.__comboInitialized = true;
+
+    syncToolbarComboInputFromSelect();
+    renderToolbarComboDropdown();
+
+    if (input) {
+        input.addEventListener("focus", () => {
+            openToolbarComboDropdown({ filterText: "" });
+        });
+        input.addEventListener("input", (evt) => {
+            toolbarComboState.filterText = evt.target.value;
+            openToolbarComboDropdown({ preserveFilter: true });
+            renderToolbarComboDropdown();
+        });
+        input.addEventListener("keydown", handleToolbarComboKeydown);
+    }
+
+    if (toggle) {
+        toggle.addEventListener("click", () => {
+            if (toolbarComboState.isOpen) {
+                closeToolbarComboDropdown();
+            } else {
+                if (input) input.focus();
+                openToolbarComboDropdown({ filterText: "" });
+            }
+        });
+    }
+
+    select.addEventListener("change", () => {
+        syncToolbarComboInputFromSelect();
+        closeToolbarComboDropdown(false);
+    });
+
+    if (!window.__toolbarComboDocListener) {
+        document.addEventListener("mousedown", handleToolbarComboDocumentClick);
+        window.__toolbarComboDocListener = true;
+    }
+}
+
+function refreshToolbarComboUI() {
+    const { select } = getToolbarComboElements();
+    if (!select) return;
+    syncToolbarComboInputFromSelect();
+    if (toolbarComboState.isOpen) {
+        renderToolbarComboDropdown();
+    }
+}
+
 // --- Uploaded mixins persistence helpers ---
 // Stored in localStorage under 'uploadedMixins' as [{ id, title, content }]
 function getUploadedMixins() {
@@ -153,6 +422,7 @@ function ensureUploadOptionsInCombo(sel) {
         sentinel.textContent = "Upload file…";
         sel.appendChild(sentinel);
     }
+    refreshToolbarComboUI();
 }
 
 function removeUploadedMixin(id) {
@@ -211,10 +481,15 @@ function initPage() {
     window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
     // Attach dummy handler for toolbar combo box
     document.addEventListener("DOMContentLoaded", function () {
-        const combo = document.getElementById("toolbar-combo");
+        initToolbarComboUI();
+        const { select: combo, root: comboRoot } = getToolbarComboElements();
         if (combo) {
-            // Hide combo if no 'options' param was provided
-            if (!window.queryOptions) {
+            if (comboRoot) {
+                comboRoot.style.display = window.queryOptions ? "" : "none";
+                if (!window.queryOptions) {
+                    closeToolbarComboDropdown();
+                }
+            } else if (!window.queryOptions) {
                 combo.style.display = "none";
             }
             // Load combo options dynamically from YAML if 'options' query param is present
@@ -1270,9 +1545,9 @@ window.loadComboOptionsFromYaml = async function () {
         const src = window.queryOptions;
         if (!src) {
             // Even if no remote options source, still ensure upload entries are present
-            const selNoSrc = document.getElementById("toolbar-combo");
+            const { select: selNoSrc, root: comboRoot } = getToolbarComboElements();
+            if (comboRoot) comboRoot.style.display = "";
             if (selNoSrc) {
-                selNoSrc.style.display = "";
                 ensureUploadOptionsInCombo(selNoSrc);
             }
             return;
@@ -1286,10 +1561,10 @@ window.loadComboOptionsFromYaml = async function () {
         const text = await resp.text();
         // Parse a simple YAML mapping: label: value (labels may be quoted)
         const entries = parseSimpleYamlMapping(text);
-        const sel = document.getElementById("toolbar-combo");
+        const { select: sel, root: comboRoot } = getToolbarComboElements();
         if (!sel) return;
         // Ensure it's visible when options are available
-        sel.style.display = "";
+        if (comboRoot) comboRoot.style.display = "";
         // Replace existing options with dynamically loaded ones
         sel.innerHTML = "";
         for (const [label, value] of entries) {
@@ -1309,6 +1584,7 @@ window.loadComboOptionsFromYaml = async function () {
         }
         // Trigger a change to load the associated YAML if a non-empty value is selected
         sel.dispatchEvent(new Event("change", { bubbles: true }));
+        refreshToolbarComboUI();
     } catch (e) {
         console.error("Failed to load combo options from YAML:", e);
     }
