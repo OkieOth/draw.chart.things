@@ -43,14 +43,204 @@ window.getAllBoxIds = function () {
     if (!svg) return [];
     // Assume box elements have id matching the box id pattern (e.g., box_1, box_2, ...)
     // We'll collect all elements with an id that matches the box prefix logic
-    const elements = svg.querySelectorAll('[id]');
+    const elements = svg.querySelectorAll("[id]");
     const ids = new Set();
-    elements.forEach(el => {
+    elements.forEach((el) => {
         const boxId = getBoxPrefix(el.id);
         if (boxId) ids.add(boxId);
     });
     return Array.from(ids);
 };
+
+async function promptForUploadedMixin() {
+    const upload = await new Promise((resolve, reject) => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".yaml,.yml";
+        input.style.display = "none";
+        document.body.appendChild(input);
+        input.addEventListener("change", () => {
+            const file = input.files && input.files[0];
+            document.body.removeChild(input);
+            if (!file) {
+                reject(new Error("No file selected"));
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () =>
+                resolve({
+                    content: String(reader.result || ""),
+                    fileName: file.name || `mixin_${Date.now()}`,
+                });
+            reader.onerror = (err) => reject(err);
+            reader.readAsText(file);
+        });
+        input.click();
+    });
+    const uploadedName = upload.fileName || `mixin_${Date.now()}`;
+    const title = parseTitleFromYaml(upload.content, uploadedName);
+    const entry = upsertUploadedMixin(uploadedName, title, upload.content);
+    return {
+        id: entry.id,
+        label: entry.title || entry.id,
+        content: upload.content,
+    };
+}
+
+async function triggerToolbarComboUpload() {
+    try {
+        closeToolbarComboDropdown(false);
+        const { select } = getToolbarComboElements();
+        const upload = await promptForUploadedMixin();
+        if (!upload || !select) return;
+        ensureUploadOptionsInCombo(select);
+        const uploadedVal = `uploaded::${upload.id}`;
+        toolbarComboState.contentCache.set(uploadedVal, upload.content);
+        addToolbarComboSelection(uploadedVal);
+        toolbarComboState.selectionMeta.set(uploadedVal, {
+            ...(toolbarComboState.selectionMeta.get(uploadedVal) || {}),
+            label: upload.label,
+        });
+    } catch (err) {
+        console.error("Upload cancelled or failed:", err);
+    }
+}
+
+function collectBadgeIds(listId) {
+    const list = document.getElementById(listId);
+    if (!list) return [];
+    return Array.from(list.querySelectorAll(".badge"))
+        .map((b) => b.dataset.hid)
+        .filter(Boolean);
+}
+
+function restoreBadgeCollectorFromIds(savedBadgeIds) {
+    const list = document.getElementById("badge-list");
+    if (!list || !Array.isArray(savedBadgeIds)) return;
+    list.innerHTML = "";
+    savedBadgeIds.forEach((hid) => {
+        if (!hid) return;
+        const svg = document.querySelector("#canvas svg");
+        let el = svg ? svg.querySelector(`[id='${hid}']`) : null;
+        if (!el && svg) {
+            el = svg.querySelector(`[id^='${hid}']`);
+        }
+        if (el && window.createBadgeForShape) {
+            const badge = window.createBadgeForShape(el);
+            badge.dataset.hid = hid;
+            list.appendChild(badge);
+        } else if (window.getCaptionForId) {
+            const span = document.createElement("span");
+            span.className = "badge";
+            span.dataset.hid = hid;
+            const label = document.createElement("span");
+            label.textContent = window.getCaptionForId(hid);
+            span.appendChild(label);
+            list.appendChild(span);
+        }
+    });
+    requestAnimationFrame(window.refitAllBadges || (() => {}));
+}
+
+async function loadYamlForComboValue(value) {
+    if (!value || value === "__upload__") return "";
+    if (toolbarComboState.contentCache.has(value)) {
+        return toolbarComboState.contentCache.get(value);
+    }
+    if (value.startsWith("uploaded::")) {
+        const id = value.slice("uploaded::".length);
+        const list = getUploadedMixins();
+        const found = list.find((x) => x && x.id === id);
+        if (found) {
+            const content = String(found.content || "");
+            toolbarComboState.contentCache.set(value, content);
+            return content;
+        }
+        console.warn("Uploaded mixin not found:", id);
+        return "";
+    }
+    try {
+        const resp = await fetch(window.getBasePath() + "/data/" + value, {
+            cache: "no-cache",
+        });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const text = await resp.text();
+        toolbarComboState.contentCache.set(value, text);
+        return text;
+    } catch (err) {
+        console.error("Failed to load YAML for", value, err);
+        return "";
+    }
+}
+
+async function regenerateSvgWithState(expandedIds, blacklistIds) {
+    if (typeof createSvgExt !== "function") {
+        return;
+    }
+    const canvas = document.getElementById("canvas");
+    if (!canvas) return;
+    const arg =
+        typeof window.input === "string" && window.input.length > 0
+            ? window.input
+            : "";
+    console.log(
+        "Refreshing SVG: ",
+        expandedIds,
+        "blacklist ids: ",
+        blacklistIds,
+        "comments hidden: ",
+        window.hideCommentsEnabled
+    );
+    try {
+        let svgStr = createSvgExt(
+            arg,
+            mixins,
+            window.defaultDepth,
+            expandedIds,
+            blacklistIds,
+            window.hideCommentsEnabled,
+            window.debug
+        );
+        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
+            console.error("createSvgExt did not return a valid SVG string.");
+            console.error(svgStr);
+            return;
+        }
+        canvas.innerHTML = svgStr;
+        const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
+        canvas.dispatchEvent(evtSwap);
+        restoreBadgeCollectorFromIds(expandedIds);
+    } catch (err) {
+        console.error("Error updating SVG via createSvgExt:", err);
+    }
+}
+
+async function applySelectedMixins() {
+    const seq = ++toolbarComboState.applyToken;
+    const selectedValues = toolbarComboState.selectedValues.slice();
+    const contents = [];
+    for (const value of selectedValues) {
+        const yamlContent = await loadYamlForComboValue(value);
+        if (toolbarComboState.applyToken !== seq) {
+            return;
+        }
+        if (yamlContent) {
+            contents.push(yamlContent);
+        }
+    }
+    mixins = contents;
+    window.currentYamlFile = selectedValues.length ? selectedValues.join(",") : undefined;
+    if (typeof createSvgExt !== "function") {
+        return;
+    }
+    const savedBadgeState = collectBadgeIds("badge-list");
+    const savedBlacklistState = collectBadgeIds("blacklist-list");
+    if (toolbarComboState.applyToken !== seq) {
+        return;
+    }
+    await regenerateSvgWithState(savedBadgeState, savedBlacklistState);
+}
 let state = { scale: 1, tx: 0, ty: 0 };
 let baseSize = { width: 0, height: 0 };
 let minimapVisible = false;
@@ -75,6 +265,10 @@ const toolbarComboState = {
     filterText: "",
     highlightedIndex: -1,
     filteredOptions: [],
+    selectedValues: [], // ordered list of selected mixin option values
+    selectionMeta: new Map(), // value -> { label, content? }
+    contentCache: new Map(), // value -> yaml content
+    applyToken: 0,
 };
 
 function getToolbarComboElements() {
@@ -87,6 +281,13 @@ function getToolbarComboElements() {
     };
 }
 
+function getSelectedCollectorElements() {
+    return {
+        panel: document.getElementById("selected-collector"),
+        list: document.getElementById("selected-mixins-list"),
+    };
+}
+
 function getToolbarComboOptions() {
     const { select } = getToolbarComboElements();
     if (!select) return [];
@@ -96,13 +297,89 @@ function getToolbarComboOptions() {
     }));
 }
 
-function syncToolbarComboInputFromSelect() {
-    const { input, select } = getToolbarComboElements();
-    if (!input || !select) return;
-    const selected = select.options[select.selectedIndex];
-    input.value = selected ? selected.textContent : "";
-    input.setAttribute("aria-activedescendant", "");
-    toolbarComboState.filterText = "";
+function resetToolbarComboInput() {
+    const { input } = getToolbarComboElements();
+    if (!input) return;
+    input.value = toolbarComboState.filterText || "";
+    if (!toolbarComboState.filterText) {
+        input.setAttribute("aria-activedescendant", "");
+    }
+}
+
+function getToolbarComboOptionLabel(value) {
+    if (!value) return "";
+    const options = getToolbarComboOptions();
+    const found = options.find((opt) => opt.value === value);
+    return (found && found.label) || value;
+}
+
+function isToolbarComboValueSelected(value) {
+    return toolbarComboState.selectedValues.includes(value);
+}
+
+function createSelectedCollectorBadge(value, label) {
+    const badge = document.createElement("div");
+    badge.className = "selected-mixin-badge";
+    badge.dataset.value = value;
+
+    const text = document.createElement("span");
+    text.className = "selected-mixin-label";
+    text.textContent = label;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "selected-mixin-remove tool-btn";
+    removeBtn.title = `Remove ${label}`;
+    removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+    badge.appendChild(text);
+    badge.appendChild(removeBtn);
+    return badge;
+}
+
+function updateToolbarComboSelectedList() {
+    const { panel, list } = getSelectedCollectorElements();
+    if (!list) return;
+    list.innerHTML = "";
+    const vals = toolbarComboState.selectedValues;
+    if (!vals.length) {
+        const empty = document.createElement("div");
+        empty.className = "collector-empty";
+        empty.textContent = "No mixins selected.";
+        list.appendChild(empty);
+    } else {
+        vals.forEach((value) => {
+            const label =
+                toolbarComboState.selectionMeta.get(value)?.label ||
+                getToolbarComboOptionLabel(value) ||
+                value;
+            list.appendChild(createSelectedCollectorBadge(value, label));
+        });
+    }
+    if (panel) {
+        panel.setAttribute(
+            "aria-hidden",
+            panel.classList.contains("hidden") ? "true" : "false"
+        );
+    }
+    positionBlacklistCollector();
+}
+
+function initSelectedCollectorInteractions() {
+    const { list } = getSelectedCollectorElements();
+    if (!list || list.__selectedHandlerAttached) return;
+    list.__selectedHandlerAttached = true;
+    list.addEventListener("click", (evt) => {
+        const btn = evt.target.closest(".selected-mixin-remove");
+        if (!btn) return;
+        const badge = btn.closest(".selected-mixin-badge");
+        const value = badge ? badge.dataset.value : null;
+        if (value) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            removeToolbarComboSelection(value);
+        }
+    });
 }
 
 function renderToolbarComboDropdown() {
@@ -143,17 +420,41 @@ function renderToolbarComboDropdown() {
         row.id = `toolbar-combo-option-${idx}`;
         row.setAttribute("role", "option");
         const displayLabel = opt.label || opt.value || "(unnamed)";
-        row.textContent = displayLabel;
         row.title = displayLabel;
+        const isUpload = opt.value === "__upload__";
+        if (isUpload) {
+            row.classList.add("toolbar-combo-option-upload");
+            const icon = document.createElement("i");
+            icon.className = "fa-solid fa-upload";
+            const label = document.createElement("span");
+            label.textContent = displayLabel;
+            row.appendChild(icon);
+            row.appendChild(label);
+            row.addEventListener("mousedown", (evt) => {
+                evt.preventDefault();
+                triggerToolbarComboUpload();
+            });
+        } else {
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.tabIndex = -1;
+            checkbox.checked = isToolbarComboValueSelected(opt.value);
+            checkbox.setAttribute("aria-hidden", "true");
+            const label = document.createElement("span");
+            label.className = "toolbar-combo-option-label";
+            label.textContent = displayLabel;
+            row.appendChild(checkbox);
+            row.appendChild(label);
+            row.addEventListener("mousedown", (evt) => {
+                evt.preventDefault();
+                toggleToolbarComboValue(opt.value);
+            });
+            row.setAttribute("aria-selected", checkbox.checked ? "true" : "false");
+        }
         row.classList.toggle("active", idx === toolbarComboState.highlightedIndex);
         row.addEventListener("mouseenter", () => {
             toolbarComboState.highlightedIndex = idx;
             updateToolbarComboActiveOption();
-        });
-        row.addEventListener("mousedown", (evt) => {
-            evt.preventDefault();
-            selectToolbarComboValue(opt.value);
-            closeToolbarComboDropdown();
         });
         dropdown.appendChild(row);
     });
@@ -204,7 +505,7 @@ function openToolbarComboDropdown(options = {}) {
     renderToolbarComboDropdown();
 }
 
-function closeToolbarComboDropdown(resetInput = true) {
+function closeToolbarComboDropdown(resetFilter = true) {
     const { dropdown, root, input } = getToolbarComboElements();
     if (!dropdown || !root || !input) return;
     toolbarComboState.isOpen = false;
@@ -212,8 +513,9 @@ function closeToolbarComboDropdown(resetInput = true) {
     dropdown.classList.add("hidden");
     root.classList.remove("open");
     input.setAttribute("aria-expanded", "false");
-    if (resetInput) {
-        syncToolbarComboInputFromSelect();
+    if (resetFilter) {
+        toolbarComboState.filterText = "";
+        resetToolbarComboInput();
     }
 }
 
@@ -227,13 +529,13 @@ function moveToolbarComboHighlight(delta) {
     updateToolbarComboActiveOption();
 }
 
-function selectToolbarComboValue(value) {
-    const { select } = getToolbarComboElements();
-    if (!select) return;
-    const optionExists = Array.from(select.options).some((opt) => opt.value === value);
-    if (!optionExists) return;
-    select.value = value;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
+function toggleToolbarComboValue(value) {
+    if (!value || value === "__upload__") return;
+    if (isToolbarComboValueSelected(value)) {
+        removeToolbarComboSelection(value);
+    } else {
+        addToolbarComboSelection(value);
+    }
 }
 
 function handleToolbarComboKeydown(evt) {
@@ -260,8 +562,11 @@ function handleToolbarComboKeydown(evt) {
             evt.preventDefault();
             const choice = toolbarComboState.filteredOptions[toolbarComboState.highlightedIndex];
             if (choice) {
-                selectToolbarComboValue(choice.value);
-                closeToolbarComboDropdown();
+                if (choice.value === "__upload__") {
+                    triggerToolbarComboUpload();
+                } else {
+                    toggleToolbarComboValue(choice.value);
+                }
             }
             break;
         }
@@ -292,8 +597,9 @@ function initToolbarComboUI() {
     if (!select || select.__comboInitialized) return;
     select.__comboInitialized = true;
 
-    syncToolbarComboInputFromSelect();
+    resetToolbarComboInput();
     renderToolbarComboDropdown();
+    updateToolbarComboSelectedList();
 
     if (input) {
         input.addEventListener("focus", () => {
@@ -318,11 +624,6 @@ function initToolbarComboUI() {
         });
     }
 
-    select.addEventListener("change", () => {
-        syncToolbarComboInputFromSelect();
-        closeToolbarComboDropdown(false);
-    });
-
     if (!window.__toolbarComboDocListener) {
         document.addEventListener("mousedown", handleToolbarComboDocumentClick);
         window.__toolbarComboDocListener = true;
@@ -330,12 +631,79 @@ function initToolbarComboUI() {
 }
 
 function refreshToolbarComboUI() {
-    const { select } = getToolbarComboElements();
-    if (!select) return;
-    syncToolbarComboInputFromSelect();
+    resetToolbarComboInput();
+    updateToolbarComboSelectedList();
     if (toolbarComboState.isOpen) {
         renderToolbarComboDropdown();
     }
+}
+
+function addToolbarComboSelection(value, options = {}) {
+    if (!value || value === "__upload__") return;
+    if (toolbarComboState.selectedValues.includes(value)) return;
+    toolbarComboState.selectedValues.push(value);
+    const label = getToolbarComboOptionLabel(value) || value;
+    const prevMeta = toolbarComboState.selectionMeta.get(value) || {};
+    toolbarComboState.selectionMeta.set(value, { ...prevMeta, label });
+    updateToolbarComboSelectedList();
+    if (toolbarComboState.isOpen) renderToolbarComboDropdown();
+    if (!options.silent) {
+        applySelectedMixins();
+    }
+}
+
+function removeToolbarComboSelection(value, options = {}) {
+    const idx = toolbarComboState.selectedValues.indexOf(value);
+    if (idx === -1) return;
+    toolbarComboState.selectedValues.splice(idx, 1);
+    if (!options.keepMeta) {
+        toolbarComboState.selectionMeta.delete(value);
+    }
+    updateToolbarComboSelectedList();
+    if (toolbarComboState.isOpen) renderToolbarComboDropdown();
+    if (!options.silent) {
+        applySelectedMixins();
+    }
+}
+
+function setToolbarComboSelections(values, options = {}) {
+    const unique = [];
+    (values || []).forEach((value) => {
+        if (!value || value === "__upload__") return;
+        if (!unique.includes(value)) unique.push(value);
+    });
+    toolbarComboState.selectedValues = unique;
+    const nextMeta = new Map();
+    unique.forEach((value) => {
+        const existing = toolbarComboState.selectionMeta.get(value) || {};
+        const label = getToolbarComboOptionLabel(value) || value;
+        nextMeta.set(value, { ...existing, label });
+    });
+    toolbarComboState.selectionMeta = nextMeta;
+    updateToolbarComboSelectedList();
+    if (toolbarComboState.isOpen) renderToolbarComboDropdown();
+    if (!options.silent) {
+        applySelectedMixins();
+    }
+}
+
+window.getToolbarComboSelectionValues = function () {
+    return toolbarComboState.selectedValues.slice();
+};
+
+function getFirstSelectableComboValue() {
+    const { select } = getToolbarComboElements();
+    if (!select) return null;
+    const opt = Array.from(select.options).find((o) => o.value && o.value !== "__upload__");
+    return opt ? opt.value : null;
+}
+
+function getDefaultComboSelectionValues() {
+    if (Array.isArray(window.queryComboValues) && window.queryComboValues.length) {
+        return window.queryComboValues.slice();
+    }
+    const first = getFirstSelectableComboValue();
+    return first ? [first] : [];
 }
 
 // --- Uploaded mixins persistence helpers ---
@@ -482,6 +850,7 @@ function initPage() {
     // Attach dummy handler for toolbar combo box
     document.addEventListener("DOMContentLoaded", function () {
         initToolbarComboUI();
+        initSelectedCollectorInteractions();
         const { select: combo, root: comboRoot } = getToolbarComboElements();
         if (combo) {
             if (comboRoot) {
@@ -492,23 +861,17 @@ function initPage() {
             } else if (!window.queryOptions) {
                 combo.style.display = "none";
             }
-            // Load combo options dynamically from YAML if 'options' query param is present
             if (typeof window.loadComboOptionsFromYaml === "function") {
-                // Fire and forget; selection will be set inside loader if 'combo' is present
                 window.loadComboOptionsFromYaml();
+            } else {
+                ensureUploadOptionsInCombo(combo);
+                const defaults = getDefaultComboSelectionValues();
+                if (defaults.length) {
+                    setToolbarComboSelections(defaults, { silent: true });
+                }
+                updateToolbarComboSelectedList();
+                applySelectedMixins();
             }
-            let previousYamlContent = "";
-            combo.addEventListener("change", async function (e) {
-                await handleComboBoxChange(combo, previousYamlContent, function (newYaml) {
-                    previousYamlContent = newYaml;
-                    // Persist selection in global mixins
-                    mixins = newYaml ? [newYaml] : [];
-                    // Set currentYamlFile to combo value if present
-                    if (combo.value) {
-                        window.currentYamlFile = combo.value;
-                    }
-                });
-            });
         }
 
         // Manage Uploads UI wiring
@@ -522,24 +885,45 @@ function initPage() {
         function refreshComboAfterStorageChange(removedId) {
             const sel = document.getElementById("toolbar-combo");
             if (!sel) return;
-            // Update options to reflect storage
             ensureUploadOptionsInCombo(sel);
-            // If removed was selected, choose a fallback
-            const removedVal = removedId ? `uploaded::${removedId}` : null;
-            const currentVal = sel.value;
-            const hasCurrent = currentVal && sel.querySelector(`option[value='${CSS.escape(currentVal)}']`);
-            if (removedVal && currentVal === removedVal || !hasCurrent) {
-                // Pick first non-sentinel option if available
-                const opts = Array.from(sel.options).filter(o => o.value !== "__upload__");
-                if (opts.length) {
-                    sel.value = opts[0].value;
-                } else {
-                    // Nothing left, clear selection
-                    sel.selectedIndex = -1;
+
+            const storedUploaded = new Set(
+                getUploadedMixins().map((u) => `uploaded::${u.id}`)
+            );
+
+            Array.from(toolbarComboState.contentCache.keys()).forEach((key) => {
+                if (key.startsWith("uploaded::") && !storedUploaded.has(key)) {
+                    toolbarComboState.contentCache.delete(key);
                 }
-                // Trigger change to refresh SVG/mixins
-                sel.dispatchEvent(new Event("change", { bubbles: true }));
+            });
+
+            if (removedId) {
+                const removedVal = `uploaded::${removedId}`;
+                toolbarComboState.contentCache.delete(removedVal);
+                removeToolbarComboSelection(removedVal, { silent: true });
             }
+
+            const available = new Set(
+                Array.from(sel.options).map((o) => o.value)
+            );
+            const filtered = toolbarComboState.selectedValues.filter((value) => {
+                if (value.startsWith("uploaded::")) {
+                    return storedUploaded.has(value);
+                }
+                return available.has(value);
+            });
+            if (filtered.length !== toolbarComboState.selectedValues.length) {
+                setToolbarComboSelections(filtered, { silent: true });
+            }
+
+            if (!toolbarComboState.selectedValues.length) {
+                const fallback = getFirstSelectableComboValue();
+                if (fallback) {
+                    addToolbarComboSelection(fallback, { silent: true });
+                }
+            }
+            updateToolbarComboSelectedList();
+            applySelectedMixins();
         }
 
         function populateUploadsPopup() {
@@ -624,155 +1008,6 @@ function initPage() {
                 }
             });
         }
-    // Production-ready: handle combo box change logic in a separate function
-    async function handleComboBoxChange(combo, previousYamlContent, setPreviousYamlContent) {
-        const val = combo.value;
-        let yamlContent = "";
-
-        // Handle uploaded mixin sentinel: open file picker
-        if (val === "__upload__") {
-            try {
-                const upload = await new Promise((resolve, reject) => {
-                    const input = document.createElement("input");
-                    input.type = "file";
-                    input.accept = ".yaml,.yml";
-                    input.style.display = "none";
-                    document.body.appendChild(input);
-                    input.addEventListener("change", async () => {
-                        const f = input.files && input.files[0];
-                        document.body.removeChild(input);
-                        if (!f) return reject(new Error("No file selected"));
-                        try {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve({ content: String(reader.result || ""), fileName: f.name || `mixin_${Date.now()}` });
-                            reader.onerror = (e) => reject(e);
-                            reader.readAsText(f);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    });
-                    // Trigger the picker
-                    input.click();
-                });
-                const { content, fileName } = upload;
-                const uploadedName = fileName || `mixin_${Date.now()}`;
-                const title = parseTitleFromYaml(content, uploadedName);
-                const entry = upsertUploadedMixin(uploadedName, title, content);
-                // Insert or update option and select it
-                ensureUploadOptionsInCombo(combo);
-                const uploadedVal = `uploaded::${entry.id}`;
-                combo.value = uploadedVal;
-                yamlContent = content;
-                setPreviousYamlContent(yamlContent);
-                console.log("Uploaded mixin added:", entry);
-            } catch (err) {
-                console.error("Upload cancelled or failed:", err);
-                // Restore previous selection if any (avoid staying on sentinel)
-                const restoreVal = previousYamlContent ? combo.value : "";
-                if (restoreVal) combo.value = restoreVal; else combo.selectedIndex = 0;
-                setPreviousYamlContent(previousYamlContent);
-            }
-        } else if (val && val.startsWith("uploaded::")) {
-            const id = val.slice("uploaded::".length);
-            const list = getUploadedMixins();
-            const found = list.find((x) => x && x.id === id);
-            if (found) {
-                yamlContent = String(found.content || "");
-                setPreviousYamlContent(yamlContent);
-                console.log("Selected uploaded mixin:", id);
-            } else {
-                console.warn("Uploaded mixin not found:", id);
-                setPreviousYamlContent("");
-            }
-        } else if (val) {
-            try {
-                const resp = await fetch(window.getBasePath() + "/data/" + val, { cache: "no-cache" });
-                if (!resp.ok) throw new Error("HTTP " + resp.status);
-                yamlContent = await resp.text();
-                setPreviousYamlContent(yamlContent);
-                console.log("Loaded YAML for", val, yamlContent);
-            } catch (err) {
-                console.error("Failed to load YAML for", val, err);
-                setPreviousYamlContent("");
-            }
-        } else {
-            setPreviousYamlContent("");
-            console.log("Combo box changed: No Connections selected");
-        }
-        // Always call createSvgExt with global mixins and current expanded/blacklist state
-        // Preserve only data-hid values before SVG refresh
-        const badgeList = document.getElementById("badge-list");
-        const savedBadgeState = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
-        const blacklistList = document.getElementById("blacklist-list");
-        const savedBlacklistState = blacklistList ? Array.from(blacklistList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
-        try {
-            if (typeof createSvgExt !== "function") {
-                console.error("createSvgExt is not available.");
-                return;
-            }
-            const canvas = document.getElementById("canvas");
-            if (!canvas) return;
-            const arg = typeof window.input === "string" && window.input.length > 0 ? window.input : "";
-            // Use saved state for filterTexts and blacklistIds
-            const filterTexts = savedBadgeState;
-            const blacklistIds = savedBlacklistState;
-            console.log(
-                "Refreshing SVG: ",
-                filterTexts,
-                "blacklist ids: ",
-                blacklistIds,
-                "comments hidden: ",
-                window.hideCommentsEnabled
-            );
-            let svgStr = createSvgExt(
-                arg,
-                mixins,
-                window.defaultDepth,
-                filterTexts,
-                blacklistIds,
-                window.hideCommentsEnabled,
-                window.debug
-            );
-            svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
-            if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
-                console.error("createSvgExt did not return a valid SVG string.");
-                console.error(svgStr);
-                return;
-            }
-            canvas.innerHTML = svgStr;
-            const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
-            canvas.dispatchEvent(evtSwap);
-            // Restore badge collector state after SVG refresh using data-hid
-            const list = document.getElementById("badge-list");
-            if (list && Array.isArray(savedBadgeState)) {
-                list.innerHTML = "";
-                savedBadgeState.forEach(hid => {
-                    if (!hid) return;
-                    // Try to find the element in the new SVG
-                    const svg = document.querySelector("#canvas svg");
-                    let el = svg ? svg.querySelector(`[id='${hid}']`) : null;
-                    if (!el && svg) el = svg.querySelector(`[id^='${hid}']`);
-                    if (el && window.createBadgeForShape) {
-                        const badge = window.createBadgeForShape(el);
-                        badge.dataset.hid = hid;
-                        list.appendChild(badge);
-                    } else if (window.getCaptionForId) {
-                        // Fallback minimal badge
-                        const span = document.createElement("span");
-                        span.className = "badge";
-                        span.dataset.hid = hid;
-                        const label = document.createElement("span");
-                        label.textContent = window.getCaptionForId(hid);
-                        span.appendChild(label);
-                        list.appendChild(span);
-                    }
-                });
-                requestAnimationFrame(window.refitAllBadges || (()=>{}));
-            }
-        } catch (e) {
-            console.error("Error updating SVG via createSvgExt:", e);
-        }
-    }
     });
     // Also reposition after collector content changes
     const observer = new MutationObserver(positionBlacklistCollector);
@@ -780,6 +1015,14 @@ function initPage() {
         childList: true,
         subtree: true,
     });
+    const selectedPanel = document.getElementById("selected-collector");
+    if (selectedPanel) {
+        const selectedObserver = new MutationObserver(positionBlacklistCollector);
+        selectedObserver.observe(selectedPanel, {
+            childList: true,
+            subtree: true,
+        });
+    }
     (function () {
         // Polyfill: CSS.escape (minimal) for older browsers
         if (typeof CSS === "undefined" || typeof CSS.escape !== "function") {
@@ -1086,6 +1329,7 @@ function initPage() {
                     }
                 }
                 updateToolButtons();
+                positionBlacklistCollector();
             },
             zoom(factor) {
                 state.scale *= factor;
@@ -1160,6 +1404,16 @@ function initPage() {
                 updateToolButtons();
                 // NEW: when showing, refit badges (sizes are measurable again)
                 if (!hidden) requestAnimationFrame(refitAllBadges);
+                positionBlacklistCollector();
+            },
+            toggleSelectedCollector() {
+                const panel = document.getElementById("selected-collector");
+                if (!panel) return;
+                const hidden = panel.classList.toggle("hidden");
+                panel.setAttribute("aria-hidden", hidden ? "true" : "false");
+                updateToolbarComboSelectedList();
+                updateToolButtons();
+                positionBlacklistCollector();
             },
             // Toggle pan tool
             togglePanTool() {
@@ -1479,21 +1733,27 @@ function handleInputQueryParam() {
         window.debug = val;
 
         // --- NEW: Parse combo, expandedIds, blacklistedIds ---
-        // Combo box
-        if (params.has("combo")) {
-            const comboVal = params.get("combo");
-            // Store for use after dynamic options load
-            window.queryCombo = comboVal || "";
-            // Set combo box value after DOMContentLoaded
-            document.addEventListener("DOMContentLoaded", function () {
-                const combo = document.getElementById("toolbar-combo");
-                if (combo && comboVal) {
-                    combo.value = comboVal;
-                    // Optionally trigger change event to load YAML
-                    combo.dispatchEvent(new Event("change", { bubbles: true }));
-                }
+        // Combo box (allow comma-separated or repeated params)
+        const comboParams = params.getAll("combo");
+        if (comboParams.length) {
+            const comboList = [];
+            const seen = new Set();
+            comboParams.forEach((chunk) => {
+                String(chunk || "")
+                    .split(",")
+                    .map((part) => part.trim())
+                    .filter(Boolean)
+                    .forEach((val) => {
+                        if (!seen.has(val)) {
+                            seen.add(val);
+                            comboList.push(val);
+                        }
+                    });
             });
+            window.queryComboValues = comboList;
+            window.queryCombo = comboList.length ? comboList[0] : undefined;
         } else {
+            window.queryComboValues = [];
             window.queryCombo = undefined;
         }
 
@@ -1575,15 +1835,10 @@ window.loadComboOptionsFromYaml = async function () {
         }
         // Add uploaded mixins and the upload sentinel
         ensureUploadOptionsInCombo(sel);
-        // If a combo selection was provided via query param, apply it
-        if (typeof window.queryCombo === "string" && sel.querySelector(`option[value='${CSS.escape(window.queryCombo)}']`)) {
-            sel.value = window.queryCombo;
-        } else if (!sel.value && sel.options.length) {
-            // Ensure the first option is selected if nothing is selected
-            sel.selectedIndex = 0;
-        }
-        // Trigger a change to load the associated YAML if a non-empty value is selected
-        sel.dispatchEvent(new Event("change", { bubbles: true }));
+        const desiredSelection = getDefaultComboSelectionValues();
+        setToolbarComboSelections(desiredSelection, { silent: true });
+        updateToolbarComboSelectedList();
+        await applySelectedMixins();
         refreshToolbarComboUI();
     } catch (e) {
         console.error("Failed to load combo options from YAML:", e);
@@ -2217,14 +2472,25 @@ function findAncestorBadgesOf(childHid) {
 }
 
 // Pan/zoom via CSS transform on an HTML wrapper (#svg-stage) to avoid SVG viewport clipping.
-// Ensure blacklist-collector always sits just below collector, never overlapping
+// Ensure left-side panels (selected, expanded, blacklist) stack without overlapping
 function positionBlacklistCollector() {
-    const collector = document.getElementById("collector");
-    const blacklist = document.getElementById("blacklist-collector");
-    if (collector && blacklist) {
-        const rect = collector.getBoundingClientRect();
-        blacklist.style.top = window.scrollY + rect.bottom + 6 + "px";
-    }
+    const gap = 6;
+    let currentTop = 56; // base below the toolbar
+    const panels = [
+        document.getElementById("selected-collector"),
+        document.getElementById("collector"),
+        document.getElementById("blacklist-collector"),
+    ];
+    panels.forEach((panel) => {
+        if (!panel) return;
+        if (panel.classList && panel.classList.contains("hidden")) {
+            panel.style.top = "";
+            return;
+        }
+        panel.style.top = currentTop + "px";
+        const height = panel.offsetHeight || panel.getBoundingClientRect().height || 0;
+        currentTop += (height || 0) + gap;
+    });
 }
 
 // Drag to pan: start on mousedown if pan tool or space is active
@@ -2493,6 +2759,7 @@ function updateToolButtons() {
     const btnPan = document.getElementById("btn-pan");
     const btnMinimap = document.getElementById("btn-minimap");
     const btnCollector = document.getElementById("btn-collector");
+    const btnSelectedPanel = document.getElementById("btn-selected-panel");
     const btnBlacklist = document.getElementById("btn-blacklist");
     const btnDebug = document.getElementById("btn-debug");
     const btnHideComments = document.getElementById("btn-hide-comments");
@@ -2505,6 +2772,11 @@ function updateToolButtons() {
         collector && !collector.classList.contains("hidden");
     if (btnCollector)
         btnCollector.classList.toggle("active", !!collectorVisible);
+    const selectedPanel = document.getElementById("selected-collector");
+    const selectedVisible =
+        selectedPanel && !selectedPanel.classList.contains("hidden");
+    if (btnSelectedPanel)
+        btnSelectedPanel.classList.toggle("active", !!selectedVisible);
     // Blacklist is active when blacklistMode is true
     if (btnBlacklist) btnBlacklist.classList.toggle("active", blacklistMode);
     if (btnDebug) btnDebug.classList.toggle("active", !!window.debug);

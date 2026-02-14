@@ -1,6 +1,7 @@
 # v0.9.0
 ## Boxes
 * format adjustments based on layout tags
+* Enable multiple mixins in the UI
 * Changed the combobox in the UI to an editable version
 * enable tag mixins
 * enable layout mixins for ids

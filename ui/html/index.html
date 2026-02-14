@@ -57,6 +57,14 @@
             >
                 <i class="fa-solid fa-arrows-up-down"></i>
             </button>
+            <button
+                id="btn-selected-panel"
+                class="tool-btn"
+                hx-on:click="window.svgControls.toggleSelectedCollector()"
+                title="Toggle Selected Mixins"
+            >
+                <i class="fa-solid fa-layer-group"></i>
+            </button>
             <!-- Blacklist tool toggle -->
             <button
                 id="btn-blacklist"
@@ -90,25 +98,27 @@
                 class="toolbar-combobox"
                 style="margin-left: 8px"
             >
-                <input
-                    id="toolbar-combo-input"
-                    class="toolbar-combo-input"
-                    type="text"
-                    placeholder="Filter mixins..."
-                    autocomplete="off"
-                    role="combobox"
-                    aria-haspopup="listbox"
-                    aria-expanded="false"
-                    aria-controls="toolbar-combo-dropdown"
-                />
-                <button
-                    type="button"
-                    id="toolbar-combo-toggle"
-                    class="tool-btn toolbar-combo-toggle"
-                    aria-label="Show mixin options"
-                >
-                    <i class="fa-solid fa-chevron-down"></i>
-                </button>
+                <div class="toolbar-combo-field">
+                    <input
+                        id="toolbar-combo-input"
+                        class="toolbar-combo-input"
+                        type="text"
+                        placeholder="Filter mixins..."
+                        autocomplete="off"
+                        role="combobox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-controls="toolbar-combo-dropdown"
+                    />
+                    <button
+                        type="button"
+                        id="toolbar-combo-toggle"
+                        class="tool-btn toolbar-combo-toggle"
+                        aria-label="Show mixin options"
+                    >
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
                 <div
                     id="toolbar-combo-dropdown"
                     class="toolbar-combo-dropdown hidden"
@@ -195,6 +205,15 @@
         </div>
 
         <!-- Badge collector box (now left side) -->
+        <div
+            id="selected-collector"
+            aria-live="polite"
+            aria-hidden="false"
+        >
+            <div class="title">Selected Mixins</div>
+            <div id="selected-mixins-list"></div>
+        </div>
+
         <div
             id="collector"
             class="hidden"
@@ -374,9 +393,14 @@
                     const el = document.getElementById("input");
                     return el ? el.value : "";
                 }
-                function getComboValue() {
+                function getComboValues() {
+                    if (typeof window.getToolbarComboSelectionValues === "function") {
+                        const values = window.getToolbarComboSelectionValues();
+                        return Array.isArray(values) ? values : [];
+                    }
                     const sel = document.getElementById("toolbar-combo");
-                    return sel ? sel.value : "";
+                    if (!sel || !sel.value) return [];
+                    return [sel.value];
                 }
                 function makePermalink() {
                     const params = new URLSearchParams();
@@ -400,9 +424,11 @@
                             : "";
                     })();
                     if (origOptions) params.set("options", origOptions);
-                    const combo = getComboValue();
-                    if (combo) {
-                        params.set("combo", combo);
+                    const comboValues = getComboValues();
+                    if (comboValues.length === 1) {
+                        params.set("combo", comboValues[0]);
+                    } else if (comboValues.length > 1) {
+                        params.set("combo", comboValues.join(","));
                     }
                     const expanded = getExpandedIds();
                     if (expanded && expanded.length)
