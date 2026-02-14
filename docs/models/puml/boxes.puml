@@ -75,7 +75,7 @@ class "**Format**" as Format {
  
 
 class "**FormatVariations**" as FormatVariations {
-        Map<Format> hasTag
+        Map<FormatVariation> hasTag
 }
 
  
@@ -127,6 +127,13 @@ note top: container to extend the layouts\nof a given layout element\nvia mixins
 
  
 
+
+class "**FormatVariation**" as FormatVariation {
+        Format format
+        IntegerType priority
+}
+
+ 
 
 
 class "**OverlayRadiusDef**" as OverlayRadiusDef {
@@ -309,7 +316,7 @@ Format  *--  FillDef
 
 
     
-FormatVariations  *--  Format
+FormatVariations  *--  FormatVariation
 
     
     
@@ -342,6 +349,10 @@ LayoutMixin "0" *-- "n" Layout
 
 
     
+    
+FormatVariation  *--  Format
+
+
     
     
 

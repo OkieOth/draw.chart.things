@@ -310,12 +310,12 @@ func CopyFormat(src *Format) *Format {
 type FormatVariations struct {
 
     // dictionary with tag values as key, that contains format definitions.
-    HasTag map[string]Format  `yaml:"hasTag,omitempty"`
+    HasTag map[string]FormatVariation  `yaml:"hasTag,omitempty"`
 }
 
 func NewFormatVariations() *FormatVariations {
     return &FormatVariations{
-        HasTag: make(map[string]Format, 0),
+        HasTag: make(map[string]FormatVariation, 0),
     }
 }
 
@@ -324,7 +324,7 @@ func CopyFormatVariations(src *FormatVariations) *FormatVariations {
         return nil
     }
     var ret FormatVariations
-    ret.HasTag = make(map[string]Format, 0)
+    ret.HasTag = make(map[string]FormatVariation, 0)
     for k, v := range src.HasTag {
         ret.HasTag[k] = v
     }
@@ -519,6 +519,30 @@ func CopyLayoutMixin(src *LayoutMixin) *LayoutMixin {
 
 
 
+
+
+
+
+
+type FormatVariation struct {
+
+    Format Format  `yaml:"format"`
+
+    // number to define the order if a layout has for instance multiple matching tags
+    Priority int  `yaml:"priority"`
+}
+
+
+func CopyFormatVariation(src *FormatVariation) *FormatVariation {
+    if src == nil {
+        return nil
+    }
+    var ret FormatVariation
+    ret.Format = *CopyFormat(&src.Format)
+    ret.Priority = src.Priority
+
+    return &ret
+}
 
 
 

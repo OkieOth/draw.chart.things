@@ -86,11 +86,18 @@ class "**Format**" as Format {
  
 
 class "**FormatVariations**" as FormatVariations {
-        Map<Format> hasTag
+        Map<FormatVariation> hasTag
 }
 
  
 
+
+class "**FormatVariation**" as FormatVariation {
+        Format format
+        IntegerType priority
+}
+
+ 
 
 class "**Overlay**" as Overlay {
         StringType caption
@@ -283,9 +290,13 @@ Format  *--  FillDef
 
 
     
-FormatVariations  *--  Format
+FormatVariations  *--  FormatVariation
 
     
+    
+FormatVariation  *--  Format
+
+
     
 
 

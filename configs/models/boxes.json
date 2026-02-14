@@ -326,10 +326,23 @@
           "$comment": "when an object contains a specific tag, then it originally format, will be overwritten with the here defined values",
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/Format"
+            "$ref": "#/definitions/FormatVariation"
           }
         }
       }
+    },
+    "FormatVariation": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "$ref": "#/definitions/Format"
+        },
+        "priority": {
+          "description": "number to define the order if a layout has for instance multiple matching tags",
+          "type": "integer"
+        }
+      },
+      "required": ["format", "priority"]
     },
     "Overlay": {
       "description": "Definition of a topic related overlay ... for instance for heatmaps",

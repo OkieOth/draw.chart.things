@@ -334,12 +334,22 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 func adjustFormatBasedOnVariations(l *boxes.Layout, b *boxes.Boxes, f *boxes.BoxFormat) *boxes.BoxFormat {
 	if b.FormatVariations != nil && b.FormatVariations.HasTag != nil {
 		// mix in format adjustment
+		var maxPriority *int
+		var format2Use *boxes.Format
 		for _, t := range l.Tags {
+
 			if adjustment, ok := b.FormatVariations.HasTag[t]; ok {
 				// needed adjustment found
-				newFormat := adjustBoxFormat(f, &adjustment)
-				return &newFormat
+				if maxPriority == nil || adjustment.Priority > *maxPriority {
+					maxPriority = &adjustment.Priority
+					format2Use = &adjustment.Format
+
+				}
 			}
+		}
+		if format2Use != nil {
+			newFormat := adjustBoxFormat(f, format2Use)
+			return &newFormat
 		}
 	}
 	return f

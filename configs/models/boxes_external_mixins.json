@@ -51,6 +51,13 @@
         "$ref": "./shared.json#/definitions/Comment"
       }
     },
+    "tags": {
+      "description": "dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/Tags"
+      }
+    },
     "images": {
       "description": "optional map of images used in the generated graphic",
       "type": "object",
@@ -73,6 +80,17 @@
           "type": "array",
           "items": {
             "$ref": "./boxes.json#/definitions/Connection"
+          }
+        }
+      }
+    },
+    "Tags": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
       }
