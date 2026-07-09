@@ -478,7 +478,7 @@ func lineStyleForType(style types.Style) string {
 	case types.StyleDashed:
 		return `stroke-dasharray:10 2;`
 	case types.StyleDotted:
-		return `stroke-dasharray:"1 10;"`
+		return `stroke-dasharray:1 10;`
 	default:
 		return ""
 	}

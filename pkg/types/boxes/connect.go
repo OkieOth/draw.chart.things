@@ -38,6 +38,20 @@ const (
 	CollisionType_WithSurroundings
 )
 
+func (doc *BoxesDocument) isParentInContainer(container *LayoutElemContainer, possibleParent, elemToCheckFor *LayoutElement) bool {
+	if container != nil {
+		for _, subElem := range container.Elems {
+			if subElem.Id == elemToCheckFor.Id {
+				return true
+			}
+			if doc.isParent(&subElem, elemToCheckFor) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func minMax(a, b int) (int, int) {
 	if a < b {
 		return a, b
@@ -46,12 +60,17 @@ func minMax(a, b int) (int, int) {
 }
 
 func (doc *BoxesDocument) isParent(possibleParent, elemToCheckFor *LayoutElement) bool {
+	// Fast-path: check if elemToCheckFor is a direct child via ParentIds
 	for _, pid := range possibleParent.ParentIds {
 		if pid == elemToCheckFor.Id {
 			return true
 		}
 	}
-	return false
+	// Fallback: walk the container hierarchy (identical logic to original)
+	if doc.isParentInContainer(possibleParent.Vertical, possibleParent, elemToCheckFor) {
+		return true
+	}
+	return doc.isParentInContainer(possibleParent.Horizontal, possibleParent, elemToCheckFor)
 }
 
 func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem *LayoutElement, isForHorizontalLine bool) CollisionType {
@@ -551,7 +570,7 @@ func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 			if !noRight {
 				doc.newConnectionNodeFromStartPos(elem.Id, elem.X+elem.Width, *elem.RightYToStart,
 					[]ConnectionEdge{
-						CreateConnectionEdge(elem.X+elem.Width+weight, *elem.LeftYToStart, weight),
+						CreateConnectionEdge(elem.X+elem.Width+weight, *elem.RightYToStart, weight),
 					})
 			}
 		}
