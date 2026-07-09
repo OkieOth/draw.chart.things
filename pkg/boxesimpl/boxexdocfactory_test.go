@@ -93,7 +93,7 @@ func TestInitLayoutElement(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			doc := boxes.NewBoxesDocument()
 			doc.Formats = tt.inputFormats
-			result := boxesimpl.ExpInitLayoutElement(&tt.layout, doc, b)
+			result := boxesimpl.ExpInitLayoutElement(&tt.layout, doc, b, []string{})
 			if result.Id != tt.expected.Id {
 				t.Errorf("expected Id %v, got %v", tt.expected.Id, result.Id)
 			}

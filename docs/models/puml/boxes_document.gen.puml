@@ -79,6 +79,7 @@ class LayoutElement {
     +tags? List<String>
     +dataLink? String
     +connRestrictions? ConnRestrItem
+    +**parentIds** List<String>
 }
 LayoutElement --> "0..*" Comment
 LayoutElement o-- ImageContainer

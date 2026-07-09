@@ -38,20 +38,6 @@ const (
 	CollisionType_WithSurroundings
 )
 
-func (doc *BoxesDocument) isParentInContainer(container *LayoutElemContainer, possibleParent, elemToCheckFor *LayoutElement) bool {
-	if container != nil {
-		for _, subElem := range container.Elems {
-			if subElem.Id == elemToCheckFor.Id {
-				return true
-			}
-			if doc.isParent(&subElem, elemToCheckFor) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func minMax(a, b int) (int, int) {
 	if a < b {
 		return a, b
@@ -60,10 +46,12 @@ func minMax(a, b int) (int, int) {
 }
 
 func (doc *BoxesDocument) isParent(possibleParent, elemToCheckFor *LayoutElement) bool {
-	if doc.isParentInContainer(possibleParent.Vertical, possibleParent, elemToCheckFor) {
-		return true
+	for _, pid := range possibleParent.ParentIds {
+		if pid == elemToCheckFor.Id {
+			return true
+		}
 	}
-	return doc.isParentInContainer(possibleParent.Horizontal, possibleParent, elemToCheckFor)
+	return false
 }
 
 func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem *LayoutElement, isForHorizontalLine bool) CollisionType {
