@@ -2,37 +2,125 @@ title: System Application architecture
 titleFormat: title
 version: v10
 formats:
+  default:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: white
+    padding: 5
+  system_base:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: "#fdfdfd"
+    padding: 5
   defaultConnection:
     line:
       width: 2
       color: black
   http:
     line:
-      color: "4271ae"
+      color: "#4271ae"
       style: solid
       width: 2
   grpc:
     line:
-      color: "3a7d44"
+      color: "#3a7d44"
       style: dashed
       width: 2
   amqp:
     line:
-      color: "f37327"
+      color: "#f37327"
       style: dotted
       width: 2
   database:
     line:
-      color: "660099"
+      color: "#660099"
       style: solid
       width: 1
   service:
-    fill:
-      color: "dddddd"
+      line:
+        width: 1
+        color: black
+      fill:
+        color: "#efefef"
+      cornerRadius: 2
+      padding: 5
+      boxMargin: 3
+      fontCaption:
+        size: 8
+        maxLenBeforeBreak: 300
+  core:
+    fontCaption:
+      maxLenBeforeBreak: 300
     line:
-      color: "333333"
-      style: solid
-      width: 1
+      width: 0.5
+      color: black
+    cornerRadius: 4
+    fill:
+      color: "#ffb74d"
+    padding: 5
+  infra:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: "#b0bec5"
+    padding: 5
+  tms:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: "#66bb6a"
+    padding: 5
+
+  additional:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: "#81c784"
+    padding: 5
+  integration:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.5
+      color: black
+    cornerRadius: 4
+    fill:
+      color: "#64b5f6"
+    padding: 5
+  boundary:
+    padding: 2
+    widthOfParent: true
+    fontCaption:
+      maxLenBeforeBreak: 300
+      size: 8
+    line:
+      width: 0.2
+      color: "#fdfdfd"
+    cornerRadius: 4
+    fill:
+      color: "#ededed"
 legend:
   format: title
   entries:
