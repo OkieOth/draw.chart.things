@@ -173,7 +173,7 @@ function restoreBadgeCollectorFromIds(savedBadgeIds) {
 }
 
 async function loadYamlForComboValue(value) {
-    if (!value || value === "__upload__") return "";
+    if (!value || value === "__upload__" || value === "...") return "";
     if (toolbarComboState.contentCache.has(value)) {
         return toolbarComboState.contentCache.get(value);
     }
@@ -271,8 +271,13 @@ function getActiveStepsJson() {
         if (!steps || steps.length === 0) {
             result.push([]);
         } else {
-            const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
-            result.push(steps.filter(s => !hiddenSet.has(s.index)).map(s => s.index));
+            const hiddenSet =
+                toolbarComboState.hiddenSteps.get(value) || new Set();
+            result.push(
+                steps
+                    .filter((s) => !hiddenSet.has(s.index))
+                    .map((s) => s.index),
+            );
         }
     }
     return JSON.stringify(result);
@@ -522,6 +527,8 @@ const toolbarComboState = {
     mixinSteps: new Map(), // value -> [{index, caption}]
     hiddenSteps: new Map(), // value -> Set<int> of hidden step indices
     collapsedSteps: new Set(), // values whose step list is collapsed in the UI
+    groups: null, // Array of {name, items: [{label, value}]} or null if flat format
+    isGroupedMode: false, // whether to render groups in dropdown
 };
 
 function getToolbarComboElements() {
@@ -625,17 +632,23 @@ function createSelectedCollectorBadge(value, label) {
 
         const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
         const stepsContainer = document.createElement("div");
-        stepsContainer.className = "selected-mixin-steps" + (isCollapsed ? " selected-mixin-steps--collapsed" : "");
+        stepsContainer.className =
+            "selected-mixin-steps" +
+            (isCollapsed ? " selected-mixin-steps--collapsed" : "");
         for (const step of steps) {
             const isStepHidden = hiddenSet.has(step.index);
             const row = document.createElement("div");
-            row.className = "selected-step-row" + (isStepHidden ? " selected-step-row--hidden" : "");
+            row.className =
+                "selected-step-row" +
+                (isStepHidden ? " selected-step-row--hidden" : "");
             row.dataset.stepIndex = step.index;
 
             const stepToggle = document.createElement("button");
             stepToggle.type = "button";
             stepToggle.className = "selected-step-toggle";
-            stepToggle.title = isStepHidden ? `Show step: ${step.caption}` : `Hide step: ${step.caption}`;
+            stepToggle.title = isStepHidden
+                ? `Show step: ${step.caption}`
+                : `Hide step: ${step.caption}`;
             stepToggle.innerHTML = isStepHidden
                 ? '<i class="fa-solid fa-eye-slash"></i>'
                 : '<i class="fa-solid fa-eye"></i>';
@@ -778,6 +791,23 @@ function renderToolbarComboDropdown() {
     const { dropdown } = getToolbarComboElements();
     if (!dropdown) return;
     const filter = toolbarComboState.filterText.trim().toLowerCase();
+    dropdown.innerHTML = "";
+
+    // Check if we're in grouped mode
+    if (toolbarComboState.isGroupedMode && toolbarComboState.groups) {
+        renderGroupedToolbarComboDropdown(filter, dropdown);
+    } else {
+        renderFlatToolbarComboDropdown(filter, dropdown);
+    }
+
+    updateToolbarComboActiveOption();
+    if (toolbarComboState.isOpen) {
+        positionToolbarComboDropdown();
+    }
+}
+
+// Render flat (non-grouped) dropdown
+function renderFlatToolbarComboDropdown(filter, dropdown) {
     const options = getToolbarComboOptions();
     const filtered = filter
         ? options.filter((opt) => {
@@ -787,7 +817,6 @@ function renderToolbarComboDropdown() {
           })
         : options;
     toolbarComboState.filteredOptions = filtered;
-    dropdown.innerHTML = "";
 
     if (!filtered.length) {
         const empty = document.createElement("div");
@@ -806,61 +835,115 @@ function renderToolbarComboDropdown() {
     }
 
     filtered.forEach((opt, idx) => {
-        const row = document.createElement("div");
-        row.className = "toolbar-combo-option";
-        row.dataset.value = opt.value;
-        row.id = `toolbar-combo-option-${idx}`;
-        row.setAttribute("role", "option");
-        const displayLabel = opt.label || opt.value || "(unnamed)";
-        row.title = displayLabel;
-        const isUpload = opt.value === "__upload__";
-        if (isUpload) {
-            row.classList.add("toolbar-combo-option-upload");
-            const icon = document.createElement("i");
-            icon.className = "fa-solid fa-upload";
-            const label = document.createElement("span");
-            label.textContent = displayLabel;
-            row.appendChild(icon);
-            row.appendChild(label);
-            row.addEventListener("mousedown", (evt) => {
-                evt.preventDefault();
-                triggerToolbarComboUpload();
-            });
-        } else {
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.tabIndex = -1;
-            checkbox.checked = isToolbarComboValueSelected(opt.value);
-            checkbox.setAttribute("aria-hidden", "true");
-            const label = document.createElement("span");
-            label.className = "toolbar-combo-option-label";
-            label.textContent = displayLabel;
-            row.appendChild(checkbox);
-            row.appendChild(label);
-            row.addEventListener("mousedown", (evt) => {
-                evt.preventDefault();
-                toggleToolbarComboValue(opt.value);
-            });
-            row.setAttribute(
-                "aria-selected",
-                checkbox.checked ? "true" : "false",
-            );
-        }
-        row.classList.toggle(
-            "active",
-            idx === toolbarComboState.highlightedIndex,
-        );
-        row.addEventListener("mouseenter", () => {
-            toolbarComboState.highlightedIndex = idx;
-            updateToolbarComboActiveOption();
-        });
-        dropdown.appendChild(row);
+        createComboOptionRow(opt, idx, dropdown);
     });
+}
 
-    updateToolbarComboActiveOption();
-    if (toolbarComboState.isOpen) {
-        positionToolbarComboDropdown();
+// Render grouped dropdown
+function renderGroupedToolbarComboDropdown(filter, dropdown) {
+    let flatIndex = 0; // Track flat index across all groups and items
+    let anyMatches = false;
+
+    for (const group of toolbarComboState.groups) {
+        // Filter items in this group
+        const filtered = group.items.filter((item) => {
+            if (!filter) return true;
+            const label = item[0].toLowerCase(); // item is [label, value]
+            const value = String(item[1] || "").toLowerCase();
+            return label.includes(filter) || value.includes(filter);
+        });
+
+        if (filtered.length === 0) continue; // Skip empty groups
+        anyMatches = true;
+
+        // Create group header
+        const groupHeader = document.createElement("div");
+        groupHeader.className = "toolbar-combo-group-header";
+        groupHeader.textContent = group.name || "Options";
+        groupHeader.setAttribute("role", "presentation");
+        dropdown.appendChild(groupHeader);
+
+        // Create options in this group
+        for (const item of filtered) {
+            const [label, value] = item;
+            const opt = { label, value };
+            createComboOptionRow(opt, flatIndex, dropdown);
+            flatIndex++;
+        }
     }
+
+    if (!anyMatches) {
+        const empty = document.createElement("div");
+        empty.className = "toolbar-combo-empty";
+        empty.textContent = "No matches";
+        dropdown.appendChild(empty);
+        toolbarComboState.highlightedIndex = -1;
+        return;
+    }
+
+    // Set highlighted index
+    if (
+        toolbarComboState.highlightedIndex < 0 ||
+        toolbarComboState.highlightedIndex >= flatIndex
+    ) {
+        toolbarComboState.highlightedIndex =
+            findFirstSelectableOptionIndex(dropdown);
+    }
+}
+
+// Helper: create a single combo option row
+function createComboOptionRow(opt, idx, dropdown) {
+    const row = document.createElement("div");
+    row.className = "toolbar-combo-option";
+    row.dataset.value = opt.value;
+    row.id = `toolbar-combo-option-${idx}`;
+    row.setAttribute("role", "option");
+    const displayLabel = opt.label || opt.value || "(unnamed)";
+    row.title = displayLabel;
+    const isUpload = opt.value === "__upload__";
+
+    if (isUpload) {
+        row.classList.add("toolbar-combo-option-upload");
+        const icon = document.createElement("i");
+        icon.className = "fa-solid fa-upload";
+        const label = document.createElement("span");
+        label.textContent = displayLabel;
+        row.appendChild(icon);
+        row.appendChild(label);
+        row.addEventListener("mousedown", (evt) => {
+            evt.preventDefault();
+            triggerToolbarComboUpload();
+        });
+    } else {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.tabIndex = -1;
+        checkbox.checked = isToolbarComboValueSelected(opt.value);
+        checkbox.setAttribute("aria-hidden", "true");
+        const label = document.createElement("span");
+        label.className = "toolbar-combo-option-label";
+        label.textContent = displayLabel;
+        row.appendChild(checkbox);
+        row.appendChild(label);
+        row.addEventListener("mousedown", (evt) => {
+            evt.preventDefault();
+            toggleToolbarComboValue(opt.value);
+        });
+        row.setAttribute("aria-selected", checkbox.checked ? "true" : "false");
+    }
+
+    row.classList.toggle("active", idx === toolbarComboState.highlightedIndex);
+    row.addEventListener("mouseenter", () => {
+        toolbarComboState.highlightedIndex = idx;
+        updateToolbarComboActiveOption();
+    });
+    dropdown.appendChild(row);
+}
+
+// Helper: find first selectable option (skip group headers)
+function findFirstSelectableOptionIndex(dropdown) {
+    const rows = dropdown.querySelectorAll(".toolbar-combo-option");
+    return rows.length > 0 ? 0 : -1;
 }
 
 function updateToolbarComboActiveOption() {
@@ -991,11 +1074,16 @@ function closeToolbarComboDropdown(resetFilter = true) {
 }
 
 function moveToolbarComboHighlight(delta) {
-    const options = toolbarComboState.filteredOptions;
-    if (!options.length) return;
+    const { dropdown } = getToolbarComboElements();
+    if (!dropdown) return;
+
+    // Get all selectable option rows (skip group headers)
+    const rows = dropdown.querySelectorAll(".toolbar-combo-option");
+    if (!rows.length) return;
+
     let idx = toolbarComboState.highlightedIndex;
     if (idx < 0) idx = 0;
-    idx = (idx + delta + options.length) % options.length;
+    idx = (idx + delta + rows.length) % rows.length;
     toolbarComboState.highlightedIndex = idx;
     updateToolbarComboActiveOption();
 }
@@ -2551,20 +2639,48 @@ window.loadComboOptionsFromYaml = async function () {
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         const text = await resp.text();
-        // Parse a simple YAML mapping: label: value (labels may be quoted)
-        const entries = parseSimpleYamlMapping(text);
+
+        // Parse YAML (handles both flat and grouped formats)
+        const parseResult = parseSimpleYamlMapping(text);
         const { select: sel, root: comboRoot } = getToolbarComboElements();
         if (!sel) return;
+
         // Ensure it's visible when options are available
         if (comboRoot) comboRoot.style.display = "";
-        // Replace existing options with dynamically loaded ones
+
+        // Replace existing options in the hidden select
         sel.innerHTML = "";
-        for (const [label, value] of entries) {
-            const opt = document.createElement("option");
-            opt.value = value;
-            opt.textContent = label;
-            sel.appendChild(opt);
+
+        // Populate state and hidden select
+        if (parseResult.isGrouped && parseResult.groups) {
+            // Grouped format: store groups in state
+            toolbarComboState.groups = parseResult.groups;
+            toolbarComboState.isGroupedMode = true;
+
+            // Still populate hidden select with flat items for backward compatibility
+            for (const group of parseResult.groups) {
+                for (const [label, value] of group.items) {
+                    const opt = document.createElement("option");
+                    opt.value = value;
+                    opt.textContent = label;
+                    sel.appendChild(opt);
+                }
+            }
+        } else {
+            // Flat format or fallback
+            toolbarComboState.groups = null;
+            toolbarComboState.isGroupedMode = false;
+
+            const entries =
+                parseResult.entries || flattenParsedYaml(parseResult);
+            for (const [label, value] of entries) {
+                const opt = document.createElement("option");
+                opt.value = value;
+                opt.textContent = label;
+                sel.appendChild(opt);
+            }
         }
+
         // Add uploaded mixins and the upload sentinel
         ensureUploadOptionsInCombo(sel);
         const desiredSelection = getDefaultComboSelectionValues();
@@ -2577,36 +2693,119 @@ window.loadComboOptionsFromYaml = async function () {
     }
 };
 
-// Helper: very small YAML mapping parser for lines like: "Label": value
+// Enhanced YAML parser: handles both flat and grouped formats
+// Flat format: "Label": value
+// Grouped format:
+//   GroupName:
+//     "Label": value
+//     "Label2": value2
 function parseSimpleYamlMapping(text) {
     const lines = String(text).split(/\r?\n/);
-    const out = [];
-    for (let line of lines) {
-        // Strip comments and trim
-        line = line.replace(/#.*/, "").trim();
-        if (!line) continue;
-        // Match key: value allowing quoted keys and values
-        const m = line.match(/^([^:]+):\s*(.*)$/);
-        if (!m) continue;
-        let key = m[1].trim();
-        let val = m[2].trim();
-        // Remove surrounding quotes from key
-        if (
-            (key.startsWith('"') && key.endsWith('"')) ||
-            (key.startsWith("'") && key.endsWith("'"))
-        ) {
-            key = key.slice(1, -1);
-        }
-        // Remove surrounding quotes from value
-        if (
-            (val.startsWith('"') && val.endsWith('"')) ||
-            (val.startsWith("'") && val.endsWith("'"))
-        ) {
-            val = val.slice(1, -1);
-        }
-        out.push([key, val]);
+    const result = detectAndParseYamlStructure(lines);
+    return result;
+}
+
+// Helper: detect if YAML has groups (lines with indent + group name + colon + no value)
+function detectAndParseYamlStructure(lines) {
+    const cleanLines = [];
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        // Strip comments but preserve indentation info
+        const commentIdx = line.indexOf("#");
+        if (commentIdx >= 0) line = line.substring(0, commentIdx);
+        if (!line.trim()) continue;
+        cleanLines.push(line);
     }
-    return out;
+
+    // Detect if grouped format by looking for top-level entries with colon and no value
+    const groups = [];
+    let currentGroup = null;
+    let isGroupedFormat = false;
+
+    for (const line of cleanLines) {
+        const indent = line.match(/^( *)/)[1].length;
+        const content = line.trim();
+
+        if (!content) continue;
+
+        // Top-level line (indent === 0): check if it's a group header
+        if (indent === 0) {
+            const m = content.match(/^([^:]+):\s*$/);
+            if (m) {
+                // This is a group header (key: with no value)
+                isGroupedFormat = true;
+                currentGroup = {
+                    name: unquoteString(m[1].trim()),
+                    items: [],
+                };
+                groups.push(currentGroup);
+            } else {
+                // Top-level key:value (flat format item)
+                const itemMatch = content.match(/^([^:]+):\s*(.*)$/);
+                if (itemMatch && itemMatch[2].trim()) {
+                    if (groups.length === 0) {
+                        // Create a default flat group if not exists
+                        currentGroup = { name: null, items: [] };
+                        groups.push(currentGroup);
+                    }
+                    const key = unquoteString(itemMatch[1].trim());
+                    const val = unquoteString(itemMatch[2].trim());
+                    currentGroup.items.push([key, val]);
+                }
+            }
+        } else if (indent > 0 && currentGroup) {
+            // Nested line (indent > 0): should be an item in current group
+            const m = content.match(/^([^:]+):\s*(.*)$/);
+            if (m && m[2].trim()) {
+                const key = unquoteString(m[1].trim());
+                const val = unquoteString(m[2].trim());
+                currentGroup.items.push([key, val]);
+            }
+        }
+    }
+
+    // Return result: if grouped format detected, return {groups, isGrouped: true}
+    // Otherwise return flat array for backward compatibility
+    if (isGroupedFormat && groups.length > 0) {
+        return { groups, isGrouped: true };
+    } else if (groups.length > 0 && groups[0].name === null) {
+        // Pure flat format: return flat array
+        return { entries: groups[0].items, isGrouped: false };
+    }
+
+    // Fallback for completely empty
+    return { entries: [], isGrouped: false };
+}
+
+// Helper: remove quotes from strings
+function unquoteString(str) {
+    if (
+        (str.startsWith('"') && str.endsWith('"')) ||
+        (str.startsWith("'") && str.endsWith("'"))
+    ) {
+        return str.slice(1, -1);
+    }
+    return str;
+}
+
+// Helper: get flat array of entries from parsed result (for backward compat)
+function flattenParsedYaml(parseResult) {
+    if (!parseResult) return [];
+    if (Array.isArray(parseResult)) {
+        // Old format: already a flat array
+        return parseResult;
+    }
+    if (parseResult.entries) {
+        return parseResult.entries;
+    }
+    if (parseResult.groups) {
+        const flat = [];
+        for (const group of parseResult.groups) {
+            flat.push(...group.items);
+        }
+        return flat;
+    }
+    return [];
 }
 
 function attachBadgeRemoval() {
@@ -3424,13 +3623,21 @@ function createCommentLegendItem(entry) {
     label.className = "comment-legend-label";
     label.textContent = entry.markerLabel || "Comment";
     markerRow.appendChild(label);
-    const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    const stepClasses = Array.isArray(entry.stepClasses)
+        ? entry.stepClasses.filter(Boolean)
+        : [];
     if (stepClasses.length > 0) {
-        const firstIdx = parseInt(/^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0", 10);
+        const firstIdx = parseInt(
+            /^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0",
+            10,
+        );
         item.dataset.stepIndex = firstIdx % 8;
     }
     stepClasses.forEach((stepClass) => {
-        const stepIdx = parseInt(/^step_(\d+)$/.exec(stepClass)?.[1] ?? "0", 10);
+        const stepIdx = parseInt(
+            /^step_(\d+)$/.exec(stepClass)?.[1] ?? "0",
+            10,
+        );
         const tag = document.createElement("span");
         tag.className = "comment-step-tag";
         tag.dataset.stepIndex = stepIdx % 8;
@@ -3452,9 +3659,13 @@ function createCommentLegendItem(entry) {
             // when the group is already in activeGroupHighlights, so a plain
             // re-call is a no-op. Force re-apply by cycling unhighlight→highlight.
             if (item.contains(e.relatedTarget)) {
-                const grps = Array.isArray(entry.groupClasses) ? entry.groupClasses.filter(Boolean) : [];
+                const grps = Array.isArray(entry.groupClasses)
+                    ? entry.groupClasses.filter(Boolean)
+                    : [];
                 grps.forEach((grp) => {
-                    if (typeof window.unhighlightConnectionGroup === "function") {
+                    if (
+                        typeof window.unhighlightConnectionGroup === "function"
+                    ) {
                         window.unhighlightConnectionGroup(grp);
                     }
                     if (typeof window.highlightConnectionGroup === "function") {
@@ -4260,15 +4471,19 @@ window.onHideCommentsChanged = function (enabled) {
 
 // ─── Presentation mode ───────────────────────────────────────────────────────
 
-const presentationState = window.presentationState = {
+const presentationState = (window.presentationState = {
     active: false,
     entries: [],
     currentIndex: -1,
     savedTransform: null, // { scale, tx, ty } restored on exit
-};
+});
 
 // IDs of UI panels/toolbar to hide while presenting
-const _PRESENT_HIDE_IDS = ["menu-wrapper", "selected-collector", "comment-legend-panel"];
+const _PRESENT_HIDE_IDS = [
+    "menu-wrapper",
+    "selected-collector",
+    "comment-legend-panel",
+];
 let _presentCardDragged = false;
 
 function startPresentation(startEntryId = null) {
@@ -4292,7 +4507,11 @@ function startPresentation(startEntryId = null) {
     presentationState.active = true;
     presentationState.entries = entries;
     presentationState.currentIndex = -1;
-    presentationState.savedTransform = { scale: state.scale, tx: state.tx, ty: state.ty };
+    presentationState.savedTransform = {
+        scale: state.scale,
+        tx: state.tx,
+        ty: state.ty,
+    };
 
     // Hide toolbar + panels; record which were already hidden
     presentationState.hiddenByUs = new Set();
@@ -4328,9 +4547,11 @@ function stopPresentation() {
     getStage()?.classList.remove("presenting", "presentation-spotlight");
     _clearSpotlightBoxes();
 
-    document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
-        el.classList.remove("comment-legend-item--presenting");
-    });
+    document
+        .querySelectorAll(".comment-legend-item--presenting")
+        .forEach((el) => {
+            el.classList.remove("comment-legend-item--presenting");
+        });
 
     if (presentationState.savedTransform) {
         const { scale, tx, ty } = presentationState.savedTransform;
@@ -4362,15 +4583,20 @@ function gotoStep(index) {
     _markInvolvedBoxes(entry);
 
     // Mark active item in the legend list
-    document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
-        el.classList.remove("comment-legend-item--presenting");
-    });
+    document
+        .querySelectorAll(".comment-legend-item--presenting")
+        .forEach((el) => {
+            el.classList.remove("comment-legend-item--presenting");
+        });
     const list = document.getElementById("comment-legend-list");
     if (list) {
         const items = list.querySelectorAll(".comment-legend-item");
         if (items[clamped]) {
             items[clamped].classList.add("comment-legend-item--presenting");
-            items[clamped].scrollIntoView({ block: "nearest", behavior: "smooth" });
+            items[clamped].scrollIntoView({
+                block: "nearest",
+                behavior: "smooth",
+            });
         }
     }
 
@@ -4404,7 +4630,9 @@ function _unhighlightCurrentStep() {
 function _clearSpotlightBoxes() {
     const svg = getSvg();
     if (!svg) return;
-    svg.querySelectorAll(".spotlight-box").forEach((el) => el.classList.remove("spotlight-box"));
+    svg.querySelectorAll(".spotlight-box").forEach((el) =>
+        el.classList.remove("spotlight-box"),
+    );
 }
 
 function _markInvolvedBoxes(entry) {
@@ -4417,23 +4645,37 @@ function _markInvolvedBoxes(entry) {
 
     entry.groupClasses.forEach((grp) => {
         svg.querySelectorAll(`line.${grp}`).forEach((el) => {
-            endpoints.push({ x: parseFloat(el.getAttribute("x1")), y: parseFloat(el.getAttribute("y1")) });
-            endpoints.push({ x: parseFloat(el.getAttribute("x2")), y: parseFloat(el.getAttribute("y2")) });
+            endpoints.push({
+                x: parseFloat(el.getAttribute("x1")),
+                y: parseFloat(el.getAttribute("y1")),
+            });
+            endpoints.push({
+                x: parseFloat(el.getAttribute("x2")),
+                y: parseFloat(el.getAttribute("y2")),
+            });
         });
         svg.querySelectorAll(`polyline.${grp}`).forEach((el) => {
             const pairs = (el.getAttribute("points") || "").trim().split(/\s+/);
             if (pairs.length >= 1) {
                 const first = pairs[0].split(",");
-                const last  = pairs[pairs.length - 1].split(",");
-                if (first.length === 2) endpoints.push({ x: parseFloat(first[0]), y: parseFloat(first[1]) });
-                if (last.length  === 2) endpoints.push({ x: parseFloat(last[0]),  y: parseFloat(last[1])  });
+                const last = pairs[pairs.length - 1].split(",");
+                if (first.length === 2)
+                    endpoints.push({
+                        x: parseFloat(first[0]),
+                        y: parseFloat(first[1]),
+                    });
+                if (last.length === 2)
+                    endpoints.push({
+                        x: parseFloat(last[0]),
+                        y: parseFloat(last[1]),
+                    });
             }
         });
         svg.querySelectorAll(`path.${grp}`).forEach((el) => {
             try {
                 const len = el.getTotalLength();
-                const p0  = el.getPointAtLength(0);
-                const p1  = el.getPointAtLength(len);
+                const p0 = el.getPointAtLength(0);
+                const p1 = el.getPointAtLength(len);
                 endpoints.push({ x: p0.x, y: p0.y });
                 endpoints.push({ x: p1.x, y: p1.y });
             } catch (_) {}
@@ -4443,17 +4685,24 @@ function _markInvolvedBoxes(entry) {
     if (!endpoints.length) return;
 
     // Only consider leaf box rectangles as connection targets.
-    const leafRects = Array.from(svg.querySelectorAll("rect.leaf")).map((rect) => {
-        try {
-            const b = rect.getBBox();
-            return { rect, b };
-        } catch (_) { return null; }
-    }).filter(Boolean);
+    const leafRects = Array.from(svg.querySelectorAll("rect.leaf"))
+        .map((rect) => {
+            try {
+                const b = rect.getBBox();
+                return { rect, b };
+            } catch (_) {
+                return null;
+            }
+        })
+        .filter(Boolean);
 
     endpoints.forEach((pt) => {
-        const hit = leafRects.find(({ b }) =>
-            pt.x >= b.x - tol && pt.x <= b.x + b.width  + tol &&
-            pt.y >= b.y - tol && pt.y <= b.y + b.height + tol
+        const hit = leafRects.find(
+            ({ b }) =>
+                pt.x >= b.x - tol &&
+                pt.x <= b.x + b.width + tol &&
+                pt.y >= b.y - tol &&
+                pt.y <= b.y + b.height + tol,
         );
         if (!hit) return;
         hit.rect.classList.add("spotlight-box");
@@ -4490,26 +4739,31 @@ function _centerOnEntry(entry) {
     const sMinY = minY * s + effTy;
     const sMaxY = maxY * s + effTy;
 
-    const topEdge    = PADDING;
+    const topEdge = PADDING;
     const bottomEdge = canvasH - PADDING;
-    const usableH    = bottomEdge - topEdge;
+    const usableH = bottomEdge - topEdge;
 
     // If the whole bbox is already within the padded viewport, do nothing
-    if (sMinX >= PADDING && sMaxX <= canvasW - PADDING &&
-        sMinY >= topEdge && sMaxY <= bottomEdge) {
+    if (
+        sMinX >= PADDING &&
+        sMaxX <= canvasW - PADDING &&
+        sMinY >= topEdge &&
+        sMaxY <= bottomEdge
+    ) {
         return;
     }
 
     // Minimum shift to make the bbox fully visible; center only when it
     // exceeds the available dimension.
-    let dx = 0, dy = 0;
+    let dx = 0,
+        dy = 0;
 
     if (sMaxX - sMinX > canvasW - 2 * PADDING) {
         dx = canvasW / 2 - (sMinX + sMaxX) / 2;
     } else if (sMinX < PADDING) {
         dx = PADDING - sMinX;
     } else if (sMaxX > canvasW - PADDING) {
-        dx = (canvasW - PADDING) - sMaxX;
+        dx = canvasW - PADDING - sMaxX;
     }
 
     if (sMaxY - sMinY > usableH) {
@@ -4546,7 +4800,7 @@ function _getBBoxForEntry(entry) {
     // which would produce a bbox spanning the whole diagram and misplace the card.
     entry.groupClasses.forEach((grp) => {
         svg.querySelectorAll(
-            `line.${grp}, path.${grp}, polyline.${grp}, rect.${grp}, circle.${grp}:not(.comment)`
+            `line.${grp}, path.${grp}, polyline.${grp}, rect.${grp}, circle.${grp}:not(.comment)`,
         ).forEach(addEl);
     });
 
@@ -4555,18 +4809,25 @@ function _getBBoxForEntry(entry) {
     if (!candidates.length && entry.sourceIds.length) {
         const markerId = entry.sourceIds[0];
         if (markerId) {
-            const el = svg.getElementById(markerId) || document.getElementById(markerId);
+            const el =
+                svg.getElementById(markerId) ||
+                document.getElementById(markerId);
             if (el) addEl(el);
         }
     }
 
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
     candidates.forEach((el) => {
         try {
             const b = el.getBBox();
             if (b.width === 0 && b.height === 0) return;
-            minX = Math.min(minX, b.x);           minY = Math.min(minY, b.y);
-            maxX = Math.max(maxX, b.x + b.width); maxY = Math.max(maxY, b.y + b.height);
+            minX = Math.min(minX, b.x);
+            minY = Math.min(minY, b.y);
+            maxX = Math.max(maxX, b.x + b.width);
+            maxY = Math.max(maxY, b.y + b.height);
         } catch (_) {}
     });
     return isFinite(minX) ? { minX, minY, maxX, maxY } : null;
@@ -4576,8 +4837,10 @@ function _updatePresentationComment(entry, index, total) {
     const card = document.getElementById("presentation-comment");
     if (!card) return;
 
-    card.querySelector(".presentation-comment-label").textContent = entry.markerLabel || "";
-    card.querySelector(".presentation-comment-body").textContent = entry.body || "";
+    card.querySelector(".presentation-comment-label").textContent =
+        entry.markerLabel || "";
+    card.querySelector(".presentation-comment-body").textContent =
+        entry.body || "";
     const counter = document.querySelector(".presentation-overlay-counter");
     if (counter) counter.textContent = `${index + 1} / ${total}`;
 
@@ -4590,9 +4853,14 @@ function _updatePresentationComment(entry, index, total) {
     }
 
     // Apply step color matching the comment legend panel
-    const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    const stepClasses = Array.isArray(entry.stepClasses)
+        ? entry.stepClasses.filter(Boolean)
+        : [];
     if (stepClasses.length > 0) {
-        const stepIdx = parseInt(/^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0", 10);
+        const stepIdx = parseInt(
+            /^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0",
+            10,
+        );
         card.dataset.stepIndex = stepIdx % 8;
     } else {
         delete card.dataset.stepIndex;
@@ -4616,7 +4884,12 @@ function _updatePresentationComment(entry, index, total) {
     const s = state.scale;
     const canvasRect = canvas
         ? canvas.getBoundingClientRect()
-        : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+        : {
+              left: 0,
+              top: 0,
+              width: window.innerWidth,
+              height: window.innerHeight,
+          };
 
     const cardW = card.offsetWidth || 280;
     const cardH = card.offsetHeight || 90;
@@ -4627,7 +4900,7 @@ function _updatePresentationComment(entry, index, total) {
 
     if (!bbox) {
         card.style.left = Math.max(margin, (vw - cardW) / 2) + "px";
-        card.style.top  = margin + "px";
+        card.style.top = margin + "px";
         return;
     }
 
@@ -4636,55 +4909,70 @@ function _updatePresentationComment(entry, index, total) {
     const sMaxX = bbox.maxX * s + effTx + canvasRect.left;
     const sMinY = bbox.minY * s + effTy + canvasRect.top;
     const sMaxY = bbox.maxY * s + effTy + canvasRect.top;
-    const sCx   = (sMinX + sMaxX) / 2;
-    const sCy   = (sMinY + sMaxY) / 2;
+    const sCx = (sMinX + sMaxX) / 2;
+    const sCy = (sMinY + sMaxY) / 2;
     const bboxW = sMaxX - sMinX;
     const bboxH = sMaxY - sMinY;
 
-    const topBound    = margin;
+    const topBound = margin;
     const bottomBound = vh - margin;
-    const leftBound   = margin;
-    const rightBound  = vw - margin;
+    const leftBound = margin;
+    const rightBound = vw - margin;
 
     let left, top;
 
     if (bboxH > bboxW) {
         // Vertical connection — place card left or right
         const spaceRight = rightBound - sMaxX - gap;
-        const spaceLeft  = sMinX - gap - leftBound;
-        left = (spaceRight >= cardW || spaceRight >= spaceLeft)
-            ? sMaxX + gap
-            : sMinX - gap - cardW;
-        top = Math.max(topBound, Math.min(sCy - cardH / 2, bottomBound - cardH));
+        const spaceLeft = sMinX - gap - leftBound;
+        left =
+            spaceRight >= cardW || spaceRight >= spaceLeft
+                ? sMaxX + gap
+                : sMinX - gap - cardW;
+        top = Math.max(
+            topBound,
+            Math.min(sCy - cardH / 2, bottomBound - cardH),
+        );
     } else {
         // Horizontal connection — place card above or below
         const spaceBelow = bottomBound - sMaxY - gap;
         const spaceAbove = sMinY - gap - topBound;
-        top = (spaceBelow >= cardH || spaceBelow >= spaceAbove)
-            ? sMaxY + gap
-            : sMinY - gap - cardH;
-        left = Math.max(leftBound, Math.min(sCx - cardW / 2, rightBound - cardW));
+        top =
+            spaceBelow >= cardH || spaceBelow >= spaceAbove
+                ? sMaxY + gap
+                : sMinY - gap - cardH;
+        left = Math.max(
+            leftBound,
+            Math.min(sCx - cardW / 2, rightBound - cardW),
+        );
     }
 
     // Final clamp
     left = Math.max(leftBound, Math.min(left, rightBound - cardW));
-    top  = Math.max(topBound,  Math.min(top,  bottomBound - cardH));
+    top = Math.max(topBound, Math.min(top, bottomBound - cardH));
 
     card.style.left = left + "px";
-    card.style.top  = top  + "px";
+    card.style.top = top + "px";
 }
 
 // Wire up presentation controls once DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("btn-stop-present")?.addEventListener("click", () => stopPresentation());
-    document.getElementById("btn-prev-step")?.addEventListener("click", () => presentPrevStep());
-    document.getElementById("btn-next-step")?.addEventListener("click", () => presentNextStep());
+    document
+        .getElementById("btn-stop-present")
+        ?.addEventListener("click", () => stopPresentation());
+    document
+        .getElementById("btn-prev-step")
+        ?.addEventListener("click", () => presentPrevStep());
+    document
+        .getElementById("btn-next-step")
+        ?.addEventListener("click", () => presentNextStep());
 
     // Draggable presentation card
     const card = document.getElementById("presentation-comment");
     const handle = card?.querySelector(".presentation-comment-top");
     if (card && handle) {
-        let dragOffsetX = 0, dragOffsetY = 0;
+        let dragOffsetX = 0,
+            dragOffsetY = 0;
 
         handle.addEventListener("mousedown", (e) => {
             if (e.button !== 0) return;
@@ -4695,10 +4983,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const onMove = (e) => {
                 const margin = 10;
-                const left = Math.max(margin, Math.min(e.clientX - dragOffsetX, window.innerWidth  - card.offsetWidth  - margin));
-                const top  = Math.max(margin, Math.min(e.clientY - dragOffsetY, window.innerHeight - card.offsetHeight - margin));
+                const left = Math.max(
+                    margin,
+                    Math.min(
+                        e.clientX - dragOffsetX,
+                        window.innerWidth - card.offsetWidth - margin,
+                    ),
+                );
+                const top = Math.max(
+                    margin,
+                    Math.min(
+                        e.clientY - dragOffsetY,
+                        window.innerHeight - card.offsetHeight - margin,
+                    ),
+                );
                 card.style.left = left + "px";
-                card.style.top  = top  + "px";
+                card.style.top = top + "px";
                 _presentCardDragged = true;
             };
 

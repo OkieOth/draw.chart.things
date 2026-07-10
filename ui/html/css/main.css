@@ -170,6 +170,24 @@ button {
     color: #0a3d62;
     font-weight: 600;
 }
+/* Group header styling */
+.toolbar-combo-group-header {
+    padding: 8px 12px 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    background: #f5f5f5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #ddd;
+    margin-top: 4px;
+    user-select: none;
+    pointer-events: none;
+}
+.toolbar-combo-group-header:first-child {
+    border-top: none;
+    margin-top: 0;
+}
 /* Active toggle visual */
 button.tool-btn.active {
     background: #0a84ff;
