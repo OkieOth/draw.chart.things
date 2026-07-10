@@ -1,0 +1,1651 @@
+title: System Application architecture
+titleFormat: title
+version: v10
+formats:
+  defaultConnection:
+    line:
+      width: 2
+      color: black
+  http:
+    line:
+      color: "4271ae"
+      style: solid
+      width: 2
+  grpc:
+    line:
+      color: "3a7d44"
+      style: dashed
+      width: 2
+  amqp:
+    line:
+      color: "f37327"
+      style: dotted
+      width: 2
+  database:
+    line:
+      color: "660099"
+      style: solid
+      width: 1
+  service:
+    fill:
+      color: "dddddd"
+    line:
+      color: "333333"
+      style: solid
+      width: 1
+legend:
+  format: title
+  entries:
+    - text: Service
+      format: service
+    - text: REST API
+      format: http
+    - text: gRPC
+      format: grpc
+    - text: AMQP
+      format: amqp
+    - text: Database
+      format: database
+boxes:
+  vertical:
+    - id: id_0
+      horizontal:
+        - caption: Frontend
+          format: system_base
+          id: id_1
+          expand: true
+          horizontal:
+            - caption: Core
+              id: id_1_1
+              format: core
+              tags:
+                - domain
+              vertical:
+                - caption: core-fe
+                  id: id_1_1_1
+                  format: service
+                  tags:
+                    - TeamAll
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: ui.i18n.fe.i18n
+                  id: id_1_1_2
+                  format: service
+                  tags:
+                    - TeamAll
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.custom.reports
+                  id: id_1_1_3
+                  format: service
+                  tags:
+                    - Team3
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.events
+                  id: id_1_1_4
+                  format: service
+                  tags:
+                    - Team1
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_2_8_8
+                      dest: srv.c.events
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.resourcesmng
+                  id: id_1_1_5
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_2_2_2
+                      dest: srv.cres.mng.query
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.monitoring
+                  id: id_1_1_6
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_1_3
+                      dest: srv.c.device.state.mng.global
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                  horizontal:
+                    - image: asyncapi
+                      dataLink: https://studio.asyncapi.com/
+                    - image: openapi
+                      dataLink: https://editor.swagger.io/
+                    - image: protobuf
+                      dataLink: https://protobuf.dev/reference/protobuf/proto3-spec/
+                    - image: jsonschema
+                      dataLink: https://json-schema.org/specification
+                    - image: backstage
+                      dataLink: https://backstage.io/
+                  tags:
+                    - Team1
+                - caption: fe.mfe.strategy.mng.v2
+                  id: id_1_1_7
+                  format: service
+                  tags:
+                    - Team2
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_2_7_1
+                      dest: srv.c.strategy.configuration
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_2_7_4
+                      dest: srv.c.strategy.mng
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.helpcenter
+                  id: id_1_1_8
+                  format: service
+                  tags:
+                    - Team1
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+            - caption: TMNG
+              id: id_1_2
+              format: tms
+              tags:
+                - domain
+              vertical:
+                - caption: fe.mfe.apx
+                  id: id_1_2_1
+                  format: service
+                  tags:
+                    - TeamUk
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.01
+                  id: id_1_2_2
+                  format: service
+                  tags:
+                    - TeamUk
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.contentmng
+                  id: id_1_2_3
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.ctm
+                  id: id_1_2_4
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_2_4
+                      dest: t.srv.corridor.control
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.sipl.diagram
+                  id: id_1_2_5
+                  format: service
+                  tags:
+                    - Team2
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.02
+                  id: id_1_2_6
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.03
+                  id: id_1_2_7
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: fe.mfe.04
+                  id: id_1_2_8
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+            - caption: Displays
+              id: id_1_3
+              format: tms
+              tags:
+                - domain
+              vertical:
+                - caption: fe.mfe.signmng
+                  id: id_1_3_1
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_3_2_1_2
+                      dest: vts.srv.vts.mng
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+            - caption: Detection
+              id: id_1_4
+              format: tms
+              tags:
+                - domain
+              vertical:
+                - caption: fe.mfe.gxgs
+                  id: id_1_4_1
+                  format: service
+                  connections:
+                    - destId: id_3_1_0_1
+                      dest: kong.api.gw.kong
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_3_3_1_1
+                      dest: gxgs.srv.device.mng
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+            - caption: Additional
+              id: id_1_6
+              format: additional
+              tags:
+                - domain
+              vertical:
+                - caption: fe.mfe.05
+                  id: id_1_6_1
+                  format: service
+                - caption: fe.mfe.subsystems
+                  id: id_1_6_2
+                  format: service
+        - caption: Additional Ingress Connected Systems
+          id: id_2
+    - id: id_3
+      expand: true
+      horizontal:
+        - caption: Infrastructure
+          expand: true
+          format: system_base
+          id: id_3_1
+          vertical:
+            - caption: Api Gateways
+              id: id_3_1_0
+              format: infra
+              tags:
+                - domain
+              vertical:
+                - caption: kong.api.gw.kong
+                  id: id_3_1_0_1
+                  format: service
+                  connections:
+                    - destId: id_3_2_2_5_3
+                      dest: srv.c.api.gateway
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_1_3
+                      dest: srv.c.device.state.mng.global
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_2_2_2
+                      dest: srv.cres.mng.query
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_2_1
+                      dest: srv.c.cmd.mng
+                      format: http
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                - caption: nginx.ingress.controller
+                  id: id_3_1_0_2
+                  format: service
+                - caption: nginx.ingress.controller.default.backend
+                  id: id_3_1_0_3
+                  format: service
+            - caption: Databases
+              id: id_3_1_1
+              format: infra
+              tags:
+                - domain
+              vertical:
+                - caption: Mongodb
+                  id: id_3_1_1_1
+                  vertical:
+                    - caption: mongodb4-mongos
+                      id: id_3_1_1_1_1
+                      format: service
+                      connections:
+                        - destId: id_3_2_1_1_1_3
+                          dest: srv.c.device.state.mng.global
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                        - destId: id_3_2_2_2_3
+                          dest: srv.c.device.mng
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: mongodb4-configsvr
+                      id: id_3_1_1_1_2
+                      format: service
+                    - caption: mongodb4.shard0.data
+                      id: id_3_1_1_1_3
+                      format: service
+                - caption: Postgresql
+                  id: id_3_1_1_2
+                  vertical:
+                    - caption: postgres-default
+                      id: id_3_1_1_2_1
+                      format: service
+                      connections:
+                        - destId: id_3_2_2_1_2
+                          dest: srv.c.user.management
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                        - destId: id_3_2_2_3_1
+                          dest: srv.c.tenant.configuration
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: postgres-operator
+                      id: id_3_1_1_2_2
+                      format: service
+                    - caption: postgres-keycloak
+                      id: id_3_1_1_2_3
+                      format: service
+                - caption: Redis
+                  id: id_3_1_1_3
+                  vertical:
+                    - caption: redis-master
+                      id: id_3_1_1_3_1
+                      format: service
+                      connections:
+                        - destId: id_3_2_2_5_3
+                          dest: srv.c.api.gateway
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                        - destId: id_3_2_1_1_2_1
+                          dest: srv.c.cmd.mng
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: redis-replicas
+                      id: id_3_1_1_3_2
+                      format: service
+                    - caption: redis.cmder.ui
+                      id: id_3_1_1_3_3
+                      format: service
+            - caption: Broker
+              id: id_3_1_2
+              format: infra
+              tags:
+                - domain
+              vertical:
+                - caption: broker-rabbitmq
+                  id: id_3_1_2_1
+                  format: service
+                  connections:
+                    - destId: id_3_2_1_1_1_1
+                      dest: srv.c.alarm.handler
+                      format: amqp
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_1_11
+                      dest: srv.c.message.center
+                      format: amqp
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_1_13
+                      dest: srv.c.resource.messages
+                      format: amqp
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_1_14
+                      dest: srv.c.state.composer
+                      format: amqp
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_1_3
+                      dest: srv.c.device.state.mng.global
+                      format: amqp
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_5_1
+                      dest: t.srv.link.state.inbound.bdg
+                      format: amqp
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+                    - destId: id_3_2_1_1_5_2
+                      dest: t.srv.dtc.state.outbound.bdg
+                      format: amqp
+                      sourceArrow: false
+                      destArrow: true
+                      tags: []
+                      hiddenComments: false
+            - caption: Monitoring
+              id: id_3_1_3
+              format: infra
+              tags:
+                - domain
+              vertical:
+                - caption: grafana-tempo
+                  id: id_3_1_3_1
+                  format: service
+                - caption: loki
+                  id: id_3_1_3_2
+                  format: service
+                - caption: prometheus
+                  id: id_3_1_3_3
+                  format: service
+                - caption: prometheus.operator.grafana
+                  id: id_3_1_3_4
+                  format: service
+                - caption: alertmng-prometheus
+                  id: id_3_1_3_5
+                  format: service
+                - caption: metrics-server
+                  id: id_3_1_3_6
+                  format: service
+            - caption: Storage
+              id: id_3_1_4
+              format: infra
+              tags:
+                - domain
+              vertical:
+                - caption: s3.reverse.proxy
+                  id: id_3_1_4_1
+                  format: service
+                - caption: nfs.subdir.external.provisioner
+                  id: id_3_1_4_2
+                  format: service
+            - caption: Additional
+              id: id_3_1_5
+              format: infra
+              tags:
+                - domain
+              vertical:
+                - caption: keycloak
+                  id: id_3_1_5_1
+                  format: service
+        - caption: Backend
+          id: id_3_2
+          expand: true
+          format: system_base
+          vertical:
+            - caption: Ingress/Api-Gateways
+              id: id_3_2_0
+              format: boundary
+              dontBlockConPaths: true
+            - id: id_3_2_1
+              expand: true
+              horizontal:
+                - id: id_3_2_1_1
+                  caption: TMNG
+                  expand: true
+                  format: tms
+                  horizontal:
+                    - caption: Monitoring
+                      id: id_3_2_1_1_1
+                      format: tms
+                      tags:
+                        - domain
+                      vertical:
+                        - caption: srv.c.alarm.handler
+                          id: id_3_2_1_1_1_1
+                          format: service
+                        - caption: srv.c.device.state.mng.global
+                          id: id_3_2_1_1_1_3
+                          format: service
+                          connections:
+                            - destId: id_3_2_1_1_2_1
+                              dest: srv.c.cmd.mng
+                              format: grpc
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                            - destId: id_3_2_1_1_1_14
+                              dest: srv.c.state.composer
+                              format: grpc
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                            - destId: id_3_2_2_2_3
+                              dest: srv.c.device.mng
+                              format: grpc
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: srv.c.device.state.mng.nnn
+                          id: id_3_2_1_1_1_6
+                          format: service
+                        - caption: srv.c.message.config
+                          id: id_3_2_1_1_1_8
+                          format: service
+                        - caption: t.srv.intersection.plan.mng
+                          id: id_3_2_1_1_1_9
+                          format: service
+                        - caption: t.srv.sub.system
+                          id: id_3_2_1_1_1_10
+                          format: service
+                        - caption: srv.c.message.center
+                          id: id_3_2_1_1_1_11
+                          format: service
+                          connections:
+                            - destId: id_3_2_2_8_16
+                              dest: srv.c.notification
+                              format: http
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                            - destId: id_3_2_2_8_9
+                              dest: srv.c.journal
+                              format: http
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: srv.c.message.translation.store
+                          id: id_3_2_1_1_1_12
+                          format: service
+                        - caption: srv.c.resource.messages
+                          id: id_3_2_1_1_1_13
+                          format: service
+                        - caption: srv.c.state.composer
+                          id: id_3_2_1_1_1_14
+                          format: service
+                    - caption: Control
+                      id: id_3_2_1_1_2
+                      format: tms
+                      tags:
+                        - domain
+                      vertical:
+                        - caption: srv.c.cmd.mng
+                          id: id_3_2_1_1_2_1
+                          format: service
+                          connections:
+                            - destId: id_3_2_1_1_1_3
+                              dest: srv.c.device.state.mng.global
+                              format: grpc
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                            - destId: id_3_2_1_1_1_10
+                              dest: t.srv.sub.system
+                              format: http
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: srv.c.weekly.automatic
+                          id: id_3_2_1_1_2_2
+                          format: service
+                        - caption: srv.c.action.plans
+                          id: id_3_2_1_1_2_3
+                          format: service
+                        - caption: t.srv.corridor.control
+                          id: id_3_2_1_1_2_4
+                          format: service
+                    - caption: TMNG-Analytics
+                      id: id_3_2_1_1_3
+                      format: tms
+                      tags:
+                        - domain
+                      vertical:
+                        - caption: t.srv.kpi.config
+                          id: id_3_2_1_1_3_1
+                          format: service
+                        - caption: t.srv.kpi.incident
+                          id: id_3_2_1_1_3_2
+                          format: service
+                        - caption: t.srv.kpi.pers
+                          id: id_3_2_1_1_3_3
+                          format: service
+                        - caption: t.srv.kpi.processor
+                          id: id_3_2_1_1_3_4
+                          format: service
+                        - caption: t.srv.kpi.threshold
+                          id: id_3_2_1_1_3_5
+                          format: service
+                        - caption: t.srv.analyse.axxa.webapp
+                          id: id_3_2_1_1_3_6
+                          format: service
+                    - caption: CTRL-Persistence
+                      id: id_3_2_1_1_4
+                      format: tms
+                      tags:
+                        - domain
+                      vertical:
+                        - caption: t.srv.ctl.pers
+                          id: id_3_2_1_1_4_1
+                          format: service
+                        - caption: t.ctl.pers.dtcs.query
+                          id: id_3_2_1_1_4_2
+                          format: service
+                        - caption: t.ctl.pers.dtcs.write
+                          id: id_3_2_1_1_4_3
+                          format: service
+                    - caption: Networks
+                      id: id_3_2_1_1_5
+                      format: tms
+                      tags:
+                        - domain
+                      vertical:
+                        - caption: t.srv.link.state.inbound.bdg
+                          id: id_3_2_1_1_5_1
+                          format: service
+                        - caption: t.srv.dtc.state.outbound.bdg
+                          id: id_3_2_1_1_5_2
+                          format: service
+                        - caption: t.srv.netw.config
+                          id: id_3_2_1_1_5_3
+                          format: service
+                        - caption: t.srv.netw.link.processor
+                          id: id_3_2_1_1_5_4
+                          format: service
+                        - caption: t.srv.traffic.netw.model.importer
+                          id: id_3_2_1_1_5_5
+                          format: service
+                    - caption: PT
+                      id: id_3_2_1_1_6
+                      format: tms
+                      tags:
+                        - domain
+                      vertical:
+                        - caption: t.srv.pt.line.mng
+                          id: id_3_2_1_1_6_1
+                          format: service
+                    - caption: Adaptive
+                      id: id_3_2_1_1_7
+                      format: tms
+                      tags:
+                        - domain
+                      vertical:
+                        - caption: iinn-central
+                          id: id_3_2_1_1_7_1
+                          format: service
+                        - caption: iinn.cmd.sender
+                          id: id_3_2_1_1_7_2
+                          format: service
+                        - caption: iinn-gui
+                          id: id_3_2_1_1_7_3
+                          format: service
+                        - caption: iinn.netw.http
+                          id: id_3_2_1_1_7_4
+                          format: service
+                        - caption: iinn.pd.reader
+                          id: id_3_2_1_1_7_5
+                          format: service
+                        - caption: mc.area.api
+                          id: id_3_2_1_1_7_6
+                          format: service
+                        - caption: mc.ctor.api
+                          id: id_3_2_1_1_7_7
+                          format: service
+                        - caption: mc.ctor.eval
+                          id: id_3_2_1_1_7_8
+                          format: service
+                        - caption: mc.area.eval
+                          id: id_3_2_1_1_7_9
+                          format: service
+                        - caption: user.config.http
+                          id: id_3_2_1_1_7_10
+                          format: service
+            - caption: Core
+              id: id_3_2_2
+              expand: true
+              format: core
+              horizontal:
+                - caption: Users
+                  id: id_3_2_2_1
+                  format: core
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.c.user.data.store
+                      id: id_3_2_2_1_1
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.user.management
+                      id: id_3_2_2_1_2
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                        - destId: id_3_1_1_3_1
+                          dest: redis-master
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                - caption: Resources
+                  id: id_3_2_2_2
+                  format: core
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.cres.mng.cmd
+                      id: id_3_2_2_2_1
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.cres.mng.query
+                      id: id_3_2_2_2_2
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.device.mng
+                      id: id_3_2_2_2_3
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                - caption: Tenant-Confs
+                  id: id_3_2_2_3
+                  format: core
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.c.tenant.configuration
+                      id: id_3_2_2_3_1
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.tenant.configuration.v2
+                      id: id_3_2_2_3_2
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.timekeeper
+                      id: id_3_2_2_3_3
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.alarm.notification
+                      text1: notification-matrix
+                      id: id_3_2_2_3_4
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_3_1
+                          dest: redis-master
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.data.retention.configuration
+                      id: id_3_2_2_3_5
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                - caption: Data-Exchange
+                  id: id_3_2_2_4
+                  format: core
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.c.data.source.mng
+                      id: id_3_2_2_4_1
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.data.source.provider
+                      id: id_3_2_2_4_2
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.data.source.catalog
+                      id: id_3_2_2_4_3
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                - caption: Networking
+                  id: id_3_2_2_5
+                  format: core
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.c.ip.pool.mng
+                      id: id_3_2_2_5_1
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.pki.gateway
+                      id: id_3_2_2_5_2
+                      format: service
+                    - caption: srv.c.api.gateway
+                      id: id_3_2_2_5_3
+                      format: service
+                      connections:
+                        - destId: id_3_2_2_2_1
+                          dest: srv.cres.mng.cmd
+                          format: grpc
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                        - destId: id_3_2_2_2_2
+                          dest: srv.cres.mng.query
+                          format: grpc
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                        - destId: id_3_2_2_1_2
+                          dest: srv.c.user.management
+                          format: http
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.remote.panel.proxy
+                      id: id_3_2_2_5_4
+                      format: service
+                - caption: Strategy
+                  id: id_3_2_2_7
+                  format: core
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.c.strategy.configuration
+                      id: id_3_2_2_7_1
+                      format: service
+                      connections:
+                        - destId: id_3_2_2_7_4
+                          dest: srv.c.strategy.mng
+                          format: http
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.strategy.executor
+                      id: id_3_2_2_7_2
+                      format: service
+                      connections:
+                        - destId: id_3_2_1_1_1_3
+                          dest: srv.c.device.state.mng.global
+                          format: grpc
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.strategy.handler
+                      id: id_3_2_2_7_3
+                      format: deprecated
+                    - caption: srv.c.strategy.mng
+                      id: id_3_2_2_7_4
+                      format: service
+                      connections:
+                        - destId: id_3_2_1_1_1_14
+                          dest: srv.c.state.composer
+                          format: grpc
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                - caption: Additional
+                  id: id_3_2_2_8
+                  format: core
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.c.asset.remover
+                      id: id_3_2_2_8_2
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.auditlog
+                      id: id_3_2_2_8_3
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.cds
+                      id: id_3_2_2_8_4
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.changeset.mng
+                      id: id_3_2_2_8_5
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.cross.domain.orchestrator
+                      id: id_3_2_2_8_6
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.day.lists
+                      id: id_3_2_2_8_7
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_2_1
+                          dest: postgres-default
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.events
+                      id: id_3_2_2_8_8
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                        - destId: id_3_1_1_3_1
+                          dest: redis-master
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.journal
+                      id: id_3_2_2_8_9
+                      format: service
+                      connections:
+                        - destId: id_3_1_1_1_1
+                          dest: mongodb4-mongos
+                          format: database
+                          sourceArrow: false
+                          destArrow: true
+                          tags: []
+                          hiddenComments: false
+                    - caption: srv.c.kube.client
+                      id: id_3_2_2_8_10
+                      format: service
+                    - caption: srv.c.pulse
+                      id: id_3_2_2_8_11
+                      format: service
+                    - caption: srv.c.stream.gateway
+                      id: id_3_2_2_8_13
+                      format: service
+                    - caption: srv.c.tileserver.proxy
+                      id: id_3_2_2_8_14
+                      format: service
+                    - caption: srv.c.tenant.layer.proxy
+                      id: id_3_2_2_8_15
+                      format: service
+                    - caption: srv.c.notification
+                      id: id_3_2_2_8_16
+                      format: service
+                    - caption: srv.c.search.proxy
+                      id: id_3_2_2_8_17
+                      format: service
+                    - caption: srv.c.shift.calendar
+                      id: id_3_2_2_8_18
+                      format: service
+            - horizontal:
+            - caption: Integrations
+              id: id_3_2_3
+              expand: true
+              format: integration
+              horizontal:
+                - caption: CTRLs
+                  id: id_3_2_3_1
+                  format: integration
+                  tags:
+                    - domain
+                  horizontal:
+                    - caption: Generic-CTRL
+                      id: id_3_2_3_1_1
+                      format: integration
+                      vertical:
+                        - caption: t.central.object.http
+                          id: id_3_2_3_1_1_1
+                          format: service
+                        - caption: t.srv.generic.ctl.mng
+                          id: id_3_2_3_1_1_2
+                          format: service
+                          connections:
+                            - destId: id_3_2_1_1_1_10
+                              dest: t.srv.sub.system
+                              format: http
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: srv.c.ctl.gateway.typescript
+                          id: id_3_2_3_1_1_3
+                          format: service
+                          connections:
+                            - destId: id_3_2_1_1_1_3
+                              dest: srv.c.device.state.mng.global
+                              format: grpc
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                    - caption: CTRL-Protocols
+                      id: id_3_2_3_1_2
+                      format: integration
+                      horizontal:
+                        - caption: BBB-O_Handler
+                          id: id_3_2_3_1_2_1
+                          format: integration
+                          vertical:
+                            - caption: t.srv.xxxx.o.ctl.mng
+                              format: service
+                              id: id_3_2_3_1_2_1_1
+                            - caption: share.srv.xxxx.device.driver.new
+                              format: service
+                              id: id_3_2_3_1_2_1_2
+                            - caption: share.srv.xxxx.event.proxy
+                              id: id_3_2_3_1_2_1_3
+                              format: service
+                        - caption: BBB-C
+                          id: id_3_2_3_1_2_2
+                          format: integration
+                          vertical:
+                            - caption: t.srv.xxxx.c.ctl.mng
+                              id: id_3_2_3_1_2_2_1
+                              format: service
+                            - caption: t.srv.xxxx.c.vd
+                              id: id_3_2_3_1_2_2_2
+                              format: service
+                            - caption: share.srv.xxxx.c_client
+                              id: id_3_2_3_1_2_2_3
+                              format: service
+                            - caption: t.xxxx.c.service
+                              id: id_3_2_3_1_2_2_4
+                              format: service
+                            - caption: srv.c.xxxx.c.data.processor
+                              id: id_3_2_3_1_2_2_5
+                              format: service
+                        - caption: CCC
+                          id: id_3_2_3_1_2_3
+                          format: integration
+                          vertical:
+                            - caption: t.srv.ccc.ctl.cmd_processor
+                              id: id_3_2_3_1_2_3_1
+                              format: service
+                            - caption: t.srv.ccc.trap.handler
+                              id: id_3_2_3_1_2_3_2
+                              format: service
+                            - caption: t.srv.ccc.ctl.mng
+                              id: id_3_2_3_1_2_3_3
+                              format: service
+                        - caption: AAA
+                          id: id_3_2_3_1_2_4
+                          format: integration
+                          vertical:
+                            - caption: t.srv.aaa.connect.bdi
+                              id: id_3_2_3_1_2_4_1
+                              format: service
+                            - caption: t.srv.aaa.connect.driver
+                              id: id_3_2_3_1_2_4_2
+                              format: service
+                        - caption: DDD
+                          id: id_3_2_3_1_2_5
+                          format: integration
+                          vertical:
+                            - caption: reg.srv.ddd.comms.handler
+                              id: id_3_2_3_1_2_5_1
+                              format: service
+                            - caption: reg.srv.ddd.simulator
+                              id: id_3_2_3_1_2_5_2
+                              format: service
+                            - caption: reg.srv.ddd.ctl.mng
+                              id: id_3_2_3_1_2_5_3
+                              format: service
+                        - caption: EEE
+                          id: id_3_2_3_1_2_6
+                          format: integration
+                          vertical:
+                            - caption: reg.srv.eee.ctl.mng
+                              id: id_3_2_3_1_2_6_1
+                              format: service
+                            - caption: reg.srv.uxu.crb.adapter
+                              id: id_3_2_3_1_2_6_2
+                              format: service
+                            - caption: reg.srv.uxu.crb.adapter.mng
+                              id: id_3_2_3_1_2_6_3
+                              format: service
+                        - caption: FFF
+                          id: id_3_2_3_1_2_7
+                          format: integration
+                          vertical:
+                            - caption: reg.srv.fff.comms.handler
+                              id: id_3_2_3_1_2_7_1
+                              format: service
+                            - caption: reg.srv.fff.simulator
+                              id: id_3_2_3_1_2_7_2
+                              format: service
+                            - caption: reg.srv.fff.ctl.mng
+                              id: id_3_2_3_1_2_7_3
+                              format: service
+                            - caption: reg.srv.tttld.fault.mng
+                              id: id_3_2_3_1_2_7_4
+                              format: service
+                        - caption: GGG
+                          id: id_3_2_3_1_2_8
+                          format: integration
+                          vertical:
+                            - caption: reg.srv.ugxo.simulator
+                              id: id_3_2_3_1_2_8_1
+                              format: service
+                            - caption: reg.srv.ugxo.ctl.mng
+                              id: id_3_2_3_1_2_8_2
+                              format: service
+                            - caption: reg.srv.ugxo.driver
+                              id: id_3_2_3_1_2_8_3
+                              format: service
+                            - caption: reg.srv.ugxo.snmplistener
+                              id: id_3_2_3_1_2_8_4
+                              format: service
+                        - caption: HHH
+                          id: id_3_2_3_1_2_9
+                          format: integration
+                          vertical:
+                            - caption: reg.srv.hhh.ctl.mng
+                              id: id_3_2_3_1_2_9_1
+                              format: service
+                            - caption: reg.srv.hhh.simulator
+                              id: id_3_2_3_1_2_9_2
+                              format: service
+                            - caption: reg.srv.hhh.comms.handler
+                              id: id_3_2_3_1_2_9_3
+                              format: service
+                - caption: Displays
+                  id: id_3_2_3_2
+                  format: integration
+                  tags:
+                    - domain
+                  horizontal:
+                    - caption: Displays-Generic
+                      id: id_3_2_3_2_1
+                      format: integration
+                      vertical:
+                        - caption: srv.c.resource.mng
+                          id: id_3_2_3_2_1_1
+                          format: service
+                        - caption: vts.srv.vts.mng
+                          id: id_3_2_3_2_1_2
+                          format: service
+                          connections:
+                            - destId: id_3_2_2_2_1
+                              dest: srv.cres.mng.cmd
+                              format: http
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                            - destId: id_3_2_1_1_1_3
+                              dest: srv.c.device.state.mng.global
+                              format: grpc
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: ixr.vts.srv.device.state.mng
+                          id: id_3_2_3_2_1_3
+                          format: service
+                          connections:
+                            - destId: id_3_1_2_1
+                              dest: broker-rabbitmq
+                              format: amqp
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: srv.c.tenant.mng
+                          id: id_3_2_3_2_1_4
+                          format: service
+                        - caption: srv.c.transaction.mng
+                          id: id_3_2_3_2_1_5
+                          format: service
+                        - caption: ixr.srv.data.vehicle.count
+                          id: id_3_2_3_2_1_6
+                          format: service
+                        - caption: vts.srv.sign.lib
+                          id: id_3_2_3_2_1_7
+                          format: service
+                        - caption: vts.srv.content.lib
+                          id: id_3_2_3_2_1_8
+                          format: service
+                        - caption: vts.srv.data.aggregator
+                          id: id_3_2_3_2_1_9
+                          format: service
+                        - caption: ixr.srv.data.simulator
+                          id: id_3_2_3_2_1_10
+                          format: service
+                    - caption: Displays-Protocols
+                      id: id_3_2_3_2_2
+                      format: integration
+                      vertical:
+                        - caption: srv.c.ftp.driver
+                          id: id_3_2_3_2_2_1
+                          format: service
+                        - caption: srv.c.rv50_driver
+                          id: id_3_2_3_2_2_2
+                          format: service
+                        - caption: ixr.vts.srv.driver.ppp
+                          id: id_3_2_3_2_2_3
+                          format: service
+                        - caption: ixr.adapter.ppp.tcp
+                          id: id_3_2_3_2_2_4
+                          format: service
+                        - caption: ixr.driver.ppp.tcp
+                          id: id_3_2_3_2_2_5
+                          format: service
+                        - caption: xgs.nnn.adapter
+                          id: id_3_2_3_2_2_6
+                          format: service
+                        - caption: xgs.uxu.adapter
+                          id: id_3_2_3_2_2_7
+                          format: service
+                        - caption: xgs.uxu.driver
+                          id: id_3_2_3_2_2_8
+                          format: service
+                        - caption: vts.srv.ntis.adapter
+                          id: id_3_2_3_2_2_9
+                          format: service
+                        - caption: xgs.nnn.driver
+                          id: id_3_2_3_2_2_10
+                          format: service
+                        - caption: ixr.srv.driver.vehicle.count
+                          id: id_3_2_3_2_2_11
+                          format: service
+                        - caption: srv.c.sign.driver.simulator
+                          id: id_3_2_3_2_2_12
+                          format: service
+                        - caption: srv.c.sign.simulator
+                          id: id_3_2_3_2_2_13
+                          format: service
+                        - caption: srv.c.ppp.sign.simulator
+                          id: id_3_2_3_2_2_14
+                          format: service
+                - caption: Detection
+                  id: id_3_2_3_3
+                  format: integration
+                  tags:
+                    - domain
+                  horizontal:
+                    - caption: Detection-Generic
+                      id: id_3_2_3_3_1
+                      format: integration
+                      vertical:
+                        - caption: gxgs.srv.device.mng
+                          id: id_3_2_3_3_1_1
+                          format: service
+                          connections:
+                            - destId: id_3_2_2_2_3
+                              dest: srv.c.device.mng
+                              format: http
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: gxgs.srv.device.state.mng
+                          id: id_3_2_3_3_1_2
+                          format: service
+                          connections:
+                            - destId: id_3_2_1_1_1_3
+                              dest: srv.c.device.state.mng.global
+                              format: grpc
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                            - destId: id_3_1_2_1
+                              dest: broker-rabbitmq
+                              format: amqp
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: gxgs.srv.data.journey.time
+                          id: id_3_2_3_3_1_3
+                          format: service
+                          connections:
+                            - destId: id_3_2_1_1_1_3
+                              dest: srv.c.device.state.mng.global
+                              format: http
+                              sourceArrow: false
+                              destArrow: true
+                              tags: []
+                              hiddenComments: false
+                        - caption: gxgs.srv.data.pollution
+                          id: id_3_2_3_3_1_4
+                          format: service
+                        - caption: gxgs.srv.data.vehicle.count
+                          id: id_3_2_3_3_1_5
+                          format: service
+                        - caption: gxgs.srv.reports.generator
+                          id: id_3_2_3_3_1_6
+                          format: service
+                        - caption: blabla.data.aggregator
+                          id: id_3_2_3_3_1_7
+                          format: service
+                        - caption: blabla.data.converter
+                          id: id_3_2_3_3_1_8
+                          format: service
+                        - caption: blabla.dataset.exporter
+                          id: id_3_2_3_3_1_9
+                          format: service
+                        - caption: blabla-gateway
+                          id: id_3_2_3_3_1_10
+                          format: service
+                        - caption: blabla.ui.registration
+                          id: id_3_2_3_3_1_11
+                          format: service
+                    - caption: Detection-Protocols
+                      id: id_3_2_3_3_2
+                      format: integration
+                      vertical:
+                        - caption: gxgs.srv.generic.sensors.driver
+                          id: id_3_2_3_3_2_1
+                          format: service
+                        - caption: gxgs.srv.ttt.adapter
+                          id: id_3_2_3_3_2_2
+                          format: service
+                        - caption: gxgs.srv.ttt.driver
+                          id: id_3_2_3_3_2_3
+                          format: service
+                        - caption: gxgs.srv.device.driver.journey.time
+                          id: id_3_2_3_3_2_4
+                          format: service
+                        - caption: gxgs.srv.device.driver.pollution
+                          id: id_3_2_3_3_2_5
+                          format: service
+                        - caption: gxgs.srv.device.driver.vehicle.count
+                          id: id_3_2_3_3_2_6
+                          format: service
+                        - caption: blabla.device.driver
+                          id: id_3_2_3_3_2_7
+                          format: service
+                        - caption: blabla.flir.driver
+                          id: id_3_2_3_3_2_8
+                          format: service
+                - caption: Cameras
+                  id: id_3_2_3_4
+                  format: integration
+                  tags:
+                    - domain
+                  vertical:
+                    - caption: srv.c.cambroker
+                      id: id_3_2_3_4_2
+                      format: service
+                    - caption: nginx.camera.streaming.server
+                      id: id_3_2_3_4_3
+                      format: service
+                    - caption: share.srv.stream
+                      id: id_3_2_3_4_4
+                      format: service
+            - caption: Cluster Network Layer
+              id: id_3_2_4
+              format: boundary
+              dontBlockConPaths: true
+
+    - caption: Additional Non-Ingress Connected Systems
+      dontBlockConPaths: true
+      id: id_3_4
