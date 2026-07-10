@@ -172,7 +172,10 @@ button {
 }
 /* Group header styling */
 .toolbar-combo-group-header {
-    padding: 8px 12px 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px 6px 8px;
     font-size: 12px;
     font-weight: 600;
     color: #666;
@@ -182,11 +185,65 @@ button {
     border-top: 1px solid #ddd;
     margin-top: 4px;
     user-select: none;
-    pointer-events: none;
+    cursor: pointer;
+    transition: background-color 150ms ease;
 }
+
+.toolbar-combo-group-header:hover {
+    background: #efefef;
+}
+
 .toolbar-combo-group-header:first-child {
     border-top: none;
     margin-top: 0;
+}
+
+.toolbar-combo-group-toggle {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    flex-shrink: 0;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.toolbar-combo-group-toggle:hover {
+    color: #333;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 3px;
+}
+
+.toolbar-combo-group-name {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
+}
+
+.toolbar-combo-group-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #0066cc;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.toolbar-combo-group-items {
+    display: block;
+}
+
+.toolbar-combo-group-items.collapsed {
+    display: none;
 }
 /* Active toggle visual */
 button.tool-btn.active {

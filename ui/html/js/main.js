@@ -529,6 +529,8 @@ const toolbarComboState = {
     collapsedSteps: new Set(), // values whose step list is collapsed in the UI
     groups: null, // Array of {name, items: [{label, value}]} or null if flat format
     isGroupedMode: false, // whether to render groups in dropdown
+    collapsedGroups: new Set(), // group names that are currently collapsed
+    groupSelectionState: new Map(), // group name -> 'all'|'partial'|'none'
 };
 
 function getToolbarComboElements() {
@@ -575,6 +577,56 @@ function getToolbarComboOptionLabel(value) {
 
 function isToolbarComboValueSelected(value) {
     return toolbarComboState.selectedValues.includes(value);
+}
+
+// --- Group collapse/expand helpers ---
+function toggleGroupCollapse(groupName) {
+    if (toolbarComboState.collapsedGroups.has(groupName)) {
+        toolbarComboState.collapsedGroups.delete(groupName);
+    } else {
+        toolbarComboState.collapsedGroups.add(groupName);
+    }
+}
+
+function isGroupCollapsed(groupName) {
+    return toolbarComboState.collapsedGroups.has(groupName);
+}
+
+function getGroupSelectionState(groupName) {
+    if (!toolbarComboState.groups || !toolbarComboState.isGroupedMode) {
+        return 'none';
+    }
+    const group = toolbarComboState.groups.find((g) => g.name === groupName);
+    if (!group || !group.items) return 'none';
+    
+    let selectedCount = 0;
+    for (const [, value] of group.items) {
+        if (isToolbarComboValueSelected(value)) {
+            selectedCount++;
+        }
+    }
+    
+    if (selectedCount === 0) return 'none';
+    if (selectedCount === group.items.length) return 'all';
+    return 'partial';
+}
+
+function selectAllInGroup(groupName, select = true) {
+    if (!toolbarComboState.groups || !toolbarComboState.isGroupedMode) return;
+    const group = toolbarComboState.groups.find((g) => g.name === groupName);
+    if (!group || !group.items) return;
+    
+    for (const [label, value] of group.items) {
+        if (select && !isToolbarComboValueSelected(value)) {
+            addToolbarComboSelection(value, { silent: true });
+        } else if (!select && isToolbarComboValueSelected(value)) {
+            removeToolbarComboSelection(value, { silent: true });
+        }
+    }
+    
+    updateToolbarComboSelectedList();
+    if (toolbarComboState.isOpen) renderToolbarComboDropdown();
+    applySelectedMixins();
 }
 
 function createSelectedCollectorBadge(value, label) {
@@ -801,6 +853,7 @@ function renderToolbarComboDropdown() {
     }
 
     updateToolbarComboActiveOption();
+    attachGroupEventHandlers();
     if (toolbarComboState.isOpen) {
         positionToolbarComboDropdown();
     }
@@ -856,20 +909,60 @@ function renderGroupedToolbarComboDropdown(filter, dropdown) {
         if (filtered.length === 0) continue; // Skip empty groups
         anyMatches = true;
 
-        // Create group header
+        // Create group header with toggle and checkbox
         const groupHeader = document.createElement("div");
         groupHeader.className = "toolbar-combo-group-header";
-        groupHeader.textContent = group.name || "Options";
+        groupHeader.dataset.groupName = group.name;
         groupHeader.setAttribute("role", "presentation");
+        
+        // Toggle button (expand/collapse)
+        const toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.className = "toolbar-combo-group-toggle";
+        toggleBtn.dataset.groupName = group.name;
+        toggleBtn.title = isGroupCollapsed(group.name) ? "Expand group" : "Collapse group";
+        toggleBtn.setAttribute("aria-label", `Toggle ${group.name}`);
+        const isCollapsed = isGroupCollapsed(group.name);
+        toggleBtn.innerHTML = isCollapsed ? 
+            '<i class="fa-solid fa-chevron-right"></i>' : 
+            '<i class="fa-solid fa-chevron-down"></i>';
+        groupHeader.appendChild(toggleBtn);
+        
+        // Group name
+        const groupName = document.createElement("span");
+        groupName.className = "toolbar-combo-group-name";
+        groupName.textContent = group.name || "Options";
+        groupHeader.appendChild(groupName);
+        
+        // Select-all checkbox
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "toolbar-combo-group-checkbox";
+        checkbox.dataset.groupName = group.name;
+        checkbox.setAttribute("aria-label", `Select all ${group.name} items`);
+        const state = getGroupSelectionState(group.name);
+        checkbox.checked = state === 'all';
+        checkbox.indeterminate = state === 'partial';
+        groupHeader.appendChild(checkbox);
+        
         dropdown.appendChild(groupHeader);
 
-        // Create options in this group
+        // Create options in this group (wrapped in a container for easier collapse/expand)
+        const itemsContainer = document.createElement("div");
+        itemsContainer.className = "toolbar-combo-group-items";
+        if (isCollapsed) {
+            itemsContainer.classList.add("collapsed");
+        }
+        itemsContainer.dataset.groupName = group.name;
+        
         for (const item of filtered) {
             const [label, value] = item;
             const opt = { label, value };
-            createComboOptionRow(opt, flatIndex, dropdown);
+            createComboOptionRow(opt, flatIndex, itemsContainer);
             flatIndex++;
         }
+        
+        dropdown.appendChild(itemsContainer);
     }
 
     if (!anyMatches) {
@@ -964,6 +1057,39 @@ function updateToolbarComboActiveOption() {
     } else {
         input.removeAttribute("aria-activedescendant");
     }
+}
+
+function attachGroupEventHandlers() {
+    const { dropdown } = getToolbarComboElements();
+    if (!dropdown || !toolbarComboState.isGroupedMode) return;
+    
+    // Group toggle buttons
+    const toggleBtns = dropdown.querySelectorAll(".toolbar-combo-group-toggle");
+    toggleBtns.forEach((btn) => {
+        btn.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            const groupName = btn.dataset.groupName;
+            if (groupName) {
+                toggleGroupCollapse(groupName);
+                renderToolbarComboDropdown();
+            }
+        });
+    });
+    
+    // Group checkboxes
+    const checkboxes = dropdown.querySelectorAll(".toolbar-combo-group-checkbox");
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", (evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            const groupName = checkbox.dataset.groupName;
+            if (groupName) {
+                // If checked, select all in group; if unchecked, deselect all
+                selectAllInGroup(groupName, checkbox.checked);
+            }
+        });
+    });
 }
 
 function ensureToolbarComboOptionVisible(row) {
@@ -1063,6 +1189,7 @@ function closeToolbarComboDropdown(resetFilter = true) {
     if (!dropdown || !root || !input) return;
     toolbarComboState.isOpen = false;
     toolbarComboState.highlightedIndex = -1;
+    toolbarComboState.collapsedGroups.clear(); // Reset collapse state when closing
     dropdown.classList.add("hidden");
     dropdown.dataset.placement = "";
     root.classList.remove("open");
