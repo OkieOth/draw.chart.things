@@ -66,11 +66,17 @@ func (doc *BoxesDocument) isParent(possibleParent, elemToCheckFor *LayoutElement
 			return true
 		}
 	}
-	// Fallback: walk the container hierarchy (identical logic to original)
-	if doc.isParentInContainer(possibleParent.Vertical, possibleParent, elemToCheckFor) {
-		return true
+	for _, pid := range elemToCheckFor.ParentIds {
+		if pid == possibleParent.Id {
+			return true
+		}
 	}
-	return doc.isParentInContainer(possibleParent.Horizontal, possibleParent, elemToCheckFor)
+	return false
+	// // Fallback: walk the container hierarchy (identical logic to original)
+	// if doc.isParentInContainer(possibleParent.Vertical, possibleParent, elemToCheckFor) {
+	// 	return true
+	// }
+	// return doc.isParentInContainer(possibleParent.Horizontal, possibleParent, elemToCheckFor)
 }
 
 func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem *LayoutElement, isForHorizontalLine bool) CollisionType {
