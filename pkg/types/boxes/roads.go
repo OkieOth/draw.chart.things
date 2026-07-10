@@ -226,37 +226,53 @@ func (doc *BoxesDocument) roadRight(line *ConnectionLine, startElem *LayoutEleme
 }
 
 func (doc *BoxesDocument) elemHasParentWithTextImpl(elemToCheck, currentElem *LayoutElement, parentTxt bool) bool {
-	if currentElem.Id != "" && currentElem.Id == elemToCheck.Id {
-		// reached end of recursion
-		return parentTxt
+	for _, pid := range currentElem.ParentIds {
+		if pid == elemToCheck.Id {
+			return parentTxt
+		}
 	}
-
-	var textOverlaps bool
-	if currentElem.XTextBox != nil && currentElem.WidthTextBox != nil {
-		textOverlaps = elemToCheck.CenterX >= *currentElem.XTextBox && elemToCheck.CenterX <= (*currentElem.XTextBox+*currentElem.WidthTextBox)
-	}
-
-	myParentTxt := textOverlaps || parentTxt
-	if doc.elemHasParentWithTextCont(elemToCheck, myParentTxt, currentElem.Horizontal) {
-		return true
-	}
-	return doc.elemHasParentWithTextCont(elemToCheck, myParentTxt, currentElem.Vertical)
+	return parentTxt
 }
 
-func (doc *BoxesDocument) elemHasParentWithTextCont(elem *LayoutElement, parentTxt bool, cont *LayoutElemContainer) bool {
-	if cont == nil {
-		return false
+func (doc *BoxesDocument) elemHasParentWithText(elem *LayoutElement) bool {
+	if doc.Boxes.Horizontal != nil {
+		for _, e := range doc.Boxes.Horizontal.Elems {
+			if elemHasParentWithText(&e, elem) {
+				return true
+			}
+		}
 	}
-	for _, e := range cont.Elems {
-		if doc.elemHasParentWithTextImpl(elem, &e, parentTxt) {
-			return true
+	if doc.Boxes.Vertical != nil {
+		for _, e := range doc.Boxes.Vertical.Elems {
+			if elemHasParentWithText(&e, elem) {
+				return true
+			}
 		}
 	}
 	return false
 }
 
-func (doc *BoxesDocument) elemHasParentWithText(elem *LayoutElement) bool {
-	return doc.elemHasParentWithTextImpl(elem, &doc.Boxes, false)
+func elemHasParentWithText(cont *LayoutElement, elemToCheck *LayoutElement) bool {
+	for _, pid := range cont.ParentIds {
+		if pid == elemToCheck.Id {
+			return true
+		}
+	}
+	if cont.Horizontal != nil {
+		for _, e := range cont.Horizontal.Elems {
+			if elemHasParentWithText(&e, elemToCheck) {
+				return true
+			}
+		}
+	}
+	if cont.Vertical != nil {
+		for _, e := range cont.Vertical.Elems {
+			if elemHasParentWithText(&e, elemToCheck) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 type DefRoadType int

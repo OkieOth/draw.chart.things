@@ -9,14 +9,14 @@ import (
 	"github.com/okieoth/boxes/pkg/types/boxes"
 )
 
-func initLayoutElemContainer(l []boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes) *boxes.LayoutElemContainer {
+func initLayoutElemContainer(l []boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes, parents []string) *boxes.LayoutElemContainer {
 	if len(l) == 0 {
 		return nil
 	}
 	var ret boxes.LayoutElemContainer
 	ret.Elems = make([]boxes.LayoutElement, 0)
 	for _, elem := range l {
-		ret.Elems = append(ret.Elems, initLayoutElement(&elem, doc, b))
+		ret.Elems = append(ret.Elems, initLayoutElement(&elem, doc, b, parents))
 	}
 	return &ret
 }
@@ -292,7 +292,7 @@ func childHasSameFormat(cont []boxes.Layout, format string) bool {
 }
 
 // func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) boxes.LayoutElement {
-func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes) boxes.LayoutElement {
+func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes, parents []string) boxes.LayoutElement {
 	var f *boxes.BoxFormat
 	if l.Format != nil {
 		if val, ok := doc.Formats[*l.Format]; ok {
@@ -351,6 +351,11 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 	if l.Comment != nil {
 		comments = append(comments, *l.Comment)
 	}
+	newParents := make([]string, len(parents))
+	copy(newParents, parents)
+	if l.Id != "" {
+		newParents = append(newParents, l.Id)
+	}
 	elem := boxes.LayoutElement{
 		Id:                l.Id,
 		Caption:           l.Caption,
@@ -359,12 +364,13 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 		Comments:          comments,
 		HiddenComments:    l.HiddenComments,
 		Image:             initImage(l, b.Images),
-		Vertical:          initLayoutElemContainer(l.Vertical, doc, b),
-		Horizontal:        initLayoutElemContainer(l.Horizontal, doc, b),
+		Vertical:          initLayoutElemContainer(l.Vertical, doc, b, newParents),
+		Horizontal:        initLayoutElemContainer(l.Horizontal, doc, b, newParents),
 		Format:            adjustFormatBasedOnVariations(l, b, f, doc),
 		DontBlockConPaths: l.DontBlockConPaths,
 		DataLink:          l.DataLink,
 		Connections:       initConnections(l.Connections, doc.Formats),
+		ParentIds:         parents,
 	}
 	for _, c := range l.Connections {
 		if c.ConnRestrictions != nil && c.ConnRestrictions.Source != nil {
@@ -506,7 +512,7 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 		return nil, err
 	}
 
-	doc.Boxes = initLayoutElement(&b.Boxes, doc, b)
+	doc.Boxes = initLayoutElement(&b.Boxes, doc, b, []string{})
 	applyDestRestrictions(&doc.Boxes, doc)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin

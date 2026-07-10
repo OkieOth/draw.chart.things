@@ -312,6 +312,13 @@
         "connRestrictions": {
           "description": "aggregated connection point restrictions for this element, derived from all connections to and from it",
           "$ref": "./shared.json#/definitions/ConnRestrItem"
+        },
+        "parentIds": {
+          "description": "list to store the parent IDs of a layout element",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -325,7 +332,8 @@
         "caption",
         "text1",
         "text2",
-        "hiddenComments"
+        "hiddenComments",
+        "parentIds"
       ]
     },
     "LayoutElemContainer": {

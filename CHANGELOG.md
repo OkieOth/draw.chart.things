@@ -1,3 +1,9 @@
+# v1.5.0
+* Improved rendering speed
+* UI: allows grouping of mixins
+* UI: expanding/collapsing of mixin groups
+* UI: select/deselect of mixin groups
+
 # v1.4.0
 * UI: improved steps view in the UI
 * UI: presentation mode
