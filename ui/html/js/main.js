@@ -1755,6 +1755,25 @@ function initPage() {
         }
 
         if (manageBtn) manageBtn.addEventListener("click", showUploadsPopup);
+        
+        // Wire up the upload button in the Manage Uploaded Mixins popup
+        const popupUploadBtn = document.getElementById("btn-uploads-popup-upload");
+        if (popupUploadBtn) {
+            popupUploadBtn.addEventListener("click", async function() {
+                try {
+                    await triggerToolbarComboUpload();
+                    // Refresh uploads in popup and dropdown
+                    if (typeof window.refreshUploadsGroupAfterStorageChange === "function") {
+                        window.refreshUploadsGroupAfterStorageChange();
+                    }
+                    // Refresh popup contents to show new upload
+                    populateUploadsPopup();
+                } catch (e) {
+                    console.error("Upload failed:", e);
+                }
+            });
+        }
+        
         if (closeBtn) closeBtn.addEventListener("click", hideUploadsPopup);
         if (doneBtn) doneBtn.addEventListener("click", hideUploadsPopup);
         if (clearAllBtn)

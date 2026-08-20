@@ -37,5 +37,6 @@ __debug_*
 build
 *.wasm
 ext_*
+*.bak
 
 ui/data/default_formats.yaml

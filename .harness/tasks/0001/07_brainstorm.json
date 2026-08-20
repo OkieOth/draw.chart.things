@@ -1,0 +1,141 @@
+{
+  "taskId": "0001",
+  "status": "active",
+  "userInput": "Current solution works but feels aesthetically inconsistent. Considering moving the upload button from Selected Mixins panel to the 'Manage Uploaded Mixins' popup instead. Only locally uploaded files would show in the mixins popup, upload would happen exclusively through the manage panel. What are the pros/cons of this approach vs alternatives?",
+  "alternatives": [
+    {
+      "name": "Keep Current Solution: Upload Button in Selected Mixins Panel",
+      "description": "Leave upload button in the Selected Mixins panel header as currently implemented. Button is always visible and provides quick access to upload functionality.",
+      "pros": [
+        "Always visible - maximum discoverability",
+        "One-click access from main UI",
+        "Consistent with other toolbar actions",
+        "No need to open popup to upload",
+        "Already implemented and working"
+      ],
+      "cons": [
+        "Feels out of place aesthetically in the mixins panel",
+        "Takes up space in panel header",
+        "Mixes upload action with selection display",
+        "Inconsistent with upload workflow (manage panel is the dedicated upload area)",
+        "User's feedback: feels 'ugly'"
+      ],
+      "complexity": "low"
+    },
+    {
+      "name": "User's Suggestion: Move Upload Button to Manage Uploaded Mixins Popup",
+      "description": "Remove upload button from Selected Mixins panel. Add upload button only to the 'Manage Uploaded Mixins' popup. All upload operations happen in this dedicated popup. Uploaded files shown in both popup and dropdown.",
+      "pros": [
+        "Cleaner aesthetics - upload action isolated to dedicated panel",
+        "Clear workflow: upload and manage in one place",
+        "Consistent UX: all upload operations in one location",
+        "Reduces visual clutter in main Selected Mixins panel",
+        "Better organization: selection separate from management",
+        "Upload button has proper context (surrounded by other upload-related features)",
+        "Aligns with user expectation of where upload should be"
+      ],
+      "cons": [
+        "Less discoverable - requires clicking 'Manage Uploaded Mixins' button first",
+        "Extra click required to upload files",
+        "Users might not find upload feature if they don't explore manage panel",
+        "Slight delay: need to open popup to upload (vs one-click from panel)",
+        "Not immediately visible to new users"
+      ],
+      "complexity": "low"
+    },
+    {
+      "name": "Upload Button in Uploads Group Header (Dropdown Only)",
+      "description": "Remove upload button from Selected Mixins panel. Add upload button ONLY to the Uploads group header in the grouped dropdown (already partially implemented in Phase 3). Upload is only accessible from dropdown.",
+      "pros": [
+        "Contextual: button appears next to Uploads group where it belongs",
+        "Clean Selected Mixins panel header",
+        "Consistent with grouped dropdown architecture",
+        "Uploads group shows available uploads, header has upload button",
+        "Aligns with YAML format philosophy (sections contain related items)"
+      ],
+      "cons": [
+        "Requires opening dropdown to access upload",
+        "Even less discoverable than manage panel approach",
+        "No upload button in manage panel (split functionality)",
+        "Inconsistent if some uploads show in manage popup but upload button elsewhere",
+        "Users need to remember two different upload workflows",
+        "May confuse users: why upload in dropdown instead of manage panel?"
+      ],
+      "complexity": "low"
+    },
+    {
+      "name": "Dedicated Upload Button in Main Toolbar",
+      "description": "Add a dedicated upload button to the main toolbar (like the search, zoom buttons). Always visible in the main UI but not mixed with Selected Mixins panel. Clicking opens file dialog or manages uploads.",
+      "pros": [
+        "Prominent, always visible location",
+        "Consistent with other toolbar actions (zoom, search, etc.)",
+        "One-click access from anywhere",
+        "Clear visual hierarchy - upload is a primary action",
+        "Professional look - clean integration with toolbar",
+        "No visual clutter in side panels"
+      ],
+      "cons": [
+        "Toolbar is already crowded with many buttons",
+        "Takes up valuable toolbar real estate",
+        "Requires scrolling on small viewports",
+        "Deviates from current grouped dropdown pattern",
+        "Upload button might be missed among other controls",
+        "Adds visual complexity to main interface"
+      ],
+      "complexity": "medium"
+    },
+    {
+      "name": "Smart Hybrid: Upload in Manage Panel + Upload Icon in Dropdown Group Header",
+      "description": "Keep upload button in 'Manage Uploaded Mixins' popup as main upload location (cleaner). Also add upload icon in Uploads group header in dropdown for quick access. Both paths lead to same upload dialog.",
+      "pros": [
+        "Best of both worlds: dedicated location + quick access",
+        "Cleaner aesthetics than current solution",
+        "High discoverability: appears in two places",
+        "Serves different user workflows: quick upload vs managed upload",
+        "Users can choose their preference",
+        "Consistent with both manage panel and dropdown paradigms",
+        "No selected-mixins panel clutter"
+      ],
+      "cons": [
+        "Two upload entry points might confuse some users",
+        "Slight code duplication (two button handlers)",
+        "More buttons in UI overall",
+        "Dropdown group header becomes busier",
+        "Might be overkill if one location is sufficient"
+      ],
+      "complexity": "low"
+    },
+    {
+      "name": "Upload in Manage Panel with Visual Indicator on Dropdown",
+      "description": "Move upload button exclusively to Manage Uploaded Mixins popup (cleaner). Add a small badge or visual indicator to the Uploads group in dropdown showing upload count. Badge/indicator hints that this is the uploads section, manage button takes you to full management.",
+      "pros": [
+        "Clean aesthetics - upload only in dedicated manage panel",
+        "Visual indicator hints at uploads without cluttering dropdown",
+        "Consistent with current UI patterns (badges, indicators)",
+        "Clear UX flow: manage button opens manage panel with upload",
+        "Reduces button proliferation in UI",
+        "Professional appearance"
+      ],
+      "cons": [
+        "Still less discoverable than having upload button visible",
+        "Indicator alone doesn't clearly show upload is possible",
+        "Users still need to find manage button to upload",
+        "Requires adding badge/indicator logic (slight complexity)",
+        "Doesn't solve the 'upload not immediately discoverable' issue completely"
+      ],
+      "complexity": "low"
+    }
+  ],
+  "recommendation": {
+    "approach": "Alternative 2: Move Upload Button Exclusively to Manage Uploaded Mixins Popup",
+    "rationale": "This is the best approach for your use case based on the user feedback about aesthetics. Here's why:\n\n**UX Benefits:**\n1. **Cleaner Aesthetics** - Removes the 'ugly' upload button from the Selected Mixins panel header, keeping that panel clean and focused on selection display\n2. **Logical Workflow** - Users expect upload/management operations to be in the \"Manage Uploaded Mixins\" panel, not scattered across the UI\n3. **Consistent Mental Model** - All upload-related operations (upload, delete, view details) happen in one dedicated location\n4. **Professional Appearance** - Selected Mixins panel becomes cleaner, focusing on its primary purpose (showing selected items)\n\n**Implementation Details:**\n1. Remove the upload button from Selected Mixins panel header (revert part of Phase 3)\n2. Add upload button to the Manage Uploaded Mixins popup (already exists, just add button)\n3. Keep Uploads group in dropdown for discoverability (users see they have uploads)\n4. All upload operations: user clicks \"Manage Uploaded Mixins\" → popup opens → uploads from there\n\n**Discoverability Trade-off:**\nThe slight reduction in discoverability (requires one extra click vs immediate access) is acceptable because:\n- Users will naturally find \"Manage Uploaded Mixins\" button when they want to upload\n- The tooltip and icon make the purpose clear\n- The Uploads group appearing in dropdown reminds users uploads exist\n- This is how most file management systems work (dedicated management area)\n\n**Recommended Implementation:**\n1. Remove `btn-selected-collector-upload` from Selected Mixins panel in index.html\n2. Add upload button to the Manage Uploaded Mixins popup header\n3. Wire handler to same `triggerToolbarComboUpload()` function\n4. Keep Uploads group in dropdown (no changes needed)\n5. Result: Clean UI, logical workflow, professional appearance\n\n**Complexity:** Low - mostly reverting Phase 3 panel changes and adding button to existing popup (which already has similar buttons)"
+  },
+  "notes": [
+    "Current implementation already shows Uploads group in dropdown (from Phase 2 fix), so users can see they have uploads available",
+    "The Manage Uploaded Mixins popup already has delete/management UI, making it the natural place for upload too",
+    "This approach follows the principle of 'one place for related operations' (upload, delete, rename all in manage panel)",
+    "User feedback was that current solution 'works but is ugly' - this directly addresses the aesthetics concern",
+    "Alternative 5 (hybrid with upload in both places) could be considered if upload discovery becomes an issue after this change",
+    "The solution maintains the fix from Phase 2 (Uploads group visible) while improving UX of upload access"
+  ]
+}

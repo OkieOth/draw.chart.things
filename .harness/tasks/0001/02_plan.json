@@ -1,0 +1,292 @@
+{
+  "taskId": "0001",
+  "status": "active",
+  "input": {
+    "userInput": "Restore file upload functionality by integrating 'Uploads' as a dedicated group in the new grouped mixin dropdown. Uploads group appears at top if uploads exist, otherwise at end. No bulk-select for uploads. Keep existing 'Manage Uploaded Mixins' button.",
+    "requirements": [
+      {
+        "text": "Inject synthetic 'Uploads' group into dropdown after YAML parsing",
+        "completed": false
+      },
+      {
+        "text": "Uploads group renders with 'Upload' text button in header",
+        "completed": false
+      },
+      {
+        "text": "Uploads group positioned at top if uploads exist, bottom if empty",
+        "completed": false
+      },
+      {
+        "text": "No bulk-select checkbox for Uploads group (unlike other groups)",
+        "completed": false
+      },
+      {
+        "text": "Upload button wired to existing triggerToolbarComboUpload() function",
+        "completed": false
+      },
+      {
+        "text": "Uploads dynamically sync when new files uploaded or deleted",
+        "completed": false
+      },
+      {
+        "text": "Group collapse/expand state handled correctly",
+        "completed": false
+      },
+      {
+        "text": "Backward compatibility with existing uploads in localStorage",
+        "completed": false
+      }
+    ],
+    "clarifications": [
+      {
+        "question": "Which approach should be planned?",
+        "answer": "Only the recommended approach (Uploads as dedicated section in dropdown)"
+      },
+      {
+        "question": "Button style and placement in group header?",
+        "answer": "Text button (not icon). 'Upload' text. Appear as part of group header, uploads show as their own group."
+      },
+      {
+        "question": "Group positioning and visibility?",
+        "answer": "Top of list if uploads exist; at end of mixin list if no uploads. No bulk-select checkbox for uploads group."
+      },
+      {
+        "question": "Manage Uploaded Mixins button?",
+        "answer": "Can stay as is - keep existing behavior"
+      },
+      {
+        "question": "Testing scope?",
+        "answer": "No unit tests for UI. Manual/integration testing only."
+      },
+      {
+        "question": "Documentation and release notes?",
+        "answer": "No additional documentation changes needed"
+      },
+      {
+        "question": "Backward compatibility and migration?",
+        "answer": "Not needed - existing uploads should just appear naturally in new UI"
+      },
+      {
+        "question": "Collapse/expand default state?",
+        "answer": "Start with default state (normal state management)"
+      }
+    ],
+    "assumptions": [
+      "All existing upload infrastructure (localStorage, prompts, toasts) continues to work unchanged",
+      "The 'Uploads' group will use the same rendering template as other groups, with conditional upload button",
+      "Filtering/searching will apply to Uploads group items same as other groups",
+      "No YAML schema changes needed - Uploads is synthetic/injected only",
+      "Group collapse state for Uploads follows same persistence pattern as other groups",
+      "Users' existing uploads in localStorage will automatically appear in new Uploads group",
+      "The 'isUploads' flag can be added to group objects to identify upload groups"
+    ]
+  },
+  "plan": {
+    "overview": "Restore file upload functionality by creating a dynamic 'Uploads' group that integrates seamlessly into the existing grouped mixin dropdown UI. The Uploads group will be synthetically injected after YAML parsing, positioned intelligently (top if uploads exist, bottom otherwise), and will include an 'Upload' text button in the group header. This approach reuses all existing upload infrastructure while leveraging the proven grouped UI architecture.",
+    "phases": [
+      {
+        "phaseNumber": 1,
+        "name": "Architecture & Design",
+        "type": "architectures",
+        "summary": "Define the technical approach for Uploads group injection and positioning",
+        "description": "Analyze and document the group injection strategy, data flow, and UI integration points:\n\n1. **Identify injection point** - Find where toolbarComboState.groups is populated after YAML parsing (likely in applyComboGroupsToUI() or similar)\n2. **Design Uploads group structure** - Define the synthetic group object format: {name: 'Uploads', items: [{label, value: 'uploaded::id'}], isUploads: true, isUploadsGroup: true}\n3. **Define positioning logic** - When Uploads group should be injected (at index 0 if uploads exist, at end otherwise)\n4. **Group header rendering strategy** - Where/how to add conditional 'Upload' button in toolbar-combo-group-header\n5. **No bulk-select design** - Identify where group checkbox is rendered and how to suppress it for Uploads group\n6. **State synchronization** - Plan how localStorage changes trigger group re-injection (e.g., after triggerToolbarComboUpload completes)\n7. **Group item format** - Ensure uploaded items follow same item structure as other groups (for rendering, selection, etc.)",
+        "gateRequired": true,
+        "acceptanceCriteria": [
+          {
+            "text": "Clear diagram/pseudo-code showing group injection flow (YAML parse → inject Uploads → render dropdown)",
+            "met": false
+          },
+          {
+            "text": "Identified exact code location where groups are set up (line number + function name)",
+            "met": false
+          },
+          {
+            "text": "Group header rendering template identified and strategy for conditional upload button documented",
+            "met": false
+          },
+          {
+            "text": "Positioning algorithm documented: top if uploads exist, bottom otherwise",
+            "met": false
+          },
+          {
+            "text": "Identified how group checkbox suppression will work (DOM check? CSS? JS flag?)",
+            "met": false
+          },
+          {
+            "text": "State sync strategy documented (when/how to refresh group after upload action)",
+            "met": false
+          }
+        ],
+        "skills": ["task-plan"]
+      },
+      {
+        "phaseNumber": 2,
+        "name": "Implement Group Injection Logic",
+        "type": "logic",
+        "summary": "Inject and manage the dynamic Uploads group in toolbarComboState",
+        "description": "Implement the core logic to create and manage the Uploads group:\n\n**Step 1: Create function injectUploadsGroup()**\n- Called after parseGroupsFromYaml() populates toolbarComboState.groups\n- Gets current uploads via getUploadedMixins()\n- Creates synthetic group: {name: 'Uploads', items: [], isUploadsGroup: true}\n- Populates items array from localStorage uploads\n- Returns group object\n\n**Step 2: Implement positioning logic**\n- If Uploads group has items (uploads exist):\n  - Insert at index 0 (top of group list)\n- Else:\n  - Append to end of toolbarComboState.groups array\n- Ensure positioning happens after all YAML groups are parsed\n\n**Step 3: Suppress group checkbox for Uploads group**\n- In group header rendering template, check for isUploadsGroup flag\n- Conditionally skip rendering toolbar-combo-group-checkbox for Uploads\n- Preserve toggle button and group name\n\n**Step 4: Add Upload button to group header**\n- In group header template, after group name/toggle, add:\n  - Create button element with text 'Upload'\n  - Add CSS class for styling (reuse .tool-btn)\n  - Wire click handler to triggerToolbarComboUpload()\n  - Only render if isUploadsGroup === true\n\n**Step 5: Update state synchronization**\n- After triggerToolbarComboUpload() completes and new upload is added:\n  - Trigger re-injection of Uploads group\n  - Update toolbarComboState.groups\n  - Call renderToolbarComboDropdown() to refresh UI\n  - This ensures newly-uploaded items appear immediately\n\n**Step 6: Handle removal from Uploads group**\n- When user deselects an uploaded item from Selected Mixins:\n  - Item is removed from toolbarComboState.selectedValues\n  - But item remains in localStorage (doesn't delete)\n  - Uploads group still shows it (user can manage via 'Manage Uploaded Mixins')\n\n**Step 7: Filter/search compatibility**\n- Ensure toolbar-combo-input filter applies to Uploads group items same as other groups\n- No special handling needed (existing filter logic should work)\n\n**Code files to modify:**\n- ui/html/js/main.js: Add injectUploadsGroup() function, call after group parsing, update group header rendering template, wire upload button handler",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "injectUploadsGroup() function created and tested with mock data",
+            "met": false
+          },
+          {
+            "text": "Positioning logic correctly places Uploads group at top if items exist, bottom if empty",
+            "met": false
+          },
+          {
+            "text": "Group checkbox not rendered for Uploads group (other groups' checkboxes still visible)",
+            "met": false
+          },
+          {
+            "text": "Upload button appears in Uploads group header with correct text and styling",
+            "met": false
+          },
+          {
+            "text": "Upload button click triggers triggerToolbarComboUpload() successfully",
+            "met": false
+          },
+          {
+            "text": "After new upload added, Uploads group automatically refreshes with new item",
+            "met": false
+          },
+          {
+            "text": "Existing uploads in localStorage appear in Uploads group on page load",
+            "met": false
+          },
+          {
+            "text": "Filter input correctly searches/filters items in Uploads group",
+            "met": false
+          }
+        ],
+        "skills": ["task-code"]
+      },
+      {
+        "phaseNumber": 3,
+        "name": "Integrate Upload Button Handler & State Management",
+        "type": "logic",
+        "summary": "Wire upload button to existing upload functions and ensure proper state updates",
+        "description": "Implement the glue logic connecting the upload button to existing infrastructure:\n\n**Step 1: Wire upload button click handler**\n- Create event listener on Upload button (in group header)\n- Call triggerToolbarComboUpload() on click\n- Ensure preventDefault() to avoid dropdown closing unintentionally\n\n**Step 2: Ensure Uploads group re-renders after upload**\n- Hook into upload completion (after upsertUploadedMixin succeeds)\n- Trigger refreshComboAfterStorageChange() or similar update mechanism\n- Ensure injectUploadsGroup() is called to rebuild group with new items\n- Call renderToolbarComboDropdown() to re-render UI\n\n**Step 3: Handle Uploads group in group collapse/expand**\n- Ensure Uploads group respects existing collapse state logic\n- Can be collapsed/expanded like other groups\n- Collapse state is managed by toggleGroupCollapse() (existing)\n- No special handling needed\n\n**Step 4: Ensure Uploads group respects group selection logic**\n- When Uploads group is collapsed, toggle button works normally\n- No select-all checkbox for Uploads (already suppressed in Phase 2)\n- Individual items in Uploads can still be selected/deselected\n- Selection state persists in toolbarComboState.selectedValues\n\n**Step 5: Test integration with existing combo state**\n- Verify Uploads group items work with getToolbarComboSelectionValues()\n- Verify Uploads items can be added/removed from selectedValues\n- Verify removeToolbarComboSelection() handles uploaded:: values\n- Verify filtering works across all groups including Uploads\n\n**Code changes:**\n- ui/html/js/main.js: Bind upload button handler, integrate with triggerToolbarComboUpload(), ensure state refresh after upload",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "Upload button click handler is attached and calls triggerToolbarComboUpload()",
+            "met": false
+          },
+          {
+            "text": "After successful upload, Uploads group immediately shows new item in dropdown",
+            "met": false
+          },
+          {
+            "text": "Uploads group can be collapsed/expanded without errors",
+            "met": false
+          },
+          {
+            "text": "Individual uploaded items can be selected and deselected from dropdown",
+            "met": false
+          },
+          {
+            "text": "Selected uploaded items appear in 'Selected Mixins' panel correctly",
+            "met": false
+          },
+          {
+            "text": "Filter/search input works on Uploads group items same as other groups",
+            "met": false
+          },
+          {
+            "text": "No JavaScript console errors during upload flow",
+            "met": false
+          }
+        ],
+        "skills": ["task-code"]
+      },
+      {
+        "phaseNumber": 4,
+        "name": "UI Styling & Polish",
+        "type": "logic",
+        "summary": "Ensure Upload button fits visually into group header and overall design",
+        "description": "Add or verify CSS styling for the Upload button in group header:\n\n**Step 1: Upload button styling**\n- Reuse existing .tool-btn class for consistency\n- Ensure button fits in group header next to group name and toggle\n- Add spacing/margin so it doesn't crowd other elements\n- Verify hover/focus states are visible\n\n**Step 2: Group header layout for Uploads group**\n- Verify Uploads group header layout (toggle → name → Upload button)\n- Ensure button alignment is consistent with group header height\n- Test that all elements (toggle, name, button) remain properly aligned\n\n**Step 3: Empty Uploads group appearance**\n- When no uploads exist, Uploads group appears at end of list\n- Group should still be collapsible even when empty\n- Upload button should remain visible and clickable\n- Visual indication that group is empty (or just show it as a selectable but empty group)\n\n**Step 4: Responsive design**\n- Test on different viewport sizes\n- Ensure Upload button doesn't overflow or wrap unexpectedly\n- Verify dropdown scrolling still works properly\n\n**Code changes:**\n- ui/html/css/main.css: Add/modify styles for Upload button placement, spacing, hover states (minimal changes expected)",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "Upload button appears in Uploads group header with clear visual style",
+            "met": false
+          },
+          {
+            "text": "Upload button is properly aligned with other header elements (toggle, name)",
+            "met": false
+          },
+          {
+            "text": "Upload button has readable text and is clearly clickable",
+            "met": false
+          },
+          {
+            "text": "Hover/focus states on Upload button are visible",
+            "met": false
+          },
+          {
+            "text": "Empty Uploads group appears cleanly at end of list",
+            "met": false
+          },
+          {
+            "text": "Button text 'Upload' fits without truncation or overflow on standard viewport sizes",
+            "met": false
+          }
+        ],
+        "skills": ["task-code"]
+      },
+      {
+        "phaseNumber": 5,
+        "name": "Integration Testing & Validation",
+        "type": "tests",
+        "summary": "Manual testing to verify Uploads group functionality and integration",
+        "description": "Perform comprehensive manual testing to ensure all functionality works correctly:\n\n**Test Scenario 1: Initial Load with Existing Uploads**\n- Pre-populate localStorage with some uploaded mixins\n- Load page\n- Verify: Uploads group appears at top of dropdown with items listed\n- Verify: Uploads group header shows 'Upload' button\n- Verify: No select-all checkbox visible for Uploads group\n\n**Test Scenario 2: Initial Load with No Uploads**\n- Clear localStorage of uploaded mixins\n- Load page\n- Verify: Uploads group appears at bottom/end of mixin list\n- Verify: Uploads group is empty (no items)\n- Verify: Upload button still present and clickable\n\n**Test Scenario 3: Upload New File**\n- With dropdown open, click Upload button in Uploads group\n- Select a YAML file\n- Verify: File upload dialog appears and works (existing functionality)\n- Verify: After upload completes, Uploads group refreshes and new item appears immediately\n- Verify: New item is selectable from dropdown\n- Verify: Toast notification shows (existing)\n\n**Test Scenario 4: Select Uploaded Item**\n- Upload a new mixin\n- From Uploads group, select (checkbox click) the uploaded item\n- Verify: Item appears in 'Selected Mixins' panel\n- Verify: SVG diagram updates to include the uploaded mixin\n\n**Test Scenario 5: Group Collapse/Expand**\n- Click toggle button on Uploads group header\n- Verify: Group collapses, items hidden\n- Verify: Toggle button rotates/changes state\n- Click again to expand\n- Verify: Items reappear\n\n**Test Scenario 6: Filter/Search with Uploads**\n- Add multiple uploads\n- Type search term in toolbar-combo-input\n- Verify: Uploads group items are filtered same as other groups\n- Verify: Only matching items show\n\n**Test Scenario 7: Upload Multiple Times**\n- Upload several files in sequence\n- Verify: Each upload adds item to Uploads group\n- Verify: No duplicate items\n- Verify: Items persist when page is reloaded\n\n**Test Scenario 8: Manage Uploaded Mixins Button Still Works**\n- Click 'Manage Uploaded Mixins' button (separate toolbar button)\n- Verify: Popup shows all uploaded mixins\n- Verify: Can remove items from popup\n- Verify: After removal, item is gone from Uploads group too\n- Verify: Uploads group re-syncs correctly\n\n**Test Scenario 9: Compatibility with Other Groups**\n- Verify: Other mixin groups (if any) still work normally\n- Verify: Uploading doesn't break group collapse/expand of other groups\n- Verify: Filtering applies to all groups uniformly\n\n**Test Scenario 10: Edge Cases**\n- Upload file, then refresh page → verify item persists\n- Upload file, remove via Manage popup, refresh → verify removed\n- Create permalink with selected uploads → verify it works\n- Remove all uploads, reload page → verify Uploads group appears at end (empty)",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "Uploads group appears at top when uploads exist, at bottom when empty",
+            "met": false
+          },
+          {
+            "text": "Upload button in group header is clickable and triggers upload dialog",
+            "met": false
+          },
+          {
+            "text": "New uploaded items appear immediately in Uploads group after upload",
+            "met": false
+          },
+          {
+            "text": "Uploaded items can be selected and deselected from dropdown",
+            "met": false
+          },
+          {
+            "text": "Selected uploaded items appear in 'Selected Mixins' panel and affect diagram",
+            "met": false
+          },
+          {
+            "text": "Uploads group can be collapsed/expanded without errors",
+            "met": false
+          },
+          {
+            "text": "Filter/search works correctly on Uploads group items",
+            "met": false
+          },
+          {
+            "text": "Uploads persist across page reloads",
+            "met": false
+          },
+          {
+            "text": "'Manage Uploaded Mixins' button still works and syncs with Uploads group",
+            "met": false
+          },
+          {
+            "text": "No JavaScript errors in browser console during any test scenario",
+            "met": false
+          }
+        ],
+        "skills": []
+      }
+    ]
+  }
+}
