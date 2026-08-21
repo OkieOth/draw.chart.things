@@ -1,3 +1,6 @@
+# v1.6.0
+* allow inserting of mixing before or after specific elements
+
 # v1.5.2
 * UI: fix disappeared upload functionality for grouped options 
 

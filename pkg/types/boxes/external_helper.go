@@ -138,13 +138,17 @@ func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) 
 	if len(*additional) == 0 {
 		return
 	}
+	handled := false
 	if l.Caption != "" {
 		if mixin, ok := (*additional)[l.Caption]; ok {
 			b.mixInLayoutNow(l, &mixin)
 			delete(*additional, l.Caption)
+			handled = true
 		}
-	} else if l.Id != "" {
+	}
+	if (!handled) && (l.Id != "") {
 		if mixin, ok := (*additional)[l.Id]; ok {
+			fmt.Println("DEBUG-WASM, l.Id", l.Id)
 			b.mixInLayoutNow(l, &mixin)
 			delete(*additional, l.Id)
 		}

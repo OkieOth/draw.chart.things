@@ -600,14 +600,14 @@ function getGroupSelectionState(groupName) {
     if (!group || !group.items) return 'none';
     // No group-level selection for Uploads group (no select-all checkbox)
     if (group.isUploadsGroup) return 'none';
-    
+
     let selectedCount = 0;
     for (const [, value] of group.items) {
         if (isToolbarComboValueSelected(value)) {
             selectedCount++;
         }
     }
-    
+
     if (selectedCount === 0) return 'none';
     if (selectedCount === group.items.length) return 'all';
     return 'partial';
@@ -619,7 +619,7 @@ function selectAllInGroup(groupName, select = true) {
     if (!group || !group.items) return;
     // No bulk-select for Uploads group
     if (group.isUploadsGroup) return;
-    
+
     for (const [label, value] of group.items) {
         if (select && !isToolbarComboValueSelected(value)) {
             addToolbarComboSelection(value, { silent: true });
@@ -627,7 +627,7 @@ function selectAllInGroup(groupName, select = true) {
             removeToolbarComboSelection(value, { silent: true });
         }
     }
-    
+
     updateToolbarComboSelectedList();
     if (toolbarComboState.isOpen) renderToolbarComboDropdown();
     applySelectedMixins();
@@ -918,7 +918,7 @@ function renderGroupedToolbarComboDropdown(filter, dropdown) {
         groupHeader.className = "toolbar-combo-group-header";
         groupHeader.dataset.groupName = group.name;
         groupHeader.setAttribute("role", "presentation");
-        
+
         // Toggle button (expand/collapse)
         const toggleBtn = document.createElement("button");
         toggleBtn.type = "button";
@@ -927,17 +927,17 @@ function renderGroupedToolbarComboDropdown(filter, dropdown) {
         toggleBtn.title = isGroupCollapsed(group.name) ? "Expand group" : "Collapse group";
         toggleBtn.setAttribute("aria-label", `Toggle ${group.name}`);
         const isCollapsed = isGroupCollapsed(group.name);
-        toggleBtn.innerHTML = isCollapsed ? 
-            '<i class="fa-solid fa-chevron-right"></i>' : 
+        toggleBtn.innerHTML = isCollapsed ?
+            '<i class="fa-solid fa-chevron-right"></i>' :
             '<i class="fa-solid fa-chevron-down"></i>';
         groupHeader.appendChild(toggleBtn);
-        
+
         // Group name
         const groupName = document.createElement("span");
         groupName.className = "toolbar-combo-group-name";
         groupName.textContent = group.name || "Options";
         groupHeader.appendChild(groupName);
-        
+
         // Select-all checkbox (suppress for Uploads group)
         if (!group.isUploadsGroup) {
             const checkbox = document.createElement("input");
@@ -950,7 +950,7 @@ function renderGroupedToolbarComboDropdown(filter, dropdown) {
             checkbox.indeterminate = state === 'partial';
             groupHeader.appendChild(checkbox);
         }
-        
+
         dropdown.appendChild(groupHeader);
 
         // Create options in this group (wrapped in a container for easier collapse/expand)
@@ -960,14 +960,14 @@ function renderGroupedToolbarComboDropdown(filter, dropdown) {
             itemsContainer.classList.add("collapsed");
         }
         itemsContainer.dataset.groupName = group.name;
-        
+
         for (const item of filtered) {
             const [label, value] = item;
             const opt = { label, value };
             createComboOptionRow(opt, flatIndex, itemsContainer);
             flatIndex++;
         }
-        
+
         dropdown.appendChild(itemsContainer);
     }
 
@@ -1068,7 +1068,7 @@ function updateToolbarComboActiveOption() {
 function attachGroupEventHandlers() {
     const { dropdown } = getToolbarComboElements();
     if (!dropdown || !toolbarComboState.isGroupedMode) return;
-    
+
     // Group toggle buttons
     const toggleBtns = dropdown.querySelectorAll(".toolbar-combo-group-toggle");
     toggleBtns.forEach((btn) => {
@@ -1082,7 +1082,7 @@ function attachGroupEventHandlers() {
             }
         });
     });
-    
+
     // Group checkboxes
     const checkboxes = dropdown.querySelectorAll(".toolbar-combo-group-checkbox");
     checkboxes.forEach((checkbox) => {
@@ -1789,7 +1789,7 @@ function initPage() {
         }
 
         if (manageBtn) manageBtn.addEventListener("click", showUploadsPopup);
-        
+
         // Wire up the upload button in the Manage Uploaded Mixins popup
         const popupUploadBtn = document.getElementById("btn-uploads-popup-upload");
         if (popupUploadBtn) {
@@ -1807,7 +1807,7 @@ function initPage() {
                 }
             });
         }
-        
+
         if (closeBtn) closeBtn.addEventListener("click", hideUploadsPopup);
         if (doneBtn) doneBtn.addEventListener("click", hideUploadsPopup);
         if (clearAllBtn)
@@ -2450,6 +2450,9 @@ async function loadYamlInput() {
             return;
         }
         const yamlFile = window.queryInput;
+        if (!yamlFile) {
+            return
+        }
         const p = (async () => {
             const resp = await fetch(
                 window.getBasePath() + "/data/" + yamlFile,
@@ -2497,7 +2500,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.5.1.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.5.2.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
