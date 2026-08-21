@@ -389,6 +389,8 @@ Layout --> "0..*" Connection
 
 
 class LayoutMixin {
+    +putBefore? String
+    +putAfter? String
     +horizontal? List<Layout>
     +vertical? List<Layout>
 }

@@ -203,6 +203,10 @@ func NewLayout() *Layout {
 
 // container to extend the layouts of a given layout element via mixins
 type LayoutMixin struct {
+    // triggers the new mixin elemente to put either left or above the object with the given ID or caption
+PutBefore *string `yaml:"putBefore,omitempty"`
+    // triggers the new mixin elemente to put either right or below the object with the given ID or caption
+PutAfter *string `yaml:"putAfter,omitempty"`
 Horizontal []Layout `yaml:"horizontal,omitempty"`
 Vertical []Layout `yaml:"vertical,omitempty"`
 }
@@ -213,6 +217,16 @@ func CopyLayoutMixin(src *LayoutMixin) *LayoutMixin {
         return nil
     }
     var ret LayoutMixin
+
+    if src.PutBefore != nil {
+        v := *src.PutBefore
+        ret.PutBefore = &v
+    }
+
+    if src.PutAfter != nil {
+        v := *src.PutAfter
+        ret.PutAfter = &v
+    }
 
     if src.Horizontal != nil {
         ret.Horizontal = make([]Layout, len(src.Horizontal))
