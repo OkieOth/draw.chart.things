@@ -127,7 +127,7 @@ func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
 		} else if mixin.PutBefore != nil {
 			for i := range len(mixin.Horizontal) {
 				e := mixin.Horizontal[i]
-				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+				if e.Caption == *mixin.PutBefore || e.Id == *mixin.PutBefore {
 					l.Horizontal = slices.Insert(l.Horizontal, i)
 					return
 				}
@@ -149,7 +149,7 @@ func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
 		} else if mixin.PutBefore != nil {
 			for i := range len(mixin.Vertical) {
 				e := mixin.Vertical[i]
-				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+				if e.Caption == *mixin.PutBefore || e.Id == *mixin.PutBefore {
 					l.Vertical = slices.Insert(l.Vertical, i)
 					return
 				}
