@@ -598,6 +598,8 @@ function getGroupSelectionState(groupName) {
     }
     const group = toolbarComboState.groups.find((g) => g.name === groupName);
     if (!group || !group.items) return 'none';
+    // No group-level selection for Uploads group (no select-all checkbox)
+    if (group.isUploadsGroup) return 'none';
     
     let selectedCount = 0;
     for (const [, value] of group.items) {
@@ -615,6 +617,8 @@ function selectAllInGroup(groupName, select = true) {
     if (!toolbarComboState.groups || !toolbarComboState.isGroupedMode) return;
     const group = toolbarComboState.groups.find((g) => g.name === groupName);
     if (!group || !group.items) return;
+    // No bulk-select for Uploads group
+    if (group.isUploadsGroup) return;
     
     for (const [label, value] of group.items) {
         if (select && !isToolbarComboValueSelected(value)) {
@@ -934,16 +938,18 @@ function renderGroupedToolbarComboDropdown(filter, dropdown) {
         groupName.textContent = group.name || "Options";
         groupHeader.appendChild(groupName);
         
-        // Select-all checkbox
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "toolbar-combo-group-checkbox";
-        checkbox.dataset.groupName = group.name;
-        checkbox.setAttribute("aria-label", `Select all ${group.name} items`);
-        const state = getGroupSelectionState(group.name);
-        checkbox.checked = state === 'all';
-        checkbox.indeterminate = state === 'partial';
-        groupHeader.appendChild(checkbox);
+        // Select-all checkbox (suppress for Uploads group)
+        if (!group.isUploadsGroup) {
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "toolbar-combo-group-checkbox";
+            checkbox.dataset.groupName = group.name;
+            checkbox.setAttribute("aria-label", `Select all ${group.name} items`);
+            const state = getGroupSelectionState(group.name);
+            checkbox.checked = state === 'all';
+            checkbox.indeterminate = state === 'partial';
+            groupHeader.appendChild(checkbox);
+        }
         
         dropdown.appendChild(groupHeader);
 
@@ -1506,6 +1512,34 @@ function ensureUploadOptionsInCombo(sel) {
         sentinel.textContent = "Upload file…";
         sel.appendChild(sentinel);
     }
+
+    // In grouped mode, also inject uploaded mixins into toolbarComboState.groups
+    // so that renderGroupedToolbarComboDropdown() can render them.
+    if (toolbarComboState.isGroupedMode && toolbarComboState.groups) {
+        const uploaded = getUploadedMixins();
+        // Build items array: [label, value] pairs
+        const items = uploaded.map((u) => {
+            const val = `uploaded::${u.id}`;
+            return [u.title || u.id, val];
+        });
+        // Always append the __upload__ sentinel item
+        items.push(["Upload file…", sentinelVal]);
+
+        // Find existing Uploads group or create a new one
+        const uploadsGroup = toolbarComboState.groups.find(
+            (g) => g.name === "Uploads" && g.isUploadsGroup,
+        );
+        if (uploadsGroup) {
+            uploadsGroup.items = items;
+        } else {
+            toolbarComboState.groups.push({
+                name: "Uploads",
+                items: items,
+                isUploadsGroup: true,
+            });
+        }
+    }
+
     refreshToolbarComboUI();
 }
 
@@ -1755,6 +1789,25 @@ function initPage() {
         }
 
         if (manageBtn) manageBtn.addEventListener("click", showUploadsPopup);
+        
+        // Wire up the upload button in the Manage Uploaded Mixins popup
+        const popupUploadBtn = document.getElementById("btn-uploads-popup-upload");
+        if (popupUploadBtn) {
+            popupUploadBtn.addEventListener("click", async function() {
+                try {
+                    await triggerToolbarComboUpload();
+                    // Refresh uploads in popup and dropdown
+                    if (typeof window.refreshUploadsGroupAfterStorageChange === "function") {
+                        window.refreshUploadsGroupAfterStorageChange();
+                    }
+                    // Refresh popup contents to show new upload
+                    populateUploadsPopup();
+                } catch (e) {
+                    console.error("Upload failed:", e);
+                }
+            });
+        }
+        
         if (closeBtn) closeBtn.addEventListener("click", hideUploadsPopup);
         if (doneBtn) doneBtn.addEventListener("click", hideUploadsPopup);
         if (clearAllBtn)
@@ -2444,7 +2497,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.5.0.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.5.1.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);

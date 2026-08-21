@@ -1,0 +1,5 @@
+Group1:
+  Default: ""
+  "Example 1": conn1.yaml
+Group2:
+  "Example 2": conn2.yaml

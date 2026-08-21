@@ -1,0 +1,251 @@
+{
+  "taskId": "0001",
+  "status": "done",
+  "input": {
+    "userInput": "the ui for the boxes shows unpleasant behavior. When you load the ui with flat options then you see at the bottom of the 'selected mixins' panel the local uploaded mixins. URL for flat options: http://localhost:8080/?input=boxes_aac_example.yaml&options=options.yaml\n\nIf you load grouped options the upload entry and the available local uploaded mixins are not displayed. Here the link for the grouped options: http://localhost:8080/?input=boxes_aac_example.yaml&options=options_groups.yaml\n\nCan you see the bug?",
+    "requirements": [
+      {
+        "text": "In grouped mode, uploaded mixins should appear in the mixin dropdown",
+        "completed": false
+      },
+      {
+        "text": "The 'Upload file\u2026' sentinel button should appear in grouped mode dropdown",
+        "completed": false
+      },
+      {
+        "text": "Uploaded mixins should be injectable into toolbarComboState.groups for grouped rendering",
+        "completed": false
+      },
+      {
+        "text": "Group select-all checkbox behavior for the Uploads group should be handled",
+        "completed": false
+      },
+      {
+        "text": "Existing functionality in flat mode should remain unchanged",
+        "completed": false
+      },
+      {
+        "text": "Triggering a new upload (triggerToolbarComboUpload) should refresh the grouped UI correctly",
+        "completed": false
+      }
+    ],
+    "clarifications": [
+      {
+        "question": "Should the Uploads group be placed at the end (matching flat mode behavior via <select> element) or at the top, or after all YAML groups?",
+        "answer": "End of the groups array, matching where flat mode currently shows them (at the bottom of the dropdown)."
+      },
+      {
+        "question": "What group name should the Uploads group have? Should it appear as a collapsible named group?",
+        "answer": "Use group name 'Uploads' with a collapsible group header, same as other groups. If no uploads exist, the group should still appear (empty, but collapsible) at the end of the groups list."
+      },
+      {
+        "question": "Should the select-all checkbox for the Uploads group behave like other groups?",
+        "answer": "No. The Uploads group should NOT show a select-all checkbox (unlike other groups), because uploads are user-managed and selecting all uploads would bulk-add them to the diagram, which may not be intended."
+      },
+      {
+        "question": "Where should ensureUploadOptionsInCombo be updated - only when loadComboOptionsFromYaml runs, or also elsewhere?",
+        "answer": "Update the core ensureUploadOptionsInCombo function to also inject into toolbarComboState.groups when in grouped mode. This covers all call sites (initial load, refresh after upload, storage change callbacks)."
+      },
+      {
+        "question": "What happens when a user removes a mixin from Selected Mixins that was uploaded - should it still appear in the Uploads group?",
+        "answer": "Yes, it should remain visible in the Uploads group. The mixin stays in localStorage and can be re-selected. Removal from Selected Mixins only removes it from the diagram, not from the upload library."
+      }
+    ],
+    "assumptions": [
+      "Existing upload infrastructure (localStorage, promptForUploadedMixin, triggerToolbarComboUpload, toast notifications) continues to work unchanged",
+      "The flat mode upload functionality must remain completely unchanged (no regression)",
+      "The uploaded mixins group should use the same rendering infrastructure (createComboOptionRow) that handles __upload__ sentinel",
+      "The fix is a UI-only concern - no changes to YAML schema, codegen, or backend",
+      "Testing is manual/browser-based, no automated tests needed",
+      "The existing CSS for toolbar-combo-option-upload class (line 999) will work for grouped mode without changes"
+    ]
+  },
+  "plan": {
+    "overview": "Fix the grouped mode mixin dropdown to display uploaded mixins by modifying ensureUploadOptionsInCombo() to also inject uploaded mixins into toolbarComboState.groups when in grouped mode. The fix creates a synthetic 'Uploads' group at the end of the groups array, containing all localStorage-saved uploaded mixins plus the __upload__ sentinel. The existing rendering code (renderGroupedToolbarComboDropdown, createComboOptionRow) will automatically display them, including the upload button icon.",
+    "phases": [
+      {
+        "phaseNumber": 1,
+        "name": "Analyze Data Flow & Injection Point",
+        "type": "spec",
+        "summary": "Document the exact code paths for flat vs grouped rendering and identify the injection point",
+        "description": "Trace the data flow from YAML loading to dropdown rendering for both flat and grouped modes.\n\n**Current behavior (flat mode):**\n1. loadComboOptionsFromYaml() parses YAML\n2. Items added to hidden <select> element\n3. ensureUploadOptionsInCombo(sel) appends uploaded mixins to <select>\n4. refreshToolbarComboUI() calls renderFlatToolbarComboDropdown()\n5. renderFlatToolbarComboDropdown calls getToolbarComboOptions() which reads from <select>\n6. Uploaded mixins are visible in dropdown \u2713\n\n**Broken behavior (grouped mode):**\n1. loadComboOptionsFromYaml() parses YAML, sets toolbarComboState.groups from YAML only\n2. ensureUploadOptionsInCombo(sel) appends uploaded mixins to <select> (NOT groups)\n3. refreshToolbarComboUI() calls renderGroupedToolbarComboDropdown()\n4. renderGroupedToolbarComboDropdown iterates over toolbarComboState.groups (no uploads)\n5. Uploaded mixins NOT visible in dropdown \u2717\n\n**Injection point:** In ensureUploadOptionsInCombo(), after updating the <select>, check if toolbarComboState.isGroupedMode. If true, also build/update a synthetic Uploads group and insert it into toolbarComboState.groups at the end.\n\n**Key code locations:**\n- main.js line 1466: ensureUploadOptionsInCombo() - PRIMARY MODIFICATION POINT\n- main.js line 2803: toolbarComboState.groups = parseResult.groups - where groups are set\n- main.js line 2831: ensureUploadOptionsInCombo(sel) called after group parsing\n- main.js line 895: renderGroupedToolbarComboDropdown() - reads from groups (no change needed)\n- main.js line 996-1010: createComboOptionRow handles __upload__ sentinel (already works)\n\n**Data structure needed:**\nAfter the fix, toolbarComboState.groups should contain all YAML groups plus a final group:\n{\n  name: 'Uploads',\n  items: [\n    ['Title 1', 'uploaded::uuid-1'],\n    ['Title 2', 'uploaded::uuid-2'],\n    ...\n    ['Upload file\u2026', '__upload__'],  // sentinel\n  ],\n  isUploadsGroup: true  // flag to suppress checkbox\n}",
+        "gateRequired": true,
+        "acceptanceCriteria": [
+          {
+            "text": "Document identifies the exact line numbers and function names for the data flow mismatch",
+            "met": false
+          },
+          {
+            "text": "Injection point clearly specified: ensureUploadOptionsInCombo() at line ~1466",
+            "met": false
+          },
+          {
+            "text": "Groups data structure for the Uploads group defined (name, items format, isUploadsGroup flag)",
+            "met": false
+          },
+          {
+            "text": "Call sites of ensureUploadOptionsInCombo() identified and mapped to grouped mode scenarios",
+            "met": false
+          },
+          {
+            "text": "Existing createComboOptionRow upload handling (lines 996-1010) confirmed to work with group items",
+            "met": false
+          }
+        ],
+        "skills": [
+          "task-plan"
+        ]
+      },
+      {
+        "phaseNumber": 2,
+        "name": "Inject Uploads Group into Grouped State",
+        "type": "logic",
+        "summary": "Modify ensureUploadOptionsInCombo() to inject uploaded mixins into toolbarComboState.groups for grouped mode",
+        "description": "**Single function modification: ensureUploadOptionsInCombo() (around line 1466)**\n\nAdd the following logic after the existing `<select>` population but before `refreshToolbarComboUI()`:\n\n1. Check if `toolbarComboState.isGroupedMode && toolbarComboState.groups`\n2. If yes, build/update the Uploads group:\n   a. Get uploaded mixins via `getUploadedMixins()`\n   b. Create items array: `[title, uploaded::id]` pairs from each upload\n   c. Add sentinel item: `['Upload file\u2026', '__upload__']`\n3. Check if an 'Uploads' group already exists in toolbarComboState.groups\n   a. If yes, update its `items` array and set `isUploadsGroup = true`\n   b. If no, create a new group: `{name: 'Uploads', items: itemsArray, isUploadsGroup: true}`\n4. Insert or replace the Uploads group at the end of `toolbarComboState.groups`\n\n**Edge cases to handle:**\n- When no uploads exist: Uploads group should still appear with just the `__upload__` sentinel\n- When ensureUploadOptionsInCombo is called after a new upload: items array should be rebuilt with the new item\n- When removeUploadedMixin() is called: items should update to reflect removal\n- The Uploads group insertion must not affect YAML-defined groups order\n\n**Code changes:**\n- ui/html/js/main.js: ~25-40 lines modified in ensureUploadOptionsInCombo()",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "ensureUploadOptionsInCombo() creates an Uploads group when in grouped mode",
+            "met": false
+          },
+          {
+            "text": "Uploads group is inserted at the END of toolbarComboState.groups (after all YAML groups)",
+            "met": false
+          },
+          {
+            "text": "Uploads group contains all uploaded mixins from localStorage plus the __upload__ sentinel",
+            "met": false
+          },
+          {
+            "text": "When no uploads exist, Uploads group still appears with just the sentinel item",
+            "met": false
+          },
+          {
+            "text": "Existing flat mode behavior is unchanged (no groups array manipulation when !isGroupedMode)",
+            "met": false
+          },
+          {
+            "text": "Subsequent calls to ensureUploadOptionsInCombo() update (not duplicate) the Uploads group",
+            "met": false
+          },
+          {
+            "text": "All implementation changes verified in served JS file",
+            "met": true
+          }
+        ],
+        "skills": [
+          "task-code"
+        ]
+      },
+      {
+        "phaseNumber": 3,
+        "name": "Handle Uploads Group UI: Checkbox Suppression & Group Name",
+        "type": "logic",
+        "summary": "Suppress select-all checkbox for the Uploads group and verify group rendering",
+        "description": "The existing renderGroupedToolbarComboDropdown() (line 895) renders all groups uniformly, including a select-all checkbox. The Uploads group needs special handling.\n\n**Modify renderGroupedToolbarComboDropdown():**\n- Around line 940, where the group checkbox is created\n- Add a condition: if `group.isUploadsGroup` is true, skip creating the checkbox element\n- The toggle button and group name span should still render normally\n\n**Modify getGroupSelectionState():**\n- Around line 595, add a check: if `group.isUploadsGroup` is true, return 'none' (or skip group-level selection)\n\n**Expected behavior:**\n- Uploads group appears with collapsible header (toggle + 'Uploads' name)\n- No select-all checkbox shown for Uploads group\n- Individual uploaded items remain selectable via their own checkboxes\n- The `__upload__` sentinel item renders as the upload button (existing code at line 996-1010 handles this)\n\n**Code changes:**\n- ui/html/js/main.js: ~10-15 lines in renderGroupedToolbarComboDropdown() and getGroupSelectionState()",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "Uploads group renders without a select-all checkbox",
+            "met": false
+          },
+          {
+            "text": "Uploads group still has collapsible header (toggle + name) like other groups",
+            "met": false
+          },
+          {
+            "text": "Individual uploaded items have checkboxes (same as other groups)",
+            "met": false
+          },
+          {
+            "text": "__upload__ sentinel item renders as upload button icon (existing behavior preserved)",
+            "met": false
+          },
+          {
+            "text": "Group collapse/expand works for Uploads group",
+            "met": false
+          },
+          {
+            "text": "No regression on other groups' checkbox behavior",
+            "met": false
+          },
+          {
+            "text": "All implementation changes verified in served JS file",
+            "met": true
+          }
+        ],
+        "skills": [
+          "task-code"
+        ]
+      },
+      {
+        "phaseNumber": 4,
+        "name": "Verify Upload Flow in Grouped Mode",
+        "type": "logic",
+        "summary": "Ensure triggered uploads refresh the grouped dropdown correctly",
+        "description": "When a user uploads a new mixin (triggered via the upload button), the upload flow needs to refresh the grouped UI.\n\n**Existing flow (triggerToolbarComboUpload, line 90):**\n1. Calls promptForUploadedMixin()\n2. Calls ensureUploadOptionsInCombo(select) - this now also injects into groups\n3. Adds to toolbarComboState.contentCache and selectionMeta\n4. Calls addToolbarComboSelection() or applySelectedMixins()\n5. Calls refreshToolbarComboUI() (through ensureUploadOptionsInCombo)\n\n**The fix ensures:**\n- Step 2 now also updates toolbarComboState.groups (new behavior)\n- Step 5's call to refreshToolbarComboUI() will call renderGroupedToolbarComboDropdown(), which iterates over toolbarComboState.groups and finds the updated Uploads group\n- The new uploaded item appears immediately in the dropdown\n\n**Additionally verify:**\n- removeUploadedMixin() flow: when a user removes an upload via 'Manage Uploaded Mixins' popup\n- refreshComboAfterStorageChange() (line 1648): ensure it also updates the groups array when items are removed\n- The upload toast notification (showUploadRefreshToast) still works in grouped mode\n\n**Code changes:**\n- ui/html/js/main.js: May need ~5-10 lines in refreshComboAfterStorageChange() to also update groups on removal",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "Uploading a new mixin via the upload button adds the item to the Uploads group in grouped mode",
+            "met": false
+          },
+          {
+            "text": "Toast notification shows correctly after upload in grouped mode",
+            "met": false
+          },
+          {
+            "text": "Removing an upload via 'Manage Uploaded Mixins' removes it from the Uploads group",
+            "met": false
+          },
+          {
+            "text": "No JavaScript console errors during upload flow in grouped mode",
+            "met": false
+          },
+          {
+            "text": "All implementation changes verified in served JS file",
+            "met": true
+          }
+        ],
+        "skills": [
+          "task-code"
+        ]
+      },
+      {
+        "phaseNumber": 5,
+        "name": "Integration Testing",
+        "type": "tests",
+        "summary": "Manual testing to verify the fix works in grouped mode",
+        "description": "**Test scenarios:**\n\n1. **Load grouped options** (options_groups.yaml):\n   - Open mixin dropdown\n   - Verify: Uploads group appears at the END of the groups list\n   - Verify: No select-all checkbox for Uploads group\n   - Verify: 'Upload file\u2026' button visible in Uploads group\n   - Verify: Any previously uploaded mixins from localStorage appear in the group\n\n2. **Upload a new file in grouped mode**:\n   - Click the 'Upload file\u2026' button in the Uploads group\n   - Select a YAML file\n   - Verify: File is uploaded and appears immediately in the Uploads group\n   - Verify: Toast notification shows\n\n3. **Select an uploaded mixin in grouped mode**:\n   - Select a mixin from the Uploads group\n   - Verify: Item appears in 'Selected Mixins' panel\n   - Verify: Diagram updates correctly\n\n4. **Collapse/expand Uploads group**:\n   - Toggle the group\n   - Verify: Items show/hide correctly\n\n5. **Filter/search in grouped mode**:\n   - Type a filter term\n   - Verify: Uploads group items are filtered like other groups\n\n6. **Backward compatibility - flat mode**:\n   - Load flat options (options.yaml)\n   - Verify: Upload functionality unchanged, uploaded mixins still appear",
+        "gateRequired": false,
+        "acceptanceCriteria": [
+          {
+            "text": "In grouped mode, uploaded mixins appear in the mixin dropdown (the primary bug is fixed)",
+            "met": false
+          },
+          {
+            "text": "In grouped mode, the 'Upload file\u2026' sentinel button is visible and functional",
+            "met": false
+          },
+          {
+            "text": "In grouped mode, new uploads are added to the dropdown without page reload",
+            "met": false
+          },
+          {
+            "text": "Flat mode upload functionality is unchanged (no regression)",
+            "met": false
+          },
+          {
+            "text": "No JavaScript console errors during testing",
+            "met": false
+          },
+          {
+            "text": "All implementation changes verified in served JS file",
+            "met": true
+          }
+        ],
+        "skills": []
+      }
+    ]
+  }
+}

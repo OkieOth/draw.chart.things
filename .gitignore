@@ -37,5 +37,8 @@ __debug_*
 build
 *.wasm
 ext_*
+*.bak
 
+.DS_Store
+*.*-e
 ui/data/default_formats.yaml

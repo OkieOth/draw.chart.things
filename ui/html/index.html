@@ -9,7 +9,7 @@
             window.formatMixin = "default_formats.yaml";
             window.defaultDepth = 2;
             window.uiVersion = "v1";
-            window.renderingVersion = "v1.5.0";
+            window.renderingVersion = "v1.5.1";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -442,20 +442,32 @@
                 style="
                     display: flex;
                     justify-content: space-between;
+                    align-items: center;
                     margin-top: 10px;
                     gap: 8px;
                 "
             >
                 <button
-                    id="uploads-clear-all"
+                    id="btn-uploads-popup-upload"
                     class="tool-btn"
-                    title="Remove all"
+                    type="button"
+                    title="Upload New Mixin"
+                    aria-label="Upload New Mixin"
                 >
-                    <i class="fa-solid fa-trash"></i> Remove all
+                    <i class="fa-solid fa-upload"></i> Upload
                 </button>
-                <button id="uploads-done" class="tool-btn" title="Done">
-                    <i class="fa-solid fa-check"></i> Done
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button
+                        id="uploads-clear-all"
+                        class="tool-btn"
+                        title="Remove all"
+                    >
+                        <i class="fa-solid fa-trash"></i> Remove all
+                    </button>
+                    <button id="uploads-done" class="tool-btn" title="Done">
+                        <i class="fa-solid fa-check"></i> Done
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -566,6 +578,15 @@
         <script>
             window.initPage();
             window.handleInputQueryParam();
+            
+            // Explicitly load combo options if DOM is ready (fixes issue where injectUploadsGroup() is not called with URL params)
+            // The DOM is always ready at this point since script runs after body loads
+            // Check if the combo options function is available and call it immediately
+            if (typeof window.loadComboOptionsFromYaml === "function") {
+                // Use setTimeout to ensure all initialization is complete
+                setTimeout(() => window.loadComboOptionsFromYaml(), 0);
+            }
+            
             window.loadYamlInput();
             window.loadSVGFromWasm();
 
