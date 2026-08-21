@@ -116,11 +116,45 @@ func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
 	if len(mixin.Horizontal) > 0 {
 		// mix in horizontal elements
 		b.initIdForMixinsInCase(mixin.Horizontal)
+		if mixin.PutAfter != nil {
+			for i := range len(mixin.Horizontal) - 1 {
+				e := mixin.Horizontal[i]
+				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+					l.Horizontal = slices.Insert(l.Horizontal, i+1)
+					return
+				}
+			}
+		} else if mixin.PutBefore != nil {
+			for i := range len(mixin.Horizontal) {
+				e := mixin.Horizontal[i]
+				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+					l.Horizontal = slices.Insert(l.Horizontal, i)
+					return
+				}
+			}
+		}
 		l.Horizontal = append(l.Horizontal, mixin.Horizontal...)
 	}
 	if len(mixin.Vertical) > 0 {
 		// mix in vertical elements
 		b.initIdForMixinsInCase(mixin.Vertical)
+		if mixin.PutAfter != nil {
+			for i := range len(mixin.Vertical) - 1 {
+				e := mixin.Vertical[i]
+				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+					l.Vertical = slices.Insert(l.Vertical, i+1)
+					return
+				}
+			}
+		} else if mixin.PutBefore != nil {
+			for i := range len(mixin.Vertical) {
+				e := mixin.Vertical[i]
+				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+					l.Vertical = slices.Insert(l.Vertical, i)
+					return
+				}
+			}
+		}
 		l.Vertical = append(l.Vertical, mixin.Vertical...)
 	}
 }
@@ -148,7 +182,6 @@ func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) 
 	}
 	if (!handled) && (l.Id != "") {
 		if mixin, ok := (*additional)[l.Id]; ok {
-			fmt.Println("DEBUG-WASM, l.Id", l.Id)
 			b.mixInLayoutNow(l, &mixin)
 			delete(*additional, l.Id)
 		}
