@@ -1,3 +1,6 @@
+# v1.5.2
+* UI: fix disappeared upload functionality for grouped options 
+
 # v1.5.0
 * Improved rendering speed
 * UI: allows grouping of mixins
