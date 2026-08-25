@@ -3,17 +3,17 @@
     "github-copilot/claude-haiku-4.5"
   ],
   "tokens": {
-    "input": 122,
-    "output": 4895,
-    "cacheRead": 269124,
-    "cacheWrite": 29528,
+    "input": 317,
+    "output": 18435,
+    "cacheRead": 811514,
+    "cacheWrite": 70446,
     "total": 0
   },
-  "cost": 0.08841940000000001,
+  "cost": 0.2617009,
   "messages": {
-    "total": 21,
-    "user": 1,
-    "assistant": 20,
+    "total": 55,
+    "user": 4,
+    "assistant": 51,
     "toolCalls": 0,
     "toolResults": 0
   }

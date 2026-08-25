@@ -4075,15 +4075,21 @@ function getHierarchyIds(id) {
 }
 
 function getBoxPrefix(id) {
-    const parts = id.split("_");
-    const isNumeric = (s) => /^\d+$/.test(s);
-    let firstNumIdx = parts.findIndex(isNumeric);
-    if (firstNumIdx < 0) return id;
-    const base = parts.slice(0, firstNumIdx).join("_");
-    const nums = parts.slice(firstNumIdx).filter(isNumeric);
-    // Build deepest id available as the box id
-    const deep = nums.join("_");
-    return base ? `${base}_${deep}` : deep;
+    // Remove trailing SVG suffix (typically '_g' for group elements)
+    // This preserves the full hierarchical ID structure
+    // Examples:
+    //   'id_1_l1_1_g' -> 'id_1_l1_1'
+    //   'id_1_l2_3_g' -> 'id_1_l2_3'
+    //   'box_1_g' -> 'box_1'
+    if (!id) return id;
+    
+    // Remove trailing '_g' suffix (SVG group element indicator)
+    let result = id;
+    if (result.endsWith('_g')) {
+        result = result.slice(0, -2);
+    }
+    
+    return result;
 }
 
 // Helper: find existing badges by hierarchical box id
