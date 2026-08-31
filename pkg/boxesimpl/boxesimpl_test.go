@@ -303,6 +303,15 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		blacklisted         []string
 	}{
 		{
+			inputFile:           "../../resources/examples_boxes/orga.yaml",
+			inputExtConnections: "../../resources/examples_boxes/jira.yaml",
+			inputExtFormats:     "",
+			outputFile:          "../../temp/orga.svg",
+			depth:               2,
+			expanded:            []string{"id_3_3_0_1"},
+			blacklisted:         []string{},
+		},
+		{
 			inputFile:           "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
 			inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
 			inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",

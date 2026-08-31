@@ -55,7 +55,8 @@ func (doc *BoxesDocument) fixHorizontalStartAndEndOfVerticalLine(offset, yStart,
 				if line.StartX == x {
 					// horizontal line goes right from the triggering line
 					line.StartX += offset
-					line.EndX += offset
+					// this was removed for a bug ... could be wrong (v2)
+					//line.EndX += offset
 					startFound = true
 					if startFound && endFound {
 						return

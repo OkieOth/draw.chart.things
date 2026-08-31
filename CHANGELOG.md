@@ -1,3 +1,6 @@
+# v1.6.1
+* fixing connection error
+
 # v1.6.0
 * allow inserting of mixing before or after specific elements
 
