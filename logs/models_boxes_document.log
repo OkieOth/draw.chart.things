@@ -1,17 +1,17 @@
 {
-  "date": "2026-07-09T19:06:18.976976Z",
+  "date": "2026-08-21T14:35:05.969332Z",
   "schemas": {
-    "configs/models/./formats.json": {
-      "hash": "fb3d90c078d4d084bff13326ffa13ff2d9b067d1154032b173966aeedc351f50"
-    },
     "configs/models/./shared.json": {
       "hash": "932816ca2592a1be0687d7d60564c559c6ccdf7af3df71acfacf9cd008bf71f0"
     },
-    "configs/models/./boxes.json": {
-      "hash": "510e5bd8de52855fefe4fa1f411f8f9112f0b526580ebbd849459953a0f5871f"
-    },
     "configs/models/boxes_document.json": {
       "hash": "554de6044fabdeb2fd0f46f37aa78ca7b3d7252aff12218e91ed14fe2785ef98"
+    },
+    "configs/models/./boxes.json": {
+      "hash": "d3c248fac3b124965aae69fc7a0b0b0c4c408342ce02128a00a6842c9dcc0d98"
+    },
+    "configs/models/./formats.json": {
+      "hash": "fb3d90c078d4d084bff13326ffa13ff2d9b067d1154032b173966aeedc351f50"
     }
   }
 }

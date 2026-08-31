@@ -116,11 +116,45 @@ func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
 	if len(mixin.Horizontal) > 0 {
 		// mix in horizontal elements
 		b.initIdForMixinsInCase(mixin.Horizontal)
+		if mixin.PutAfter != nil {
+			for i := range len(l.Horizontal) - 1 {
+				e := l.Horizontal[i]
+				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+					l.Horizontal = slices.Insert(l.Horizontal, i+1, mixin.Horizontal...)
+					return
+				}
+			}
+		} else if mixin.PutBefore != nil {
+			for i := range len(l.Horizontal) {
+				e := l.Horizontal[i]
+				if e.Caption == *mixin.PutBefore || e.Id == *mixin.PutBefore {
+					l.Horizontal = slices.Insert(l.Horizontal, i, mixin.Horizontal...)
+					return
+				}
+			}
+		}
 		l.Horizontal = append(l.Horizontal, mixin.Horizontal...)
 	}
 	if len(mixin.Vertical) > 0 {
 		// mix in vertical elements
 		b.initIdForMixinsInCase(mixin.Vertical)
+		if mixin.PutAfter != nil {
+			for i := range len(l.Vertical) {
+				e := l.Vertical[i]
+				if e.Caption == *mixin.PutAfter || e.Id == *mixin.PutAfter {
+					l.Vertical = slices.Insert(l.Vertical, i+1, mixin.Vertical...)
+					return
+				}
+			}
+		} else if mixin.PutBefore != nil {
+			for i := range len(l.Vertical) {
+				e := l.Vertical[i]
+				if e.Caption == *mixin.PutBefore || e.Id == *mixin.PutBefore {
+					l.Vertical = slices.Insert(l.Vertical, i, mixin.Vertical...)
+					return
+				}
+			}
+		}
 		l.Vertical = append(l.Vertical, mixin.Vertical...)
 	}
 }
@@ -138,12 +172,15 @@ func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) 
 	if len(*additional) == 0 {
 		return
 	}
+	handled := false
 	if l.Caption != "" {
 		if mixin, ok := (*additional)[l.Caption]; ok {
 			b.mixInLayoutNow(l, &mixin)
 			delete(*additional, l.Caption)
+			handled = true
 		}
-	} else if l.Id != "" {
+	}
+	if (!handled) && (l.Id != "") {
 		if mixin, ok := (*additional)[l.Id]; ok {
 			b.mixInLayoutNow(l, &mixin)
 			delete(*additional, l.Id)

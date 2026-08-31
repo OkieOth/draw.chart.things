@@ -1,3 +1,4 @@
 Default: ""
 "Example 1": conn1.yaml
 "Example 2": conn2.yaml
+"Box Inserts": box_insert.yaml

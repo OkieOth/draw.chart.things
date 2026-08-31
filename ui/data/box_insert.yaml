@@ -1,0 +1,18 @@
+title: This example mixes in some boxes
+formats:
+  bi1:
+    fill:
+      color: pink
+layoutMixins:
+  id_0:
+    putAfter: id_3
+    vertical:
+      - id: id_0x_1
+        caption: XXX
+        format: bi1
+      - id: id_0x_2
+        caption: YYY
+        format: bi1
+      - id: id_0x_3
+        caption: ZZZ
+        format: bi1

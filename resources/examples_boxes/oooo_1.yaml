@@ -1,0 +1,148 @@
+title: dölfdsöf sdf öasdöfsd fösda sdöfjsdföjl
+titleFormat: title
+version: v1
+legend:
+  format: title
+  entries:
+    - text: Service
+      format: service
+formats:
+  default:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: white
+    padding: 5
+  product_base:
+    fontCaption:
+      maxLenBeforeBreak: 300
+    line:
+      width: 0.2
+      color: black
+    cornerRadius: 4
+    fill:
+      color: "#fdfdfd"
+    padding: 5
+
+boxes:
+  id: id_0
+  vertical:
+    - id: id_0_1
+      horizontal:
+        - id: id_1
+          caption: kdf sdlfsd fsdölf sdfje öelr
+          text1: "aföfs: löd sdöfa sd"
+          format: product_base
+    - id: id_2
+      horizontal:
+        - id: id_2_1
+          caption: fasdflöd fasödf sadf dfjlsd fsdljf
+          text1: "aföfs:  dsföasdf dsaf"
+          format: product_base
+          horizontal:
+            - id: id_2_1_1
+              caption: aöfa dsföa sfeö d
+              text1: dsafö asdfösdf sd
+            - id: id_2_1_2
+              caption: öladsf dsöf eödfda
+              text1:  asdföjdsf sdj
+            - id: id_2_1_3
+              caption: aödf asdföa ödsf öasödf eöl döf aöee öd
+              text1: ddkf ldf lödfa sdf
+        - id: id_2_2
+          caption: aöf eereererer
+          text1: "aföfs: dfö fasdf sdf"
+          format: product_base
+          horizontal:
+            - id: id_2_2_1
+              caption: fdasöfdsdfsadfasdf d dfdsafdsaffd
+            - id: id_2_2_2
+              caption: faöf ödf ads
+            - id: id_2_2_3
+              caption: lödfsdf döf ds
+            - id: id_2_2_4
+              caption: dfaöfasdfasdfsadf
+              text1: d föasf ö df dsalfs öd
+        - id: id_2_3
+          caption: fasdf
+          text1: "aföfs: dklfad er öafer k"
+          format: product_base
+          horizontal:
+            - id: id_2_3_1
+              caption: afasdfsd fösdf asdfedf
+              text1: dlöfa föadsf asö
+              horizontal:
+                - id: id_2_3_1_1
+                  caption: öfdad fdfadff
+                  text1: dlöf dföla adsf aös
+                - id: id_2_3_1_2
+                  caption: döfdas fösd fsdöf ösd
+                  text1: dkf ale rel fö
+                - id: id_2_3_1_3
+                  caption: adf sdöfs dfsdöf sdöf sdö
+                  text1: dkfdl öe döf eö adf
+                - id: id_2_3_1_4
+                  caption: eprwer eprewprpwerere
+                  text1: ldf aöst asödf d
+            - id: id_2_3_2
+              caption: jlfaödfasdfd
+              text1: ödlaf aöfe öd
+              horizontal:
+                - id: id_2_3_2_1
+                  caption: eöaf asdöf dsfdf
+                  text1: ldaf adöf aeöö dd
+                - id: id_2_3_2_2
+                  caption: dafadsfe
+                  text1: kdf asöd öfe döf e
+                - id: id_2_3_2_3
+                  caption: daf dsfösd fösdf sdöf
+                  text1: ldöfad döfd sfösdf sdö
+            - id: id_2_3_3
+              caption: rrrerr eredaf dsfösd fösdf sdöf
+              text1: ldsf aöf döfa öjkdfe
+              horizontal:
+                - id: id_2_3_3_1
+                  caption: Imflow
+                  text1: öladf dsöaf asdöfe
+                - id: id_2_3_3_2
+                  caption: wwaf dfösd fösdf sdöf
+                  text1: löasf asdöf döe döld e
+                - id: id_2_3_3_3
+                  caption: pererewr erpiqweiürq eüwir
+                  text1: öldas faös
+                - id: id_2_3_3_4
+                  caption: prwer eprepwrpewrperri
+                  text1: ld fadsöf söd dsö
+            - id: id_2_3_4
+              caption: eriqwerprew erpewrwerueore
+              text1: dlkf söfas dfödslfd
+              horizontal:
+                - id: id_2_3_4_1
+                  caption: üöjldfd
+                  text1: jöasdöf döf asdöfle
+            - id: id_2_3_5
+              caption: eprföf dfö sdfüöjldfd
+              text1: ödlsf aö eöjfö
+            - id: id_2_3_6
+              caption: eafasdfsdfsdfas
+              text1: öalsdf asö eödj
+        - id: id_2_4
+          caption: lkklööe er eör eaör aeör
+          text1: "aföfs: ldf drö df ds lödf ösaf"
+          format: product_base
+          horizontal:
+            - id: id_2_4_1
+              caption: dlf dsöf sdöf
+              text1: öadf aösdf eö d
+            - id: id_2_4_2
+              caption: eöakdro döf eör aeörjödfödö
+              text1: öaf döer öedjödöe
+            - id: id_2_4_3
+              caption: faöf ödf ads
+            - id: id_2_4_4
+              caption: ereraeraererö öe röer
+              text1: kaf aösr eödf öedfeö
