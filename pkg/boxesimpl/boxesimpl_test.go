@@ -303,8 +303,8 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		blacklisted         []string
 	}{
 		{
-			inputFile:           "../../resources/examples_boxes/orga.yaml",
-			inputExtConnections: "../../resources/examples_boxes/jira.yaml",
+			inputFile:           "../../resources/examples_boxes/oooo_1.yaml",
+			inputExtConnections: "../../resources/examples_boxes/oooo_2.yaml",
 			inputExtFormats:     "",
 			outputFile:          "../../temp/orga.svg",
 			depth:               2,
