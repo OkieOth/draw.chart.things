@@ -344,6 +344,8 @@ Padding *int `yaml:"padding,omitempty"`
 BoxMargin *int `yaml:"boxMargin,omitempty"`
     // radius of the box corners in pixel
 CornerRadius *int `yaml:"cornerRadius,omitempty"`
+    // defines how this box is rendered, default is 'rectangle'
+RenderType *types.BoxRenderType `yaml:"renderType,omitempty"`
 }
 
 
@@ -400,6 +402,11 @@ func CopyFormat(src *Format) *Format {
     if src.CornerRadius != nil {
         v := *src.CornerRadius
         ret.CornerRadius = &v
+    }
+
+    if src.RenderType != nil {
+        v := *src.RenderType
+        ret.RenderType = &v
     }
 return &ret
 }

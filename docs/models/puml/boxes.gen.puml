@@ -223,6 +223,17 @@ parameters of an image to
 be displayed in the SVG
 end note
     
+enum BoxRenderType {
+    rectangle,
+    centeredHorizontalLine,
+    horizontalArcDown,
+    horizontalArcUp,
+    centeredVerticalLine,
+    verticalArcLeft,
+    verticalArcRight,
+}
+
+
 class Format {
     +widthOfParent? Boolean
     +fixedWidth? Integer
@@ -238,10 +249,12 @@ class Format {
     +padding? Integer
     +boxMargin? Integer
     +cornerRadius? Integer
+    +renderType? BoxRenderType
 }
 Format o-- FontDef
 Format o-- LineDef
 Format o-- FillDef
+Format o-- BoxRenderType
 
 
 class FormatVariations {

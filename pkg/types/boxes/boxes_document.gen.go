@@ -525,6 +525,8 @@ FixedWidth *int `yaml:"fixedWidth,omitempty"`
 FixedHeight *int `yaml:"fixedHeight,omitempty"`
     // If true, the text will be displayed vertically
 VerticalTxt bool `yaml:"verticalTxt"`
+    // defines how this box is rendered, default is 'rectangle'
+RenderType *types.BoxRenderType `yaml:"renderType,omitempty"`
 }
 
 
@@ -573,6 +575,11 @@ func CopyBoxFormat(src *BoxFormat) *BoxFormat {
     }
 
     ret.VerticalTxt = src.VerticalTxt
+
+    if src.RenderType != nil {
+        v := *src.RenderType
+        ret.RenderType = &v
+    }
 return &ret
 }
 

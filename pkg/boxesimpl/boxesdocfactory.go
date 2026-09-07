@@ -72,6 +72,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	boxMargin := types.GlobalMinBoxMargin
 	var fixedHeight, fixedWidth, cornerRadius *int
 	var widthOfParent *bool
+	var renderType *types.BoxRenderType
 	if f != nil {
 		initFontFormatAnchorInCase(f.FontCaption)
 		initFontFormatAnchorInCase(f.FontText1)
@@ -96,6 +97,14 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		if f.VerticalTxt != nil {
 			verticalTxt = *f.VerticalTxt
 		}
+
+		if f.RenderType != nil {
+			renderType = f.RenderType
+		} else {
+			rt := types.BoxRenderTypeRectangle
+			renderType = &rt
+		}
+
 		fixedHeight = f.FixedHeight
 		fixedWidth = f.FixedWidth
 		cornerRadius = f.CornerRadius
@@ -117,6 +126,7 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 		WidthOfParent:     widthOfParent,
 		VerticalTxt:       verticalTxt,
 		CornerRadius:      cornerRadius,
+		RenderType:        renderType,
 	}
 }
 
